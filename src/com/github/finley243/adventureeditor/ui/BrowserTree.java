@@ -37,10 +37,11 @@ public class BrowserTree extends JTree {
                             objectNode.openInEditor();
                         }
                     }
-                } else if (e.getClickCount() == 1 && e.getButton() == MouseEvent.BUTTON3) {
+                } else if (e.getButton() == MouseEvent.BUTTON3) {
                     TreePath path = thisTree.getPathForLocation(e.getX(), e.getY());
                     if (path != null) {
                         DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                        thisTree.setSelectionPath(path);
                         if (node instanceof BrowserObjectNode objectNode) {
                             objectNode.openContextMenu(e.getComponent(), e.getPoint());
                         } else if (node instanceof BrowserCategoryNode categoryNode) {
