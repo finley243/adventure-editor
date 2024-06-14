@@ -10,8 +10,8 @@ import java.text.DecimalFormat;
 
 public class ParameterFieldFloat extends EditorElement {
 
-    private JLabel label;
-    private JSpinner spinner;
+    private final JLabel label;
+    private final JSpinner spinner;
 
     public ParameterFieldFloat(String name) {
         setLayout(new GridBagLayout());

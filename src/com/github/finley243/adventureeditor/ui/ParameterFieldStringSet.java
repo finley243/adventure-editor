@@ -10,17 +10,15 @@ import java.util.List;
 
 public class ParameterFieldStringSet extends EditorElement {
 
-    private JLabel label;
-    private JScrollPane scrollPane;
-    private JList<String> textList;
-    private JButton buttonAdd;
-    private JButton buttonRemove;
+    private final JList<String> textList;
+    private final JButton buttonAdd;
+    private final JButton buttonRemove;
 
     public ParameterFieldStringSet(String name) {
         setLayout(new GridBagLayout());
-        this.label = new JLabel(name);
+        JLabel label = new JLabel(name);
         this.textList = new JList<>();
-        this.scrollPane = new JScrollPane(textList);
+        JScrollPane scrollPane = new JScrollPane(textList);
         this.buttonAdd = new JButton("+");
         this.buttonRemove = new JButton("-");
         //textList.setPreferredSize(new Dimension(150, 100));

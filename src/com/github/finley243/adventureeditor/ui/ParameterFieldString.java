@@ -8,8 +8,8 @@ import java.awt.*;
 
 public class ParameterFieldString extends EditorElement {
 
-    private JLabel label;
-    private JTextField textField;
+    private final JLabel label;
+    private final JTextField textField;
 
     public ParameterFieldString(String name) {
         setLayout(new GridBagLayout());

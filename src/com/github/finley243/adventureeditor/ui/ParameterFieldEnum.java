@@ -10,12 +10,11 @@ import java.awt.*;
 
 public class ParameterFieldEnum extends EditorElement {
 
-    private JLabel label;
-    private JComboBox<String> dropdownMenu;
+    private final JComboBox<String> dropdownMenu;
 
     public ParameterFieldEnum(String name, String[] values) {
         setLayout(new GridBagLayout());
-        this.label = new JLabel(name);
+        JLabel label = new JLabel(name);
         this.dropdownMenu = new JComboBox<>(values);
         dropdownMenu.setPreferredSize(new Dimension(150, 20));
         dropdownMenu.setEditable(false);

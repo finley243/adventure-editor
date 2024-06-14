@@ -14,7 +14,7 @@ public class DataReference extends Data {
 
     @Override
     public String toString() {
-        return "REF: " + value;
+        return value;
     }
 
 }

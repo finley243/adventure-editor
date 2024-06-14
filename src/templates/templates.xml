@@ -1,22 +1,22 @@
 <data>
-    <template id="room" name="Room" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+    <template id="room" name="Room" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="object" name="Name" type="roomName"/>
         <parameter id="description" dataType="object" name="Description" type="scene"/>
-        <parameter id="faction" dataType="reference" name="Faction" type="faction" attribute="true"/>
+        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute"/>
         <parameter id="area" dataType="objectSet" name="Areas" type="area"/>
     </template>
-    <template id="area" name="Area" topLevel="false">
-        <parameter id="id" dataType="string" name="ID" topLevelOnly="false" attribute="true"/>
+    <template id="area" name="Area" topLevel="false" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" topLevelOnly="false" format="attribute"/>
         <parameter id="name" dataType="object" name="Name" type="areaName"/>
-        <parameter id="landmark" dataType="reference" name="Landmark" type="objectInstance" attribute="true"/>
+        <parameter id="landmark" dataType="reference" name="Landmark" type="objectInstance" format="attribute"/>
         <parameter id="description" dataType="object" name="Description" type="scene"/>
-        <parameter id="faction" dataType="reference" name="Faction" type="faction" attribute="true"/>
+        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute"/>
         <parameter id="link" dataType="objectSet" name="Links" type="areaLink"/>
     </template>
-    <template id="areaLink" name="Area Link" topLevel="false">
-        <parameter id="type" dataType="string" name="Link Type" attribute="true"/>
-        <parameter id="dir" dataType="enum" name="Direction" attribute="true">
+    <template id="areaLink" name="Area Link" topLevel="false" primaryParameter="area">
+        <parameter id="type" dataType="string" name="Link Type" format="attribute"/>
+        <parameter id="dir" dataType="enum" name="Direction" format="attribute">
             <value>N</value>
             <value>NE</value>
             <value>E</value>
@@ -26,18 +26,18 @@
             <value>W</value>
             <value>NW</value>
         </parameter>
-        <parameter id="dist" dataType="enum" name="Distance" attribute="true">
+        <parameter id="dist" dataType="enum" name="Distance" format="attribute">
             <value>NEAR</value>
             <value>CLOSE</value>
             <value>FAR</value>
             <value>DISTANT</value>
         </parameter>
-        <parameter id="area" dataType="reference" name="Area" type="area" attribute="true"/>
+        <parameter id="area" dataType="reference" name="Area" type="area" format="attribute"/>
     </template>
     <template id="roomName" name="Name">
-        <parameter id="name" dataType="string" name="Name" tagContent="true"/>
-        <parameter id="proper" dataType="boolean" name="Proper" attribute="true"/>
-        <parameter id="type" dataType="enum" name="Type" attribute="true">
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
+        <parameter id="proper" dataType="boolean" name="Proper" format="attribute"/>
+        <parameter id="type" dataType="enum" name="Type" format="attribute">
             <value>in</value>
             <value>on</value>
             <value>near</value>
@@ -47,9 +47,9 @@
         </parameter>
     </template>
     <template id="areaName" name="Name">
-        <parameter id="name" dataType="string" name="Name" tagContent="true"/>
-        <parameter id="proper" dataType="boolean" name="Proper" attribute="true"/>
-        <parameter id="type" dataType="enum" name="Type" attribute="true">
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
+        <parameter id="proper" dataType="boolean" name="Proper" format="attribute"/>
+        <parameter id="type" dataType="enum" name="Type" format="attribute">
             <value>in</value>
             <value>on</value>
             <value>near</value>
@@ -58,10 +58,10 @@
             <value>behind</value>
         </parameter>
     </template>
-    <template id="scene" name="Scene" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" topLevelOnly="true" attribute="true"/>
-        <parameter id="once" dataType="boolean" name="Show Once" attribute="true"/>
-        <parameter id="type" dataType="enum" name="Type" attribute="true">
+    <template id="scene" name="Scene" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" topLevelOnly="true" format="attribute"/>
+        <parameter id="once" dataType="boolean" name="Show Once" format="attribute"/>
+        <parameter id="type" dataType="enum" name="Type" format="attribute">
             <value>all</value>
             <value>select</value>
             <value>random</value>
@@ -70,62 +70,74 @@
         <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine"/>
         <parameter id="choice" dataType="objectSet" name="Choices" type="sceneChoice" topLevelOnly="true"/>
     </template>
-    <template id="sceneLine" name="Scene Line" topLevel="false">
-        <parameter id="once" dataType="boolean" name="Show Once" attribute="true"/>
-        <parameter id="type" dataType="enum" name="Type" attribute="true">
+    <template id="sceneLine" name="Scene Line" topLevel="false" primaryParameter="text">
+        <parameter id="once" dataType="boolean" name="Show Once" format="attribute"/>
+        <parameter id="type" dataType="enum" name="Type" format="attribute">
             <value>all</value>
             <value>select</value>
             <value>random</value>
         </parameter>
-        <parameter id="exit" dataType="boolean" name="Exit After Showing" attribute="true"/>
-        <parameter id="redirect" dataType="reference" name="Redirect" type="scene" attribute="true"/>
-        <parameter id="from" dataType="reference" name="From" type="scene" attribute="true"/>
-        <parameter id="text" dataType="string" name="Text" tagContent="true"/>
+        <parameter id="exit" dataType="boolean" name="Exit After Showing" format="attribute"/>
+        <parameter id="redirect" dataType="reference" name="Redirect" type="scene" format="attribute"/>
+        <parameter id="from" dataType="reference" name="From" type="scene" format="attribute"/>
+        <parameter id="text" dataType="string" name="Text" format="current_tag"/>
         <parameter id="condition" dataType="object" name="Condition" type="condition"/>
         <parameter id="scriptPre" dataType="object" name="Pre Script" type="script"/>
         <parameter id="scriptPost" dataType="object" name="Post Script" type="script"/>
         <parameter id="line" dataType="objectSet" name="Sub-Lines" type="sceneLine"/>
     </template>
     <template id="script" name="Script" topLevel="false">
-        <parameter id="script" dataType="string" name="Script" tagContent="true"/>
+        <parameter id="script" dataType="string" name="Script" format="current_tag"/>
     </template>
     <template id="condition" name="Condition" topLevel="false">
-        <parameter id="condition" dataType="string" name="Condition" tagContent="true"/>
+        <parameter id="condition" dataType="string" name="Condition" format="current_tag"/>
     </template>
-    <template id="sceneChoice" name="Scene Choice" topLevel="false">
+    <template id="sceneChoice" name="Scene Choice" topLevel="false" primaryParameter="text">
         <parameter id="link" dataType="reference" name="Link" type="scene"/>
-        <parameter id="text" dataType="string" name="Text" tagContent="true"/>
+        <parameter id="text" dataType="string" name="Text" format="current_tag"/>
     </template>
     <template id="faction" name="Faction" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
-        <parameter id="default" dataType="enum" name="Default Relation" attribute="true">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="default" dataType="enum" name="Default Relation" format="attribute">
             <value>NEUTRAL</value>
             <value>HOSTILE</value>
             <value>ALLY</value>
         </parameter>
         <parameter id="relation" dataType="objectSet" name="Relations" type="factionRelation"/>
     </template>
-    <template id="factionRelation" name="Faction Relation" topLevel="false">
-        <parameter id="faction" dataType="reference" name="Faction" type="faction" attribute="true"/>
-        <parameter id="type" dataType="enum" name="Relation" attribute="true">
+    <template id="factionRelation" name="Faction Relation" topLevel="false" primaryParameter="faction">
+        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute"/>
+        <parameter id="type" dataType="enum" name="Relation" format="attribute">
             <value>NEUTRAL</value>
             <value>HOSTILE</value>
             <value>ALLY</value>
         </parameter>
     </template>
-    <template id="action" name="Action" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+    <template id="action" name="Action" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="prompt" dataType="string" name="Prompt" format="child_tag"/>
+        <parameter id="parameter" dataType="objectSet" name="Parameters" type="actionParameter"/>
+        <parameter id="condition" dataType="objectSet" name="Conditions" type="actionCondition"/>
+        <parameter id="script" dataType="object" name="Script" type="script"/>
     </template>
-    <template id="actor" name="Actor" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
-        <parameter id="parent" dataType="reference" name="Parent" type="actor" attribute="true"/>
+    <template id="actionParameter" name="Parameter" topLevel="false" primaryParameter="name">
+        <parameter id="name" dataType="string" name="Name" format="attribute"/>
+        <parameter id="parameter" dataType="string" name="Expression" format="current_tag"/>
+    </template>
+    <template id="actionCondition" name="Condition" topLevel="false" primaryParameter="blockMessage">
+        <parameter id="blockMessage" dataType="string" name="Block Message" format="child_tag"/>
+        <parameter id="script" dataType="string" name="Script" format="child_tag"/>
+    </template>
+    <template id="actor" name="Actor" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="parent" dataType="reference" name="Parent" type="actor" format="attribute"/>
         <parameter id="name" dataType="object" name="Name" type="actorName"/>
-        <parameter id="faction" dataType="reference" name="Faction" type="faction" attribute="true"/>
-        <parameter id="isEnforcer" dataType="boolean" name="Is Enforcer" attribute="true"/>
-        <parameter id="hp" dataType="integer" name="HP" attribute="true"/>
-        <parameter id="actionPoints" dataType="integer" name="Action Points" attribute="true"/>
-        <parameter id="movePoints" dataType="integer" name="Move Points" attribute="true"/>
-        <parameter id="dialogueStart" dataType="reference" name="Dialogue Start" type="scene" attribute="true"/>
+        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute"/>
+        <parameter id="isEnforcer" dataType="boolean" name="Is Enforcer" format="attribute"/>
+        <parameter id="hp" dataType="integer" name="HP" format="attribute"/>
+        <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute"/>
+        <parameter id="movePoints" dataType="integer" name="Move Points" format="attribute"/>
+        <parameter id="dialogueStart" dataType="reference" name="Dialogue Start" type="scene" format="attribute"/>
         <parameter id="attribute" dataType="objectSet" name="Attributes" type="actorAttribute"/>
         <parameter id="skill" dataType="objectSet" name="Skills" type="actorSkill"/>
         <parameter id="senseType" dataType="objectSet" name="Sense Types" type="actorSenseType"/>
@@ -135,9 +147,9 @@
         <parameter id="inventory" dataType="object" name="Inventory" type="lootTable"/>
     </template>
     <template id="actorName" name="Name">
-        <parameter id="name" dataType="string" name="Name" tagContent="true"/>
-        <parameter id="proper" dataType="boolean" name="Proper" attribute="true"/>
-        <parameter id="pronoun" dataType="enum" name="Pronoun" attribute="true">
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
+        <parameter id="proper" dataType="boolean" name="Proper" format="attribute"/>
+        <parameter id="pronoun" dataType="enum" name="Pronoun" format="attribute">
             <value>THEY</value>
             <value>HE</value>
             <value>SHE</value>
@@ -148,94 +160,99 @@
             <value>YOUALL</value>
         </parameter>
     </template>
-    <template id="actorAttribute" name="Attribute">
-        <parameter id="key" dataType="reference" name="Attribute" type="attribute" attribute="true"/>
-        <parameter id="value" dataType="integer" name="Value" attribute="true"/>
+    <template id="actorAttribute" name="Attribute" primaryParameter="key">
+        <parameter id="key" dataType="reference" name="Attribute" type="attribute" format="attribute"/>
+        <parameter id="value" dataType="integer" name="Value" format="attribute"/>
     </template>
-    <template id="actorSkill" name="Skill">
-        <parameter id="key" dataType="reference" name="Skill" type="skill" attribute="true"/>
-        <parameter id="value" dataType="integer" name="Value" attribute="true"/>
+    <template id="actorSkill" name="Skill" primaryParameter="key">
+        <parameter id="key" dataType="reference" name="Skill" type="skill" format="attribute"/>
+        <parameter id="value" dataType="integer" name="Value" format="attribute"/>
     </template>
-    <template id="actorSenseType" name="Sense Type">
-        <parameter id="senseType" dataType="reference" name="Sense Type" type="senseType" tagContent="true"/>
+    <template id="actorSenseType" name="Sense Type" primaryParameter="senseType">
+        <parameter id="senseType" dataType="reference" name="Sense Type" type="senseType" format="current_tag"/>
     </template>
-    <template id="actorLimb" name="Limb">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+    <template id="actorLimb" name="Limb" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="string" name="Name"/>
         <parameter id="hitEffect" dataType="objectSet" name="Hit Effects" type="limbHitEffect"/>
-        <parameter id="hitChance" dataType="float" name="Hit Chance" attribute="true"/>
-        <parameter id="damageMult" dataType="float" name="Damage Multiplier" attribute="true"/>
-        <parameter id="apparelSlot" dataType="reference" name="Apparel Slot" type="actorEquipSlot" attribute="true"/>
+        <parameter id="hitChance" dataType="float" name="Hit Chance" format="attribute"/>
+        <parameter id="damageMult" dataType="float" name="Damage Multiplier" format="attribute"/>
+        <parameter id="apparelSlot" dataType="reference" name="Apparel Slot" type="actorEquipSlot" format="attribute"/>
     </template>
-    <template id="limbHitEffect" name="Hit Effect">
-        <parameter id="effect" dataType="reference" name="Effect" type="effect" tagContent="true"/>
+    <template id="limbHitEffect" name="Hit Effect" primaryParameter="effect">
+        <parameter id="effect" dataType="reference" name="Effect" type="effect" format="current_tag"/>
     </template>
-    <template id="actorEquipSlot" name="Equip Slot">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
-        <parameter id="name" dataType="string" name="Name" tagContent="true"/>
+    <template id="actorEquipSlot" name="Equip Slot" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
     </template>
-    <template id="actorDamageResistance" name="Damage Resistance">
-        <parameter id="type" dataType="reference" name="Damage Type" type="damageType" attribute="true"/>
-        <parameter id="value" dataType="integer" name="Value" attribute="true"/>
+    <template id="actorDamageResistance" name="Damage Resistance" primaryParameter="type">
+        <parameter id="type" dataType="reference" name="Damage Type" type="damageType" format="attribute"/>
+        <parameter id="value" dataType="integer" name="Value" format="attribute"/>
     </template>
-    <template id="attackType" name="Attack Type" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+    <template id="attackType" name="Attack Type" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
-    <template id="attribute" name="Attribute" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
-        <parameter id="name" dataType="string" name="Name" tagContent="true"/>
+    <template id="attribute" name="Attribute" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
     </template>
-    <template id="damageType" name="Damage Type" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+    <template id="damageType" name="Damage Type" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
-    <template id="effect" name="Effect" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+    <template id="effect" name="Effect" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
-    <template id="item" name="Item" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+    <template id="item" name="Item" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
-    <template id="linkType" name="Link Type" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+    <template id="linkType" name="Link Type" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
-    <template id="lootTable" name="Loot Table" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true" topLevelOnly="true"/>
-        <parameter id="useAll" dataType="boolean" name="Use All" attribute="true" topLevelOnly="true"/>
+    <template id="lootTable" name="Loot Table" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute" topLevelOnly="true"/>
+        <parameter id="useAll" dataType="boolean" name="Use All" format="attribute" topLevelOnly="true"/>
         <parameter id="item" dataType="objectSet" name="Items" type="lootTableRefItem"/>
         <parameter id="table" dataType="objectSet" name="Tables" type="lootTableRefTable"/>
     </template>
-    <template id="lootTableRefItem" name="Item Entry">
-        <parameter id="id" dataType="reference" name="ID" type="item" tagContent="true"/>
-        <parameter id="chance" dataType="float" name="Chance" attribute="true"/>
-        <parameter id="count" dataType="integer" name="Count" attribute="true"/>
-        <parameter id="countMin" dataType="integer" name="Min Count" attribute="true"/>
-        <parameter id="countMax" dataType="integer" name="Max Count" attribute="true"/>
-        <parameter id="modItem" dataType="reference" name="Mod Item" type="item" attribute="true"/>
-        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" attribute="true"/>
+    <template id="lootTableRefItem" name="Item Entry" primaryParameter="id">
+        <parameter id="id" dataType="reference" name="ID" type="item" format="current_tag"/>
+        <parameter id="chance" dataType="float" name="Chance" format="attribute"/>
+        <parameter id="count" dataType="integer" name="Count" format="attribute"/>
+        <parameter id="countMin" dataType="integer" name="Min Count" format="attribute"/>
+        <parameter id="countMax" dataType="integer" name="Max Count" format="attribute"/>
+        <parameter id="modItem" dataType="reference" name="Mod Item" type="item" format="attribute"/>
+        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute"/>
     </template>
-    <template id="lootTableRefTable" name="Table Entry">
-        <parameter id="id" dataType="reference" name="ID" type="lootTable" tagContent="true"/>
-        <parameter id="chance" dataType="float" name="Chance" attribute="true"/>
-        <parameter id="count" dataType="integer" name="Count" attribute="true"/>
-        <parameter id="countMin" dataType="integer" name="Min Count" attribute="true"/>
-        <parameter id="countMax" dataType="integer" name="Max Count" attribute="true"/>
-        <parameter id="modItem" dataType="reference" name="Mod Item" type="item" attribute="true"/>
-        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" attribute="true"/>
+    <template id="lootTableRefTable" name="Table Entry" primaryParameter="id">
+        <parameter id="id" dataType="reference" name="ID" type="lootTable" format="current_tag"/>
+        <parameter id="chance" dataType="float" name="Chance" format="attribute"/>
+        <parameter id="count" dataType="integer" name="Count" format="attribute"/>
+        <parameter id="countMin" dataType="integer" name="Min Count" format="attribute"/>
+        <parameter id="countMax" dataType="integer" name="Max Count" format="attribute"/>
+        <parameter id="modItem" dataType="reference" name="Mod Item" type="item" format="attribute"/>
+        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute"/>
     </template>
-    <template id="node" name="Network Node" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+    <template id="node" name="Network Node" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
-    <template id="object" name="Object" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+    <template id="object" name="Object" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="name" dataType="object" name="Name" type="objectName"/>
     </template>
-    <template id="senseType" name="Sense Type" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
-        <parameter id="name" dataType="string" name="Name" tagContent="true"/>
+    <template id="objectName" name="Name" topLevel="false">
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
+        <parameter id="proper" dataType="boolean" name="Proper" format="attribute"/>
     </template>
-    <template id="skill" name="Skill" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
-        <parameter id="name" dataType="string" name="Name" tagContent="true"/>
+    <template id="senseType" name="Sense Type" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
     </template>
-    <template id="weaponClass" name="Weapon Class" topLevel="true">
-        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+    <template id="skill" name="Skill" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
+    </template>
+    <template id="weaponClass" name="Weapon Class" topLevel="true" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
 </data>

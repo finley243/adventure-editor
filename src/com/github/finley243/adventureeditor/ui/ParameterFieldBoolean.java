@@ -8,7 +8,7 @@ import java.awt.*;
 
 public class ParameterFieldBoolean extends EditorElement {
 
-    private JCheckBox checkBox;
+    private final JCheckBox checkBox;
 
     public ParameterFieldBoolean(String name) {
         setLayout(new GridBagLayout());

@@ -44,7 +44,7 @@ public class ParameterFieldObject extends EditorElement {
         for (Map.Entry<String, EditorElement> entry : editorElements.entrySet()) {
             objectParameters.put(entry.getKey(), entry.getValue().getData());
         }
-        return new DataObject(objectParameters);
+        return new DataObject(template, objectParameters);
     }
 
     @Override

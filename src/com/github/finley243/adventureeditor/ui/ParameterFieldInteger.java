@@ -10,8 +10,8 @@ import java.util.List;
 
 public class ParameterFieldInteger extends EditorElement {
 
-    private JLabel label;
-    private JSpinner spinner;
+    private final JLabel label;
+    private final JSpinner spinner;
 
     public ParameterFieldInteger(String name) {
         setLayout(new GridBagLayout());

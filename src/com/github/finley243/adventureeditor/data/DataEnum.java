@@ -14,7 +14,7 @@ public class DataEnum extends Data {
 
     @Override
     public String toString() {
-        return "ENUM: " + value;
+        return value;
     }
 
 }

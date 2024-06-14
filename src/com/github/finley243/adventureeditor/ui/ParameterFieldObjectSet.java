@@ -1,7 +1,6 @@
 package com.github.finley243.adventureeditor.ui;
 
 import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataObjectSet;
 import com.github.finley243.adventureeditor.template.Template;
 
@@ -14,15 +13,18 @@ import java.util.Map;
 public class ParameterFieldObjectSet extends EditorElement {
 
     private final JList<Data> textList;
+    private final JButton buttonAdd;
+    private final JButton buttonEdit;
+    private final JButton buttonRemove;
 
     public ParameterFieldObjectSet(String name, Template template, Map<String, Template> templates, Map<String, Map<String, Data>> data) {
         setLayout(new GridBagLayout());
         JLabel label = new JLabel(name);
         this.textList = new JList<>();
         JScrollPane scrollPane = new JScrollPane(textList);
-        JButton buttonAdd = new JButton("New");
-        JButton buttonEdit = new JButton("Edit");
-        JButton buttonRemove = new JButton("Remove");
+        this.buttonAdd = new JButton("New");
+        this.buttonEdit = new JButton("Edit");
+        this.buttonRemove = new JButton("Remove");
         scrollPane.setPreferredSize(new Dimension(150, 100));
         textList.setModel(new DefaultListModel<>());
         textList.setDragEnabled(false);
