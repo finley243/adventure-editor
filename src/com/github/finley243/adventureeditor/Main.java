@@ -21,17 +21,13 @@ public class Main {
     private final Map<String, Template> templates;
     private final Map<String, Map<String, Data>> data;
 
+    private final BrowserTree browserTree;
+
     public static void main(String[] args) throws ParserConfigurationException, IOException, SAXException {
         Main main = new Main();
     }
 
     public Main() throws ParserConfigurationException, IOException, SAXException {
-        this.templates = DataLoader.loadTemplates(new File(TEMPLATE_DIRECTORY));
-        this.data = DataLoader.loadFromDir(new File(DATA_DIRECTORY_TEST), templates);
-        EventQueue.invokeLater(this::run);
-    }
-
-    public void run() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | UnsupportedLookAndFeelException | InstantiationException |
@@ -39,6 +35,13 @@ public class Main {
             throw new RuntimeException(e);
         }
 
+        this.templates = DataLoader.loadTemplates(new File(TEMPLATE_DIRECTORY));
+        this.data = DataLoader.loadFromDir(new File(DATA_DIRECTORY_TEST), templates);
+        this.browserTree = new BrowserTree(this);
+        EventQueue.invokeLater(this::run);
+    }
+
+    public void run() {
         JFrame frame = new JFrame("AdventureEditor");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //frame.setLayout(new BorderLayout());
@@ -62,18 +65,8 @@ public class Main {
 
         JPanel browserPanel = new JPanel();
         browserPanel.setLayout(new BorderLayout());
-        BrowserTree browserTree = new BrowserTree(this);
 
-        for (String category : templates.keySet()) {
-            if (templates.get(category).topLevel()) {
-                browserTree.addCategory(category, templates.get(category).name());
-            }
-        }
-        for (String category : data.keySet()) {
-            for (String object : data.get(category).keySet()) {
-                browserTree.addGameObject(category, object);
-            }
-        }
+        loadBrowser();
 
         browserTree.setPreferredSize(new Dimension(400, 400));
         JScrollPane browserScrollPane = new JScrollPane(browserTree);
@@ -108,7 +101,20 @@ public class Main {
         return data.get(category).get(object);
     }
 
-    public void openEditorMenu(Template template, Data objectData) {
+    private void loadBrowser() {
+        for (String category : templates.keySet()) {
+            if (templates.get(category).topLevel()) {
+                browserTree.addCategory(category, templates.get(category).name());
+            }
+        }
+        for (String category : data.keySet()) {
+            for (String object : data.get(category).keySet()) {
+                browserTree.addGameObject(category, object);
+            }
+        }
+    }
+
+    public void newObject(Template template) {
         JFrame editorFrame = new JFrame(template.name());
         editorFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         EditorElement editorElement = new ParameterFieldObject(template.name(), template, templates, data, true);
@@ -116,9 +122,34 @@ public class Main {
         editorFrame.pack();
         editorFrame.setLocationRelativeTo(null);
         editorFrame.setVisible(true);
-        if (objectData != null) {
-            editorElement.setData(objectData);
-        }
+    }
+
+    public void editObject(Template template, Data objectData) {
+        JFrame editorFrame = new JFrame(template.name());
+        editorFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        EditorElement editorElement = new ParameterFieldObject(template.name(), template, templates, data, true);
+        editorElement.setData(objectData);
+        editorFrame.getContentPane().add(editorElement);
+        editorFrame.pack();
+        editorFrame.setLocationRelativeTo(null);
+        editorFrame.setVisible(true);
+    }
+
+    public void duplicateObject(Template template, Data objectData) {
+        JFrame editorFrame = new JFrame(template.name());
+        editorFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        EditorElement editorElement = new ParameterFieldObject(template.name(), template, templates, data, true);
+        editorElement.setData(objectData);
+        editorFrame.getContentPane().add(editorElement);
+        editorFrame.pack();
+        editorFrame.setLocationRelativeTo(null);
+        editorFrame.setVisible(true);
+    }
+
+    public void deleteObject(String categoryID, String objectID) {
+        data.get(categoryID).remove(objectID);
+        // TODO - Add confirmation dialog
+        browserTree.removeGameObject(categoryID, objectID);
     }
 
 }

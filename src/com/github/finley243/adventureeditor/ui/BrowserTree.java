@@ -14,6 +14,7 @@ import java.util.Map;
 public class BrowserTree extends JTree {
 
     private final DefaultMutableTreeNode treeRoot;
+    private final DefaultTreeModel treeModel;
     private final Map<String, BrowserCategoryNode> categoryNodes;
     private final Main main;
 
@@ -21,7 +22,7 @@ public class BrowserTree extends JTree {
         this.treeRoot = new BrowserRootNode();
         this.categoryNodes = new HashMap<>();
         this.main = main;
-        DefaultTreeModel treeModel = new DefaultTreeModel(treeRoot, false);
+        this.treeModel = new DefaultTreeModel(treeRoot, false);
         this.setModel(treeModel);
         //this.expandRow(0);
         BrowserTree thisTree = this;
@@ -63,6 +64,11 @@ public class BrowserTree extends JTree {
             categoryNodes.get(category).addGameObject(objectID);
         }
         this.expandRow(0);
+    }
+
+    public void removeGameObject(String category, String objectID) {
+        treeModel.removeNodeFromParent(categoryNodes.get(category).getObjectNode(objectID));
+        categoryNodes.get(category).removeGameObject(objectID);
     }
 
 }

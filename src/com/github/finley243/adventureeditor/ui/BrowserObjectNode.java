@@ -28,13 +28,13 @@ public class BrowserObjectNode extends DefaultMutableTreeNode {
     }
 
     public void openInEditor() {
-        main.openEditorMenu(main.getTemplate(categoryID), main.getData(categoryID, objectID));
+        main.editObject(main.getTemplate(categoryID), main.getData(categoryID, objectID));
     }
 
     public void openContextMenu(Component component, Point point) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuNew = new JMenuItem("New " + main.getTemplate(categoryID).name());
-        menuNew.addActionListener(e -> main.openEditorMenu(main.getTemplate(categoryID), null));
+        menuNew.addActionListener(e -> main.editObject(main.getTemplate(categoryID), null));
         menu.add(menuNew);
         JMenuItem menuOpen = new JMenuItem("Open " + objectID);
         menuOpen.addActionListener(e -> openInEditor());
@@ -43,9 +43,19 @@ public class BrowserObjectNode extends DefaultMutableTreeNode {
         menuDuplicate.addActionListener(e -> System.out.println("DUPLICATE: " + objectID));
         menu.add(menuDuplicate);
         JMenuItem menuDelete = new JMenuItem("Delete " + objectID);
-        menuDelete.addActionListener(e -> System.out.println("DELETE: " + objectID));
+        menuDelete.addActionListener(e -> main.deleteObject(categoryID, objectID));
         menu.add(menuDelete);
         menu.show(component, point.x, point.y);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof BrowserObjectNode objectNode && objectNode.objectID.equals(objectID) && objectNode.categoryID.equals(categoryID);
+    }
+
+    @Override
+    public int hashCode() {
+        return objectID.hashCode() + (31 * categoryID.hashCode());
     }
 
 }
