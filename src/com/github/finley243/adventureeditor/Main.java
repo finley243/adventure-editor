@@ -28,15 +28,6 @@ public class Main {
     public Main() throws ParserConfigurationException, IOException, SAXException {
         this.templates = DataLoader.loadTemplates(new File(TEMPLATE_DIRECTORY));
         this.data = DataLoader.loadFromDir(new File(DATA_DIRECTORY_TEST), templates);
-        /*for (String dataType : data.keySet()) {
-            Map<String, Data> instances = data.get(dataType);
-            System.out.println("Data Type: " + dataType);
-            for (String instanceID : instances.keySet()) {
-                Data instance = instances.get(instanceID);
-                System.out.println(" - Instance: " + instanceID);
-                System.out.println(instance);
-            }
-        }*/
         EventQueue.invokeLater(this::run);
     }
 
@@ -53,8 +44,8 @@ public class Main {
         //frame.setLayout(new BorderLayout());
         JMenuBar menuBar = new JMenuBar();
         frame.setJMenuBar(menuBar);
-        JSplitPane splitPane = new JSplitPane();
-        frame.getContentPane().add(splitPane);
+        //JSplitPane splitPane = new JSplitPane();
+        //frame.getContentPane().add(splitPane);
 
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
@@ -73,37 +64,40 @@ public class Main {
         browserPanel.setLayout(new BorderLayout());
         BrowserTree browserTree = new BrowserTree();
 
-        browserTree.setPreferredSize(new Dimension(200, 600));
-        browserPanel.add(browserTree, BorderLayout.CENTER);
-        //frame.getContentPane().add(browserPanel, BorderLayout.WEST);
-        splitPane.setLeftComponent(browserPanel);
+        for (String category : templates.keySet()) {
+            if (templates.get(category).topLevel()) {
+                browserTree.addCategory(category, templates.get(category).name());
+            }
+        }
+        for (String category : data.keySet()) {
+            for (String object : data.get(category).keySet()) {
+                browserTree.addGameObject(category, object);
+            }
+        }
 
-        JPanel editorPanel = new JPanel();
-        //frame.getContentPane().add(editorPanel, BorderLayout.CENTER);
-        splitPane.setRightComponent(editorPanel);
-        editorPanel.setLayout(new BorderLayout());
+        browserTree.setPreferredSize(new Dimension(400, 600));
+        JScrollPane browserScrollPane = new JScrollPane(browserTree);
+        browserScrollPane.setViewportView(browserTree);
+        browserPanel.add(browserScrollPane, BorderLayout.CENTER);
+        frame.getContentPane().add(browserPanel);
+        //splitPane.setLeftComponent(browserPanel);
+
+        //JPanel editorPanel = new JPanel();
+        //splitPane.setRightComponent(editorPanel);
+        //editorPanel.setLayout(new BorderLayout());
 
         frame.setVisible(true);
-        //frame.setResizable(false);
 
-        EditorElement roomElement = buildMenuForTemplate(editorPanel, templates.get("room"));
-        editorPanel.add(roomElement);
-        roomElement.setData(data.get("room").get("wilsons_corner_store"));
+        //EditorElement roomElement = buildMenuForTemplate(templates.get("room"));
+        //editorPanel.add(roomElement);
+        //roomElement.setData(data.get("room").get("wilsons_corner_store"));
 
         frame.pack();
         frame.setLocationRelativeTo(null);
     }
 
-    private EditorElement buildMenuForTemplate(JPanel containingPanel, Template template) {
-        /*JPanel mainPanel = new JPanel();
-        mainPanel.setBorder(BorderFactory.createTitledBorder(template.name()));
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        containingPanel.add(mainPanel, BorderLayout.CENTER);
-        for (TemplateParameter parameter : template.parameters()) {
-            mainPanel.add(ParameterFactory.create(parameter, templates, data));
-        }*/
+    private EditorElement buildMenuForTemplate(Template template) {
         return new ParameterFieldObject(template.name(), template, templates, data);
-        //containingPanel.add(objectPanel);
     }
 
 }
