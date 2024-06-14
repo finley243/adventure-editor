@@ -155,8 +155,17 @@ public class DataLoader {
                 case REFERENCE -> {
                     if (parameter.isAttribute()) {
                         dataMap.put(parameter.id(), new DataReference(LoadUtils.attribute(element, parameter.id(), null)));
+                    } else if (parameter.isTagContent()) {
+                        dataMap.put(parameter.id(), new DataReference(element == null ? null : element.getTextContent()));
                     } else {
                         dataMap.put(parameter.id(), new DataReference(LoadUtils.singleTag(element, parameter.id(), null)));
+                    }
+                }
+                case ENUM -> {
+                    if (parameter.isAttribute()) {
+                        dataMap.put(parameter.id(), new DataEnum(LoadUtils.attribute(element, parameter.id(), null)));
+                    } else {
+                        dataMap.put(parameter.id(), new DataEnum(LoadUtils.singleTag(element, parameter.id(), null)));
                     }
                 }
             }

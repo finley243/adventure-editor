@@ -14,14 +14,14 @@ public class ParameterFieldObject extends EditorElement {
     private final Map<String, EditorElement> editorElements;
     private final Template template;
 
-    public ParameterFieldObject(String name, Template template, Map<String, Template> templates, Map<String, Map<String, Data>> data) {
+    public ParameterFieldObject(String name, Template template, Map<String, Template> templates, Map<String, Map<String, Data>> data, boolean isTopLevelEditor) {
         this.template = template;
         JPanel innerPanel = new JPanel();
         innerPanel.setBorder(BorderFactory.createTitledBorder(name));
         innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
         this.editorElements = new HashMap<>();
         for (TemplateParameter parameter : template.parameters()) {
-            if (!parameter.topLevelOnly()) {
+            if (isTopLevelEditor || !parameter.topLevelOnly()) {
                 EditorElement parameterElement = ParameterFactory.create(parameter, templates, data);
                 innerPanel.add(parameterElement);
                 editorElements.put(parameter.id(), parameterElement);

@@ -64,7 +64,7 @@ public class ParameterFieldObjectSet extends EditorElement {
             JFrame objectFrame = new JFrame();
             objectFrame.setLayout(new FlowLayout());
             objectFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            ParameterFieldObject objectParameter = new ParameterFieldObject(name, template, templates, data);
+            ParameterFieldObject objectParameter = new ParameterFieldObject(name, template, templates, data, false);
             objectFrame.getContentPane().add(objectParameter);
             JButton buttonSave = new JButton("Save");
             JButton buttonCancel = new JButton("Cancel");
@@ -87,7 +87,7 @@ public class ParameterFieldObjectSet extends EditorElement {
             Data objectData = textList.getSelectedValue();
             if (objectData != null) {
                 JFrame objectFrame = new JFrame();
-                ParameterFieldObject objectParameter = new ParameterFieldObject(name, template, templates, data);
+                ParameterFieldObject objectParameter = new ParameterFieldObject(name, template, templates, data, false);
                 objectParameter.setData(objectData);
                 objectFrame.setLayout(new FlowLayout());
                 objectFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

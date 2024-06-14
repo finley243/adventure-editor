@@ -15,7 +15,7 @@ public class ParameterFactory {
             case FLOAT -> new ParameterFieldFloat(parameter.name());
             case STRING -> new ParameterFieldString(parameter.name());
             case STRING_SET -> new ParameterFieldStringSet(parameter.name());
-            case OBJECT -> new ParameterFieldObject(parameter.name(), templates.get(parameter.type()), templates, data);
+            case OBJECT -> new ParameterFieldObject(parameter.name(), templates.get(parameter.type()), templates, data, false);
             case OBJECT_SET -> new ParameterFieldObjectSet(parameter.name(), templates.get(parameter.type()), templates, data);
             case REFERENCE -> new ParameterFieldReference(parameter.name(), !data.containsKey(parameter.type()) || data.get(parameter.type()).keySet().isEmpty() ? new String[0] : data.get(parameter.type()).keySet().toArray(new String[0]));
             case ENUM -> new ParameterFieldEnum(parameter.name(), parameter.enumOptions().toArray(new String[0]));

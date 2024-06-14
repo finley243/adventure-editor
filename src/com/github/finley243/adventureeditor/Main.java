@@ -62,7 +62,7 @@ public class Main {
 
         JPanel browserPanel = new JPanel();
         browserPanel.setLayout(new BorderLayout());
-        BrowserTree browserTree = new BrowserTree();
+        BrowserTree browserTree = new BrowserTree(this);
 
         for (String category : templates.keySet()) {
             if (templates.get(category).topLevel()) {
@@ -75,9 +75,10 @@ public class Main {
             }
         }
 
-        browserTree.setPreferredSize(new Dimension(400, 600));
+        browserTree.setPreferredSize(new Dimension(400, 400));
         JScrollPane browserScrollPane = new JScrollPane(browserTree);
         browserScrollPane.setViewportView(browserTree);
+        browserScrollPane.setPreferredSize(new Dimension(400, 800));
         browserPanel.add(browserScrollPane, BorderLayout.CENTER);
         frame.getContentPane().add(browserPanel);
         //splitPane.setLeftComponent(browserPanel);
@@ -96,8 +97,28 @@ public class Main {
         frame.setLocationRelativeTo(null);
     }
 
-    private EditorElement buildMenuForTemplate(Template template) {
-        return new ParameterFieldObject(template.name(), template, templates, data);
+    public Template getTemplate(String category) {
+        return templates.get(category);
+    }
+
+    public Data getData(String category, String object) {
+        if (data.get(category) == null) {
+            return null;
+        }
+        return data.get(category).get(object);
+    }
+
+    public void openEditorMenu(Template template, Data objectData) {
+        JFrame editorFrame = new JFrame(template.name());
+        editorFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        EditorElement editorElement = new ParameterFieldObject(template.name(), template, templates, data, true);
+        editorFrame.getContentPane().add(editorElement);
+        editorFrame.pack();
+        editorFrame.setLocationRelativeTo(null);
+        editorFrame.setVisible(true);
+        if (objectData != null) {
+            editorElement.setData(objectData);
+        }
     }
 
 }
