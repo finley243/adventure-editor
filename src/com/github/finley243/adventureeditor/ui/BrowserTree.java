@@ -28,13 +28,22 @@ public class BrowserTree extends JTree {
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
+                if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
                     TreePath path = thisTree.getPathForLocation(e.getX(), e.getY());
                     if (path != null) {
                         DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-                        if (node instanceof BrowserObjectNode) {
-                            BrowserObjectNode objectNode = (BrowserObjectNode) node;
+                        if (node instanceof BrowserObjectNode objectNode) {
                             objectNode.openInEditor();
+                        }
+                    }
+                } else if (e.getClickCount() == 1 && e.getButton() == MouseEvent.BUTTON3) {
+                    TreePath path = thisTree.getPathForLocation(e.getX(), e.getY());
+                    if (path != null) {
+                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                        if (node instanceof BrowserObjectNode objectNode) {
+                            objectNode.openContextMenu(e.getComponent(), e.getPoint());
+                        } else if (node instanceof BrowserCategoryNode categoryNode) {
+                            categoryNode.openContextMenu(e.getComponent(), e.getPoint());
                         }
                     }
                 }

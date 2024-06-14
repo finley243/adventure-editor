@@ -254,5 +254,33 @@
     </template>
     <template id="weaponClass" name="Weapon Class" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="isRanged" dataType="boolean" name="Is Ranged" format="attribute"/>
+        <parameter id="isLoud" dataType="boolean" name="Is Loud" format="attribute"/>
+        <parameter id="skill" dataType="reference" name="Skill" type="skill" format="attribute"/>
+        <parameter id="name" dataType="string" name="Name" format="child_tag"/>
+        <parameter id="slotGroup" dataType="objectSet" name="Slot Groups" type="weaponClassSlotGroup"/>
+        <parameter id="ammo" dataType="objectSet" name="Ammo Types" type="weaponClassAmmoType"/>
+        <parameter id="range" dataType="objectSet" name="Ranges" type="weaponClassRange"/>
+        <parameter id="attackType" dataType="objectSet" name="Attack Types" type="weaponClassAttackType"/>
+    </template>
+    <template id="weaponClassSlotGroup" name="Slot Group" topLevel="false" primaryParameter="slot">
+        <parameter id="slot" dataType="objectSet" name="Slots" type="weaponClassSlot"/>
+    </template>
+    <template id="weaponClassSlot" name="Slot" topLevel="false" primaryParameter="slot">
+        <parameter id="slot" dataType="string" name="Slot" format="current_tag"/>
+    </template>
+    <template id="weaponClassAmmoType" name="Ammo Type" topLevel="false" primaryParameter="ammo">
+        <parameter id="ammo" dataType="reference" name="Ammo Item" type="item" format="current_tag"/>
+    </template>
+    <template id="weaponClassRange" name="Range" topLevel="false" primaryParameter="range">
+        <parameter id="range" dataType="enum" name="Range" format="current_tag">
+            <value>NEAR</value>
+            <value>CLOSE</value>
+            <value>FAR</value>
+            <value>DISTANT</value>
+        </parameter>
+    </template>
+    <template id="weaponClassAttackType" name="AttackType" topLevel="false" primaryParameter="attackType">
+        <parameter id="attackType" dataType="reference" name="Attack Type" type="attackType" format="current_tag"/>
     </template>
 </data>
