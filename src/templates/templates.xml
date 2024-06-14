@@ -1,0 +1,67 @@
+<data>
+    <template id="room" name="Room" topLevel="true">
+        <parameter id="id" dataType="string" name="ID" attribute="true"/>
+        <parameter id="name" dataType="object" name="Name" type="roomName"/>
+        <parameter id="description" dataType="object" name="Description" type="scene"/>
+        <parameter id="area" dataType="objectSet" name="Areas" type="area"/>
+    </template>
+    <template id="area" name="Area" topLevel="false">
+        <parameter id="id" dataType="string" name="ID" topLevelOnly="false" attribute="true"/>
+        <parameter id="name" dataType="object" name="Name" type="areaName"/>
+        <parameter id="description" dataType="object" name="Description" type="scene"/>
+        <parameter id="link" dataType="objectSet" name="Links" type="areaLink"/>
+    </template>
+    <template id="areaLink" name="Area Link" topLevel="false">
+        <parameter id="type" dataType="string" name="Link Type" attribute="true"/>
+        <parameter id="dir" dataType="enum" name="Direction" attribute="true">
+            <value>N</value>
+            <value>NE</value>
+            <value>E</value>
+            <value>SE</value>
+            <value>S</value>
+            <value>SW</value>
+            <value>W</value>
+            <value>NW</value>
+        </parameter>
+        <parameter id="dist" dataType="enum" name="Distance" attribute="true">
+            <value>NEAR</value>
+            <value>CLOSE</value>
+            <value>FAR</value>
+            <value>DISTANT</value>
+        </parameter>
+        <parameter id="area" dataType="reference" name="Area" type="area" attribute="true"/>
+    </template>
+    <template id="roomName" name="Name">
+        <parameter id="name" dataType="string" name="Name" tagContent="true"/>
+        <parameter id="proper" dataType="boolean" name="Is Proper?" attribute="true"/>
+        <parameter id="type" dataType="enum" name="Type" attribute="true">
+            <value>in</value>
+            <value>on</value>
+        </parameter>
+    </template>
+    <template id="areaName" name="Name">
+        <parameter id="name" dataType="string" name="Name" tagContent="true"/>
+        <parameter id="proper" dataType="boolean" name="Is Proper?" attribute="true"/>
+        <parameter id="type" dataType="enum" name="Type" attribute="true">
+            <value>in</value>
+            <value>on</value>
+            <value>near</value>
+        </parameter>
+    </template>
+    <template id="scene" name="Scene" topLevel="true">
+        <parameter id="id" dataType="string" name="ID" topLevelOnly="true" attribute="true"/>
+        <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine"/>
+        <parameter id="choice" dataType="objectSet" name="Choices" type="sceneChoice"/>
+    </template>
+    <template id="sceneLine">
+        <parameter id="once" dataType="boolean" name="Show Once" attribute="true"/>
+        <parameter id="exit" dataType="boolean" name="Exit After Showing" attribute="true"/>
+        <parameter id="redir" dataType="reference" name="Redirect" type="scene" attribute="true"/>
+        <parameter id="text" dataType="string" name="Text" tagContent="true"/>
+        <parameter id="line" dataType="objectSet" name="Sub-Lines" type="sceneLine"/>
+    </template>
+    <template id="sceneChoice">
+        <parameter id="link" dataType="reference" name="Link" type="scene"/>
+        <parameter id="text" dataType="string" name="Text" tagContent="true"/>
+    </template>
+</data>
