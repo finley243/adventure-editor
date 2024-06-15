@@ -72,18 +72,18 @@
     </template>
     <template id="sceneLine" name="Scene Line" topLevel="false" primaryParameter="text">
         <parameter id="once" dataType="boolean" name="Show Once" format="attribute"/>
+        <parameter id="exit" dataType="boolean" name="Exit After Showing" format="attribute"/>
+        <parameter id="from" dataType="reference" name="Show Only From" type="scene" format="attribute"/>
+        <parameter id="redirect" dataType="reference" name="Redirect To" type="scene" format="attribute"/>
+        <parameter id="text" dataType="string" name="Text" format="current_tag"/>
+        <parameter id="condition" dataType="object" name="Condition" type="condition"/>
+        <parameter id="scriptPre" dataType="object" name="Pre Script" type="script"/>
+        <parameter id="scriptPost" dataType="object" name="Post Script" type="script"/>
         <parameter id="type" dataType="enum" name="Type" format="attribute">
             <value>all</value>
             <value>select</value>
             <value>random</value>
         </parameter>
-        <parameter id="exit" dataType="boolean" name="Exit After Showing" format="attribute"/>
-        <parameter id="redirect" dataType="reference" name="Redirect" type="scene" format="attribute"/>
-        <parameter id="from" dataType="reference" name="From" type="scene" format="attribute"/>
-        <parameter id="text" dataType="string" name="Text" format="current_tag"/>
-        <parameter id="condition" dataType="object" name="Condition" type="condition"/>
-        <parameter id="scriptPre" dataType="object" name="Pre Script" type="script"/>
-        <parameter id="scriptPost" dataType="object" name="Post Script" type="script"/>
         <parameter id="line" dataType="objectSet" name="Sub-Lines" type="sceneLine"/>
     </template>
     <template id="script" name="Script" topLevel="false">

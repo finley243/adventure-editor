@@ -5,6 +5,7 @@ import com.github.finley243.adventureeditor.Main;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
+import java.util.Set;
 
 public class BrowserObjectNode extends DefaultMutableTreeNode {
 
@@ -27,20 +28,16 @@ public class BrowserObjectNode extends DefaultMutableTreeNode {
         return categoryID;
     }
 
-    public void openInEditor() {
-        main.editObject(main.getTemplate(categoryID), main.getData(categoryID, objectID));
-    }
-
     public void openContextMenu(Component component, Point point) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuNew = new JMenuItem("New " + main.getTemplate(categoryID).name());
-        menuNew.addActionListener(e -> main.editObject(main.getTemplate(categoryID), null));
+        menuNew.addActionListener(e -> main.newObject(categoryID));
         menu.add(menuNew);
         JMenuItem menuOpen = new JMenuItem("Open " + objectID);
-        menuOpen.addActionListener(e -> openInEditor());
+        menuOpen.addActionListener(e -> main.editObject(categoryID, objectID));
         menu.add(menuOpen);
         JMenuItem menuDuplicate = new JMenuItem("Duplicate " + objectID);
-        menuDuplicate.addActionListener(e -> System.out.println("DUPLICATE: " + objectID));
+        menuDuplicate.addActionListener(e -> main.duplicateObject(categoryID, objectID));
         menu.add(menuDuplicate);
         JMenuItem menuDelete = new JMenuItem("Delete " + objectID);
         menuDelete.addActionListener(e -> main.deleteObject(categoryID, objectID));

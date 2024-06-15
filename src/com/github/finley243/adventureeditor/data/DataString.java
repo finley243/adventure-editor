@@ -13,6 +13,11 @@ public class DataString extends Data {
     }
 
     @Override
+    public Data createCopy() {
+        return new DataString(value);
+    }
+
+    @Override
     public String toString() {
         return value;
     }

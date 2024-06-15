@@ -13,6 +13,11 @@ public class DataFloat extends Data {
     }
 
     @Override
+    public Data createCopy() {
+        return new DataFloat(value);
+    }
+
+    @Override
     public String toString() {
         return Float.toString(value);
     }

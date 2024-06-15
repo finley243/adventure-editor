@@ -24,7 +24,6 @@ public class BrowserTree extends JTree {
         this.main = main;
         this.treeModel = new DefaultTreeModel(treeRoot, false);
         this.setModel(treeModel);
-        //this.expandRow(0);
         BrowserTree thisTree = this;
         this.addMouseListener(new MouseAdapter() {
             @Override
@@ -34,7 +33,7 @@ public class BrowserTree extends JTree {
                     if (path != null) {
                         DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                         if (node instanceof BrowserObjectNode objectNode) {
-                            objectNode.openInEditor();
+                            main.editObject(objectNode.getCategoryID(), objectNode.getObjectID());
                         }
                     }
                 } else if (e.getButton() == MouseEvent.BUTTON3) {
@@ -57,12 +56,12 @@ public class BrowserTree extends JTree {
         BrowserCategoryNode node = new BrowserCategoryNode(main, categoryID, name);
         categoryNodes.put(categoryID, node);
         treeRoot.add(node);
-        //this.expandRow(0);
     }
 
     public void addGameObject(String category, String objectID) {
         if (categoryNodes.containsKey(category)) {
             categoryNodes.get(category).addGameObject(objectID);
+            treeModel.nodeStructureChanged(categoryNodes.get(category));
         }
         this.expandRow(0);
     }

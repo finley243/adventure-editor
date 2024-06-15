@@ -1,5 +1,6 @@
 package com.github.finley243.adventureeditor.ui;
 
+import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObjectSet;
 import com.github.finley243.adventureeditor.template.Template;
@@ -8,7 +9,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ParameterFieldObjectSet extends EditorElement {
 
@@ -17,7 +17,7 @@ public class ParameterFieldObjectSet extends EditorElement {
     private final JButton buttonEdit;
     private final JButton buttonRemove;
 
-    public ParameterFieldObjectSet(String name, Template template, Map<String, Template> templates, Map<String, Map<String, Data>> data) {
+    public ParameterFieldObjectSet(String name, Template template, Main main) {
         setLayout(new GridBagLayout());
         JLabel label = new JLabel(name);
         this.textList = new JList<>();
@@ -66,7 +66,7 @@ public class ParameterFieldObjectSet extends EditorElement {
             JFrame objectFrame = new JFrame();
             objectFrame.setLayout(new FlowLayout());
             objectFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            ParameterFieldObject objectParameter = new ParameterFieldObject(name, template, templates, data, false);
+            ParameterFieldObject objectParameter = new ParameterFieldObject(name, template, main, false);
             objectFrame.getContentPane().add(objectParameter);
             JButton buttonSave = new JButton("Save");
             JButton buttonCancel = new JButton("Cancel");
@@ -88,21 +88,7 @@ public class ParameterFieldObjectSet extends EditorElement {
         buttonEdit.addActionListener(e -> {
             Data objectData = textList.getSelectedValue();
             if (objectData != null) {
-                JFrame objectFrame = new JFrame();
-                ParameterFieldObject objectParameter = new ParameterFieldObject(name, template, templates, data, false);
-                objectParameter.setData(objectData);
-                objectFrame.setLayout(new FlowLayout());
-                objectFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-                objectFrame.getContentPane().add(objectParameter);
-                JButton buttonSave = new JButton("Save");
-                JButton buttonCancel = new JButton("Cancel");
-                buttonSave.addActionListener(eSave -> objectFrame.dispose());
-                buttonCancel.addActionListener(eCancel -> objectFrame.dispose());
-                objectFrame.getContentPane().add(buttonSave);
-                objectFrame.getContentPane().add(buttonCancel);
-                objectFrame.pack();
-                objectFrame.setLocationRelativeTo(null);
-                objectFrame.setVisible(true);
+                EditorFrame objectFrame = new EditorFrame(main, template, objectData, false);
             }
         });
         buttonRemove.addActionListener(e -> {

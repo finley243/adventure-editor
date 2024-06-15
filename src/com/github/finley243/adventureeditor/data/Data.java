@@ -1,5 +1,7 @@
 package com.github.finley243.adventureeditor.data;
 
-public class Data {
+public abstract class Data {
+
+    public abstract Data createCopy();
 
 }

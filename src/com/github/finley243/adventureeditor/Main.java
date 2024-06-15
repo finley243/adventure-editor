@@ -1,6 +1,7 @@
 package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.*;
 import org.xml.sax.SAXException;
@@ -9,6 +10,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
@@ -90,15 +92,22 @@ public class Main {
         frame.setLocationRelativeTo(null);
     }
 
-    public Template getTemplate(String category) {
-        return templates.get(category);
+    public Template getTemplate(String categoryID) {
+        return templates.get(categoryID);
     }
 
-    public Data getData(String category, String object) {
-        if (data.get(category) == null) {
+    public Set<String> getIDsForCategory(String categoryID) {
+        if (!data.containsKey(categoryID)) {
             return null;
         }
-        return data.get(category).get(object);
+        return data.get(categoryID).keySet();
+    }
+
+    public Data getData(String categoryID, String object) {
+        if (data.get(categoryID) == null) {
+            return null;
+        }
+        return data.get(categoryID).get(object);
     }
 
     private void loadBrowser() {
@@ -114,42 +123,45 @@ public class Main {
         }
     }
 
-    public void newObject(Template template) {
-        JFrame editorFrame = new JFrame(template.name());
-        editorFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        EditorElement editorElement = new ParameterFieldObject(template.name(), template, templates, data, true);
-        editorFrame.getContentPane().add(editorElement);
-        editorFrame.pack();
-        editorFrame.setLocationRelativeTo(null);
-        editorFrame.setVisible(true);
+    public void newObject(String categoryID) {
+        Template template = templates.get(categoryID);
+        EditorFrame editorFrame = new EditorFrame(this, template, null, true);
     }
 
-    public void editObject(Template template, Data objectData) {
-        JFrame editorFrame = new JFrame(template.name());
-        editorFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        EditorElement editorElement = new ParameterFieldObject(template.name(), template, templates, data, true);
-        editorElement.setData(objectData);
-        editorFrame.getContentPane().add(editorElement);
-        editorFrame.pack();
-        editorFrame.setLocationRelativeTo(null);
-        editorFrame.setVisible(true);
+    public void editObject(String categoryID, String objectID) {
+        Template template = templates.get(categoryID);
+        Data objectData = data.get(categoryID).get(objectID);
+        EditorFrame editorFrame = new EditorFrame(this, template, objectData, true);
     }
 
-    public void duplicateObject(Template template, Data objectData) {
-        JFrame editorFrame = new JFrame(template.name());
-        editorFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        EditorElement editorElement = new ParameterFieldObject(template.name(), template, templates, data, true);
-        editorElement.setData(objectData);
-        editorFrame.getContentPane().add(editorElement);
-        editorFrame.pack();
-        editorFrame.setLocationRelativeTo(null);
-        editorFrame.setVisible(true);
+    public void duplicateObject(String categoryID, String objectID) {
+        Data objectData = data.get(categoryID).get(objectID);
+        Data objectDataCopy = objectData.createCopy();
+        String newObjectID = generateDuplicateObjectID(categoryID, objectID);
+        if (objectDataCopy instanceof DataObject dataObject) {
+            dataObject.replaceID(newObjectID);
+        }
+        data.get(categoryID).put(newObjectID, objectDataCopy);
+        browserTree.addGameObject(categoryID, newObjectID);
     }
 
     public void deleteObject(String categoryID, String objectID) {
-        data.get(categoryID).remove(objectID);
-        // TODO - Add confirmation dialog
-        browserTree.removeGameObject(categoryID, objectID);
+        Object[] confirmOptions = {"Delete", "Cancel"};
+        int confirmResult = JOptionPane.showOptionDialog(browserTree, "Are you sure you want to delete " + objectID + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        if (confirmResult == 0) {
+            data.get(categoryID).remove(objectID);
+            browserTree.removeGameObject(categoryID, objectID);
+        }
+    }
+
+    private String generateDuplicateObjectID(String categoryID, String objectID) {
+        Set<String> existingIDs = getIDsForCategory(categoryID);
+        String baseCopyID = objectID + "_COPY_";
+        int i = 1;
+        while (existingIDs.contains(baseCopyID + i)) {
+            i += 1;
+        }
+        return baseCopyID + i;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.github.finley243.adventureeditor.ui;
 
+import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.Template;
@@ -14,7 +15,7 @@ public class ParameterFieldObject extends EditorElement {
     private final Map<String, EditorElement> editorElements;
     private final Template template;
 
-    public ParameterFieldObject(String name, Template template, Map<String, Template> templates, Map<String, Map<String, Data>> data, boolean isTopLevelEditor) {
+    public ParameterFieldObject(String name, Template template, Main main, boolean isTopLevelEditor) {
         this.template = template;
         JPanel innerPanel = new JPanel();
         innerPanel.setBorder(BorderFactory.createTitledBorder(name));
@@ -22,7 +23,7 @@ public class ParameterFieldObject extends EditorElement {
         this.editorElements = new HashMap<>();
         for (TemplateParameter parameter : template.parameters()) {
             if (isTopLevelEditor || !parameter.topLevelOnly()) {
-                EditorElement parameterElement = ParameterFactory.create(parameter, templates, data);
+                EditorElement parameterElement = ParameterFactory.create(parameter, main);
                 innerPanel.add(parameterElement);
                 editorElements.put(parameter.id(), parameterElement);
             }

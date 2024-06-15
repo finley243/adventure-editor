@@ -13,6 +13,11 @@ public class DataEnum extends Data {
     }
 
     @Override
+    public Data createCopy() {
+        return new DataEnum(value);
+    }
+
+    @Override
     public String toString() {
         return value;
     }

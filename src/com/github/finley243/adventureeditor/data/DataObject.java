@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor.data;
 
 import com.github.finley243.adventureeditor.template.Template;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class DataObject extends Data {
@@ -20,6 +21,21 @@ public class DataObject extends Data {
 
     public Map<String, Data> getValue() {
         return value;
+    }
+
+    @Override
+    public Data createCopy() {
+        Map<String, Data> copyMap = new HashMap<>();
+        for (Map.Entry<String, Data> entry : value.entrySet()) {
+            copyMap.put(entry.getKey(), entry.getValue().createCopy());
+        }
+        return new DataObject(template, copyMap);
+    }
+
+    public void replaceID(String newID) {
+        if (value.containsKey("id")) {
+            value.put("id", new DataString(newID));
+        }
     }
 
     public String getID() {

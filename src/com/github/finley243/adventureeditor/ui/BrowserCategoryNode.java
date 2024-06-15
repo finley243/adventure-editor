@@ -50,7 +50,7 @@ public class BrowserCategoryNode extends DefaultMutableTreeNode {
     public void openContextMenu(Component component, Point point) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuNew = new JMenuItem("New " + name);
-        menuNew.addActionListener(e -> main.editObject(main.getTemplate(categoryID), null));
+        menuNew.addActionListener(e -> main.newObject(categoryID));
         menu.add(menuNew);
         menu.show(component, point.x, point.y);
     }

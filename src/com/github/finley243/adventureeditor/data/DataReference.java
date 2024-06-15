@@ -13,6 +13,11 @@ public class DataReference extends Data {
     }
 
     @Override
+    public Data createCopy() {
+        return new DataReference(value);
+    }
+
+    @Override
     public String toString() {
         return value;
     }

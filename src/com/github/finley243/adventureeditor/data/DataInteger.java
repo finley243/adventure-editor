@@ -13,6 +13,11 @@ public class DataInteger extends Data {
     }
 
     @Override
+    public Data createCopy() {
+        return new DataInteger(value);
+    }
+
+    @Override
     public String toString() {
         return Integer.toString(value);
     }

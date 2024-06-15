@@ -13,6 +13,11 @@ public class DataBoolean extends Data {
     }
 
     @Override
+    public Data createCopy() {
+        return new DataBoolean(value);
+    }
+
+    @Override
     public String toString() {
         return Boolean.toString(value);
     }
