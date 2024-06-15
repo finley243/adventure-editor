@@ -1,5 +1,7 @@
 package com.github.finley243.adventureeditor.data;
 
+import java.util.Objects;
+
 public class DataEnum extends Data {
 
     private final String value;
@@ -20,6 +22,11 @@ public class DataEnum extends Data {
     @Override
     public String toString() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DataEnum dataEnum && Objects.equals(dataEnum.value, value);
     }
 
 }

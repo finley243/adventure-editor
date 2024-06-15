@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DataObjectSet extends Data {
 
@@ -27,6 +28,11 @@ public class DataObjectSet extends Data {
     @Override
     public String toString() {
         return value.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DataObjectSet dataObjectSet && Objects.equals(dataObjectSet.value, value);
     }
 
 }

@@ -4,6 +4,8 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataString;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 
 public class ParameterFieldString extends EditorElement {
@@ -11,11 +13,29 @@ public class ParameterFieldString extends EditorElement {
     private final JLabel label;
     private final JTextField textField;
 
-    public ParameterFieldString(String name) {
+    public ParameterFieldString(EditorFrame editorFrame, String name) {
+        super(editorFrame);
         setLayout(new GridBagLayout());
         this.label = new JLabel(name);
         this.textField = new JTextField();
         textField.setPreferredSize(new Dimension(150, 20));
+        textField.addActionListener(e -> editorFrame.onEditorElementUpdated());
+        textField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                editorFrame.onEditorElementUpdated();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                editorFrame.onEditorElementUpdated();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                editorFrame.onEditorElementUpdated();
+            }
+        });
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
         labelConstraints.gridx = 0;

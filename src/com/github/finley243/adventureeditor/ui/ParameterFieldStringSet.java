@@ -14,10 +14,13 @@ public class ParameterFieldStringSet extends EditorElement {
     private final JButton buttonAdd;
     private final JButton buttonRemove;
 
-    public ParameterFieldStringSet(String name) {
+    public ParameterFieldStringSet(EditorFrame editorFrame, String name) {
+        super(editorFrame);
         setLayout(new GridBagLayout());
         JLabel label = new JLabel(name);
         this.textList = new JList<>();
+        // May not be the ideal listener type
+        textList.addListSelectionListener(e -> editorFrame.onEditorElementUpdated());
         JScrollPane scrollPane = new JScrollPane(textList);
         this.buttonAdd = new JButton("+");
         this.buttonRemove = new JButton("-");
@@ -50,6 +53,7 @@ public class ParameterFieldStringSet extends EditorElement {
                 addIndex = textList.getModel().getSize();
             }
             ((DefaultListModel<String>) textList.getModel()).add(addIndex, input);
+            editorFrame.onEditorElementUpdated();
         });
         buttonRemove.addActionListener(e -> {
             int selectedIndex = textList.getSelectedIndex();
@@ -60,6 +64,7 @@ public class ParameterFieldStringSet extends EditorElement {
                 } else if (textList.getModel().getSize() == selectedIndex) {
                     textList.setSelectedIndex(selectedIndex - 1);
                 }
+                editorFrame.onEditorElementUpdated();
             }
         });
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);

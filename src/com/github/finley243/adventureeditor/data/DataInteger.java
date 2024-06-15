@@ -1,5 +1,7 @@
 package com.github.finley243.adventureeditor.data;
 
+import java.util.Objects;
+
 public class DataInteger extends Data {
 
     private final int value;
@@ -20,6 +22,11 @@ public class DataInteger extends Data {
     @Override
     public String toString() {
         return Integer.toString(value);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DataInteger dataInteger && dataInteger.value == value;
     }
 
 }

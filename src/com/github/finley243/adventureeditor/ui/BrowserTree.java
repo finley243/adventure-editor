@@ -58,10 +58,14 @@ public class BrowserTree extends JTree {
         treeRoot.add(node);
     }
 
+    public void updateCategory(String categoryID) {
+        treeModel.nodeStructureChanged(categoryNodes.get(categoryID));
+    }
+
     public void addGameObject(String category, String objectID) {
         if (categoryNodes.containsKey(category)) {
             categoryNodes.get(category).addGameObject(objectID);
-            treeModel.nodeStructureChanged(categoryNodes.get(category));
+            updateCategory(category);
         }
         this.expandRow(0);
     }

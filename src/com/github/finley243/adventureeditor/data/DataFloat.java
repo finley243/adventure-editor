@@ -22,4 +22,9 @@ public class DataFloat extends Data {
         return Float.toString(value);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DataFloat dataFloat && dataFloat.value == value;
+    }
+
 }

@@ -10,14 +10,15 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParameterFieldObjectSet extends EditorElement {
+public class ParameterFieldObjectSet extends EditorElement implements DataSaveTarget {
 
     private final JList<Data> textList;
     private final JButton buttonAdd;
     private final JButton buttonEdit;
     private final JButton buttonRemove;
 
-    public ParameterFieldObjectSet(String name, Template template, Main main) {
+    public ParameterFieldObjectSet(EditorFrame editorFrame, String name, Template template, Main main) {
+        super(editorFrame);
         setLayout(new GridBagLayout());
         JLabel label = new JLabel(name);
         this.textList = new JList<>();
@@ -29,6 +30,8 @@ public class ParameterFieldObjectSet extends EditorElement {
         textList.setModel(new DefaultListModel<>());
         textList.setDragEnabled(false);
         textList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        // May not be the ideal listener to use
+        textList.addListSelectionListener(e -> editorFrame.onEditorElementUpdated());
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
         GridBagConstraints addConstraints = new GridBagConstraints();
@@ -63,7 +66,8 @@ public class ParameterFieldObjectSet extends EditorElement {
             }
         });
         buttonAdd.addActionListener(e -> {
-            JFrame objectFrame = new JFrame();
+            EditorFrame objectFrame = new EditorFrame(main, template, null, this);
+            /*JFrame objectFrame = new JFrame();
             objectFrame.setLayout(new FlowLayout());
             objectFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             ParameterFieldObject objectParameter = new ParameterFieldObject(name, template, main, false);
@@ -83,12 +87,12 @@ public class ParameterFieldObjectSet extends EditorElement {
             objectFrame.getContentPane().add(buttonCancel);
             objectFrame.pack();
             objectFrame.setLocationRelativeTo(null);
-            objectFrame.setVisible(true);
+            objectFrame.setVisible(true);*/
         });
         buttonEdit.addActionListener(e -> {
             Data objectData = textList.getSelectedValue();
             if (objectData != null) {
-                EditorFrame objectFrame = new EditorFrame(main, template, objectData, false);
+                EditorFrame objectFrame = new EditorFrame(main, template, objectData, this);
             }
         });
         buttonRemove.addActionListener(e -> {
@@ -122,6 +126,20 @@ public class ParameterFieldObjectSet extends EditorElement {
     public void setValue(List<Data> value) {
         ((DefaultListModel<Data>) textList.getModel()).clear();
         ((DefaultListModel<Data>) textList.getModel()).addAll(value);
+    }
+
+    @Override
+    public void saveData(Data data, Data initialData) {
+        int addIndex = textList.getSelectedIndex() + 1;
+        if (addIndex == 0) {
+            addIndex = textList.getModel().getSize();
+        }
+        if (initialData != null) {
+            addIndex = ((DefaultListModel<Data>) textList.getModel()).indexOf(initialData);
+            ((DefaultListModel<Data>) textList.getModel()).removeElement(initialData);
+        }
+        ((DefaultListModel<Data>) textList.getModel()).add(addIndex, data);
+        editorFrame.onEditorElementUpdated();
     }
 
     @Override

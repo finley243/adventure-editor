@@ -110,6 +110,33 @@ public class Main {
         return data.get(categoryID).get(object);
     }
 
+    public void saveData(Data objectData, Data initialData) {
+        if (!(objectData instanceof DataObject objectDataCast)) {
+            throw new IllegalArgumentException("Top-level saved data must be an object");
+        }
+        String objectID = objectDataCast.getID();
+        if (objectID == null) {
+            throw new IllegalArgumentException("Top-level object must have an ID");
+        }
+        String categoryID = objectDataCast.getTemplate().id();
+        if (initialData != null) {
+            String initialID = ((DataObject) initialData).getID();
+            String newID = objectDataCast.getID();
+            if (!initialID.equals(newID)) { // Edit with new ID
+                data.get(categoryID).remove(initialID);
+                browserTree.removeGameObject(categoryID, initialID);
+                data.get(categoryID).put(objectID, objectData);
+                browserTree.addGameObject(categoryID, objectID);
+            } else { // Edit with same ID
+                data.get(categoryID).put(objectID, objectData);
+                browserTree.updateCategory(categoryID);
+            }
+        } else { // New object instance
+            data.get(categoryID).put(objectID, objectData);
+            browserTree.addGameObject(categoryID, objectID);
+        }
+    }
+
     private void loadBrowser() {
         for (String category : templates.keySet()) {
             if (templates.get(category).topLevel()) {
@@ -125,13 +152,13 @@ public class Main {
 
     public void newObject(String categoryID) {
         Template template = templates.get(categoryID);
-        EditorFrame editorFrame = new EditorFrame(this, template, null, true);
+        EditorFrame editorFrame = new EditorFrame(this, template, null, null);
     }
 
     public void editObject(String categoryID, String objectID) {
         Template template = templates.get(categoryID);
         Data objectData = data.get(categoryID).get(objectID);
-        EditorFrame editorFrame = new EditorFrame(this, template, objectData, true);
+        EditorFrame editorFrame = new EditorFrame(this, template, objectData, null);
     }
 
     public void duplicateObject(String categoryID, String objectID) {

@@ -15,7 +15,8 @@ public class ParameterFieldObject extends EditorElement {
     private final Map<String, EditorElement> editorElements;
     private final Template template;
 
-    public ParameterFieldObject(String name, Template template, Main main, boolean isTopLevelEditor) {
+    public ParameterFieldObject(EditorFrame editorFrame, String name, Template template, Main main, boolean isTopLevelEditor) {
+        super(editorFrame);
         this.template = template;
         JPanel innerPanel = new JPanel();
         innerPanel.setBorder(BorderFactory.createTitledBorder(name));
@@ -23,7 +24,7 @@ public class ParameterFieldObject extends EditorElement {
         this.editorElements = new HashMap<>();
         for (TemplateParameter parameter : template.parameters()) {
             if (isTopLevelEditor || !parameter.topLevelOnly()) {
-                EditorElement parameterElement = ParameterFactory.create(parameter, main);
+                EditorElement parameterElement = ParameterFactory.create(parameter, main, editorFrame);
                 innerPanel.add(parameterElement);
                 editorElements.put(parameter.id(), parameterElement);
             }

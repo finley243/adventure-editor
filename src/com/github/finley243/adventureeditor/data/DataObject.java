@@ -4,6 +4,7 @@ import com.github.finley243.adventureeditor.template.Template;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class DataObject extends Data {
 
@@ -56,6 +57,11 @@ public class DataObject extends Data {
             return id;
         }
         return template.id();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DataObject dataObject && Objects.equals(dataObject.value, value);
     }
 
 }

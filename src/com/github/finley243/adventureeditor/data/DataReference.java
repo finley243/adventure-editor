@@ -1,5 +1,7 @@
 package com.github.finley243.adventureeditor.data;
 
+import java.util.Objects;
+
 public class DataReference extends Data {
 
     private final String value;
@@ -20,6 +22,11 @@ public class DataReference extends Data {
     @Override
     public String toString() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DataReference dataReference && Objects.equals(dataReference.value, value);
     }
 
 }

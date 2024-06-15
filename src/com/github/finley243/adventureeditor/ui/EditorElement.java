@@ -6,6 +6,12 @@ import javax.swing.*;
 
 public abstract class EditorElement extends JPanel {
 
+    protected final EditorFrame editorFrame;
+
+    public EditorElement(EditorFrame editorFrame) {
+        this.editorFrame = editorFrame;
+    }
+
     public abstract Data getData();
 
     public abstract void setData(Data data);

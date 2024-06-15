@@ -22,4 +22,9 @@ public class DataBoolean extends Data {
         return Boolean.toString(value);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DataBoolean dataBoolean && dataBoolean.value == value;
+    }
+
 }

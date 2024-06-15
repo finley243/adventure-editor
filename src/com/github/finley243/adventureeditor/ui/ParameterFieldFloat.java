@@ -13,12 +13,14 @@ public class ParameterFieldFloat extends EditorElement {
     private final JLabel label;
     private final JSpinner spinner;
 
-    public ParameterFieldFloat(String name) {
+    public ParameterFieldFloat(EditorFrame editorFrame, String name) {
+        super(editorFrame);
         setLayout(new GridBagLayout());
         this.label = new JLabel(name);
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.000d, null, null, 0.001d);
         this.spinner = new JSpinner(spinnerModel);
         spinner.setPreferredSize(new Dimension(150, 20));
+        spinner.addChangeListener(e -> editorFrame.onEditorElementUpdated());
         JSpinner.NumberEditor editor = (JSpinner.NumberEditor)spinner.getEditor();
         DecimalFormat format = editor.getFormat();
         format.setMinimumFractionDigits(3);

@@ -1,6 +1,7 @@
 package com.github.finley243.adventureeditor.data;
 
 import java.util.List;
+import java.util.Objects;
 
 public class DataStringSet extends Data {
 
@@ -22,6 +23,11 @@ public class DataStringSet extends Data {
     @Override
     public String toString() {
         return value.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DataStringSet dataStringSet && Objects.equals(dataStringSet.value, value);
     }
 
 }

@@ -10,10 +10,12 @@ public class ParameterFieldBoolean extends EditorElement {
 
     private final JCheckBox checkBox;
 
-    public ParameterFieldBoolean(String name) {
+    public ParameterFieldBoolean(EditorFrame editorFrame, String name) {
+        super(editorFrame);
         setLayout(new GridBagLayout());
         this.checkBox = new JCheckBox(name);
         checkBox.setPreferredSize(new Dimension(150, 20));
+        checkBox.addActionListener(e -> editorFrame.onEditorElementUpdated());
         GridBagConstraints valueConstraints = new GridBagConstraints();
         valueConstraints.gridx = 0;
         valueConstraints.gridy = 0;

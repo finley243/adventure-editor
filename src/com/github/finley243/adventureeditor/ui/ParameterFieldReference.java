@@ -4,6 +4,9 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataReference;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 import java.awt.*;
 import java.util.Arrays;
 
@@ -11,13 +14,32 @@ public class ParameterFieldReference extends EditorElement {
 
     private final JComboBox<String> dropdownMenu;
 
-    public ParameterFieldReference(String name, String[] values) {
+    public ParameterFieldReference(EditorFrame editorFrame, String name, String[] values) {
+        super(editorFrame);
         setLayout(new GridBagLayout());
         JLabel label = new JLabel(name);
         Arrays.sort(values);
         this.dropdownMenu = new JComboBox<>(values);
         dropdownMenu.setPreferredSize(new Dimension(150, 20));
         dropdownMenu.setEditable(true);
+        dropdownMenu.addActionListener(e -> editorFrame.onEditorElementUpdated());
+        // TODO - Document listener not working, find another solution
+        /*((JTextField) dropdownMenu.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                editorFrame.onEditorElementUpdated();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                editorFrame.onEditorElementUpdated();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                editorFrame.onEditorElementUpdated();
+            }
+        });*/
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
         labelConstraints.gridx = 0;
