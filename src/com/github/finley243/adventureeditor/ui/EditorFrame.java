@@ -24,7 +24,7 @@ public class EditorFrame extends JFrame {
         this.saveTarget = saveTarget;
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
-        this.editorElement = new ParameterFieldObject(this, template.name(), template, main, saveTarget == null);
+        this.editorElement = new ParameterFieldObject(this, false, template.name(), template, main, saveTarget == null, true);
         if (objectData != null) {
             editorElement.setData(objectData);
         }
@@ -42,18 +42,22 @@ public class EditorFrame extends JFrame {
         this.setVisible(true);
     }
 
+    private boolean isTopLevel() {
+        return saveTarget == null;
+    }
+
     private JPanel getButtonPanel(boolean isNewInstance) {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
         saveButton.addActionListener(e -> {
-            if (saveTarget == null) {
+            if (isTopLevel()) {
                 if (isDataValidOrShowDialog()) {
                     main.saveData(editorElement.getData(), initialData);
                     this.dispose();
                 }
             } else {
                 if (isDataValidOrShowDialog()) {
-                    saveTarget.saveData(editorElement.getData(), initialData);
+                    saveTarget.saveObjectData(editorElement.getData(), initialData);
                     this.dispose();
                 }
             }
@@ -102,19 +106,22 @@ public class EditorFrame extends JFrame {
     private boolean isDataValidOrShowDialog() {
         boolean isNewInstance = initialData == null;
         Data currentData = editorElement.getData();
-        if (saveTarget == null) {
+        if (isTopLevel()) {
             String categoryID = ((DataObject) currentData).getTemplate().id();
+            String currentID = ((DataObject) currentData).getID();
+            if (currentID == null || currentID.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "ID cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
             if (isNewInstance) {
-                String currentID = ((DataObject) currentData).getID();
                 if (main.getIDsForCategory(categoryID).contains(currentID)) {
-                    JOptionPane.showMessageDialog(this, "An object with ID " + currentID + " already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "An object with ID \"" + currentID + "\" already exists.", "Error", JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
             } else {
                 String initialID = ((DataObject) initialData).getID();
-                String currentID = ((DataObject) currentData).getID();
                 if (!initialID.equals(currentID) && main.getIDsForCategory(categoryID).contains(currentID)) {
-                    JOptionPane.showMessageDialog(this, "An object with ID " + currentID + " already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "An object with ID \"" + currentID + "\" already exists.", "Error", JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
             }

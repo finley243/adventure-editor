@@ -2,7 +2,7 @@ package com.github.finley243.adventureeditor.template;
 
 import java.util.List;
 
-public record TemplateParameter(String id, ParameterDataType dataType, String name, String type, List<String> enumOptions, boolean topLevelOnly, boolean optional, ParameterFormat format) {
+public record TemplateParameter(String id, ParameterDataType dataType, String name, String type, List<String> enumOptions, boolean topLevelOnly, boolean optional, ParameterFormat format, int x, int y, int width, int height) {
 
     /*
      * dataType is the type of parameter
@@ -12,7 +12,7 @@ public record TemplateParameter(String id, ParameterDataType dataType, String na
      */
 
     public enum ParameterDataType {
-        BOOLEAN, INTEGER, FLOAT, STRING, STRING_SET, OBJECT, OBJECT_SET, REFERENCE, ENUM
+        BOOLEAN, INTEGER, FLOAT, STRING, STRING_SET, OBJECT, OBJECT_SET, REFERENCE, ENUM, SCRIPT
     }
 
     public enum ParameterFormat {

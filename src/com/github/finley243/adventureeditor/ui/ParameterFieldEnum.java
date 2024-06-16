@@ -2,8 +2,6 @@ package com.github.finley243.adventureeditor.ui;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataEnum;
-import com.github.finley243.adventureeditor.data.DataInteger;
-import com.github.finley243.adventureeditor.data.DataReference;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,9 +10,9 @@ public class ParameterFieldEnum extends EditorElement {
 
     private final JComboBox<String> dropdownMenu;
 
-    public ParameterFieldEnum(EditorFrame editorFrame, String name, String[] values) {
-        super(editorFrame);
-        setLayout(new GridBagLayout());
+    public ParameterFieldEnum(EditorFrame editorFrame, boolean optional, String name, String[] values) {
+        super(editorFrame, optional, name);
+        getInnerPanel().setLayout(new GridBagLayout());
         JLabel label = new JLabel(name);
         this.dropdownMenu = new JComboBox<>(values);
         dropdownMenu.setPreferredSize(new Dimension(150, 20));
@@ -28,8 +26,8 @@ public class ParameterFieldEnum extends EditorElement {
         labelConstraints.insets = new Insets(2, 2, 2, 2);
         valueConstraints.gridx = 0;
         valueConstraints.gridy = 1;
-        add(label, labelConstraints);
-        add(dropdownMenu, valueConstraints);
+        getInnerPanel().add(label, labelConstraints);
+        getInnerPanel().add(dropdownMenu, valueConstraints);
     }
 
     public String getValue() {
@@ -41,12 +39,21 @@ public class ParameterFieldEnum extends EditorElement {
     }
 
     @Override
+    public void setEnabledState(boolean enabled) {
+        dropdownMenu.setEnabled(enabled);
+    }
+
+    @Override
     public Data getData() {
+        if (!isOptionalEnabled()) {
+            return null;
+        }
         return new DataEnum(getValue());
     }
 
     @Override
     public void setData(Data data) {
+        setOptionalEnabled(data != null);
         if (data instanceof DataEnum dataEnum) {
             setValue(dataEnum.getValue());
         }

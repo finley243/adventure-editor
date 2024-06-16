@@ -2,7 +2,6 @@ package com.github.finley243.adventureeditor.ui;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataFloat;
-import com.github.finley243.adventureeditor.data.DataInteger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,13 +9,12 @@ import java.text.DecimalFormat;
 
 public class ParameterFieldFloat extends EditorElement {
 
-    private final JLabel label;
     private final JSpinner spinner;
 
-    public ParameterFieldFloat(EditorFrame editorFrame, String name) {
-        super(editorFrame);
-        setLayout(new GridBagLayout());
-        this.label = new JLabel(name);
+    public ParameterFieldFloat(EditorFrame editorFrame, boolean optional, String name) {
+        super(editorFrame, optional, name);
+        getInnerPanel().setLayout(new GridBagLayout());
+        JLabel label = new JLabel(name);
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.000d, null, null, 0.001d);
         this.spinner = new JSpinner(spinnerModel);
         spinner.setPreferredSize(new Dimension(150, 20));
@@ -32,8 +30,8 @@ public class ParameterFieldFloat extends EditorElement {
         labelConstraints.insets = new Insets(2, 2, 2, 2);
         valueConstraints.gridx = 0;
         valueConstraints.gridy = 1;
-        add(label, labelConstraints);
-        add(spinner, valueConstraints);
+        getInnerPanel().add(label, labelConstraints);
+        getInnerPanel().add(spinner, valueConstraints);
     }
 
     public float getValue() {
@@ -45,12 +43,21 @@ public class ParameterFieldFloat extends EditorElement {
     }
 
     @Override
+    public void setEnabledState(boolean enabled) {
+        spinner.setEnabled(enabled);
+    }
+
+    @Override
     public Data getData() {
+        if (!isOptionalEnabled()) {
+            return null;
+        }
         return new DataFloat(getValue());
     }
 
     @Override
     public void setData(Data data) {
+        setOptionalEnabled(data != null);
         if (data instanceof DataFloat dataFloat) {
             setValue(dataFloat.getValue());
         }

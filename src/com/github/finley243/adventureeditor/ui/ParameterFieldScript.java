@@ -1,6 +1,7 @@
 package com.github.finley243.adventureeditor.ui;
 
 import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.data.DataScript;
 import com.github.finley243.adventureeditor.data.DataString;
 
 import javax.swing.*;
@@ -8,18 +9,25 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 
-public class ParameterFieldString extends EditorElement {
+public class ParameterFieldScript extends EditorElement {
 
-    private final JTextField textField;
+    private final JTextPane textPane;
 
-    public ParameterFieldString(EditorFrame editorFrame, boolean optional, String name) {
+    public ParameterFieldScript(EditorFrame editorFrame, boolean optional, String name) {
         super(editorFrame, optional, name);
         getInnerPanel().setLayout(new GridBagLayout());
         JLabel label = new JLabel(name);
-        this.textField = new JTextField();
-        textField.setPreferredSize(new Dimension(150, 20));
-        textField.addActionListener(e -> editorFrame.onEditorElementUpdated());
-        textField.getDocument().addDocumentListener(new DocumentListener() {
+        this.textPane = new JTextPane();
+        JPanel sizeLimiterPanel = new JPanel(new BorderLayout());
+        sizeLimiterPanel.add(textPane);
+        JScrollPane scrollPane = new JScrollPane(sizeLimiterPanel);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        //textPane.setPreferredSize(new Dimension(200, 150));
+        //sizeLimiterPanel.setPreferredSize(new Dimension(200, 150));
+        scrollPane.setPreferredSize(new Dimension(200, 150));
+        //textPane.addActionListener(e -> editorFrame.onEditorElementUpdated());
+        textPane.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 editorFrame.onEditorElementUpdated();
@@ -44,20 +52,22 @@ public class ParameterFieldString extends EditorElement {
         valueConstraints.gridx = 0;
         valueConstraints.gridy = 1;
         getInnerPanel().add(label, labelConstraints);
-        getInnerPanel().add(textField, valueConstraints);
+        //getInnerPanel().add(textPane, valueConstraints);
+        getInnerPanel().add(scrollPane, valueConstraints);
     }
 
     public String getValue() {
-        return textField.getText();
+        return textPane.getText();
     }
 
     public void setValue(String value) {
-        textField.setText(value);
+        textPane.setText(value);
+        System.out.println("Is text modified by pane?: " + value.equals(textPane.getText()));
     }
 
     @Override
     public void setEnabledState(boolean enabled) {
-        textField.setEnabled(enabled);
+        textPane.setEnabled(enabled);
     }
 
     @Override
@@ -71,8 +81,8 @@ public class ParameterFieldString extends EditorElement {
     @Override
     public void setData(Data data) {
         setOptionalEnabled(data != null);
-        if (data instanceof DataString dataString) {
-            setValue(dataString.getValue());
+        if (data instanceof DataScript dataScript) {
+            setValue(dataScript.getValue());
         }
     }
 

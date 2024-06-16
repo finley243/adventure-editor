@@ -4,9 +4,6 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataReference;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.Document;
 import java.awt.*;
 import java.util.Arrays;
 
@@ -14,9 +11,9 @@ public class ParameterFieldReference extends EditorElement {
 
     private final JComboBox<String> dropdownMenu;
 
-    public ParameterFieldReference(EditorFrame editorFrame, String name, String[] values) {
-        super(editorFrame);
-        setLayout(new GridBagLayout());
+    public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, String[] values) {
+        super(editorFrame, optional, name);
+        getInnerPanel().setLayout(new GridBagLayout());
         JLabel label = new JLabel(name);
         Arrays.sort(values);
         this.dropdownMenu = new JComboBox<>(values);
@@ -48,8 +45,8 @@ public class ParameterFieldReference extends EditorElement {
         labelConstraints.insets = new Insets(2, 2, 2, 2);
         valueConstraints.gridx = 0;
         valueConstraints.gridy = 1;
-        add(label, labelConstraints);
-        add(dropdownMenu, valueConstraints);
+        getInnerPanel().add(label, labelConstraints);
+        getInnerPanel().add(dropdownMenu, valueConstraints);
     }
 
     public String getValue() {
@@ -61,12 +58,24 @@ public class ParameterFieldReference extends EditorElement {
     }
 
     @Override
+    public void setEnabledState(boolean enabled) {
+        dropdownMenu.setEnabled(enabled);
+    }
+
+    @Override
     public Data getData() {
+        if (!isOptionalEnabled()) {
+            return null;
+        }
         return new DataReference(getValue());
     }
 
     @Override
     public void setData(Data data) {
+        setOptionalEnabled(data != null);
+        if (data == null) {
+            setValue(null);
+        }
         if (data instanceof DataReference dataReference) {
             setValue(dataReference.getValue());
         }

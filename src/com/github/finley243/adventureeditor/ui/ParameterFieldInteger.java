@@ -2,21 +2,18 @@ package com.github.finley243.adventureeditor.ui;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataInteger;
-import com.github.finley243.adventureeditor.data.DataObjectSet;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 public class ParameterFieldInteger extends EditorElement {
 
-    private final JLabel label;
     private final JSpinner spinner;
 
-    public ParameterFieldInteger(EditorFrame editorFrame, String name) {
-        super(editorFrame);
-        setLayout(new GridBagLayout());
-        this.label = new JLabel(name);
+    public ParameterFieldInteger(EditorFrame editorFrame, boolean optional, String name) {
+        super(editorFrame, optional, name);
+        getInnerPanel().setLayout(new GridBagLayout());
+        JLabel label = new JLabel(name);
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0, null, null, 1);
         this.spinner = new JSpinner(spinnerModel);
         spinner.setPreferredSize(new Dimension(150, 20));
@@ -29,8 +26,8 @@ public class ParameterFieldInteger extends EditorElement {
         labelConstraints.insets = new Insets(2, 2, 2, 2);
         valueConstraints.gridx = 0;
         valueConstraints.gridy = 1;
-        add(label, labelConstraints);
-        add(spinner, valueConstraints);
+        getInnerPanel().add(label, labelConstraints);
+        getInnerPanel().add(spinner, valueConstraints);
     }
 
     public int getValue() {
@@ -42,12 +39,21 @@ public class ParameterFieldInteger extends EditorElement {
     }
 
     @Override
+    public void setEnabledState(boolean enabled) {
+        spinner.setEnabled(enabled);
+    }
+
+    @Override
     public Data getData() {
+        if (!isOptionalEnabled()) {
+            return null;
+        }
         return new DataInteger(getValue());
     }
 
     @Override
     public void setData(Data data) {
+        setOptionalEnabled(data != null);
         if (data instanceof DataInteger dataInteger) {
             setValue(dataInteger.getValue());
         }

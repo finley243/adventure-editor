@@ -4,6 +4,6 @@ import com.github.finley243.adventureeditor.data.Data;
 
 public interface DataSaveTarget {
 
-    void saveData(Data data, Data initialData);
+    void saveObjectData(Data data, Data initialData);
 
 }

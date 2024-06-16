@@ -12,26 +12,26 @@ import java.util.List;
 
 public class ParameterFieldObjectSet extends EditorElement implements DataSaveTarget {
 
-    private final JList<Data> textList;
+    private final JList<Data> objectList;
     private final JButton buttonAdd;
     private final JButton buttonEdit;
     private final JButton buttonRemove;
 
-    public ParameterFieldObjectSet(EditorFrame editorFrame, String name, Template template, Main main) {
-        super(editorFrame);
-        setLayout(new GridBagLayout());
+    public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, Template template, Main main) {
+        super(editorFrame, optional, name);
+        getInnerPanel().setLayout(new GridBagLayout());
         JLabel label = new JLabel(name);
-        this.textList = new JList<>();
-        JScrollPane scrollPane = new JScrollPane(textList);
+        this.objectList = new JList<>();
+        JScrollPane scrollPane = new JScrollPane(objectList);
         this.buttonAdd = new JButton("New");
         this.buttonEdit = new JButton("Edit");
         this.buttonRemove = new JButton("Remove");
         scrollPane.setPreferredSize(new Dimension(150, 100));
-        textList.setModel(new DefaultListModel<>());
-        textList.setDragEnabled(false);
-        textList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        objectList.setModel(new DefaultListModel<>());
+        objectList.setDragEnabled(false);
+        objectList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         // May not be the ideal listener to use
-        textList.addListSelectionListener(e -> editorFrame.onEditorElementUpdated());
+        objectList.addListSelectionListener(e -> editorFrame.onEditorElementUpdated());
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
         GridBagConstraints addConstraints = new GridBagConstraints();
@@ -56,100 +56,97 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
         removeConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         buttonEdit.setEnabled(false);
         buttonRemove.setEnabled(false);
-        textList.addListSelectionListener(e -> {
-            if (textList.getSelectedIndex() == -1) {
-                buttonEdit.setEnabled(false);
-                buttonRemove.setEnabled(false);
-            } else {
-                buttonEdit.setEnabled(true);
-                buttonRemove.setEnabled(true);
-            }
+        objectList.addListSelectionListener(e -> {
+            boolean enableSelectionButtons = objectList.getSelectedIndex() != -1;
+            buttonEdit.setEnabled(enableSelectionButtons);
+            buttonRemove.setEnabled(enableSelectionButtons);
         });
         buttonAdd.addActionListener(e -> {
             EditorFrame objectFrame = new EditorFrame(main, template, null, this);
-            /*JFrame objectFrame = new JFrame();
-            objectFrame.setLayout(new FlowLayout());
-            objectFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            ParameterFieldObject objectParameter = new ParameterFieldObject(name, template, main, false);
-            objectFrame.getContentPane().add(objectParameter);
-            JButton buttonSave = new JButton("Save");
-            JButton buttonCancel = new JButton("Cancel");
-            buttonSave.addActionListener(eSave -> {
-                int addIndex = textList.getSelectedIndex() + 1;
-                if (addIndex == 0) {
-                    addIndex = textList.getModel().getSize();
-                }
-                ((DefaultListModel<Data>) textList.getModel()).addElement(objectParameter.getData());
-                objectFrame.dispose();
-            });
-            buttonCancel.addActionListener(eCancel -> objectFrame.dispose());
-            objectFrame.getContentPane().add(buttonSave);
-            objectFrame.getContentPane().add(buttonCancel);
-            objectFrame.pack();
-            objectFrame.setLocationRelativeTo(null);
-            objectFrame.setVisible(true);*/
         });
         buttonEdit.addActionListener(e -> {
-            Data objectData = textList.getSelectedValue();
+            Data objectData = objectList.getSelectedValue();
             if (objectData != null) {
                 EditorFrame objectFrame = new EditorFrame(main, template, objectData, this);
             }
         });
         buttonRemove.addActionListener(e -> {
-            int selectedIndex = textList.getSelectedIndex();
+            int selectedIndex = objectList.getSelectedIndex();
             if (selectedIndex != -1) {
-                ((DefaultListModel<Data>) textList.getModel()).removeElementAt(selectedIndex);
-                if (textList.getModel().getSize() > selectedIndex) {
-                    textList.setSelectedIndex(selectedIndex);
-                } else if (textList.getModel().getSize() == selectedIndex) {
-                    textList.setSelectedIndex(selectedIndex - 1);
+                ((DefaultListModel<Data>) objectList.getModel()).removeElementAt(selectedIndex);
+                if (objectList.getModel().getSize() > selectedIndex) {
+                    objectList.setSelectedIndex(selectedIndex);
+                } else if (objectList.getModel().getSize() == selectedIndex) {
+                    objectList.setSelectedIndex(selectedIndex - 1);
                 }
             }
         });
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        add(label, labelConstraints);
-        add(scrollPane, valueConstraints);
-        add(buttonAdd, addConstraints);
-        add(buttonEdit, editConstraints);
-        add(buttonRemove, removeConstraints);
+        getInnerPanel().add(label, labelConstraints);
+        getInnerPanel().add(scrollPane, valueConstraints);
+        getInnerPanel().add(buttonAdd, addConstraints);
+        getInnerPanel().add(buttonEdit, editConstraints);
+        getInnerPanel().add(buttonRemove, removeConstraints);
     }
 
     public java.util.List<Data> getValue() {
         java.util.List<Data> test = new ArrayList<>();
-        for (int i = 0; i < textList.getModel().getSize(); i++) {
-            test.add(textList.getModel().getElementAt(i));
+        for (int i = 0; i < objectList.getModel().getSize(); i++) {
+            test.add(objectList.getModel().getElementAt(i));
         }
         return test;
     }
 
     public void setValue(List<Data> value) {
-        ((DefaultListModel<Data>) textList.getModel()).clear();
-        ((DefaultListModel<Data>) textList.getModel()).addAll(value);
+        ((DefaultListModel<Data>) objectList.getModel()).clear();
+        ((DefaultListModel<Data>) objectList.getModel()).addAll(value);
     }
 
     @Override
-    public void saveData(Data data, Data initialData) {
-        int addIndex = textList.getSelectedIndex() + 1;
+    public void setEnabledState(boolean enabled) {
+        if (!enabled) {
+            objectList.setSelectedIndex(-1);
+        }
+        objectList.setEnabled(enabled);
+        if (enabled) {
+            buttonAdd.setEnabled(true);
+            boolean enableSelectionButtons = objectList.getSelectedIndex() != -1;
+            buttonEdit.setEnabled(enableSelectionButtons);
+            buttonRemove.setEnabled(enableSelectionButtons);
+        } else {
+            buttonAdd.setEnabled(false);
+            buttonEdit.setEnabled(false);
+            buttonRemove.setEnabled(false);
+        }
+    }
+
+    @Override
+    public void saveObjectData(Data data, Data initialData) {
+        int addIndex = objectList.getSelectedIndex() + 1;
         if (addIndex == 0) {
-            addIndex = textList.getModel().getSize();
+            addIndex = objectList.getModel().getSize();
         }
         if (initialData != null) {
-            addIndex = ((DefaultListModel<Data>) textList.getModel()).indexOf(initialData);
-            ((DefaultListModel<Data>) textList.getModel()).removeElement(initialData);
+            addIndex = ((DefaultListModel<Data>) objectList.getModel()).indexOf(initialData);
+            ((DefaultListModel<Data>) objectList.getModel()).removeElement(initialData);
         }
-        ((DefaultListModel<Data>) textList.getModel()).add(addIndex, data);
-        editorFrame.onEditorElementUpdated();
+        ((DefaultListModel<Data>) objectList.getModel()).add(addIndex, data);
+        parentFrame.onEditorElementUpdated();
     }
 
     @Override
     public Data getData() {
+        if (!isOptionalEnabled()) {
+            return null;
+        }
         List<Data> objectData = new ArrayList<>(getValue());
         return new DataObjectSet(objectData);
     }
 
     @Override
     public void setData(Data data) {
+        setOptionalEnabled(data != null);
         if (data instanceof DataObjectSet dataObjectSet) {
             List<Data> objectData = dataObjectSet.getValue();
             setValue(objectData);

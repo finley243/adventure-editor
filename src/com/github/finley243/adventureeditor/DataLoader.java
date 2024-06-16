@@ -48,6 +48,7 @@ public class DataLoader {
                                 case "objectSet" -> TemplateParameter.ParameterDataType.OBJECT_SET;
                                 case "reference" -> TemplateParameter.ParameterDataType.REFERENCE;
                                 case "enum" -> TemplateParameter.ParameterDataType.ENUM;
+                                case "script" -> TemplateParameter.ParameterDataType.SCRIPT;
                                 case null, default -> throw new IllegalArgumentException("Invalid parameter data type: " + dataTypeString);
                             };
                             String parameterID = LoadUtils.attribute(parameterElement, "id", null);
@@ -57,7 +58,11 @@ public class DataLoader {
                             boolean topLevelOnly = LoadUtils.attributeBool(parameterElement, "topLevelOnly", false);
                             boolean optional = LoadUtils.attributeBool(parameterElement, "optional", false);
                             TemplateParameter.ParameterFormat format = LoadUtils.attributeEnum(parameterElement, "format", TemplateParameter.ParameterFormat.class, TemplateParameter.ParameterFormat.CHILD_TAG);
-                            parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, enumOptions, topLevelOnly, optional, format));
+                            int x = LoadUtils.attributeInt(parameterElement, "x", 0);
+                            int y = LoadUtils.attributeInt(parameterElement, "y", 0);
+                            int width = LoadUtils.attributeInt(parameterElement, "width", 1);
+                            int height = LoadUtils.attributeInt(parameterElement, "height", 1);
+                            parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, enumOptions, topLevelOnly, optional, format, x, y, width, height));
                         }
                         String primaryParameter = LoadUtils.attribute(templateElement, "primaryParameter", null);
                         Template template = new Template(id, name, topLevel, parameters, primaryParameter);
@@ -111,34 +116,62 @@ public class DataLoader {
         for (TemplateParameter parameter : template.parameters()) {
             switch (parameter.dataType()) {
                 case BOOLEAN -> {
-                    switch (parameter.format()) {
-                        case ATTRIBUTE -> dataMap.put(parameter.id(), new DataBoolean(LoadUtils.attributeBool(element, parameter.id(), false)));
-                        case CHILD_TAG -> dataMap.put(parameter.id(), new DataBoolean(LoadUtils.singleTagBoolean(element, parameter.id(), false)));
+                    Boolean value = switch (parameter.format()) {
+                        case ATTRIBUTE -> LoadUtils.attributeBool(element, parameter.id(), null);
+                        case CHILD_TAG -> LoadUtils.singleTagBoolean(element, parameter.id(), null);
+                        default -> null;
+                    };
+                    if (value == null) {
+                        dataMap.put(parameter.id(), null);
+                    } else {
+                        dataMap.put(parameter.id(), new DataBoolean(value));
                     }
                 }
                 case INTEGER -> {
-                    switch (parameter.format()) {
-                        case ATTRIBUTE -> dataMap.put(parameter.id(), new DataInteger(LoadUtils.attributeInt(element, parameter.id(), 0)));
-                        case CHILD_TAG -> dataMap.put(parameter.id(), new DataInteger(LoadUtils.singleTagInt(element, parameter.id(), 0)));
+                    Integer value = switch (parameter.format()) {
+                        case ATTRIBUTE -> LoadUtils.attributeInt(element, parameter.id(), null);
+                        case CHILD_TAG -> LoadUtils.singleTagInt(element, parameter.id(), null);
+                        default -> null;
+                    };
+                    if (value == null) {
+                        dataMap.put(parameter.id(), null);
+                    } else {
+                        dataMap.put(parameter.id(), new DataInteger(value));
                     }
                 }
                 case FLOAT -> {
-                    switch (parameter.format()) {
-                        case ATTRIBUTE -> dataMap.put(parameter.id(), new DataFloat(LoadUtils.attributeFloat(element, parameter.id(), 0.0f)));
-                        case CHILD_TAG -> dataMap.put(parameter.id(), new DataFloat(LoadUtils.singleTagFloat(element, parameter.id(), 0.0f)));
+                    Float value = switch (parameter.format()) {
+                        case ATTRIBUTE -> LoadUtils.attributeFloat(element, parameter.id(), null);
+                        case CHILD_TAG -> LoadUtils.singleTagFloat(element, parameter.id(), null);
+                        default -> null;
+                    };
+                    if (value == null) {
+                        dataMap.put(parameter.id(), null);
+                    } else {
+                        dataMap.put(parameter.id(), new DataFloat(value));
                     }
                 }
                 case STRING -> {
-                    switch (parameter.format()) {
-                        case ATTRIBUTE -> dataMap.put(parameter.id(), new DataString(LoadUtils.attribute(element, parameter.id(), null)));
-                        case CHILD_TAG -> dataMap.put(parameter.id(), new DataString(LoadUtils.singleTag(element, parameter.id(), null)));
-                        case CURRENT_TAG -> dataMap.put(parameter.id(), new DataString(element == null ? null : element.getTextContent()));
+                    String value = switch (parameter.format()) {
+                        case ATTRIBUTE -> LoadUtils.attribute(element, parameter.id(), null);
+                        case CHILD_TAG -> LoadUtils.singleTag(element, parameter.id(), null);
+                        case CURRENT_TAG -> element == null ? null : element.getTextContent();
+                    };
+                    if (value == null) {
+                        dataMap.put(parameter.id(), null);
+                    } else {
+                        dataMap.put(parameter.id(), new DataString(value));
                     }
                 }
                 case STRING_SET -> dataMap.put(parameter.id(), new DataStringSet(LoadUtils.listOfTags(element, parameter.id())));
                 case OBJECT -> {
-                    Data objectData = loadDataFromElement(LoadUtils.singleChildWithName(element, parameter.id()), templates.get(parameter.type()), templates);
-                    dataMap.put(parameter.id(), objectData);
+                    Element objectElement = LoadUtils.singleChildWithName(element, parameter.id());
+                    if (objectElement == null) {
+                        dataMap.put(parameter.id(), null);
+                    } else {
+                        Data objectData = loadDataFromElement(LoadUtils.singleChildWithName(element, parameter.id()), templates.get(parameter.type()), templates);
+                        dataMap.put(parameter.id(), objectData);
+                    }
                 }
                 case OBJECT_SET -> {
                     List<Data> objectList = new ArrayList<>();
@@ -149,17 +182,39 @@ public class DataLoader {
                     dataMap.put(parameter.id(), new DataObjectSet(objectList));
                 }
                 case REFERENCE -> {
-                    switch (parameter.format()) {
-                        case ATTRIBUTE -> dataMap.put(parameter.id(), new DataReference(LoadUtils.attribute(element, parameter.id(), null)));
-                        case CHILD_TAG -> dataMap.put(parameter.id(), new DataReference(LoadUtils.singleTag(element, parameter.id(), null)));
-                        case CURRENT_TAG -> dataMap.put(parameter.id(), new DataReference(element == null ? null : element.getTextContent()));
+                    String value = switch (parameter.format()) {
+                        case ATTRIBUTE -> LoadUtils.attribute(element, parameter.id(), null);
+                        case CHILD_TAG -> LoadUtils.singleTag(element, parameter.id(), null);
+                        case CURRENT_TAG -> element == null ? null : element.getTextContent();
+                    };
+                    if (value == null) {
+                        dataMap.put(parameter.id(), null);
+                    } else {
+                        dataMap.put(parameter.id(), new DataReference(value));
                     }
                 }
                 case ENUM -> {
-                    switch (parameter.format()) {
-                        case ATTRIBUTE -> dataMap.put(parameter.id(), new DataEnum(LoadUtils.attribute(element, parameter.id(), null)));
-                        case CHILD_TAG -> dataMap.put(parameter.id(), new DataEnum(LoadUtils.singleTag(element, parameter.id(), null)));
-                        case CURRENT_TAG -> dataMap.put(parameter.id(), new DataEnum(element == null ? null : element.getTextContent()));
+                    String value = switch (parameter.format()) {
+                        case ATTRIBUTE -> LoadUtils.attribute(element, parameter.id(), null);
+                        case CHILD_TAG -> LoadUtils.singleTag(element, parameter.id(), null);
+                        case CURRENT_TAG -> element == null ? null : element.getTextContent();
+                    };
+                    if (value == null) {
+                        dataMap.put(parameter.id(), null);
+                    } else {
+                        dataMap.put(parameter.id(), new DataEnum(value));
+                    }
+                }
+                case SCRIPT -> {
+                    String value = switch (parameter.format()) {
+                        case CHILD_TAG -> LoadUtils.singleTag(element, parameter.id(), null);
+                        case CURRENT_TAG -> element == null ? null : element.getTextContent();
+                        default -> null;
+                    };
+                    if (value == null) {
+                        dataMap.put(parameter.id(), null);
+                    } else {
+                        dataMap.put(parameter.id(), new DataScript(value));
                     }
                 }
             }

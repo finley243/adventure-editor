@@ -10,16 +10,13 @@ public class ParameterFieldBoolean extends EditorElement {
 
     private final JCheckBox checkBox;
 
-    public ParameterFieldBoolean(EditorFrame editorFrame, String name) {
-        super(editorFrame);
-        setLayout(new GridBagLayout());
+    public ParameterFieldBoolean(EditorFrame editorFrame, boolean optional, String name) {
+        super(editorFrame, optional, name);
         this.checkBox = new JCheckBox(name);
-        checkBox.setPreferredSize(new Dimension(150, 20));
+        checkBox.setPreferredSize(new Dimension(140, 20));
+        checkBox.setVerticalTextPosition(SwingConstants.TOP);
         checkBox.addActionListener(e -> editorFrame.onEditorElementUpdated());
-        GridBagConstraints valueConstraints = new GridBagConstraints();
-        valueConstraints.gridx = 0;
-        valueConstraints.gridy = 0;
-        add(checkBox, valueConstraints);
+        getInnerPanel().add(checkBox);
     }
 
     public boolean getValue() {
@@ -31,12 +28,21 @@ public class ParameterFieldBoolean extends EditorElement {
     }
 
     @Override
+    public void setEnabledState(boolean enabled) {
+        checkBox.setEnabled(enabled);
+    }
+
+    @Override
     public Data getData() {
+        if (!isOptionalEnabled()) {
+            return null;
+        }
         return new DataBoolean(getValue());
     }
 
     @Override
     public void setData(Data data) {
+        setOptionalEnabled(data != null);
         if (data instanceof DataBoolean dataBoolean) {
             setValue(dataBoolean.getValue());
         }

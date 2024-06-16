@@ -14,9 +14,9 @@ public class ParameterFieldStringSet extends EditorElement {
     private final JButton buttonAdd;
     private final JButton buttonRemove;
 
-    public ParameterFieldStringSet(EditorFrame editorFrame, String name) {
-        super(editorFrame);
-        setLayout(new GridBagLayout());
+    public ParameterFieldStringSet(EditorFrame editorFrame, boolean optional, String name) {
+        super(editorFrame, optional, name);
+        getInnerPanel().setLayout(new GridBagLayout());
         JLabel label = new JLabel(name);
         this.textList = new JList<>();
         // May not be the ideal listener type
@@ -69,11 +69,10 @@ public class ParameterFieldStringSet extends EditorElement {
         });
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        //scrollPane.add(textList);
-        add(label, labelConstraints);
-        add(scrollPane, valueConstraints);
-        add(buttonAdd, addConstraints);
-        add(buttonRemove, removeConstraints);
+        getInnerPanel().add(label, labelConstraints);
+        getInnerPanel().add(scrollPane, valueConstraints);
+        getInnerPanel().add(buttonAdd, addConstraints);
+        getInnerPanel().add(buttonRemove, removeConstraints);
     }
 
     public List<String> getValue() {
@@ -90,12 +89,26 @@ public class ParameterFieldStringSet extends EditorElement {
     }
 
     @Override
+    public void setEnabledState(boolean enabled) {
+        if (!enabled) {
+            textList.setSelectedIndex(-1);
+        }
+        textList.setEnabled(enabled);
+        buttonAdd.setEnabled(enabled);
+        buttonRemove.setEnabled(enabled);
+    }
+
+    @Override
     public Data getData() {
+        if (!isOptionalEnabled()) {
+            return null;
+        }
         return new DataStringSet(getValue());
     }
 
     @Override
     public void setData(Data data) {
+        setOptionalEnabled(data != null);
         if (data instanceof DataStringSet dataStringSet) {
             setValue(dataStringSet.getValue());
         }
