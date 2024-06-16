@@ -149,6 +149,9 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
         setOptionalEnabled(data != null);
         if (data instanceof DataObjectSet dataObjectSet) {
             List<Data> objectData = dataObjectSet.getValue();
+            if (objectData.isEmpty()) {
+                setOptionalEnabled(false);
+            }
             setValue(objectData);
         }
     }

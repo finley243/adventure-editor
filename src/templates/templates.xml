@@ -154,7 +154,7 @@
         <parameter id="limb" dataType="objectSet" name="Limbs" type="actorLimb" optional="true" x="3" y="1" height="3"/>
         <parameter id="equipSlot" dataType="objectSet" name="Equip Slots" type="actorEquipSlot" optional="true" x="4" y="4" height="3"/>
         <parameter id="damageResistance" dataType="objectSet" name="Damage Resistances" type="actorDamageResistance" optional="true" x="3" y="4" height="3"/>
-        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" x="1" y="1" height="6"/>
+        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" x="1" y="1" height="6"/>
     </template>
     <template id="actorName" name="Name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
@@ -171,41 +171,41 @@
         </parameter>
     </template>
     <template id="actorAttribute" name="Attribute" primaryParameter="key">
-        <parameter id="key" dataType="reference" name="Attribute" type="attribute" format="attribute"/>
-        <parameter id="value" dataType="integer" name="Value" format="attribute"/>
+        <parameter id="key" dataType="reference" name="Attribute" type="attribute" format="attribute" y="0"/>
+        <parameter id="value" dataType="integer" name="Value" format="attribute" y="1"/>
     </template>
     <template id="actorSkill" name="Skill" primaryParameter="key">
-        <parameter id="key" dataType="reference" name="Skill" type="skill" format="attribute"/>
-        <parameter id="value" dataType="integer" name="Value" format="attribute"/>
+        <parameter id="key" dataType="reference" name="Skill" type="skill" format="attribute" y="0"/>
+        <parameter id="value" dataType="integer" name="Value" format="attribute" y="1"/>
     </template>
     <template id="actorSenseType" name="Sense Type" primaryParameter="senseType">
         <parameter id="senseType" dataType="reference" name="Sense Type" type="senseType" format="current_tag"/>
     </template>
     <template id="actorLimb" name="Limb" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute"/>
-        <parameter id="name" dataType="string" name="Name"/>
-        <parameter id="hitEffect" dataType="objectSet" name="Hit Effects" type="limbHitEffect" optional="true"/>
-        <parameter id="hitChance" dataType="float" name="Hit Chance" format="attribute"/>
-        <parameter id="damageMult" dataType="float" name="Damage Multiplier" format="attribute"/>
-        <parameter id="apparelSlot" dataType="reference" name="Apparel Slot" type="actorEquipSlot" format="attribute"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="name" dataType="string" name="Name" y="1"/>
+        <parameter id="hitEffect" dataType="objectSet" name="Hit Effects" type="limbHitEffect" optional="true" y="2"/>
+        <parameter id="hitChance" dataType="float" name="Hit Chance" format="attribute" y="3"/>
+        <parameter id="damageMult" dataType="float" name="Damage Multiplier" format="attribute" y="4"/>
+        <parameter id="apparelSlot" dataType="reference" name="Apparel Slot" type="actorEquipSlot" format="attribute" y="5"/>
     </template>
     <template id="limbHitEffect" name="Hit Effect" primaryParameter="effect">
         <parameter id="effect" dataType="reference" name="Effect" type="effect" format="current_tag"/>
     </template>
     <template id="actorEquipSlot" name="Equip Slot" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute"/>
-        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag" y="1"/>
     </template>
     <template id="actorDamageResistance" name="Damage Resistance" primaryParameter="type">
-        <parameter id="type" dataType="reference" name="Damage Type" type="damageType" format="attribute"/>
-        <parameter id="value" dataType="integer" name="Value" format="attribute"/>
+        <parameter id="type" dataType="reference" name="Damage Type" type="damageType" format="attribute" y="0"/>
+        <parameter id="value" dataType="integer" name="Value" format="attribute" y="1"/>
     </template>
     <template id="attackType" name="Attack Type" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
     <template id="attribute" name="Attribute" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute"/>
-        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag" y="1"/>
     </template>
     <template id="damageType" name="Damage Type" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute"/>
@@ -226,52 +226,52 @@
         <parameter id="table" dataType="objectSet" name="Tables" type="lootTableRefTable" y="3"/>
     </template>
     <template id="lootTableRefItem" name="Item Entry" primaryParameter="id">
-        <parameter id="id" dataType="reference" name="ID" type="item" format="current_tag"/>
-        <parameter id="chance" dataType="float" name="Chance" format="attribute"/>
-        <parameter id="count" dataType="integer" name="Count" format="attribute"/>
-        <parameter id="countMin" dataType="integer" name="Min Count" format="attribute"/>
-        <parameter id="countMax" dataType="integer" name="Max Count" format="attribute"/>
-        <parameter id="modItem" dataType="reference" name="Mod Item" type="item" format="attribute" optional="true"/>
-        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true"/>
+        <parameter id="id" dataType="reference" name="ID" type="item" format="current_tag" y="0"/>
+        <parameter id="chance" dataType="float" name="Chance" format="attribute" y="1"/>
+        <parameter id="count" dataType="integer" name="Count" format="attribute" y="2"/>
+        <parameter id="countMin" dataType="integer" name="Min Count" format="attribute" y="3"/>
+        <parameter id="countMax" dataType="integer" name="Max Count" format="attribute" y="4"/>
+        <parameter id="modItem" dataType="reference" name="Mod Item" type="item" format="attribute" optional="true" y="5"/>
+        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true" y="6"/>
     </template>
     <template id="lootTableRefTable" name="Table Entry" primaryParameter="id">
-        <parameter id="id" dataType="reference" name="ID" type="lootTable" format="current_tag"/>
-        <parameter id="chance" dataType="float" name="Chance" format="attribute"/>
-        <parameter id="count" dataType="integer" name="Count" format="attribute"/>
-        <parameter id="countMin" dataType="integer" name="Min Count" format="attribute"/>
-        <parameter id="countMax" dataType="integer" name="Max Count" format="attribute"/>
-        <parameter id="modItem" dataType="reference" name="Mod Item" type="item" format="attribute" optional="true"/>
-        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true"/>
+        <parameter id="id" dataType="reference" name="ID" type="lootTable" format="current_tag" y="0"/>
+        <parameter id="chance" dataType="float" name="Chance" format="attribute" y="1"/>
+        <parameter id="count" dataType="integer" name="Count" format="attribute" y="2"/>
+        <parameter id="countMin" dataType="integer" name="Min Count" format="attribute" y="3"/>
+        <parameter id="countMax" dataType="integer" name="Max Count" format="attribute" y="4"/>
+        <parameter id="modItem" dataType="reference" name="Mod Item" type="item" format="attribute" optional="true" y="5"/>
+        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true" y="6"/>
     </template>
     <template id="node" name="Network Node" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
     <template id="object" name="Object" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute"/>
-        <parameter id="name" dataType="object" name="Name" type="objectName"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="name" dataType="object" name="Name" type="objectName" y="1"/>
     </template>
     <template id="objectName" name="Name" topLevel="false">
-        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
-        <parameter id="proper" dataType="boolean" name="Proper" format="attribute"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
+        <parameter id="proper" dataType="boolean" name="Proper" format="attribute" y="1"/>
     </template>
     <template id="senseType" name="Sense Type" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute"/>
-        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag" y="1"/>
     </template>
     <template id="skill" name="Skill" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute"/>
-        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag" y="1"/>
     </template>
     <template id="weaponClass" name="Weapon Class" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute"/>
-        <parameter id="isRanged" dataType="boolean" name="Is Ranged" format="attribute"/>
-        <parameter id="isLoud" dataType="boolean" name="Is Loud" format="attribute"/>
-        <parameter id="skill" dataType="reference" name="Skill" type="skill" format="attribute"/>
-        <parameter id="name" dataType="string" name="Name" format="child_tag"/>
-        <parameter id="slotGroup" dataType="objectSet" name="Slot Groups" type="weaponClassSlotGroup"/>
-        <parameter id="ammo" dataType="objectSet" name="Ammo Types" type="weaponClassAmmoType"/>
-        <parameter id="range" dataType="objectSet" name="Ranges" type="weaponClassRange"/>
-        <parameter id="attackType" dataType="objectSet" name="Attack Types" type="weaponClassAttackType"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="isRanged" dataType="boolean" name="Is Ranged" format="attribute" y="1"/>
+        <parameter id="isLoud" dataType="boolean" name="Is Loud" format="attribute" y="2"/>
+        <parameter id="skill" dataType="reference" name="Skill" type="skill" format="attribute" y="3"/>
+        <parameter id="name" dataType="string" name="Name" format="child_tag" y="4"/>
+        <parameter id="slotGroup" dataType="objectSet" name="Slot Groups" type="weaponClassSlotGroup" y="5"/>
+        <parameter id="ammo" dataType="objectSet" name="Ammo Types" type="weaponClassAmmoType" y="6"/>
+        <parameter id="range" dataType="objectSet" name="Ranges" type="weaponClassRange" y="7"/>
+        <parameter id="attackType" dataType="objectSet" name="Attack Types" type="weaponClassAttackType" y="8"/>
     </template>
     <template id="weaponClassSlotGroup" name="Slot Group" topLevel="false" primaryParameter="slot">
         <parameter id="slot" dataType="objectSet" name="Slots" type="weaponClassSlot"/>
