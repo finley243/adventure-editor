@@ -14,7 +14,12 @@ public class ParameterFieldFloat extends EditorElement {
     public ParameterFieldFloat(EditorFrame editorFrame, boolean optional, String name) {
         super(editorFrame, optional, name);
         getInnerPanel().setLayout(new GridBagLayout());
-        JLabel label = new JLabel(name);
+        JComponent label;
+        if (optional) {
+            label = getOptionalCheckbox();
+        } else {
+            label = new JLabel(name);
+        }
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.000d, null, null, 0.001d);
         this.spinner = new JSpinner(spinnerModel);
         spinner.setPreferredSize(new Dimension(150, 20));

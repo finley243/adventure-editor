@@ -15,7 +15,12 @@ public class ParameterFieldString extends EditorElement {
     public ParameterFieldString(EditorFrame editorFrame, boolean optional, String name) {
         super(editorFrame, optional, name);
         getInnerPanel().setLayout(new GridBagLayout());
-        JLabel label = new JLabel(name);
+        JComponent label;
+        if (optional) {
+            label = getOptionalCheckbox();
+        } else {
+            label = new JLabel(name);
+        }
         this.textField = new JTextField();
         textField.setPreferredSize(new Dimension(150, 20));
         textField.addActionListener(e -> editorFrame.onEditorElementUpdated());

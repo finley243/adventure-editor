@@ -13,7 +13,12 @@ public class ParameterFieldInteger extends EditorElement {
     public ParameterFieldInteger(EditorFrame editorFrame, boolean optional, String name) {
         super(editorFrame, optional, name);
         getInnerPanel().setLayout(new GridBagLayout());
-        JLabel label = new JLabel(name);
+        JComponent label;
+        if (optional) {
+            label = getOptionalCheckbox();
+        } else {
+            label = new JLabel(name);
+        }
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0, null, null, 1);
         this.spinner = new JSpinner(spinnerModel);
         spinner.setPreferredSize(new Dimension(150, 20));

@@ -17,7 +17,12 @@ public class ParameterFieldStringSet extends EditorElement {
     public ParameterFieldStringSet(EditorFrame editorFrame, boolean optional, String name) {
         super(editorFrame, optional, name);
         getInnerPanel().setLayout(new GridBagLayout());
-        JLabel label = new JLabel(name);
+        JComponent label;
+        if (optional) {
+            label = getOptionalCheckbox();
+        } else {
+            label = new JLabel(name);
+        }
         this.textList = new JList<>();
         // May not be the ideal listener type
         textList.addListSelectionListener(e -> editorFrame.onEditorElementUpdated());

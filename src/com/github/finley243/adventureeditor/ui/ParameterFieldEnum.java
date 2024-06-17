@@ -13,7 +13,12 @@ public class ParameterFieldEnum extends EditorElement {
     public ParameterFieldEnum(EditorFrame editorFrame, boolean optional, String name, String[] values) {
         super(editorFrame, optional, name);
         getInnerPanel().setLayout(new GridBagLayout());
-        JLabel label = new JLabel(name);
+        JComponent label;
+        if (optional) {
+            label = getOptionalCheckbox();
+        } else {
+            label = new JLabel(name);
+        }
         this.dropdownMenu = new JComboBox<>(values);
         dropdownMenu.setPreferredSize(new Dimension(150, 20));
         dropdownMenu.setEditable(false);

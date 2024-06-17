@@ -23,20 +23,26 @@ public abstract class EditorElement extends JPanel {
         add(innerPanel, BorderLayout.CENTER);
         if (isOptional) {
             //setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-            this.optionalCheckbox = new JCheckBox("Enable " + name);
+            this.optionalCheckbox = new JCheckBox(/*"Enable " +*/ name);
+            optionalCheckbox.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             //optionalCheckbox.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             optionalCheckbox.addActionListener(e -> {
                 boolean isEnabled = optionalCheckbox.isSelected();
                 this.isOptionalEnabled = isEnabled;
                 setEnabledState(isEnabled);
+                parentFrame.onEditorElementUpdated();
             });
             optionalCheckbox.setVerticalTextPosition(SwingConstants.TOP);
-            add(optionalCheckbox, BorderLayout.PAGE_START);
+            //add(optionalCheckbox, BorderLayout.PAGE_START);
             this.isOptionalEnabled = false;
         } else {
             this.optionalCheckbox = null;
             this.isOptionalEnabled = true;
         }
+    }
+
+    public JCheckBox getOptionalCheckbox() {
+        return optionalCheckbox;
     }
 
     public JPanel getInnerPanel() {

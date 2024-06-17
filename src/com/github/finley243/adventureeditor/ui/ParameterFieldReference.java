@@ -14,7 +14,12 @@ public class ParameterFieldReference extends EditorElement {
     public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, String[] values) {
         super(editorFrame, optional, name);
         getInnerPanel().setLayout(new GridBagLayout());
-        JLabel label = new JLabel(name);
+        JComponent label;
+        if (optional) {
+            label = getOptionalCheckbox();
+        } else {
+            label = new JLabel(name);
+        }
         Arrays.sort(values);
         this.dropdownMenu = new JComboBox<>(values);
         dropdownMenu.setPreferredSize(new Dimension(150, 20));

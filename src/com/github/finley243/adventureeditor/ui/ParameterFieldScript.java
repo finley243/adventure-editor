@@ -16,7 +16,12 @@ public class ParameterFieldScript extends EditorElement {
     public ParameterFieldScript(EditorFrame editorFrame, boolean optional, String name) {
         super(editorFrame, optional, name);
         getInnerPanel().setLayout(new GridBagLayout());
-        JLabel label = new JLabel(name);
+        JComponent label;
+        if (optional) {
+            label = getOptionalCheckbox();
+        } else {
+            label = new JLabel(name);
+        }
         this.textPane = new JTextPane();
         JPanel sizeLimiterPanel = new JPanel(new BorderLayout());
         sizeLimiterPanel.add(textPane);

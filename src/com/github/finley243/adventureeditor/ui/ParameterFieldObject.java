@@ -21,9 +21,9 @@ public class ParameterFieldObject extends EditorElement {
         super(editorFrame, optional, name);
         this.template = template;
         JPanel objectPanel = new JPanel();
-        if (!isSeparateWindow) {
-            //objectPanel.setBorder(BorderFactory.createTitledBorder(name));
-        }
+        /*if (!isSeparateWindow) {
+            objectPanel.setBorder(BorderFactory.createTitledBorder(name));
+        }*/
         objectPanel.setLayout(new GridBagLayout());
         this.editorElements = new HashMap<>();
         Map<String, EditorGroup> groups = new HashMap<>();
@@ -57,7 +57,12 @@ public class ParameterFieldObject extends EditorElement {
                 }
             }
         }
-        getInnerPanel().add(objectPanel);
+        //getInnerPanel().add(objectPanel);
+        if (optional) {
+            getInnerPanel().add(new OptionalBorderedPanel(name, objectPanel, getOptionalCheckbox()));
+        } else {
+            getInnerPanel().add(objectPanel);
+        }
     }
 
     @Override

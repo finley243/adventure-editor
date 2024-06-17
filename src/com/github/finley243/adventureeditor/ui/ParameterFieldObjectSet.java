@@ -20,7 +20,12 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
     public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, Template template, Main main) {
         super(editorFrame, optional, name);
         getInnerPanel().setLayout(new GridBagLayout());
-        JLabel label = new JLabel(name);
+        JComponent label;
+        if (optional) {
+            label = getOptionalCheckbox();
+        } else {
+            label = new JLabel(name);
+        }
         this.objectList = new JList<>();
         JScrollPane scrollPane = new JScrollPane(objectList);
         this.buttonAdd = new JButton("New");
