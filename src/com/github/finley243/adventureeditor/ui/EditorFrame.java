@@ -37,6 +37,7 @@ public class EditorFrame extends JFrame {
         mainPanel.add(buttonPanel, BorderLayout.PAGE_END);
         this.getContentPane().add(mainPanel);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        this.setResizable(false);
         this.pack();
         this.setLocationRelativeTo(null);
         this.setVisible(true);

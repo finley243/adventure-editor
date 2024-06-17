@@ -16,13 +16,12 @@
     </template>
     <template id="description" name="Description" topLevel="false">
         <parameter id="once" dataType="boolean" name="Show Once" format="attribute" x="0" y="0"/>
-        <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" x="0" y="1"/>
-        <parameter id="type" dataType="enum" name="Type" format="attribute" x="1" y="0">
+        <parameter id="type" dataType="enum" name="Type" format="attribute" x="0" y="1">
             <value>all</value>
             <value>select</value>
             <value>random</value>
         </parameter>
-        <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine" x="1" y="1"/>
+        <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine" x="0" y="2"/>
     </template>
     <template id="areaLink" name="Area Link" topLevel="false" primaryParameter="area">
         <parameter id="type" dataType="string" name="Link Type" format="attribute" x="0" y="0"/>
@@ -226,7 +225,7 @@
         <parameter id="table" dataType="objectSet" name="Tables" type="lootTableRefTable" y="3"/>
     </template>
     <template id="lootTableRefItem" name="Item Entry" primaryParameter="id">
-        <parameter id="id" dataType="reference" name="ID" type="item" format="current_tag" y="0"/>
+        <parameter id="id" dataType="reference" name="Item" type="item" format="current_tag" y="0"/>
         <parameter id="chance" dataType="float" name="Chance" format="attribute" y="1"/>
         <parameter id="count" dataType="integer" name="Count" format="attribute" y="2"/>
         <parameter id="countMin" dataType="integer" name="Min Count" format="attribute" y="3"/>
@@ -235,7 +234,7 @@
         <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true" y="6"/>
     </template>
     <template id="lootTableRefTable" name="Table Entry" primaryParameter="id">
-        <parameter id="id" dataType="reference" name="ID" type="lootTable" format="current_tag" y="0"/>
+        <parameter id="id" dataType="reference" name="Loot Table" type="lootTable" format="current_tag" y="0"/>
         <parameter id="chance" dataType="float" name="Chance" format="attribute" y="1"/>
         <parameter id="count" dataType="integer" name="Count" format="attribute" y="2"/>
         <parameter id="countMin" dataType="integer" name="Min Count" format="attribute" y="3"/>

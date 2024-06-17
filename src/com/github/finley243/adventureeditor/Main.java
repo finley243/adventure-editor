@@ -126,14 +126,14 @@ public class Main {
                 data.get(categoryID).remove(initialID);
                 browserTree.removeGameObject(categoryID, initialID);
                 data.get(categoryID).put(objectID, objectData);
-                browserTree.addGameObject(categoryID, objectID);
+                browserTree.addGameObject(categoryID, objectID, true);
             } else { // Edit with same ID
                 data.get(categoryID).put(objectID, objectData);
                 browserTree.updateCategory(categoryID);
             }
         } else { // New object instance
             data.get(categoryID).put(objectID, objectData);
-            browserTree.addGameObject(categoryID, objectID);
+            browserTree.addGameObject(categoryID, objectID, true);
         }
     }
 
@@ -145,7 +145,7 @@ public class Main {
         }
         for (String category : data.keySet()) {
             for (String object : data.get(category).keySet()) {
-                browserTree.addGameObject(category, object);
+                browserTree.addGameObject(category, object, false);
             }
         }
     }
@@ -169,7 +169,8 @@ public class Main {
             dataObject.replaceID(newObjectID);
         }
         data.get(categoryID).put(newObjectID, objectDataCopy);
-        browserTree.addGameObject(categoryID, newObjectID);
+        browserTree.addGameObject(categoryID, newObjectID, false);
+        browserTree.setSelectedNode(categoryID, objectID);
     }
 
     public void deleteObject(String categoryID, String objectID) {
