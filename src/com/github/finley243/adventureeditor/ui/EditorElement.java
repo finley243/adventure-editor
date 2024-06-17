@@ -22,7 +22,7 @@ public abstract class EditorElement extends JPanel {
         setLayout(new BorderLayout());
         add(innerPanel, BorderLayout.CENTER);
         if (isOptional) {
-            setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+            //setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
             this.optionalCheckbox = new JCheckBox("Enable " + name);
             //optionalCheckbox.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             optionalCheckbox.addActionListener(e -> {

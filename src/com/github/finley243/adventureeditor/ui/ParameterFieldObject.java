@@ -3,6 +3,7 @@ package com.github.finley243.adventureeditor.ui;
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
+import com.github.finley243.adventureeditor.template.Group;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
 
@@ -15,19 +16,27 @@ public class ParameterFieldObject extends EditorElement {
 
     private final Map<String, EditorElement> editorElements;
     private final Template template;
-    private final JPanel objectPanel;
 
     public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, Template template, Main main, boolean isTopLevelEditor, boolean isSeparateWindow) {
         super(editorFrame, optional, name);
         this.template = template;
-        this.objectPanel = new JPanel();
+        JPanel objectPanel = new JPanel();
         if (!isSeparateWindow) {
-            objectPanel.setBorder(BorderFactory.createTitledBorder(name));
+            //objectPanel.setBorder(BorderFactory.createTitledBorder(name));
         }
-        //objectPanel.setLayout(new BoxLayout(objectPanel, BoxLayout.Y_AXIS));
-        //objectPanel.setLayout(new GridLayout(0, 1));
         objectPanel.setLayout(new GridBagLayout());
         this.editorElements = new HashMap<>();
+        Map<String, EditorGroup> groups = new HashMap<>();
+        for (Group group : template.groups()) {
+            EditorGroup editorGroup = new EditorGroup(group.id(), group.name());
+            groups.put(group.id(), editorGroup);
+            GridBagConstraints groupConstraints = new GridBagConstraints();
+            groupConstraints.gridx = group.x();
+            groupConstraints.gridy = group.y();
+            groupConstraints.gridwidth = group.width();
+            groupConstraints.gridheight = group.height();
+            objectPanel.add(editorGroup, groupConstraints);
+        }
         for (TemplateParameter parameter : template.parameters()) {
             if (isTopLevelEditor || !parameter.topLevelOnly()) {
                 EditorElement parameterElement = ParameterFactory.create(parameter, main, editorFrame);
@@ -36,8 +45,16 @@ public class ParameterFieldObject extends EditorElement {
                 parameterConstraints.gridy = parameter.y();
                 parameterConstraints.gridwidth = parameter.width();
                 parameterConstraints.gridheight = parameter.height();
-                objectPanel.add(parameterElement, parameterConstraints);
                 editorElements.put(parameter.id(), parameterElement);
+                if (parameter.group() != null) {
+                    EditorGroup group = groups.get(parameter.group());
+                    if (group == null) {
+                        throw new IllegalArgumentException("Group " + parameter.group() + " not found in template " + template.id());
+                    }
+                    group.add(parameterElement, parameterConstraints);
+                } else {
+                    objectPanel.add(parameterElement, parameterConstraints);
+                }
             }
         }
         getInnerPanel().add(objectPanel);
@@ -45,11 +62,9 @@ public class ParameterFieldObject extends EditorElement {
 
     @Override
     public void setEnabledState(boolean enabled) {
-        //objectPanel.setVisible(enabled);
         for (EditorElement element : editorElements.values()) {
             element.setEnabledFromParent(enabled);
         }
-
     }
 
     @Override

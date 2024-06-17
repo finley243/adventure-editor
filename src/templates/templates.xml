@@ -15,13 +15,14 @@
         <parameter id="link" dataType="objectSet" name="Links" type="areaLink" x="2" y="0" height="4"/>
     </template>
     <template id="description" name="Description" topLevel="false">
+        <group id="lines" name="Lines" x="0" y="1"/>
         <parameter id="once" dataType="boolean" name="Show Once" format="attribute" x="0" y="0"/>
-        <parameter id="type" dataType="enum" name="Type" format="attribute" x="0" y="1">
+        <parameter id="type" dataType="enum" name="Type" format="attribute" x="0" y="0" group="lines">
             <value>all</value>
             <value>select</value>
             <value>random</value>
         </parameter>
-        <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine" x="0" y="2"/>
+        <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine" x="0" y="1" group="lines"/>
     </template>
     <template id="areaLink" name="Area Link" topLevel="false" primaryParameter="area">
         <parameter id="type" dataType="string" name="Link Type" format="attribute" x="0" y="0"/>
