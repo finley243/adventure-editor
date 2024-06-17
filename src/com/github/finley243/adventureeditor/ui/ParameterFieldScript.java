@@ -67,7 +67,6 @@ public class ParameterFieldScript extends EditorElement {
 
     public void setValue(String value) {
         textPane.setText(value);
-        System.out.println("Is text modified by pane?: " + value.equals(textPane.getText()));
     }
 
     @Override
@@ -80,7 +79,7 @@ public class ParameterFieldScript extends EditorElement {
         if (!isOptionalEnabled()) {
             return null;
         }
-        return new DataString(getValue());
+        return new DataScript(getValue());
     }
 
     @Override
