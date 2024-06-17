@@ -4,6 +4,7 @@ import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.Group;
+import com.github.finley243.adventureeditor.template.TabGroup;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
 
@@ -26,16 +27,35 @@ public class ParameterFieldObject extends EditorElement {
         }*/
         objectPanel.setLayout(new GridBagLayout());
         this.editorElements = new HashMap<>();
+        Map<String, EditorTabGroup> tabGroups = new HashMap<>();
+        for (TabGroup tabGroup : template.tabGroups()) {
+            EditorTabGroup editorTabGroup = new EditorTabGroup(tabGroup.id(), tabGroup.name());
+            tabGroups.put(tabGroup.id(), editorTabGroup);
+            GridBagConstraints tabGroupConstraints = new GridBagConstraints();
+            tabGroupConstraints.gridx = tabGroup.x();
+            tabGroupConstraints.gridy = tabGroup.y();
+            tabGroupConstraints.gridwidth = tabGroup.width();
+            tabGroupConstraints.gridheight = tabGroup.height();
+            objectPanel.add(editorTabGroup, tabGroupConstraints);
+        }
         Map<String, EditorGroup> groups = new HashMap<>();
         for (Group group : template.groups()) {
             EditorGroup editorGroup = new EditorGroup(group.id(), group.name());
             groups.put(group.id(), editorGroup);
-            GridBagConstraints groupConstraints = new GridBagConstraints();
-            groupConstraints.gridx = group.x();
-            groupConstraints.gridy = group.y();
-            groupConstraints.gridwidth = group.width();
-            groupConstraints.gridheight = group.height();
-            objectPanel.add(editorGroup, groupConstraints);
+            if (group.tabGroup() != null) {
+                EditorTabGroup tabGroup = tabGroups.get(group.tabGroup());
+                if (tabGroup == null) {
+                    throw new IllegalArgumentException("Tab group " + group.tabGroup() + " not found in template " + template.id());
+                }
+                tabGroup.addGroupTab(editorGroup);
+            } else {
+                GridBagConstraints groupConstraints = new GridBagConstraints();
+                groupConstraints.gridx = group.x();
+                groupConstraints.gridy = group.y();
+                groupConstraints.gridwidth = group.width();
+                groupConstraints.gridheight = group.height();
+                objectPanel.add(editorGroup, groupConstraints);
+            }
         }
         for (TemplateParameter parameter : template.parameters()) {
             if (isTopLevelEditor || !parameter.topLevelOnly()) {

@@ -44,6 +44,18 @@
         </parameter>
         <parameter id="area" dataType="reference" name="Area" type="area" format="attribute" x="0" y="3"/>
     </template>
+    <!--<template id="roomName" name="Name">
+        <parameter id="name" dataType="string" name="Name" format="current_tag" x="0" y="0"/>
+        <parameter id="proper" dataType="boolean" name="Proper" format="attribute" x="0" y="1"/>
+        <parameter id="type" dataType="enum" name="Type" format="attribute" x="0" y="2">
+            <value>in</value>
+            <value>on</value>
+            <value>near</value>
+            <value>front</value>
+            <value>side</value>
+            <value>behind</value>
+        </parameter>
+    </template>-->
     <template id="roomName" name="Name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" x="0" y="0"/>
         <parameter id="proper" dataType="boolean" name="Proper" format="attribute" x="0" y="1"/>

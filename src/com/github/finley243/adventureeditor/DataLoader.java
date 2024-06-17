@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.*;
 import com.github.finley243.adventureeditor.template.Group;
+import com.github.finley243.adventureeditor.template.TabGroup;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
 import org.w3c.dom.Document;
@@ -36,15 +37,26 @@ public class DataLoader {
                         String id = LoadUtils.attribute(templateElement, "id", null);
                         String name = LoadUtils.attribute(templateElement, "name", null);
                         boolean topLevel = LoadUtils.attributeBool(templateElement, "topLevel", false);
+                        List<TabGroup> tabGroups = new ArrayList<>();
+                        for (Element tabGroupElement : LoadUtils.directChildrenWithName(templateElement, "tabGroup")) {
+                            String groupID = LoadUtils.attribute(tabGroupElement, "id", null);
+                            String groupName = LoadUtils.attribute(tabGroupElement, "name", null);
+                            int x = LoadUtils.attributeInt(tabGroupElement, "x", 0);
+                            int y = LoadUtils.attributeInt(tabGroupElement, "y", 0);
+                            int width = LoadUtils.attributeInt(tabGroupElement, "width", 1);
+                            int height = LoadUtils.attributeInt(tabGroupElement, "height", 1);
+                            tabGroups.add(new TabGroup(groupID, groupName, x, y, width, height));
+                        }
                         List<Group> groups = new ArrayList<>();
                         for (Element groupElement : LoadUtils.directChildrenWithName(templateElement, "group")) {
                             String groupID = LoadUtils.attribute(groupElement, "id", null);
                             String groupName = LoadUtils.attribute(groupElement, "name", null);
+                            String tabGroup = LoadUtils.attribute(groupElement, "tabGroup", null);
                             int x = LoadUtils.attributeInt(groupElement, "x", 0);
                             int y = LoadUtils.attributeInt(groupElement, "y", 0);
                             int width = LoadUtils.attributeInt(groupElement, "width", 1);
                             int height = LoadUtils.attributeInt(groupElement, "height", 1);
-                            groups.add(new Group(groupID, groupName, x, y, width, height));
+                            groups.add(new Group(groupID, groupName, tabGroup, x, y, width, height));
                         }
                         List<TemplateParameter> parameters = new ArrayList<>();
                         for (Element parameterElement : LoadUtils.directChildrenWithName(templateElement, "parameter")) {
@@ -77,7 +89,7 @@ public class DataLoader {
                             parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, enumOptions, topLevelOnly, optional, format, group, x, y, width, height));
                         }
                         String primaryParameter = LoadUtils.attribute(templateElement, "primaryParameter", null);
-                        Template template = new Template(id, name, topLevel, groups, parameters, primaryParameter);
+                        Template template = new Template(id, name, topLevel, groups, tabGroups, parameters, primaryParameter);
                         templates.put(id, template);
                     }
                 }
