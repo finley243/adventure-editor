@@ -17,78 +17,30 @@
     <template id="description" name="Description" topLevel="false">
         <group id="lines" name="Lines" x="0" y="1"/>
         <parameter id="once" dataType="boolean" name="Show Once" format="attribute" x="0" y="0"/>
-        <parameter id="type" dataType="enum" name="Type" format="attribute" x="0" y="0" group="lines">
-            <value>all</value>
-            <value>select</value>
-            <value>random</value>
-        </parameter>
+        <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="0" y="0" group="lines"/>
         <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine" x="0" y="1" group="lines"/>
     </template>
     <template id="areaLink" name="Area Link" topLevel="false" primaryParameter="area">
         <parameter id="type" dataType="string" name="Link Type" format="attribute" x="0" y="0"/>
-        <parameter id="dir" dataType="enum" name="Direction" format="attribute" x="0" y="1">
-            <value>N</value>
-            <value>NE</value>
-            <value>E</value>
-            <value>SE</value>
-            <value>S</value>
-            <value>SW</value>
-            <value>W</value>
-            <value>NW</value>
-        </parameter>
-        <parameter id="dist" dataType="enum" name="Distance" format="attribute" x="0" y="2">
-            <value>NEAR</value>
-            <value>CLOSE</value>
-            <value>FAR</value>
-            <value>DISTANT</value>
-        </parameter>
+        <parameter id="dir" dataType="enum" type="direction" name="Direction" format="attribute" x="0" y="1"/>
+        <parameter id="dist" dataType="enum" type="distance" name="Distance" format="attribute" x="0" y="2"/>
         <parameter id="area" dataType="reference" name="Area" type="area" format="attribute" x="0" y="3"/>
     </template>
-    <!--<template id="roomName" name="Name">
-        <parameter id="name" dataType="string" name="Name" format="current_tag" x="0" y="0"/>
-        <parameter id="proper" dataType="boolean" name="Proper" format="attribute" x="0" y="1"/>
-        <parameter id="type" dataType="enum" name="Type" format="attribute" x="0" y="2">
-            <value>in</value>
-            <value>on</value>
-            <value>near</value>
-            <value>front</value>
-            <value>side</value>
-            <value>behind</value>
-        </parameter>
-    </template>-->
     <template id="roomName" name="Name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" x="0" y="0"/>
         <parameter id="proper" dataType="boolean" name="Proper" format="attribute" x="0" y="1"/>
-        <parameter id="type" dataType="enum" name="Type" format="attribute" x="0" y="2">
-            <value>in</value>
-            <value>on</value>
-            <value>near</value>
-            <value>front</value>
-            <value>side</value>
-            <value>behind</value>
-        </parameter>
+        <parameter id="type" dataType="enum" type="areaNameType" name="Type" format="attribute" x="0" y="2"/>
     </template>
     <template id="areaName" name="Name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" x="0" y="0"/>
         <parameter id="proper" dataType="boolean" name="Proper" format="attribute" x="0" y="1"/>
-        <parameter id="type" dataType="enum" name="Type" format="attribute" x="0" y="2">
-            <value>in</value>
-            <value>on</value>
-            <value>near</value>
-            <value>front</value>
-            <value>side</value>
-            <value>behind</value>
-        </parameter>
+        <parameter id="type" dataType="enum" type="areaNameType" name="Type" format="attribute" x="0" y="2"/>
     </template>
     <template id="scene" name="Scene" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" topLevelOnly="true" format="attribute" x="0" y="0"/>
         <parameter id="once" dataType="boolean" name="Show Once" format="attribute" x="0" y="1"/>
         <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" x="0" y="2"/>
-        <parameter id="type" dataType="enum" name="Type" format="attribute" x="1" y="0">
-            <value>all</value>
-            <value>select</value>
-            <value>random</value>
-        </parameter>
+        <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="1" y="0"/>
         <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine" x="1" y="1" height="2"/>
         <parameter id="choice" dataType="objectSet" name="Choices" type="sceneChoice" topLevelOnly="true" x="2" y="0" height="3"/>
     </template>
@@ -101,11 +53,7 @@
         <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" x="1" y="1" height="2"/>
         <parameter id="scriptPre" dataType="object" name="Pre Script" type="script" optional="true" x="2" y="0" height="2"/>
         <parameter id="scriptPost" dataType="object" name="Post Script" type="script" optional="true" x="2" y="2" height="2"/>
-        <parameter id="type" dataType="enum" name="Type" format="attribute" x="3" y="0">
-            <value>all</value>
-            <value>select</value>
-            <value>random</value>
-        </parameter>
+        <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="3" y="0"/>
         <parameter id="line" dataType="objectSet" name="Sub-Lines" type="sceneLine" x="3" y="1" height="3"/>
     </template>
     <template id="script" name="Script" topLevel="false">
@@ -120,20 +68,12 @@
     </template>
     <template id="faction" name="Faction" topLevel="true">
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
-        <parameter id="default" dataType="enum" name="Default Relation" format="attribute" x="0" y="1">
-            <value>NEUTRAL</value>
-            <value>HOSTILE</value>
-            <value>ALLY</value>
-        </parameter>
+        <parameter id="default" dataType="enum" type="factionRelation" name="Default Relation" format="attribute" x="0" y="1"/>
         <parameter id="relation" dataType="objectSet" name="Relations" type="factionRelation" x="0" y="2"/>
     </template>
     <template id="factionRelation" name="Faction Relation" topLevel="false" primaryParameter="faction">
         <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" y="0"/>
-        <parameter id="type" dataType="enum" name="Relation" format="attribute" y="1">
-            <value>NEUTRAL</value>
-            <value>HOSTILE</value>
-            <value>ALLY</value>
-        </parameter>
+        <parameter id="type" dataType="enum" type="factionRelation" name="Relation" format="attribute" y="1"/>
     </template>
     <template id="action" name="Action" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
@@ -171,16 +111,7 @@
     <template id="actorName" name="Name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
         <parameter id="proper" dataType="boolean" name="Proper" format="attribute" y="1"/>
-        <parameter id="pronoun" dataType="enum" name="Pronoun" format="attribute" y="2">
-            <value>THEY</value>
-            <value>HE</value>
-            <value>SHE</value>
-            <value>IT</value>
-            <value>YOU</value>
-            <value>I</value>
-            <value>WE</value>
-            <value>YOUALL</value>
-        </parameter>
+        <parameter id="pronoun" dataType="enum" type="pronoun" name="Pronoun" format="attribute" y="2"/>
     </template>
     <template id="actorAttribute" name="Attribute" primaryParameter="key">
         <parameter id="key" dataType="reference" name="Attribute" type="attribute" format="attribute" y="0"/>
@@ -213,7 +144,21 @@
         <parameter id="value" dataType="integer" name="Value" format="attribute" y="1"/>
     </template>
     <template id="attackType" name="Attack Type" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="prompt" dataType="string" name="Prompt" format="child_tag" y="1"/>
+        <parameter id="hitPhrase" dataType="string" name="Hit Phrase" format="child_tag" y="2"/>
+        <parameter id="hitPhraseRepeat" dataType="string" name="Hit Repeat Phrase" format="child_tag" y="3"/>
+        <parameter id="missPhrase" dataType="string" name="Miss Phrase" format="child_tag" y="4"/>
+        <parameter id="missPhraseRepeat" dataType="string" name="Miss Repeat Phrase" format="child_tag" y="5"/>
+        <parameter id="category" dataType="enum" type="attackTypeCategory" name="Category" format="attribute" y="6"/>
+        <parameter id="weaponConsumeType" dataType="enum" type="attackTypeWeaponConsumeType" name="Weapon Consume Type" format="attribute" y="7"/>
+        <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute" y="8"/>
+        <parameter id="ammoConsumed" dataType="integer" name="Ammo Consumed" format="attribute" y="9"/>
+        <parameter id="skill" dataType="reference" type="skill" name="Override Attack Skill" format="attribute" optional="true" y="10"/>
+        <parameter id="dodgeSkill" dataType="reference" type="skill" name="Dodge Skill" format="attribute" optional="true" y="11"/>
+        <parameter id="rate" dataType="integer" name="Rate" format="attribute" y="12"/>
+        <parameter id="damageMult" dataType="float" name="Damage Mult" format="attribute" y="13"/>
+        <parameter id="hitChanceMult" dataType="float" name="Hit Chance Mult" format="attribute" y="14"/>
     </template>
     <template id="attribute" name="Attribute" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
@@ -295,12 +240,7 @@
         <parameter id="ammo" dataType="reference" name="Ammo Item" type="item" format="current_tag"/>
     </template>
     <template id="weaponClassRange" name="Range" topLevel="false" primaryParameter="range">
-        <parameter id="range" dataType="enum" name="Range" format="current_tag">
-            <value>NEAR</value>
-            <value>CLOSE</value>
-            <value>FAR</value>
-            <value>DISTANT</value>
-        </parameter>
+        <parameter id="range" dataType="enum" type="distance" name="Range" format="current_tag"/>
     </template>
     <template id="weaponClassAttackType" name="AttackType" topLevel="false" primaryParameter="attackType">
         <parameter id="attackType" dataType="reference" name="Attack Type" type="attackType" format="current_tag"/>

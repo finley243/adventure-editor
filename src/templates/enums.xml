@@ -1,0 +1,56 @@
+<data>
+    <enumType id="pronoun">
+        <value>THEY</value>
+        <value>HE</value>
+        <value>SHE</value>
+        <value>IT</value>
+        <value>YOU</value>
+        <value>I</value>
+        <value>WE</value>
+        <value>YOUALL</value>
+    </enumType>
+    <enumType id="areaNameType">
+        <value>in</value>
+        <value>on</value>
+        <value>near</value>
+        <value>front</value>
+        <value>side</value>
+        <value>behind</value>
+    </enumType>
+    <enumType id="factionRelation">
+        <value>NEUTRAL</value>
+        <value>HOSTILE</value>
+        <value>ALLY</value>
+    </enumType>
+    <enumType id="sceneFlowType">
+        <value>all</value>
+        <value>select</value>
+        <value>random</value>
+    </enumType>
+    <enumType id="distance">
+        <value>NEAR</value>
+        <value>CLOSE</value>
+        <value>FAR</value>
+        <value>DISTANT</value>
+    </enumType>
+    <enumType id="direction">
+        <value>N</value>
+        <value>NE</value>
+        <value>E</value>
+        <value>SE</value>
+        <value>S</value>
+        <value>SW</value>
+        <value>W</value>
+        <value>NW</value>
+    </enumType>
+    <enumType id="attackTypeCategory">
+        <value>single</value>
+        <value>targeted</value>
+        <value>spread</value>
+    </enumType>
+    <enumType id="attackTypeWeaponConsumeType">
+        <value>none</value>
+        <value>destroy</value>
+        <value>place</value>
+    </enumType>
+</data>

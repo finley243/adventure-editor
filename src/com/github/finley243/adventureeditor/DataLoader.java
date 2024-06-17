@@ -15,15 +15,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataLoader {
 
-    public static Map<String, Template> loadTemplates(File dir) throws ParserConfigurationException, IOException, SAXException {
-        Map<String, Template> templates = new HashMap<>();
+    public static void loadTemplates(File dir, Map<String, Template> templates, Map<String, Set<String>> enumTypes) throws ParserConfigurationException, IOException, SAXException {
         if (dir.isDirectory()) {
             File[] files = dir.listFiles();
             assert files != null;
@@ -33,6 +29,11 @@ public class DataLoader {
                     DocumentBuilder builder = factory.newDocumentBuilder();
                     Document document = builder.parse(file);
                     Element rootElement = document.getDocumentElement();
+                    for (Element enumTypeElement : LoadUtils.directChildrenWithName(rootElement, "enumType")) {
+                        String id = LoadUtils.attribute(enumTypeElement, "id", null);
+                        Set<String> values = LoadUtils.setOfTags(enumTypeElement, "value");
+                        enumTypes.put(id, values);
+                    }
                     for (Element templateElement : LoadUtils.directChildrenWithName(rootElement, "template")) {
                         String id = LoadUtils.attribute(templateElement, "id", null);
                         String name = LoadUtils.attribute(templateElement, "name", null);
@@ -77,7 +78,6 @@ public class DataLoader {
                             String parameterID = LoadUtils.attribute(parameterElement, "id", null);
                             String parameterName = LoadUtils.attribute(parameterElement, "name", null);
                             String type = LoadUtils.attribute(parameterElement, "type", null);
-                            List<String> enumOptions = LoadUtils.listOfTags(parameterElement, "value");
                             boolean topLevelOnly = LoadUtils.attributeBool(parameterElement, "topLevelOnly", false);
                             boolean optional = LoadUtils.attributeBool(parameterElement, "optional", false);
                             TemplateParameter.ParameterFormat format = LoadUtils.attributeEnum(parameterElement, "format", TemplateParameter.ParameterFormat.class, TemplateParameter.ParameterFormat.CHILD_TAG);
@@ -86,7 +86,7 @@ public class DataLoader {
                             int y = LoadUtils.attributeInt(parameterElement, "y", 0);
                             int width = LoadUtils.attributeInt(parameterElement, "width", 1);
                             int height = LoadUtils.attributeInt(parameterElement, "height", 1);
-                            parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, enumOptions, topLevelOnly, optional, format, group, x, y, width, height));
+                            parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, group, x, y, width, height));
                         }
                         String primaryParameter = LoadUtils.attribute(templateElement, "primaryParameter", null);
                         Template template = new Template(id, name, topLevel, groups, tabGroups, parameters, primaryParameter);
@@ -95,7 +95,6 @@ public class DataLoader {
                 }
             }
         }
-        return templates;
     }
 
     public static Map<String, Map<String, Data>> loadFromDir(File dir, Map<String, Template> templates) throws ParserConfigurationException, IOException, SAXException {

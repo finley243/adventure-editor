@@ -9,6 +9,7 @@ import org.xml.sax.SAXException;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ public class Main {
     private static final String DATA_DIRECTORY_TEST = "src/gamefiles";
 
     private final Map<String, Template> templates;
+    private final Map<String, Set<String>> enumTypes;
     private final Map<String, Map<String, Data>> data;
 
     private final BrowserTree browserTree;
@@ -37,7 +39,9 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        this.templates = DataLoader.loadTemplates(new File(TEMPLATE_DIRECTORY));
+        this.templates = new HashMap<>();
+        this.enumTypes = new HashMap<>();
+        DataLoader.loadTemplates(new File(TEMPLATE_DIRECTORY), templates, enumTypes);
         this.data = DataLoader.loadFromDir(new File(DATA_DIRECTORY_TEST), templates);
         this.browserTree = new BrowserTree(this);
         EventQueue.invokeLater(this::run);
@@ -46,11 +50,8 @@ public class Main {
     public void run() {
         JFrame frame = new JFrame("AdventureEditor");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //frame.setLayout(new BorderLayout());
         JMenuBar menuBar = new JMenuBar();
         frame.setJMenuBar(menuBar);
-        //JSplitPane splitPane = new JSplitPane();
-        //frame.getContentPane().add(splitPane);
 
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
@@ -76,17 +77,8 @@ public class Main {
         browserScrollPane.setPreferredSize(new Dimension(400, 800));
         browserPanel.add(browserScrollPane, BorderLayout.CENTER);
         frame.getContentPane().add(browserPanel);
-        //splitPane.setLeftComponent(browserPanel);
-
-        //JPanel editorPanel = new JPanel();
-        //splitPane.setRightComponent(editorPanel);
-        //editorPanel.setLayout(new BorderLayout());
 
         frame.setVisible(true);
-
-        //EditorElement roomElement = buildMenuForTemplate(templates.get("room"));
-        //editorPanel.add(roomElement);
-        //roomElement.setData(data.get("room").get("wilsons_corner_store"));
 
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -94,6 +86,10 @@ public class Main {
 
     public Template getTemplate(String categoryID) {
         return templates.get(categoryID);
+    }
+
+    public Set<String> getEnumValues(String enumID) {
+        return enumTypes.get(enumID);
     }
 
     public Set<String> getIDsForCategory(String categoryID) {
