@@ -13,16 +13,29 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 public class DataLoader {
 
-    public static void loadTemplates(File dir, Map<String, Template> templates, Map<String, Set<String>> enumTypes) throws ParserConfigurationException, IOException, SAXException {
+    private static final String TEMPLATE_DIRECTORY = "src/templates";
+    private static final String DATA_DIRECTORY = "/data";
+    private static final String CONFIG_FILE = "/config.xml";
+
+    public static void loadTemplates(Map<String, Template> templates, Map<String, Set<String>> enumTypes) throws ParserConfigurationException, IOException, SAXException {
+        File dir = new File(TEMPLATE_DIRECTORY);
         if (dir.isDirectory()) {
             File[] files = dir.listFiles();
-            assert files != null;
+            if (files == null) {
+                return;
+            }
             for (File file : files) {
                 if (file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("xml")) {
                     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -97,11 +110,16 @@ public class DataLoader {
         }
     }
 
-    public static Map<String, Map<String, Data>> loadFromDir(File dir, Map<String, Template> templates) throws ParserConfigurationException, IOException, SAXException {
+    public static void loadFromDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap) throws ParserConfigurationException, IOException, SAXException {
         if (dir.isDirectory()) {
-            Map<String, Map<String, Data>> dataMap = new HashMap<>();
-            File[] files = dir.listFiles();
-            assert files != null;
+            File dataDirectory = new File(dir, DATA_DIRECTORY);
+            if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
+                return;
+            }
+            File[] files = dataDirectory.listFiles();
+            if (files == null) {
+                return;
+            }
             for (File file : files) {
                 if (file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("xml")) {
                     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -129,9 +147,23 @@ public class DataLoader {
                     }
                 }
             }
-            return dataMap;
         }
-        return null;
+    }
+
+    public static void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap) throws IOException, TransformerException, ParserConfigurationException {
+        if (dir.isDirectory()) {
+            File dataDirectory = new File(dir, DATA_DIRECTORY);
+            dataDirectory.mkdirs();
+            for (Map.Entry<String, Map<String, Data>> entry : dataMap.entrySet()) {
+                String categoryID = entry.getKey();
+                Map<String, Data> categoryData = entry.getValue();
+                File categoryFile = new File(dataDirectory, categoryID + ".xml");
+                if (!categoryFile.exists()) {
+                    categoryFile.createNewFile();
+                }
+                saveDataToFile(categoryData, categoryFile, templates);
+            }
+        }
     }
 
     private static DataObject loadDataFromElement(Element element, Template template, Map<String, Template> templates) {
@@ -243,6 +275,140 @@ public class DataLoader {
             }
         }
         return new DataObject(template, dataMap);
+    }
+
+    private static void saveDataToFile(Map<String, Data> data, File file, Map<String, Template> templates) throws TransformerException, ParserConfigurationException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.newDocument();
+        Element rootElement = document.createElement("data");
+        document.appendChild(rootElement);
+        for (Data currentData : data.values()) {
+            DataObject objectData = (DataObject) currentData;
+            if (objectData != null) {
+                Element objectElement = document.createElement(objectData.getTemplate().id());
+                addObjectToElement(objectData, objectElement, document);
+                rootElement.appendChild(objectElement);
+            }
+        }
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        DOMSource source = new DOMSource(document);
+        StreamResult result = new StreamResult(file);
+        transformer.transform(source, result);
+    }
+
+    private static void addObjectToElement(DataObject objectData, Element objectElement, Document document) {
+        for (TemplateParameter parameter : objectData.getTemplate().parameters()) {
+            Data parameterData = objectData.getValue().get(parameter.id());
+            if (parameterData == null /*&& parameter.optional()*/) {
+                continue;
+            }
+            switch (parameter.dataType()) {
+                case BOOLEAN -> {
+                    String value = ((DataBoolean) parameterData).getValue() ? "true" : "false";
+                    switch (parameter.format()) {
+                        case ATTRIBUTE -> objectElement.setAttribute(parameter.id(), value);
+                        case CHILD_TAG -> {
+                            Element childElement = document.createElement(parameter.id());
+                            childElement.setTextContent(value);
+                            objectElement.appendChild(childElement);
+                        }
+                    }
+                }
+                case INTEGER -> {
+                    String value = Integer.toString(((DataInteger) parameterData).getValue());
+                    switch (parameter.format()) {
+                        case ATTRIBUTE -> objectElement.setAttribute(parameter.id(), value);
+                        case CHILD_TAG -> {
+                            Element childElement = document.createElement(parameter.id());
+                            childElement.setTextContent(value);
+                            objectElement.appendChild(childElement);
+                        }
+                    }
+                }
+                case FLOAT -> {
+                    String value = Float.toString(((DataFloat) parameterData).getValue());
+                    switch (parameter.format()) {
+                        case ATTRIBUTE -> objectElement.setAttribute(parameter.id(), value);
+                        case CHILD_TAG -> {
+                            Element childElement = document.createElement(parameter.id());
+                            childElement.setTextContent(value);
+                            objectElement.appendChild(childElement);
+                        }
+                    }
+                }
+                case STRING -> {
+                    String value = ((DataString) parameterData).getValue();
+                    switch (parameter.format()) {
+                        case ATTRIBUTE -> objectElement.setAttribute(parameter.id(), value);
+                        case CHILD_TAG -> {
+                            Element childElement = document.createElement(parameter.id());
+                            childElement.setTextContent(value);
+                            objectElement.appendChild(childElement);
+                        }
+                        case CURRENT_TAG -> objectElement.setTextContent(value);
+                    }
+                }
+                case STRING_SET -> {
+                    List<String> values = ((DataStringSet) parameterData).getValue();
+                    for (String value : values) {
+                        Element childElement = document.createElement(parameter.id());
+                        childElement.setTextContent(value);
+                        objectElement.appendChild(childElement);
+                    }
+                }
+                case OBJECT -> {
+                    Element childElement = document.createElement(parameter.id());
+                    addObjectToElement((DataObject) parameterData, childElement, document);
+                    objectElement.appendChild(childElement);
+                }
+                case OBJECT_SET -> {
+                    List<Data> values = ((DataObjectSet) parameterData).getValue();
+                    for (Data value : values) {
+                        Element childElement = document.createElement(parameter.id());
+                        addObjectToElement((DataObject) value, childElement, document);
+                        objectElement.appendChild(childElement);
+                    }
+                }
+                case REFERENCE -> {
+                    String value = ((DataReference) parameterData).getValue();
+                    switch (parameter.format()) {
+                        case ATTRIBUTE -> objectElement.setAttribute(parameter.id(), value);
+                        case CHILD_TAG -> {
+                            Element childElement = document.createElement(parameter.id());
+                            childElement.setTextContent(value);
+                            objectElement.appendChild(childElement);
+                        }
+                        case CURRENT_TAG -> objectElement.setTextContent(value);
+                    }
+                }
+                case ENUM -> {
+                    String value = ((DataEnum) parameterData).getValue();
+                    switch (parameter.format()) {
+                        case ATTRIBUTE -> objectElement.setAttribute(parameter.id(), value);
+                        case CHILD_TAG -> {
+                            Element childElement = document.createElement(parameter.id());
+                            childElement.setTextContent(value);
+                            objectElement.appendChild(childElement);
+                        }
+                        case CURRENT_TAG -> objectElement.setTextContent(value);
+                    }
+                }
+                case SCRIPT -> {
+                    String value = ((DataScript) parameterData).getValue();
+                    switch (parameter.format()) {
+                        case CHILD_TAG -> {
+                            Element childElement = document.createElement(parameter.id());
+                            childElement.setTextContent(value);
+                            objectElement.appendChild(childElement);
+                        }
+                        case CURRENT_TAG -> objectElement.setTextContent(value);
+                    }
+                }
+            }
+        }
     }
 
 }

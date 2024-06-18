@@ -15,11 +15,9 @@ import java.util.Set;
 
 import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 public class Main {
-
-    private static final String TEMPLATE_DIRECTORY = "src/templates";
-    private static final String DATA_DIRECTORY_TEST = "src/gamefiles";
 
     private final Map<String, Template> templates;
     private final Map<String, Set<String>> enumTypes;
@@ -41,8 +39,8 @@ public class Main {
 
         this.templates = new HashMap<>();
         this.enumTypes = new HashMap<>();
-        DataLoader.loadTemplates(new File(TEMPLATE_DIRECTORY), templates, enumTypes);
-        this.data = DataLoader.loadFromDir(new File(DATA_DIRECTORY_TEST), templates);
+        DataLoader.loadTemplates(templates, enumTypes);
+        this.data = new HashMap<>();
         this.browserTree = new BrowserTree(this);
         EventQueue.invokeLater(this::run);
     }
@@ -58,18 +56,29 @@ public class Main {
         JMenuItem fileOpen = new JMenuItem("Open");
         fileOpen.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-            fileChooser.setMultiSelectionEnabled(true);
-            fileChooser.showOpenDialog(frame);
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int result = fileChooser.showOpenDialog(frame);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedDirectory = fileChooser.getSelectedFile();
+                openProject(selectedDirectory);
+            }
         });
         JMenuItem fileSave = new JMenuItem("Save");
+        fileSave.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int result = fileChooser.showSaveDialog(frame);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedDirectory = fileChooser.getSelectedFile();
+                saveProject(selectedDirectory);
+            }
+        });
         fileMenu.add(fileOpen);
         fileMenu.add(fileSave);
 
         JPanel browserPanel = new JPanel();
         browserPanel.setLayout(new BorderLayout());
-
-        loadBrowser();
+        //loadBrowserCategories();
 
         browserTree.setPreferredSize(new Dimension(400, 400));
         JScrollPane browserScrollPane = new JScrollPane(browserTree);
@@ -133,7 +142,7 @@ public class Main {
         }
     }
 
-    private void loadBrowser() {
+    private void loadBrowserData() {
         for (String category : templates.keySet()) {
             if (templates.get(category).topLevel()) {
                 browserTree.addCategory(category, templates.get(category).name());
@@ -143,6 +152,33 @@ public class Main {
             for (String object : data.get(category).keySet()) {
                 browserTree.addGameObject(category, object, false);
             }
+        }
+    }
+
+    public void openProject(File projectDirectory) {
+        // TODO - Add save confirmation if a project is open
+        data.clear();
+        try {
+            DataLoader.loadFromDir(projectDirectory, templates, data);
+        } catch (ParserConfigurationException | SAXException e) {
+            //throw new RuntimeException(e);
+            JOptionPane.showMessageDialog(browserTree, "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            //throw new RuntimeException(e);
+            JOptionPane.showMessageDialog(browserTree, "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        loadBrowserData();
+    }
+
+    public void saveProject(File projectDirectory) {
+        try {
+            DataLoader.saveToDir(projectDirectory, templates, data);
+        } catch (IOException e) {
+            //throw new RuntimeException(e);
+            JOptionPane.showMessageDialog(browserTree, "Project could not be saved to the selected directory.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (ParserConfigurationException | TransformerException e) {
+            //throw new RuntimeException(e);
+            JOptionPane.showMessageDialog(browserTree, "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
