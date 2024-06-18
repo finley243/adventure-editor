@@ -95,18 +95,42 @@ public class BrowserTree extends JTree {
                 }
             }
         };
+        Action newProjectAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                main.newProject();
+            }
+        };
+        Action openProjectAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                main.openProject();
+            }
+        };
+        Action saveProjectAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                main.saveProject();
+            }
+        };
 
         ActionMap actionMap = getActionMap();
         actionMap.put("newGameObject", newAction);
         actionMap.put("editGameObject", editAction);
         actionMap.put("duplicateGameObject", duplicateAction);
         actionMap.put("deleteGameObject", deleteAction);
+        actionMap.put("newProject", newProjectAction);
+        actionMap.put("openProject", openProjectAction);
+        actionMap.put("saveProject", saveProjectAction);
 
         InputMap inputMap = getInputMap(JComponent.WHEN_FOCUSED);
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK), "newGameObject");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "editGameObject");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK), "duplicateGameObject");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deleteGameObject");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK), "newProject");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK), "openProject");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "saveProject");
     }
 
     public void addCategory(String categoryID, String name) {

@@ -61,25 +61,9 @@ public class Main {
         JMenuItem fileNew = new JMenuItem("New");
         fileNew.addActionListener(e -> newProject());
         JMenuItem fileOpen = new JMenuItem("Open");
-        fileOpen.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            int result = fileChooser.showOpenDialog(frame);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                File selectedDirectory = fileChooser.getSelectedFile();
-                openProject(selectedDirectory);
-            }
-        });
+        fileOpen.addActionListener(e -> openProject());
         JMenuItem fileSave = new JMenuItem("Save");
-        fileSave.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            int result = fileChooser.showSaveDialog(frame);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                File selectedDirectory = fileChooser.getSelectedFile();
-                saveProject(selectedDirectory);
-            }
-        });
+        fileSave.addActionListener(e -> saveProject());
         fileMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
@@ -161,6 +145,7 @@ public class Main {
     }
 
     private void loadBrowserData() {
+        browserTree.clearData();
         for (String category : templates.keySet()) {
             if (templates.get(category).topLevel()) {
                 browserTree.addCategory(category, templates.get(category).name());
@@ -176,17 +161,23 @@ public class Main {
     public void newProject() {
         // TODO - Add save confirmation if a project is open
         data.clear();
-        browserTree.clearData();
         loadBrowserData();
         browserTree.expandRow(0);
         isProjectLoaded = true;
     }
 
-    public void openProject(File projectDirectory) {
+    public void openProject() {
         // TODO - Add save confirmation if a project is open
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = fileChooser.showOpenDialog(browserTree);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        File selectedDirectory = fileChooser.getSelectedFile();
         data.clear();
         try {
-            DataLoader.loadFromDir(projectDirectory, templates, data);
+            DataLoader.loadFromDir(selectedDirectory, templates, data);
             loadBrowserData();
             isProjectLoaded = true;
         } catch (ParserConfigurationException | SAXException e) {
@@ -200,9 +191,16 @@ public class Main {
         }
     }
 
-    public void saveProject(File projectDirectory) {
+    public void saveProject() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = fileChooser.showSaveDialog(browserTree);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        File selectedDirectory = fileChooser.getSelectedFile();
         try {
-            DataLoader.saveToDir(projectDirectory, templates, data);
+            DataLoader.saveToDir(selectedDirectory, templates, data);
         } catch (IOException e) {
             //throw new RuntimeException(e);
             JOptionPane.showMessageDialog(browserTree, "Project could not be saved to the selected directory.", "Error", JOptionPane.ERROR_MESSAGE);
