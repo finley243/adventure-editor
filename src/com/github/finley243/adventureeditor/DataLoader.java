@@ -245,7 +245,7 @@ public class DataLoader {
                     String value = switch (parameter.format()) {
                         case ATTRIBUTE -> LoadUtils.attribute(element, parameter.id(), null);
                         case CHILD_TAG -> LoadUtils.singleTag(element, parameter.id(), null);
-                        case CURRENT_TAG -> element == null ? null : element.getTextContent();
+                        case CURRENT_TAG -> LoadUtils.textContent(element, null);
                     };
                     if (value == null) {
                         dataMap.put(parameter.id(), null);
@@ -275,7 +275,7 @@ public class DataLoader {
                     String value = switch (parameter.format()) {
                         case ATTRIBUTE -> LoadUtils.attribute(element, parameter.id(), null);
                         case CHILD_TAG -> LoadUtils.singleTag(element, parameter.id(), null);
-                        case CURRENT_TAG -> element == null ? null : element.getTextContent();
+                        case CURRENT_TAG -> LoadUtils.textContent(element, null);
                     };
                     if (value == null) {
                         dataMap.put(parameter.id(), null);
@@ -287,7 +287,7 @@ public class DataLoader {
                     String value = switch (parameter.format()) {
                         case ATTRIBUTE -> LoadUtils.attribute(element, parameter.id(), null);
                         case CHILD_TAG -> LoadUtils.singleTag(element, parameter.id(), null);
-                        case CURRENT_TAG -> element == null ? null : element.getTextContent();
+                        case CURRENT_TAG -> LoadUtils.textContent(element, null);
                     };
                     if (value == null) {
                         dataMap.put(parameter.id(), null);
@@ -298,7 +298,7 @@ public class DataLoader {
                 case SCRIPT -> {
                     String value = switch (parameter.format()) {
                         case CHILD_TAG -> LoadUtils.singleTag(element, parameter.id(), null);
-                        case CURRENT_TAG -> element == null ? null : element.getTextContent();
+                        case CURRENT_TAG -> LoadUtils.textContent(element, null);
                         default -> null;
                     };
                     if (value == null) {

@@ -49,12 +49,12 @@
         <parameter id="exit" dataType="boolean" name="Exit After" format="attribute" x="1" y="0"/>
         <parameter id="from" dataType="reference" name="Show Only From" type="scene" format="attribute" optional="true" x="0" y="1" width="2"/>
         <parameter id="redirect" dataType="reference" name="Redirect To" type="scene" format="attribute" optional="true" x="0" y="2" width="2"/>
-        <parameter id="text" dataType="string" name="Text" format="current_tag" optional="true" x="1" y="0"/>
-        <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" x="1" y="1" height="2"/>
-        <parameter id="scriptPre" dataType="object" name="Pre Script" type="script" optional="true" x="2" y="0" height="2"/>
-        <parameter id="scriptPost" dataType="object" name="Post Script" type="script" optional="true" x="2" y="2" height="2"/>
-        <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="3" y="0"/>
-        <parameter id="line" dataType="objectSet" name="Sub-Lines" type="sceneLine" x="3" y="1" height="3"/>
+        <parameter id="text" dataType="string" name="Text" format="current_tag" optional="true" x="2" y="0"/>
+        <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" x="2" y="1" height="2"/>
+        <parameter id="scriptPre" dataType="object" name="Pre Script" type="script" optional="true" x="3" y="0" height="4"/>
+        <parameter id="scriptPost" dataType="object" name="Post Script" type="script" optional="true" x="3" y="4" height="4"/>
+        <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="4" y="0"/>
+        <parameter id="line" dataType="objectSet" name="Sub-Lines" type="sceneLine" x="4" y="1" height="3"/>
     </template>
     <template id="script" name="Script" topLevel="false">
         <parameter id="script" dataType="script" name="Script" format="current_tag"/>
@@ -168,13 +168,41 @@
         <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
     <template id="effect" name="Effect" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="permanent" dataType="boolean" name="Is Permanent" format="attribute" y="1"/>
+        <parameter id="type" dataType="enum" type="effectType" name="Type" format="attribute" y="2"/>
+        <parameter id="duration" dataType="integer" name="Duration" format="attribute" y="3"/>
+        <parameter id="stack" dataType="boolean" name="Can Stack" format="attribute" y="4"/>
+        <parameter id="conditionAdd" dataType="string" name="Add Condition" format="child_tag" y="5"/>
+        <parameter id="conditionRemove" dataType="string" name="Remove Condition" format="child_tag" y="6"/>
+        <parameter id="conditionActive" dataType="string" name="Active Condition" format="child_tag" y="7"/>
+        <parameter id="scriptAdd" dataType="script" name="Add Script" format="child_tag" optional="true" x="1" y="0" height="3"/>
+        <parameter id="scriptRemove" dataType="script" name="Remove Script" format="child_tag" optional="true" x="1" y="3" height="3"/>
+        <parameter id="scriptRound" dataType="script" name="Each Round Script" format="child_tag" optional="true" x="1" y="6" height="3"/>
     </template>
     <template id="item" name="Item" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="price" dataType="integer" name="Price" format="attribute" y="1"/>
+        <parameter id="name" dataType="object" type="itemName" name="Name" y="2"/>
+        <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="3"/>
+    </template>
+    <template id="itemName" name="Name" topLevel="false" primaryParameter="name">
+        <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
+        <parameter id="proper" dataType="boolean" name="Is Proper" format="attribute" y="1"/>
     </template>
     <template id="linkType" name="Link Type" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="visible" dataType="boolean" name="Visible" format="attribute" y="1"/>
+        <parameter id="moveAction" dataType="reference" type="action" name="Move Action" format="attribute" optional="true" y="2"/>
+        <parameter id="moveDistance" dataType="objectSet" type="linkMoveDistance" name="Move Distances" y="3"/>
+        <parameter id="vehicleMoveAction" dataType="objectSet" type="linkVehicleMoveAction" name="Vehicle Move Actions" y="4"/>
+    </template>
+    <template id="linkMoveDistance" name="Move Distance" topLevel="false" primaryParameter="distance">
+        <parameter id="distance" dataType="enum" type="distance" format="current_tag"/>
+    </template>
+    <template id="linkVehicleMoveAction" name="Vehicle Move Action" topLevel="false" primaryParameter="type">
+        <parameter id="type" dataType="string" name="Vehicle Type" format="attribute"/>
+        <parameter id="action" dataType="reference" type="action" name="Move Action" format="attribute"/>
     </template>
     <template id="lootTable" name="Loot Table" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" topLevelOnly="true" y="0"/>
@@ -206,6 +234,7 @@
     <template id="object" name="Object" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
         <parameter id="name" dataType="object" name="Name" type="objectName" y="1"/>
+        <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="2"/>
     </template>
     <template id="objectName" name="Name" topLevel="false">
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>

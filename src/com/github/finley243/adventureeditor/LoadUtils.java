@@ -38,6 +38,12 @@ public class LoadUtils {
 		}
 		return defaultValue;
 	}
+
+	public static String textContent(Element element, String defaultValue) {
+		if (element == null) return defaultValue;
+		if (!hasTextContent(element)) return defaultValue;
+		return element.getTextContent();
+	}
 	
 	public static String singleTag(Element parent, String name, String defaultValue) {
 		Element element = singleChildWithName(parent, name);
@@ -131,6 +137,15 @@ public class LoadUtils {
 			currentChild = currentChild.getNextSibling();
 		}
 		return null;
+	}
+
+	private static boolean hasTextContent(Element parent) {
+		if (parent == null) return false;
+		Node firstChild = parent.getFirstChild();
+		if (firstChild == null) return false;
+		if (firstChild.getNodeType() != Node.TEXT_NODE) return false;
+		if (firstChild.getNextSibling() != null) return false;
+		return true;
 	}
 
 	public static boolean hasChildWithName(Element parent, String name) {

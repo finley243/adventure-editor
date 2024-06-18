@@ -81,6 +81,7 @@ public class ParameterFieldObject extends EditorElement {
         if (optional) {
             getInnerPanel().add(new OptionalBorderedPanel(name, objectPanel, getOptionalCheckbox()));
         } else {
+            setBorder(BorderFactory.createEmptyBorder());
             getInnerPanel().add(objectPanel);
         }
     }
