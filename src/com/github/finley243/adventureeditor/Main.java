@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.*;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
@@ -24,6 +26,8 @@ public class Main {
     private final Map<String, Map<String, Data>> data;
 
     private final BrowserTree browserTree;
+
+    private boolean isProjectLoaded;
 
     public static void main(String[] args) throws ParserConfigurationException, IOException, SAXException {
         Main main = new Main();
@@ -42,6 +46,7 @@ public class Main {
         DataLoader.loadTemplates(templates, enumTypes);
         this.data = new HashMap<>();
         this.browserTree = new BrowserTree(this);
+        isProjectLoaded = false;
         EventQueue.invokeLater(this::run);
     }
 
@@ -53,6 +58,8 @@ public class Main {
 
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
+        JMenuItem fileNew = new JMenuItem("New");
+        fileNew.addActionListener(e -> newProject());
         JMenuItem fileOpen = new JMenuItem("Open");
         fileOpen.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -73,6 +80,17 @@ public class Main {
                 saveProject(selectedDirectory);
             }
         });
+        fileMenu.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                fileSave.setEnabled(isProjectLoaded);
+            }
+            @Override
+            public void menuDeselected(MenuEvent e) {}
+            @Override
+            public void menuCanceled(MenuEvent e) {}
+        });
+        fileMenu.add(fileNew);
         fileMenu.add(fileOpen);
         fileMenu.add(fileSave);
 
@@ -155,19 +173,31 @@ public class Main {
         }
     }
 
+    public void newProject() {
+        // TODO - Add save confirmation if a project is open
+        data.clear();
+        browserTree.clearData();
+        loadBrowserData();
+        browserTree.expandRow(0);
+        isProjectLoaded = true;
+    }
+
     public void openProject(File projectDirectory) {
         // TODO - Add save confirmation if a project is open
         data.clear();
         try {
             DataLoader.loadFromDir(projectDirectory, templates, data);
+            loadBrowserData();
+            isProjectLoaded = true;
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
+            data.clear();
             JOptionPane.showMessageDialog(browserTree, "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             //throw new RuntimeException(e);
+            data.clear();
             JOptionPane.showMessageDialog(browserTree, "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
         }
-        loadBrowserData();
     }
 
     public void saveProject(File projectDirectory) {

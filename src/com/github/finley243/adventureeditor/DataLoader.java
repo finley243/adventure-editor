@@ -25,7 +25,7 @@ import java.util.*;
 
 public class DataLoader {
 
-    private static final String TEMPLATE_DIRECTORY = "src/templates";
+    private static final String TEMPLATE_DIRECTORY = "templates";
     private static final String DATA_DIRECTORY = "/data";
     private static final String CONFIG_FILE = "/config.xml";
 

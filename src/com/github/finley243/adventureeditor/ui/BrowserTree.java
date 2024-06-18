@@ -155,6 +155,13 @@ public class BrowserTree extends JTree {
         }
     }
 
+    public void clearData() {
+        for (BrowserCategoryNode node : categoryNodes.values()) {
+            treeModel.removeNodeFromParent(node);
+        }
+        categoryNodes.clear();
+    }
+
     public void setSelectedNode(String categoryID, String objectID) {
         if (objectID == null) {
             this.setSelectionPath(new TreePath(treeModel.getPathToRoot(categoryNodes.get(categoryID))));
