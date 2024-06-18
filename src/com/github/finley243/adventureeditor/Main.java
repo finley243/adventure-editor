@@ -19,7 +19,7 @@ import javax.swing.event.MenuListener;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-public class Main {
+public class Main implements DataSaveTarget {
 
     private final Map<String, Template> templates;
     private final Map<String, Set<String>> enumTypes;
@@ -28,6 +28,8 @@ public class Main {
 
     private final BrowserTree browserTree;
     private final JMenu fileOpenRecent;
+
+    private final Map<String, Map<String, EditorFrame>> topLevelEditorWindows;
 
     private boolean isProjectLoaded;
 
@@ -51,6 +53,7 @@ public class Main {
         this.data = new HashMap<>();
         this.browserTree = new BrowserTree(this);
         this.fileOpenRecent = new JMenu("Open Recent");
+        this.topLevelEditorWindows = new HashMap<>();
         isProjectLoaded = false;
         EventQueue.invokeLater(this::run);
     }
@@ -144,7 +147,8 @@ public class Main {
         return data.get(categoryID).get(object);
     }
 
-    public void saveData(Data objectData, Data initialData) {
+    @Override
+    public void saveObjectData(Data objectData, Data initialData) {
         if (!(objectData instanceof DataObject objectDataCast)) {
             throw new IllegalArgumentException("Top-level saved data must be an object");
         }
@@ -264,14 +268,11 @@ public class Main {
     }
 
     public void newObject(String categoryID) {
-        Template template = templates.get(categoryID);
-        EditorFrame editorFrame = new EditorFrame(this, template, null, null);
+        openEditorFrame(categoryID, null);
     }
 
     public void editObject(String categoryID, String objectID) {
-        Template template = templates.get(categoryID);
-        Data objectData = data.get(categoryID).get(objectID);
-        EditorFrame editorFrame = new EditorFrame(this, template, objectData, null);
+        openEditorFrame(categoryID, objectID);
     }
 
     public void duplicateObject(String categoryID, String objectID) {
@@ -291,8 +292,31 @@ public class Main {
         int confirmResult = JOptionPane.showOptionDialog(browserTree, "Are you sure you want to delete " + objectID + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
         if (confirmResult == 0) {
             data.get(categoryID).remove(objectID);
+            EditorFrame activeFrame = getActiveTopLevelFrame(categoryID, objectID);
+            if (activeFrame != null) {
+                activeFrame.dispose();
+                removeActiveTopLevelFrame(categoryID, objectID);
+            }
             browserTree.removeGameObject(categoryID, objectID);
         }
+    }
+
+    public void openEditorFrame(String categoryID, String objectID) {
+        EditorFrame activeFrame = getActiveTopLevelFrame(categoryID, objectID);
+        if (activeFrame != null) {
+            activeFrame.toFront();
+            activeFrame.requestFocus();
+        } else {
+            Template template = templates.get(categoryID);
+            Data objectData = data.get(categoryID).get(objectID);
+            EditorFrame editorFrame = new EditorFrame(this, template, objectData, this);
+            addActiveTopLevelFrame(categoryID, objectID, editorFrame);
+        }
+    }
+
+    @Override
+    public void onEditorFrameClose(EditorFrame frame) {
+        removeActiveTopLevelFrame(frame.getTemplate().id(), frame.getObjectID());
     }
 
     private String generateDuplicateObjectID(String categoryID, String objectID) {
@@ -303,6 +327,39 @@ public class Main {
             i += 1;
         }
         return baseCopyID + i;
+    }
+
+    private EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
+        if (categoryID == null | objectID == null) {
+            return null;
+        }
+        if (!topLevelEditorWindows.containsKey(categoryID)) {
+            return null;
+        }
+        return topLevelEditorWindows.get(categoryID).get(objectID);
+    }
+
+    private void addActiveTopLevelFrame(String categoryID, String objectID, EditorFrame frame) {
+        if (objectID == null) {
+            return;
+        }
+        if (!topLevelEditorWindows.containsKey(categoryID)) {
+            topLevelEditorWindows.put(categoryID, new HashMap<>());
+        }
+        topLevelEditorWindows.get(categoryID).put(objectID, frame);
+    }
+
+    private void removeActiveTopLevelFrame(String categoryID, String objectID) {
+        if (objectID == null) {
+            return;
+        }
+        if (!topLevelEditorWindows.containsKey(categoryID)) {
+            return;
+        }
+        topLevelEditorWindows.get(categoryID).remove(objectID);
+        if (topLevelEditorWindows.get(categoryID).isEmpty()) {
+            topLevelEditorWindows.remove(categoryID);
+        }
     }
 
 }

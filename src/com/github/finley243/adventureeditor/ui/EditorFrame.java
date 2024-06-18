@@ -13,6 +13,7 @@ public class EditorFrame extends JFrame {
 
     private final Main main;
     private final EditorElement editorElement;
+    private final Template template;
     private final Data initialData;
     private final DataSaveTarget saveTarget;
     private final JButton saveButton;
@@ -20,6 +21,7 @@ public class EditorFrame extends JFrame {
     public EditorFrame(Main main, Template template, Data objectData, DataSaveTarget saveTarget) {
         super(template.name());
         this.main = main;
+        this.template = template;
         this.initialData = objectData;
         this.saveTarget = saveTarget;
         JPanel mainPanel = new JPanel();
@@ -43,6 +45,17 @@ public class EditorFrame extends JFrame {
         this.setVisible(true);
     }
 
+    public Template getTemplate() {
+        return template;
+    }
+
+    public String getObjectID() {
+        if (initialData == null) {
+            return null;
+        }
+        return ((DataObject) initialData).getID();
+    }
+
     private boolean isTopLevel() {
         return saveTarget == null;
     }
@@ -51,20 +64,17 @@ public class EditorFrame extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
         saveButton.addActionListener(e -> {
-            if (isTopLevel()) {
-                if (isDataValidOrShowDialog()) {
-                    main.saveData(editorElement.getData(), initialData);
-                    this.dispose();
-                }
-            } else {
-                if (isDataValidOrShowDialog()) {
-                    saveTarget.saveObjectData(editorElement.getData(), initialData);
-                    this.dispose();
-                }
+            if (isDataValidOrShowDialog()) {
+                saveTarget.saveObjectData(editorElement.getData(), initialData);
+                saveTarget.onEditorFrameClose(this);
+                this.dispose();
             }
         });
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(e -> this.dispose());
+        cancelButton.addActionListener(e -> {
+            saveTarget.onEditorFrameClose(this);
+            this.dispose();
+        });
         buttonPanel.add(saveButton);
         buttonPanel.add(cancelButton);
         return buttonPanel;
@@ -81,6 +91,7 @@ public class EditorFrame extends JFrame {
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
             if (!hasUnsavedChanges()) {
+                saveTarget.onEditorFrameClose(this);
                 super.processWindowEvent(e);
                 return;
             }
@@ -90,11 +101,13 @@ public class EditorFrame extends JFrame {
             if (confirmResult == 0) {
                 // Save
                 if (isDataValidOrShowDialog()) {
-                    main.saveData(editorElement.getData(), initialData);
+                    saveTarget.saveObjectData(editorElement.getData(), initialData);
+                    saveTarget.onEditorFrameClose(this);
                     super.processWindowEvent(e);
                 }
             } else if (confirmResult == 1) {
                 // Don't save
+                saveTarget.onEditorFrameClose(this);
                 super.processWindowEvent(e);
             }
             // Cancel (do nothing)

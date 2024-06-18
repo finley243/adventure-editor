@@ -17,8 +17,11 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
     private final JButton buttonEdit;
     private final JButton buttonRemove;
 
+    private final List<EditorFrame> editorFrames;
+
     public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, Template template, Main main) {
         super(editorFrame, optional, name);
+        this.editorFrames = new ArrayList<>();
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
         if (optional) {
@@ -72,14 +75,25 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
         });
         buttonEdit.addActionListener(e -> {
             Data objectData = objectList.getSelectedValue();
+            int objectIndex = objectList.getSelectedIndex();
             if (objectData != null) {
-                EditorFrame objectFrame = new EditorFrame(main, template, objectData, this);
+                if (editorFrames.get(objectIndex) != null) {
+                    editorFrames.get(objectIndex).toFront();
+                    editorFrames.get(objectIndex).requestFocus();
+                } else {
+                    EditorFrame objectFrame = new EditorFrame(main, template, objectData, this);
+                    editorFrames.set(objectIndex, objectFrame);
+                }
             }
         });
         buttonRemove.addActionListener(e -> {
             int selectedIndex = objectList.getSelectedIndex();
             if (selectedIndex != -1) {
                 ((DefaultListModel<Data>) objectList.getModel()).removeElementAt(selectedIndex);
+                if (editorFrames.get(selectedIndex) != null) {
+                    editorFrames.get(selectedIndex).dispose();
+                }
+                editorFrames.remove(selectedIndex);
                 if (objectList.getModel().getSize() > selectedIndex) {
                     objectList.setSelectedIndex(selectedIndex);
                 } else if (objectList.getModel().getSize() == selectedIndex) {
@@ -107,6 +121,10 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
     public void setValue(List<Data> value) {
         ((DefaultListModel<Data>) objectList.getModel()).clear();
         ((DefaultListModel<Data>) objectList.getModel()).addAll(value);
+        editorFrames.clear();
+        for (int i = 0; i < value.size(); i++) {
+            editorFrames.add(null);
+        }
     }
 
     @Override
@@ -135,10 +153,18 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
         }
         if (initialData != null) {
             addIndex = ((DefaultListModel<Data>) objectList.getModel()).indexOf(initialData);
-            ((DefaultListModel<Data>) objectList.getModel()).removeElement(initialData);
+            ((DefaultListModel<Data>) objectList.getModel()).remove(addIndex);
+            editorFrames.remove(addIndex);
         }
         ((DefaultListModel<Data>) objectList.getModel()).add(addIndex, data);
+        editorFrames.add(addIndex, null);
         parentFrame.onEditorElementUpdated();
+    }
+
+    @Override
+    public void onEditorFrameClose(EditorFrame frame) {
+         int index = editorFrames.indexOf(frame);
+         editorFrames.set(index, null);
     }
 
     @Override

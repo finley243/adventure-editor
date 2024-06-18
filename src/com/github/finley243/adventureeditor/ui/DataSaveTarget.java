@@ -6,4 +6,6 @@ public interface DataSaveTarget {
 
     void saveObjectData(Data data, Data initialData);
 
+    void onEditorFrameClose(EditorFrame frame);
+
 }
