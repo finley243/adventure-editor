@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
+import com.github.finley243.adventureeditor.template.ProjectData;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.*;
 import org.xml.sax.SAXException;
@@ -9,9 +10,8 @@ import org.xml.sax.SAXException;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -23,9 +23,11 @@ public class Main {
 
     private final Map<String, Template> templates;
     private final Map<String, Set<String>> enumTypes;
+    private final List<ProjectData> recentProjects;
     private final Map<String, Map<String, Data>> data;
 
     private final BrowserTree browserTree;
+    private final JMenu fileOpenRecent;
 
     private boolean isProjectLoaded;
 
@@ -43,9 +45,12 @@ public class Main {
 
         this.templates = new HashMap<>();
         this.enumTypes = new HashMap<>();
+        this.recentProjects = new ArrayList<>();
         DataLoader.loadTemplates(templates, enumTypes);
+        DataLoader.loadRecentProjects(recentProjects);
         this.data = new HashMap<>();
         this.browserTree = new BrowserTree(this);
+        this.fileOpenRecent = new JMenu("Open Recent");
         isProjectLoaded = false;
         EventQueue.invokeLater(this::run);
     }
@@ -76,7 +81,9 @@ public class Main {
         });
         fileMenu.add(fileNew);
         fileMenu.add(fileOpen);
+        fileMenu.add(fileOpenRecent);
         fileMenu.add(fileSave);
+        updateRecentProjects();
 
         JPanel browserPanel = new JPanel();
         browserPanel.setLayout(new BorderLayout());
@@ -93,6 +100,26 @@ public class Main {
 
         frame.pack();
         frame.setLocationRelativeTo(null);
+    }
+
+    public void updateRecentProjects() {
+        fileOpenRecent.setEnabled(!recentProjects.isEmpty());
+        fileOpenRecent.removeAll();
+        for (ProjectData recentProject : recentProjects) {
+            JMenuItem recentProjectItem = new JMenuItem(recentProject.name());
+            recentProjectItem.addActionListener(e -> {
+                File recentProjectFile = new File(recentProject.absolutePath());
+                if (recentProjectFile.exists()) {
+                    recentProjects.remove(recentProject);
+                    recentProjects.addFirst(recentProject);
+                    openProjectFromFile(recentProjectFile);
+                } else {
+                    JOptionPane.showMessageDialog(browserTree, "The selected project file does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+            fileOpenRecent.add(recentProjectItem);
+        }
+        DataLoader.saveRecentProjects(recentProjects);
     }
 
     public Template getTemplate(String categoryID) {
@@ -146,6 +173,7 @@ public class Main {
 
     private void loadBrowserData() {
         browserTree.clearData();
+        browserTree.expandRow(0);
         for (String category : templates.keySet()) {
             if (templates.get(category).topLevel()) {
                 browserTree.addCategory(category, templates.get(category).name());
@@ -162,7 +190,6 @@ public class Main {
         // TODO - Add save confirmation if a project is open
         data.clear();
         loadBrowserData();
-        browserTree.expandRow(0);
         isProjectLoaded = true;
     }
 
@@ -178,6 +205,28 @@ public class Main {
         data.clear();
         try {
             DataLoader.loadFromDir(selectedDirectory, templates, data);
+            loadBrowserData();
+            ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
+            recentProjects.remove(project);
+            recentProjects.addFirst(project);
+            updateRecentProjects();
+            isProjectLoaded = true;
+        } catch (ParserConfigurationException | SAXException e) {
+            //throw new RuntimeException(e);
+            data.clear();
+            JOptionPane.showMessageDialog(browserTree, "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            //throw new RuntimeException(e);
+            data.clear();
+            JOptionPane.showMessageDialog(browserTree, "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void openProjectFromFile(File file) {
+        // TODO - Add save confirmation if a project is open
+        data.clear();
+        try {
+            DataLoader.loadFromDir(file, templates, data);
             loadBrowserData();
             isProjectLoaded = true;
         } catch (ParserConfigurationException | SAXException e) {
@@ -201,6 +250,10 @@ public class Main {
         File selectedDirectory = fileChooser.getSelectedFile();
         try {
             DataLoader.saveToDir(selectedDirectory, templates, data);
+            ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
+            recentProjects.remove(project);
+            recentProjects.addFirst(project);
+            updateRecentProjects();
         } catch (IOException e) {
             //throw new RuntimeException(e);
             JOptionPane.showMessageDialog(browserTree, "Project could not be saved to the selected directory.", "Error", JOptionPane.ERROR_MESSAGE);

@@ -133,10 +133,20 @@ public class BrowserTree extends JTree {
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "saveProject");
     }
 
+    @Override
+    public void collapsePath(TreePath path) {
+        if (path.equals(new TreePath(getModel().getRoot()))) {
+            return;
+        }
+        super.collapsePath(path);
+    }
+
     public void addCategory(String categoryID, String name) {
         BrowserCategoryNode node = new BrowserCategoryNode(main, categoryID, name);
         categoryNodes.put(categoryID, node);
         treeRoot.add(node);
+        treeModel.nodeStructureChanged(treeRoot);
+        this.scrollPathToVisible(new TreePath(treeModel.getPathToRoot(node)));
     }
 
     public void updateCategory(String categoryID) {
@@ -180,9 +190,11 @@ public class BrowserTree extends JTree {
     }
 
     public void clearData() {
-        for (BrowserCategoryNode node : categoryNodes.values()) {
+        /*for (BrowserCategoryNode node : categoryNodes.values()) {
             treeModel.removeNodeFromParent(node);
-        }
+        }*/
+        treeRoot.removeAllChildren();
+        treeModel.nodeStructureChanged(treeRoot);
         categoryNodes.clear();
     }
 

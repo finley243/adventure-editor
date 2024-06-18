@@ -1,10 +1,7 @@
 package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.*;
-import com.github.finley243.adventureeditor.template.Group;
-import com.github.finley243.adventureeditor.template.TabGroup;
-import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.template.TemplateParameter;
+import com.github.finley243.adventureeditor.template.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -19,13 +16,17 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
 public class DataLoader {
 
     private static final String TEMPLATE_DIRECTORY = "templates";
+    private static final String RECENT_PROJECTS_FILE = "recents.txt";
+
     private static final String DATA_DIRECTORY = "/data";
     private static final String CONFIG_FILE = "/config.xml";
 
@@ -107,6 +108,40 @@ public class DataLoader {
                     }
                 }
             }
+        }
+    }
+
+    public static void loadRecentProjects(List<ProjectData> recentProjects) {
+        File file = new File(RECENT_PROJECTS_FILE);
+        if (!file.exists()) {
+            return;
+        }
+        try {
+            Scanner scanner = new Scanner(file);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] parts = line.split("\\|");
+                if (parts.length == 2) {
+                    recentProjects.add(new ProjectData(parts[0], parts[1]));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void saveRecentProjects(List<ProjectData> recentProjects) {
+        File file = new File(RECENT_PROJECTS_FILE);
+        try (FileWriter writer = new FileWriter(file); BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
+            file.createNewFile();
+            StringBuilder builder = new StringBuilder();
+            for (ProjectData project : recentProjects) {
+                builder.append(project.name()).append("|").append(project.absolutePath()).append("\n");
+            }
+            String content = builder.toString();
+            bufferedWriter.write(content);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
