@@ -76,4 +76,11 @@
         <value>stringSet</value>
         <value>compound</value>
     </enumType>
+    <enumType id="objectComponentTypes">
+        <value>inventory</value>
+        <value>network</value>
+        <value>link</value>
+        <value>usable</value>
+        <value>vehicle</value>
+    </enumType>
 </data>

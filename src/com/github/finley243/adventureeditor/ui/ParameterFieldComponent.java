@@ -22,16 +22,18 @@ public class ParameterFieldComponent extends EditorElement {
     private final JPanel objectPanel;
     private final JComboBox<ComponentOption> dropdownMenu;
     private final Map<String, ComponentOption> componentOptionMap;
+    private final boolean useComponentTypeName;
 
     private String activeOption;
 
-    public ParameterFieldComponent(EditorFrame editorFrame, boolean optional, String name, TemplateParameter.ComponentFormat componentFormat, List<ComponentOption> componentOptions, Main main) {
+    public ParameterFieldComponent(EditorFrame editorFrame, boolean optional, String name, TemplateParameter.ComponentFormat componentFormat, List<ComponentOption> componentOptions, boolean useComponentTypeName, Main main) {
         super(editorFrame, optional, name);
         this.editorElements = new HashMap<>();
         this.main = main;
         this.componentFormat = componentFormat;
         this.objectPanel = new JPanel();
         this.componentOptionMap = new HashMap<>();
+        this.useComponentTypeName = useComponentTypeName;
         objectPanel.setLayout(new CardLayout());
         objectPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         for (ComponentOption option : componentOptions) {
@@ -91,7 +93,8 @@ public class ParameterFieldComponent extends EditorElement {
             return null;
         }
         Data currentObjectData = editorElements.get(activeOption).getData();
-        return new DataComponent(activeOption, currentObjectData);
+        String nameOverride = useComponentTypeName ? componentOptionMap.get(activeOption).name() : null;
+        return new DataComponent(activeOption, currentObjectData, nameOverride);
     }
 
     @Override

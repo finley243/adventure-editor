@@ -17,7 +17,7 @@ import java.util.List;
  * @param width The GridBag width of the parameter in the editor window (or in the specified group).
  * @param height The GridBag height of the parameter in the editor window (or in the specified group).
  */
-public record TemplateParameter(String id, ParameterDataType dataType, String name, String type, boolean topLevelOnly, boolean optional, ParameterFormat format, ComponentFormat componentFormat, List<ComponentOption> componentOptions, String group, int x, int y, int width, int height) {
+public record TemplateParameter(String id, ParameterDataType dataType, String name, String type, boolean topLevelOnly, boolean optional, ParameterFormat format, ComponentFormat componentFormat, List<ComponentOption> componentOptions, boolean useComponentTypeName, String group, int x, int y, int width, int height) {
 
     public enum ParameterDataType {
         BOOLEAN, INTEGER, FLOAT, STRING, OBJECT, OBJECT_SET, REFERENCE, ENUM, SCRIPT, COMPONENT

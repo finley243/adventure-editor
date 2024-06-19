@@ -109,12 +109,13 @@ public class DataLoader {
                                 String optionObject = LoadUtils.attribute(componentOptionElement, "object", null);
                                 componentOptions.add(new ComponentOption(optionID, optionName, optionObject));
                             }
+                            boolean useComponentTypeName = LoadUtils.attributeBool(parameterElement, "useComponentTypeName", false);
                             String group = LoadUtils.attribute(parameterElement, "group", null);
                             int x = LoadUtils.attributeInt(parameterElement, "x", 0);
                             int y = LoadUtils.attributeInt(parameterElement, "y", 0);
                             int width = LoadUtils.attributeInt(parameterElement, "width", 1);
                             int height = LoadUtils.attributeInt(parameterElement, "height", 1);
-                            parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, group, x, y, width, height));
+                            parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height));
                         }
                         String primaryParameter = LoadUtils.attribute(templateElement, "primaryParameter", null);
                         Template template = new Template(id, name, topLevel, groups, tabGroups, parameters, primaryParameter);
@@ -368,7 +369,6 @@ public class DataLoader {
                 case COMPONENT -> {
                     //Element componentElement = LoadUtils.singleChildWithName(element, parameter.id());
                     if (element == null) {
-                        System.out.println("Component element is null in " + template.id() + ":" + parameter.id());
                         dataMap.put(parameter.id(), null);
                     } else {
                         String componentType = switch (parameter.componentFormat()) {
@@ -380,7 +380,8 @@ public class DataLoader {
                             optionsMap.put(option.id(), option);
                         }
                         Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates);
-                        dataMap.put(parameter.id(), new DataComponent(componentType, objectData));
+                        String nameOverride = parameter.useComponentTypeName() ? optionsMap.get(componentType).name() : null;
+                        dataMap.put(parameter.id(), new DataComponent(componentType, objectData, nameOverride));
                     }
                 }
             }
