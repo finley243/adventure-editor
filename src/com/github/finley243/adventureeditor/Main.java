@@ -19,6 +19,7 @@ import javax.xml.transform.TransformerException;
 public class Main {
 
     private static final boolean OPEN_CONFIG_MENU_ON_NEW_PROJECT = true;
+    private static final String UNNAMED_PROJECT_NAME = "Unnamed Project";
 
     private final Map<String, Template> templates;
     private final Map<String, List<String>> enumTypes;
@@ -69,6 +70,14 @@ public class Main {
 
     public List<ProjectData> getRecentProjects() {
         return recentProjects;
+    }
+
+    public boolean hasOpenProject() {
+        return isProjectLoaded;
+    }
+
+    public boolean hasUnsavedOpenProject() {
+        return isProjectLoaded && loadedProjectPath == null;
     }
 
     public Template getTemplate(String categoryID) {
@@ -129,6 +138,15 @@ public class Main {
         }
     }
 
+    public void updateProjectName() {
+        String configProjectName = configMenuHandler.getProjectName();
+        if (configProjectName == null && hasOpenProject()) {
+            browserFrame.setProjectName(UNNAMED_PROJECT_NAME);
+        } else {
+            browserFrame.setProjectName(configProjectName);
+        }
+    }
+
     public void newProject() {
         // TODO - Add save confirmation if a project is open
         data.clear();
@@ -136,6 +154,7 @@ public class Main {
         browserFrame.reloadBrowserData(templates, data);
         isProjectLoaded = true;
         loadedProjectPath = null;
+        updateProjectName();
         if (OPEN_CONFIG_MENU_ON_NEW_PROJECT) {
             openConfigMenu();
         }
@@ -161,6 +180,7 @@ public class Main {
             browserFrame.updateRecentProjects();
             isProjectLoaded = true;
             loadedProjectPath = selectedDirectory.getAbsolutePath();
+            updateProjectName();
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
             data.clear();
@@ -183,6 +203,7 @@ public class Main {
             browserFrame.reloadBrowserData(templates, data);
             isProjectLoaded = true;
             loadedProjectPath = file.getAbsolutePath();
+            updateProjectName();
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
             data.clear();

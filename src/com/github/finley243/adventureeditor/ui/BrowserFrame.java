@@ -3,6 +3,7 @@ package com.github.finley243.adventureeditor.ui;
 import com.github.finley243.adventureeditor.DataLoader;
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.ProjectData;
 import com.github.finley243.adventureeditor.template.Template;
 
@@ -230,4 +231,29 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
     public void onEditorFrameClose(EditorFrame frame) {
         this.closeEditorFrameIfActive(frame.getTemplate().id(), frame.getObjectID());
     }
+
+    @Override
+    public boolean isDataValidOrShowDialog(Component parentComponent, Data currentData, Data initialData) {
+        boolean isNewInstance = initialData == null;
+        String categoryID = ((DataObject) currentData).getTemplate().id();
+        String currentID = ((DataObject) currentData).getID();
+        if (currentID == null || currentID.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(parentComponent, "ID cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (isNewInstance) {
+            if (main.getIDsForCategory(categoryID).contains(currentID)) {
+                JOptionPane.showMessageDialog(parentComponent, "An object with ID \"" + currentID + "\" already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        } else {
+            String initialID = ((DataObject) initialData).getID();
+            if (!initialID.equals(currentID) && main.getIDsForCategory(categoryID).contains(currentID)) {
+                JOptionPane.showMessageDialog(parentComponent, "An object with ID \"" + currentID + "\" already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

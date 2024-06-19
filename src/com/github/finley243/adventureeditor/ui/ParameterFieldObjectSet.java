@@ -170,6 +170,11 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
     }
 
     @Override
+    public boolean isDataValidOrShowDialog(Component parentComponent, Data currentData, Data initialData) {
+        return true;
+    }
+
+    @Override
     public Data getData() {
         if (!isOptionalEnabled()) {
             return null;

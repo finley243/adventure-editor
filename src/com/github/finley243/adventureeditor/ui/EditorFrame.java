@@ -23,13 +23,16 @@ public class EditorFrame extends JFrame {
 
     public EditorFrame(Main main, Template template, Data objectData, DataSaveTarget saveTarget) {
         super(template.name());
+        if (saveTarget == null) {
+            throw new IllegalArgumentException("Save target cannot be null");
+        }
         this.main = main;
         this.template = template;
         this.initialData = objectData;
         this.saveTarget = saveTarget;
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
-        this.editorElement = new ParameterFieldObject(this, false, template.name(), template, main, saveTarget == null, true);
+        this.editorElement = new ParameterFieldObject(this, false, template.name(), template, main, saveTarget instanceof BrowserFrame, true);
         if (objectData != null) {
             editorElement.setData(objectData);
         }
@@ -159,30 +162,7 @@ public class EditorFrame extends JFrame {
 
     // Returns true if data is valid, shows error dialog and returns false if not
     private boolean isDataValidOrShowDialog() {
-        boolean isNewInstance = initialData == null;
-        Data currentData = editorElement.getData();
-        if (saveTarget instanceof BrowserFrame) { // Saving object to main game data
-            String categoryID = ((DataObject) currentData).getTemplate().id();
-            String currentID = ((DataObject) currentData).getID();
-            if (currentID == null || currentID.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "ID cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-            if (isNewInstance) {
-                if (main.getIDsForCategory(categoryID).contains(currentID)) {
-                    JOptionPane.showMessageDialog(this, "An object with ID \"" + currentID + "\" already exists.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-            } else {
-                String initialID = ((DataObject) initialData).getID();
-                if (!initialID.equals(currentID) && main.getIDsForCategory(categoryID).contains(currentID)) {
-                    JOptionPane.showMessageDialog(this, "An object with ID \"" + currentID + "\" already exists.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-            }
-        }
-        // TODO - Add checks for required parameters
-        return true;
+        return saveTarget.isDataValidOrShowDialog(this, editorElement.getData(), initialData);
     }
 
     private boolean hasUnsavedChanges() {
