@@ -7,6 +7,9 @@ import com.github.finley243.adventureeditor.template.Template;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 
 public class EditorFrame extends JFrame {
@@ -40,6 +43,48 @@ public class EditorFrame extends JFrame {
         this.getContentPane().add(mainPanel);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setResizable(false);
+
+        EditorFrame thisFrame = this;
+        Action saveAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isDataValidOrShowDialog()) {
+                    saveTarget.saveObjectData(editorElement.getData(), initialData);
+                    saveTarget.onEditorFrameClose(thisFrame);
+                    thisFrame.dispose();
+                }
+            }
+        };
+        Action closeAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String[] confirmOptions = {"Yes", "No", "Cancel"};
+                int confirmResult = JOptionPane.showOptionDialog(thisFrame, "Would you like to save changes?", "Save Confirmation",
+                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, confirmOptions, confirmOptions[2]);
+                if (confirmResult == 0) {
+                    // Save
+                    if (isDataValidOrShowDialog()) {
+                        saveTarget.saveObjectData(editorElement.getData(), initialData);
+                        saveTarget.onEditorFrameClose(thisFrame);
+                        thisFrame.dispose();
+                    }
+                } else if (confirmResult == 1) {
+                    // Don't save
+                    saveTarget.onEditorFrameClose(thisFrame);
+                    thisFrame.dispose();
+                }
+                // Cancel (do nothing)
+            }
+        };
+
+        ActionMap actionMap = getRootPane().getActionMap();
+        actionMap.put("saveEditor", saveAction);
+        actionMap.put("closeEditor", closeAction);
+
+        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "saveEditor");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "closeEditor");
+
         this.pack();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -54,10 +99,6 @@ public class EditorFrame extends JFrame {
             return null;
         }
         return ((DataObject) initialData).getID();
-    }
-
-    private boolean isTopLevel() {
-        return saveTarget == main;
     }
 
     private JPanel getButtonPanel(boolean isNewInstance) {
@@ -96,7 +137,7 @@ public class EditorFrame extends JFrame {
                 return;
             }
             String[] confirmOptions = {"Yes", "No", "Cancel"};
-            int confirmResult = JOptionPane.showOptionDialog(this, "Would you like to save changes?", "Save Confirmation",
+            int confirmResult = JOptionPane.showOptionDialog(this, "Would you like to save changes to this data?", "Save Confirmation",
                     JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, confirmOptions, confirmOptions[2]);
             if (confirmResult == 0) {
                 // Save
@@ -120,7 +161,7 @@ public class EditorFrame extends JFrame {
     private boolean isDataValidOrShowDialog() {
         boolean isNewInstance = initialData == null;
         Data currentData = editorElement.getData();
-        if (isTopLevel()) {
+        if (saveTarget instanceof BrowserFrame) { // Saving object to main game data
             String categoryID = ((DataObject) currentData).getTemplate().id();
             String currentID = ((DataObject) currentData).getID();
             if (currentID == null || currentID.trim().isEmpty()) {

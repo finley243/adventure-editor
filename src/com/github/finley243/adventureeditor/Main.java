@@ -18,6 +18,8 @@ import javax.xml.transform.TransformerException;
 
 public class Main {
 
+    private static final boolean OPEN_CONFIG_MENU_ON_NEW_PROJECT = true;
+
     private final Map<String, Template> templates;
     private final Map<String, List<String>> enumTypes;
     private final List<ProjectData> recentProjects;
@@ -28,6 +30,7 @@ public class Main {
     private final BrowserFrame browserFrame;
 
     private boolean isProjectLoaded;
+    private String loadedProjectPath;
 
     public static void main(String[] args) throws ParserConfigurationException, IOException, SAXException {
         Main main = new Main();
@@ -51,14 +54,17 @@ public class Main {
         browserFrame.updateRecentProjects();
         this.data = new HashMap<>();
         isProjectLoaded = false;
+        loadedProjectPath = null;
     }
 
     public boolean isProjectLoaded() {
         return isProjectLoaded;
     }
 
-    public ConfigMenuHandler getConfigMenuHandler() {
-        return configMenuHandler;
+    public void openConfigMenu() {
+        if (isProjectLoaded) {
+            configMenuHandler.openConfigMenu();
+        }
     }
 
     public List<ProjectData> getRecentProjects() {
@@ -129,9 +135,13 @@ public class Main {
         configMenuHandler.clearConfigData();
         browserFrame.reloadBrowserData(templates, data);
         isProjectLoaded = true;
+        loadedProjectPath = null;
+        if (OPEN_CONFIG_MENU_ON_NEW_PROJECT) {
+            openConfigMenu();
+        }
     }
 
-    public void openProject() {
+    public void openProjectFromMenu() {
         // TODO - Add save confirmation if a project is open
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -150,6 +160,7 @@ public class Main {
             recentProjects.addFirst(project);
             browserFrame.updateRecentProjects();
             isProjectLoaded = true;
+            loadedProjectPath = selectedDirectory.getAbsolutePath();
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
             data.clear();
@@ -171,6 +182,7 @@ public class Main {
             DataLoader.loadFromDir(file, templates, data, configMenuHandler);
             browserFrame.reloadBrowserData(templates, data);
             isProjectLoaded = true;
+            loadedProjectPath = file.getAbsolutePath();
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
             data.clear();
@@ -184,7 +196,28 @@ public class Main {
         }
     }
 
-    public void saveProject() {
+    public void saveProjectToCurrentPath() {
+        if (loadedProjectPath == null) {
+            saveProjectToMenu();
+        } else {
+            File loadedDirectory = new File(loadedProjectPath);
+            try {
+                DataLoader.saveToDir(loadedDirectory, templates, data, configMenuHandler);
+                ProjectData project = new ProjectData(loadedDirectory.getName(), loadedDirectory.getAbsolutePath());
+                recentProjects.remove(project);
+                recentProjects.addFirst(project);
+                browserFrame.updateRecentProjects();
+            } catch (IOException e) {
+                //throw new RuntimeException(e);
+                JOptionPane.showMessageDialog(browserFrame, "Project could not be saved to the current directory.", "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (ParserConfigurationException | TransformerException e) {
+                //throw new RuntimeException(e);
+                JOptionPane.showMessageDialog(browserFrame, "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    public void saveProjectToMenu() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int result = fileChooser.showSaveDialog(browserFrame);
@@ -198,6 +231,7 @@ public class Main {
             recentProjects.remove(project);
             recentProjects.addFirst(project);
             browserFrame.updateRecentProjects();
+            loadedProjectPath = selectedDirectory.getAbsolutePath();
         } catch (IOException e) {
             //throw new RuntimeException(e);
             JOptionPane.showMessageDialog(browserFrame, "Project could not be saved to the selected directory.", "Error", JOptionPane.ERROR_MESSAGE);

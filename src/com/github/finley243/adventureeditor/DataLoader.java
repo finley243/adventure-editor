@@ -17,6 +17,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class DataLoader {
@@ -188,13 +192,20 @@ public class DataLoader {
             saveConfigData(dir, templates.get(ConfigMenuHandler.CONFIG_TEMPLATE), configMenuHandler);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
             dataDirectory.mkdirs();
+
+            // Delete all existing .xml files in the directory
+            Path dirPath = Paths.get(dataDirectory.getAbsolutePath());
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*.xml")) {
+                for (Path path : stream) {
+                    Files.delete(path);
+                }
+            }
+
             for (Map.Entry<String, Map<String, Data>> entry : dataMap.entrySet()) {
                 String categoryID = entry.getKey();
                 Map<String, Data> categoryData = entry.getValue();
                 File categoryFile = new File(dataDirectory, categoryID + ".xml");
-                if (!categoryFile.exists()) {
-                    categoryFile.createNewFile();
-                }
+                categoryFile.createNewFile();
                 saveDataToFile(categoryData, categoryFile, templates);
             }
         }
@@ -370,6 +381,9 @@ public class DataLoader {
     }
 
     private static void addObjectToElement(DataObject objectData, Element objectElement, Document document) {
+        if (objectData == null) {
+            return;
+        }
         for (TemplateParameter parameter : objectData.getTemplate().parameters()) {
             Data parameterData = objectData.getValue().get(parameter.id());
             if (parameterData == null /*&& parameter.optional()*/) {

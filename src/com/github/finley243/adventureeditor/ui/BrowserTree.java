@@ -51,9 +51,9 @@ public class BrowserTree extends JTree {
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserCategoryNode categoryNode) {
                     main.newObject(categoryNode.getCategoryID());
-                }/* else if (node instanceof BrowserObjectNode objectNode) {
+                } else if (node instanceof BrowserObjectNode objectNode) {
                     main.newObject(objectNode.getCategoryID());
-                }*/
+                }
             }
         };
         Action editAction = new AbstractAction() {
@@ -104,13 +104,25 @@ public class BrowserTree extends JTree {
         Action openProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.openProject();
+                main.openProjectFromMenu();
             }
         };
         Action saveProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.saveProject();
+                main.saveProjectToMenu();
+            }
+        };
+        Action saveProjectAsAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                main.saveProjectToCurrentPath();
+            }
+        };
+        Action openConfigAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                main.openConfigMenu();
             }
         };
 
@@ -122,15 +134,20 @@ public class BrowserTree extends JTree {
         actionMap.put("newProject", newProjectAction);
         actionMap.put("openProject", openProjectAction);
         actionMap.put("saveProject", saveProjectAction);
+        actionMap.put("saveProjectAs", saveProjectAsAction);
+        actionMap.put("openConfig", openConfigAction);
 
-        InputMap inputMap = getInputMap(JComponent.WHEN_FOCUSED);
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK), "newGameObject");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "editGameObject");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK), "duplicateGameObject");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deleteGameObject");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK), "newProject");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK), "openProject");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "saveProject");
+        InputMap inputMapFocused = getInputMap(JComponent.WHEN_FOCUSED);
+        inputMapFocused.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK), "newGameObject");
+        inputMapFocused.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "editGameObject");
+        inputMapFocused.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK), "duplicateGameObject");
+        inputMapFocused.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deleteGameObject");
+        InputMap inputMapWindow = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "newProject");
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK), "openProject");
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "saveProject");
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "saveProjectAs");
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "openConfig");
     }
 
     @Override

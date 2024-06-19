@@ -41,14 +41,17 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         JMenuItem fileNew = new JMenuItem("New");
         fileNew.addActionListener(e -> main.newProject());
         JMenuItem fileOpen = new JMenuItem("Open");
-        fileOpen.addActionListener(e -> main.openProject());
+        fileOpen.addActionListener(e -> main.openProjectFromMenu());
         this.fileOpenRecent = new JMenu("Open Recent");
         JMenuItem fileSave = new JMenuItem("Save");
-        fileSave.addActionListener(e -> main.saveProject());
+        fileSave.addActionListener(e -> main.saveProjectToCurrentPath());
+        JMenuItem fileSaveAs = new JMenuItem("Save As");
+        fileSaveAs.addActionListener(e -> main.saveProjectToMenu());
         fileMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
                 fileSave.setEnabled(main.isProjectLoaded());
+                fileSaveAs.setEnabled(main.isProjectLoaded());
             }
             @Override
             public void menuDeselected(MenuEvent e) {}
@@ -58,12 +61,14 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         fileMenu.add(fileNew);
         fileMenu.add(fileOpen);
         fileMenu.add(fileOpenRecent);
+        fileMenu.addSeparator();
         fileMenu.add(fileSave);
+        fileMenu.add(fileSaveAs);
 
         JMenu settingsMenu = new JMenu("Settings");
         menuBar.add(settingsMenu);
         JMenuItem settingsProjectConfig = new JMenuItem("Project Configuration");
-        settingsProjectConfig.addActionListener(e -> main.getConfigMenuHandler().openConfigMenu());
+        settingsProjectConfig.addActionListener(e -> main.openConfigMenu());
         settingsMenu.add(settingsProjectConfig);
         settingsMenu.addMenuListener(new MenuListener() {
             @Override
@@ -91,6 +96,14 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         this.pack();
         this.setVisible(true);
         this.setLocationRelativeTo(null);
+    }
+
+    public void setProjectName(String name) {
+        if (name == null) {
+            this.setTitle("AdventureEditor");
+        } else {
+            this.setTitle("AdventureEditor - " + name);
+        }
     }
 
     public void updateRecentProjects() {
@@ -131,6 +144,7 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
     }
 
     public void reloadBrowserData(Map<String, Template> templates, Map<String, Map<String, Data>> data) {
+        closeAllActiveEditorFrames();
         browserTree.clearData();
         browserTree.expandRow(0);
         for (String category : templates.keySet()) {
@@ -162,6 +176,16 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
             activeFrame.dispose();
             removeActiveTopLevelFrame(categoryID, objectID);
         }
+    }
+
+    private void closeAllActiveEditorFrames() {
+        for (String categoryID : topLevelEditorWindows.keySet()) {
+            for (String objectID : topLevelEditorWindows.get(categoryID).keySet()) {
+                // TODO - Check if user wants to save changes in each window if applicable
+                topLevelEditorWindows.get(categoryID).get(objectID).dispose();
+            }
+        }
+        topLevelEditorWindows.clear();
     }
 
     private EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
