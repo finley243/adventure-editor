@@ -10,7 +10,7 @@ public record TemplateParameter(String id, ParameterDataType dataType, String na
      */
 
     public enum ParameterDataType {
-        BOOLEAN, INTEGER, FLOAT, STRING, STRING_SET, OBJECT, OBJECT_SET, REFERENCE, ENUM, SCRIPT
+        BOOLEAN, INTEGER, FLOAT, STRING, OBJECT, OBJECT_SET, REFERENCE, ENUM, SCRIPT
     }
 
     public enum ParameterFormat {

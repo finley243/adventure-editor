@@ -82,7 +82,6 @@ public class DataLoader {
                                 case "integer" -> TemplateParameter.ParameterDataType.INTEGER;
                                 case "float" -> TemplateParameter.ParameterDataType.FLOAT;
                                 case "string" -> TemplateParameter.ParameterDataType.STRING;
-                                case "stringSet" -> TemplateParameter.ParameterDataType.STRING_SET;
                                 case "object" -> TemplateParameter.ParameterDataType.OBJECT;
                                 case "objectSet" -> TemplateParameter.ParameterDataType.OBJECT_SET;
                                 case "reference" -> TemplateParameter.ParameterDataType.REFERENCE;
@@ -299,7 +298,6 @@ public class DataLoader {
                         dataMap.put(parameter.id(), new DataString(value));
                     }
                 }
-                case STRING_SET -> dataMap.put(parameter.id(), new DataStringSet(LoadUtils.listOfTags(element, parameter.id())));
                 case OBJECT -> {
                     Element objectElement = LoadUtils.singleChildWithName(element, parameter.id());
                     if (objectElement == null) {
@@ -433,14 +431,6 @@ public class DataLoader {
                             objectElement.appendChild(childElement);
                         }
                         case CURRENT_TAG -> objectElement.setTextContent(value);
-                    }
-                }
-                case STRING_SET -> {
-                    List<String> values = ((DataStringSet) parameterData).getValue();
-                    for (String value : values) {
-                        Element childElement = document.createElement(parameter.id());
-                        childElement.setTextContent(value);
-                        objectElement.appendChild(childElement);
                     }
                 }
                 case OBJECT -> {
