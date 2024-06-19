@@ -120,7 +120,12 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
                     recentProjects.addFirst(recentProject);
                     main.openProjectFromFile(recentProjectFile);
                 } else {
-                    JOptionPane.showMessageDialog(this, "The selected project file does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
+                    int choice = JOptionPane.showOptionDialog(this, "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
+                    if (choice == JOptionPane.YES_OPTION) {
+                        recentProjects.remove(recentProject);
+                        DataLoader.saveRecentProjects(recentProjects);
+                        updateRecentProjects();
+                    }
                 }
             });
             fileOpenRecent.add(recentProjectItem);
