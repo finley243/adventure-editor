@@ -164,7 +164,9 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
     @Override
     public void onEditorFrameClose(EditorFrame frame) {
          int index = editorFrames.indexOf(frame);
-         editorFrames.set(index, null);
+         if (index != -1) {
+             editorFrames.set(index, null);
+         }
     }
 
     @Override

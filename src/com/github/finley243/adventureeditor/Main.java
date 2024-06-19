@@ -22,9 +22,11 @@ import javax.xml.transform.TransformerException;
 public class Main implements DataSaveTarget {
 
     private final Map<String, Template> templates;
-    private final Map<String, Set<String>> enumTypes;
+    private final Map<String, List<String>> enumTypes;
     private final List<ProjectData> recentProjects;
     private final Map<String, Map<String, Data>> data;
+
+    private final ConfigMenuHandler configMenuHandler;
 
     private final BrowserTree browserTree;
     private final JMenu fileOpenRecent;
@@ -48,6 +50,7 @@ public class Main implements DataSaveTarget {
         this.templates = new HashMap<>();
         this.enumTypes = new HashMap<>();
         this.recentProjects = new ArrayList<>();
+        this.configMenuHandler = new ConfigMenuHandler(this);
         DataLoader.loadTemplates(templates, enumTypes);
         DataLoader.loadRecentProjects(recentProjects);
         this.data = new HashMap<>();
@@ -86,6 +89,23 @@ public class Main implements DataSaveTarget {
         fileMenu.add(fileOpen);
         fileMenu.add(fileOpenRecent);
         fileMenu.add(fileSave);
+
+        JMenu settingsMenu = new JMenu("Settings");
+        menuBar.add(settingsMenu);
+        JMenuItem settingsProjectConfig = new JMenuItem("Project Configuration");
+        settingsProjectConfig.addActionListener(e -> configMenuHandler.openConfigMenu());
+        settingsMenu.add(settingsProjectConfig);
+        settingsMenu.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                settingsProjectConfig.setEnabled(isProjectLoaded);
+            }
+            @Override
+            public void menuDeselected(MenuEvent e) {}
+            @Override
+            public void menuCanceled(MenuEvent e) {}
+        });
+
         updateRecentProjects();
 
         JPanel browserPanel = new JPanel();
@@ -129,7 +149,7 @@ public class Main implements DataSaveTarget {
         return templates.get(categoryID);
     }
 
-    public Set<String> getEnumValues(String enumID) {
+    public List<String> getEnumValues(String enumID) {
         return enumTypes.get(enumID);
     }
 
@@ -161,15 +181,24 @@ public class Main implements DataSaveTarget {
             String initialID = ((DataObject) initialData).getID();
             String newID = objectDataCast.getID();
             if (!initialID.equals(newID)) { // Edit with new ID
+                if (!data.containsKey(categoryID)) {
+                    data.put(categoryID, new HashMap<>());
+                }
                 data.get(categoryID).remove(initialID);
                 browserTree.removeGameObject(categoryID, initialID);
                 data.get(categoryID).put(objectID, objectData);
                 browserTree.addGameObject(categoryID, objectID, true);
             } else { // Edit with same ID
+                if (!data.containsKey(categoryID)) {
+                    data.put(categoryID, new HashMap<>());
+                }
                 data.get(categoryID).put(objectID, objectData);
                 browserTree.updateCategory(categoryID);
             }
         } else { // New object instance
+            if (!data.containsKey(categoryID)) {
+                data.put(categoryID, new HashMap<>());
+            }
             data.get(categoryID).put(objectID, objectData);
             browserTree.addGameObject(categoryID, objectID, true);
         }
@@ -193,6 +222,7 @@ public class Main implements DataSaveTarget {
     public void newProject() {
         // TODO - Add save confirmation if a project is open
         data.clear();
+        configMenuHandler.clearConfigData();
         loadBrowserData();
         isProjectLoaded = true;
     }
@@ -207,8 +237,9 @@ public class Main implements DataSaveTarget {
         }
         File selectedDirectory = fileChooser.getSelectedFile();
         data.clear();
+        configMenuHandler.clearConfigData();
         try {
-            DataLoader.loadFromDir(selectedDirectory, templates, data);
+            DataLoader.loadFromDir(selectedDirectory, templates, data, configMenuHandler);
             loadBrowserData();
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             recentProjects.remove(project);
@@ -218,10 +249,12 @@ public class Main implements DataSaveTarget {
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
             data.clear();
+            configMenuHandler.clearConfigData();
             JOptionPane.showMessageDialog(browserTree, "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             //throw new RuntimeException(e);
             data.clear();
+            configMenuHandler.clearConfigData();
             JOptionPane.showMessageDialog(browserTree, "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -229,17 +262,20 @@ public class Main implements DataSaveTarget {
     public void openProjectFromFile(File file) {
         // TODO - Add save confirmation if a project is open
         data.clear();
+        configMenuHandler.clearConfigData();
         try {
-            DataLoader.loadFromDir(file, templates, data);
+            DataLoader.loadFromDir(file, templates, data, configMenuHandler);
             loadBrowserData();
             isProjectLoaded = true;
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
             data.clear();
+            configMenuHandler.clearConfigData();
             JOptionPane.showMessageDialog(browserTree, "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             //throw new RuntimeException(e);
             data.clear();
+            configMenuHandler.clearConfigData();
             JOptionPane.showMessageDialog(browserTree, "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -253,7 +289,7 @@ public class Main implements DataSaveTarget {
         }
         File selectedDirectory = fileChooser.getSelectedFile();
         try {
-            DataLoader.saveToDir(selectedDirectory, templates, data);
+            DataLoader.saveToDir(selectedDirectory, templates, data, configMenuHandler);
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             recentProjects.remove(project);
             recentProjects.addFirst(project);
@@ -308,7 +344,7 @@ public class Main implements DataSaveTarget {
             activeFrame.requestFocus();
         } else {
             Template template = templates.get(categoryID);
-            Data objectData = data.get(categoryID).get(objectID);
+            Data objectData = data.containsKey(categoryID) ? data.get(categoryID).get(objectID) : null;
             EditorFrame editorFrame = new EditorFrame(this, template, objectData, this);
             addActiveTopLevelFrame(categoryID, objectID, editorFrame);
         }

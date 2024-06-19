@@ -16,10 +16,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class DataLoader {
@@ -30,7 +27,7 @@ public class DataLoader {
     private static final String DATA_DIRECTORY = "/data";
     private static final String CONFIG_FILE = "/config.xml";
 
-    public static void loadTemplates(Map<String, Template> templates, Map<String, Set<String>> enumTypes) throws ParserConfigurationException, IOException, SAXException {
+    public static void loadTemplates(Map<String, Template> templates, Map<String, List<String>> enumTypes) throws ParserConfigurationException, IOException, SAXException {
         File dir = new File(TEMPLATE_DIRECTORY);
         if (dir.isDirectory()) {
             File[] files = dir.listFiles();
@@ -45,7 +42,7 @@ public class DataLoader {
                     Element rootElement = document.getDocumentElement();
                     for (Element enumTypeElement : LoadUtils.directChildrenWithName(rootElement, "enumType")) {
                         String id = LoadUtils.attribute(enumTypeElement, "id", null);
-                        Set<String> values = LoadUtils.setOfTags(enumTypeElement, "value");
+                        List<String> values = LoadUtils.listOfTags(enumTypeElement, "value");
                         enumTypes.put(id, values);
                     }
                     for (Element templateElement : LoadUtils.directChildrenWithName(rootElement, "template")) {
@@ -145,8 +142,9 @@ public class DataLoader {
         }
     }
 
-    public static void loadFromDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap) throws ParserConfigurationException, IOException, SAXException {
+    public static void loadFromDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuHandler configMenuHandler) throws ParserConfigurationException, IOException, SAXException {
         if (dir.isDirectory()) {
+            loadConfigData(dir, templates.get(ConfigMenuHandler.CONFIG_TEMPLATE), configMenuHandler);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
             if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
                 return;
@@ -167,7 +165,7 @@ public class DataLoader {
                             Element currentElement = (Element) currentChild;
                             String elementType = currentChild.getNodeName();
                             Template template = templates.get(elementType);
-                            if (template != null) {
+                            if (template != null && template.topLevel()) {
                                 DataObject data = loadDataFromElement(currentElement, template, templates);
                                 if (!dataMap.containsKey(elementType)) {
                                     dataMap.put(elementType, new HashMap<>());
@@ -185,8 +183,9 @@ public class DataLoader {
         }
     }
 
-    public static void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap) throws IOException, TransformerException, ParserConfigurationException {
+    public static void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuHandler configMenuHandler) throws IOException, TransformerException, ParserConfigurationException {
         if (dir.isDirectory()) {
+            saveConfigData(dir, templates.get(ConfigMenuHandler.CONFIG_TEMPLATE), configMenuHandler);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
             dataDirectory.mkdirs();
             for (Map.Entry<String, Map<String, Data>> entry : dataMap.entrySet()) {
@@ -199,6 +198,42 @@ public class DataLoader {
                 saveDataToFile(categoryData, categoryFile, templates);
             }
         }
+    }
+
+    private static void loadConfigData(File dir, Template configTemplate, ConfigMenuHandler configMenuHandler) throws ParserConfigurationException, IOException, SAXException {
+        File configFile = new File(dir, CONFIG_FILE);
+        if (!configFile.exists()) {
+            return;
+        }
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(configFile);
+        Element rootElement = document.getDocumentElement();
+        if (rootElement == null) {
+            return;
+        }
+        Data configData = loadDataFromElement(rootElement, configTemplate, new HashMap<>());
+        configMenuHandler.setConfigData(configData);
+    }
+
+    private static void saveConfigData(File dir, Template configTemplate, ConfigMenuHandler configMenuHandler) throws IOException, ParserConfigurationException, TransformerException {
+        File configFile = new File(dir, CONFIG_FILE);
+        if (!configFile.exists()) {
+            configFile.createNewFile();
+        }
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.newDocument();
+        Element rootElement = document.createElement("data");
+        document.appendChild(rootElement);
+        DataObject objectData = (DataObject) configMenuHandler.getConfigData();
+        addObjectToElement(objectData, rootElement, document);
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        DOMSource source = new DOMSource(document);
+        StreamResult result = new StreamResult(configFile);
+        transformer.transform(source, result);
     }
 
     private static DataObject loadDataFromElement(Element element, Template template, Map<String, Template> templates) {

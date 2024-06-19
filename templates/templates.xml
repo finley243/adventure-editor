@@ -1,4 +1,23 @@
 <data>
+    <template id="config" name="Project Configuration" topLevel="false">
+        <group id="startTime" name="Start Time" y="5" width="2"/>
+        <group id="startDate" name="Start Date" y="4" width="2"/>
+        <group id="player" name="Player Settings" x="1" y="0" height="3"/>
+        <parameter id="gameName" dataType="string" name="Game Name" format="child_tag" y="0"/>
+        <parameter id="interfaceType" dataType="enum" type="interfaceType" name="Interface Type" format="child_tag" y="1"/>
+        <parameter id="enableDebugLog" dataType="boolean" name="Enable Debug Log" format="child_tag" y="2"/>
+        <parameter id="playerStats" dataType="reference" type="actor" name="Actor Template" format="child_tag" group="player" y="0"/>
+        <parameter id="playerID" dataType="string" name="Instance ID" format="child_tag" group="player" y="1"/>
+        <parameter id="playerStartArea" dataType="reference" type="area" name="Start Area" format="child_tag" group="player" y="2"/>
+        <parameter id="defaultDamageType" dataType="reference" type="damageType" name="Default Damage Type" format="child_tag" x="0" y="3"/>
+        <parameter id="defaultLinkType" dataType="reference" type="linkType" name="Default Link Type" format="child_tag" x="1" y="3"/>
+        <parameter id="startTimeHours" dataType="integer" name="Hours" format="child_tag" group="startTime" x="0"/>
+        <parameter id="startTimeMinutes" dataType="integer" name="Minutes" format="child_tag" group="startTime" x="1"/>
+        <parameter id="startDateYear" dataType="integer" name="Year" format="child_tag" group="startDate" x="0" y="0"/>
+        <parameter id="startDateMonth" dataType="integer" name="Month" format="child_tag" group="startDate" x="1" y="0"/>
+        <parameter id="startDateDay" dataType="integer" name="Day" format="child_tag" group="startDate" x="0" y="1"/>
+        <parameter id="startDateWeekday" dataType="enum" type="weekday" name="Weekday" format="child_tag" group="startDate" x="1" y="1"/>
+    </template>
     <template id="room" name="Room" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
         <parameter id="name" dataType="object" name="Name" type="roomName" x="0" y="1"/>

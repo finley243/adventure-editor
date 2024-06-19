@@ -1,4 +1,18 @@
 <data>
+    <enumType id="interfaceType">
+        <value>graphicalChoice</value>
+        <value>consoleChoice</value>
+        <value>consoleParser</value>
+    </enumType>
+    <enumType id="weekday">
+        <value>monday</value>
+        <value>tuesday</value>
+        <value>wednesday</value>
+        <value>thursday</value>
+        <value>friday</value>
+        <value>saturday</value>
+        <value>sunday</value>
+    </enumType>
     <enumType id="pronoun">
         <value>THEY</value>
         <value>HE</value>

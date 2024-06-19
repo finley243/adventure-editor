@@ -57,7 +57,7 @@ public class EditorFrame extends JFrame {
     }
 
     private boolean isTopLevel() {
-        return saveTarget == null;
+        return saveTarget == main;
     }
 
     private JPanel getButtonPanel(boolean isNewInstance) {
