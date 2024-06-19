@@ -7,19 +7,16 @@ import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.*;
 import org.xml.sax.SAXException;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
 import javax.swing.*;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-public class Main implements DataSaveTarget {
+public class Main {
 
     private final Map<String, Template> templates;
     private final Map<String, List<String>> enumTypes;
@@ -28,10 +25,7 @@ public class Main implements DataSaveTarget {
 
     private final ConfigMenuHandler configMenuHandler;
 
-    private final BrowserTree browserTree;
-    private final JMenu fileOpenRecent;
-
-    private final Map<String, Map<String, EditorFrame>> topLevelEditorWindows;
+    private final BrowserFrame browserFrame;
 
     private boolean isProjectLoaded;
 
@@ -51,98 +45,24 @@ public class Main implements DataSaveTarget {
         this.enumTypes = new HashMap<>();
         this.recentProjects = new ArrayList<>();
         this.configMenuHandler = new ConfigMenuHandler(this);
+        this.browserFrame = new BrowserFrame(this);
         DataLoader.loadTemplates(templates, enumTypes);
         DataLoader.loadRecentProjects(recentProjects);
+        browserFrame.updateRecentProjects();
         this.data = new HashMap<>();
-        this.browserTree = new BrowserTree(this);
-        this.fileOpenRecent = new JMenu("Open Recent");
-        this.topLevelEditorWindows = new HashMap<>();
         isProjectLoaded = false;
-        EventQueue.invokeLater(this::run);
     }
 
-    public void run() {
-        JFrame frame = new JFrame("AdventureEditor");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JMenuBar menuBar = new JMenuBar();
-        frame.setJMenuBar(menuBar);
-
-        JMenu fileMenu = new JMenu("File");
-        menuBar.add(fileMenu);
-        JMenuItem fileNew = new JMenuItem("New");
-        fileNew.addActionListener(e -> newProject());
-        JMenuItem fileOpen = new JMenuItem("Open");
-        fileOpen.addActionListener(e -> openProject());
-        JMenuItem fileSave = new JMenuItem("Save");
-        fileSave.addActionListener(e -> saveProject());
-        fileMenu.addMenuListener(new MenuListener() {
-            @Override
-            public void menuSelected(MenuEvent e) {
-                fileSave.setEnabled(isProjectLoaded);
-            }
-            @Override
-            public void menuDeselected(MenuEvent e) {}
-            @Override
-            public void menuCanceled(MenuEvent e) {}
-        });
-        fileMenu.add(fileNew);
-        fileMenu.add(fileOpen);
-        fileMenu.add(fileOpenRecent);
-        fileMenu.add(fileSave);
-
-        JMenu settingsMenu = new JMenu("Settings");
-        menuBar.add(settingsMenu);
-        JMenuItem settingsProjectConfig = new JMenuItem("Project Configuration");
-        settingsProjectConfig.addActionListener(e -> configMenuHandler.openConfigMenu());
-        settingsMenu.add(settingsProjectConfig);
-        settingsMenu.addMenuListener(new MenuListener() {
-            @Override
-            public void menuSelected(MenuEvent e) {
-                settingsProjectConfig.setEnabled(isProjectLoaded);
-            }
-            @Override
-            public void menuDeselected(MenuEvent e) {}
-            @Override
-            public void menuCanceled(MenuEvent e) {}
-        });
-
-        updateRecentProjects();
-
-        JPanel browserPanel = new JPanel();
-        browserPanel.setLayout(new BorderLayout());
-        //loadBrowserCategories();
-
-        browserTree.setPreferredSize(new Dimension(400, 400));
-        JScrollPane browserScrollPane = new JScrollPane(browserTree);
-        browserScrollPane.setViewportView(browserTree);
-        browserScrollPane.setPreferredSize(new Dimension(400, 800));
-        browserPanel.add(browserScrollPane, BorderLayout.CENTER);
-        frame.getContentPane().add(browserPanel);
-
-        frame.setVisible(true);
-
-        frame.pack();
-        frame.setLocationRelativeTo(null);
+    public boolean isProjectLoaded() {
+        return isProjectLoaded;
     }
 
-    public void updateRecentProjects() {
-        fileOpenRecent.setEnabled(!recentProjects.isEmpty());
-        fileOpenRecent.removeAll();
-        for (ProjectData recentProject : recentProjects) {
-            JMenuItem recentProjectItem = new JMenuItem(recentProject.name());
-            recentProjectItem.addActionListener(e -> {
-                File recentProjectFile = new File(recentProject.absolutePath());
-                if (recentProjectFile.exists()) {
-                    recentProjects.remove(recentProject);
-                    recentProjects.addFirst(recentProject);
-                    openProjectFromFile(recentProjectFile);
-                } else {
-                    JOptionPane.showMessageDialog(browserTree, "The selected project file does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            });
-            fileOpenRecent.add(recentProjectItem);
-        }
-        DataLoader.saveRecentProjects(recentProjects);
+    public ConfigMenuHandler getConfigMenuHandler() {
+        return configMenuHandler;
+    }
+
+    public List<ProjectData> getRecentProjects() {
+        return recentProjects;
     }
 
     public Template getTemplate(String categoryID) {
@@ -160,14 +80,13 @@ public class Main implements DataSaveTarget {
         return data.get(categoryID).keySet();
     }
 
-    public Data getData(String categoryID, String object) {
+    public Data getData(String categoryID, String objectID) {
         if (data.get(categoryID) == null) {
             return null;
         }
-        return data.get(categoryID).get(object);
+        return data.get(categoryID).get(objectID);
     }
 
-    @Override
     public void saveObjectData(Data objectData, Data initialData) {
         if (!(objectData instanceof DataObject objectDataCast)) {
             throw new IllegalArgumentException("Top-level saved data must be an object");
@@ -185,37 +104,22 @@ public class Main implements DataSaveTarget {
                     data.put(categoryID, new HashMap<>());
                 }
                 data.get(categoryID).remove(initialID);
-                browserTree.removeGameObject(categoryID, initialID);
+                browserFrame.removeGameObject(categoryID, initialID);
                 data.get(categoryID).put(objectID, objectData);
-                browserTree.addGameObject(categoryID, objectID, true);
+                browserFrame.addGameObject(categoryID, objectID, true);
             } else { // Edit with same ID
                 if (!data.containsKey(categoryID)) {
                     data.put(categoryID, new HashMap<>());
                 }
                 data.get(categoryID).put(objectID, objectData);
-                browserTree.updateCategory(categoryID);
+                browserFrame.updateCategory(categoryID);
             }
         } else { // New object instance
             if (!data.containsKey(categoryID)) {
                 data.put(categoryID, new HashMap<>());
             }
             data.get(categoryID).put(objectID, objectData);
-            browserTree.addGameObject(categoryID, objectID, true);
-        }
-    }
-
-    private void loadBrowserData() {
-        browserTree.clearData();
-        browserTree.expandRow(0);
-        for (String category : templates.keySet()) {
-            if (templates.get(category).topLevel()) {
-                browserTree.addCategory(category, templates.get(category).name());
-            }
-        }
-        for (String category : data.keySet()) {
-            for (String object : data.get(category).keySet()) {
-                browserTree.addGameObject(category, object, false);
-            }
+            browserFrame.addGameObject(categoryID, objectID, true);
         }
     }
 
@@ -223,7 +127,7 @@ public class Main implements DataSaveTarget {
         // TODO - Add save confirmation if a project is open
         data.clear();
         configMenuHandler.clearConfigData();
-        loadBrowserData();
+        browserFrame.reloadBrowserData(templates, data);
         isProjectLoaded = true;
     }
 
@@ -231,7 +135,7 @@ public class Main implements DataSaveTarget {
         // TODO - Add save confirmation if a project is open
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int result = fileChooser.showOpenDialog(browserTree);
+        int result = fileChooser.showOpenDialog(browserFrame);
         if (result != JFileChooser.APPROVE_OPTION) {
             return;
         }
@@ -240,22 +144,22 @@ public class Main implements DataSaveTarget {
         configMenuHandler.clearConfigData();
         try {
             DataLoader.loadFromDir(selectedDirectory, templates, data, configMenuHandler);
-            loadBrowserData();
+            browserFrame.reloadBrowserData(templates, data);
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             recentProjects.remove(project);
             recentProjects.addFirst(project);
-            updateRecentProjects();
+            browserFrame.updateRecentProjects();
             isProjectLoaded = true;
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
             data.clear();
             configMenuHandler.clearConfigData();
-            JOptionPane.showMessageDialog(browserTree, "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(browserFrame, "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             //throw new RuntimeException(e);
             data.clear();
             configMenuHandler.clearConfigData();
-            JOptionPane.showMessageDialog(browserTree, "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(browserFrame, "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -265,25 +169,25 @@ public class Main implements DataSaveTarget {
         configMenuHandler.clearConfigData();
         try {
             DataLoader.loadFromDir(file, templates, data, configMenuHandler);
-            loadBrowserData();
+            browserFrame.reloadBrowserData(templates, data);
             isProjectLoaded = true;
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
             data.clear();
             configMenuHandler.clearConfigData();
-            JOptionPane.showMessageDialog(browserTree, "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(browserFrame, "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             //throw new RuntimeException(e);
             data.clear();
             configMenuHandler.clearConfigData();
-            JOptionPane.showMessageDialog(browserTree, "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(browserFrame, "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public void saveProject() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int result = fileChooser.showSaveDialog(browserTree);
+        int result = fileChooser.showSaveDialog(browserFrame);
         if (result != JFileChooser.APPROVE_OPTION) {
             return;
         }
@@ -293,66 +197,44 @@ public class Main implements DataSaveTarget {
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             recentProjects.remove(project);
             recentProjects.addFirst(project);
-            updateRecentProjects();
+            browserFrame.updateRecentProjects();
         } catch (IOException e) {
             //throw new RuntimeException(e);
-            JOptionPane.showMessageDialog(browserTree, "Project could not be saved to the selected directory.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(browserFrame, "Project could not be saved to the selected directory.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (ParserConfigurationException | TransformerException e) {
             //throw new RuntimeException(e);
-            JOptionPane.showMessageDialog(browserTree, "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(browserFrame, "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public void newObject(String categoryID) {
-        openEditorFrame(categoryID, null);
+        browserFrame.openEditorFrame(categoryID, null, getTemplate(categoryID), null);
     }
 
     public void editObject(String categoryID, String objectID) {
-        openEditorFrame(categoryID, objectID);
+        browserFrame.openEditorFrame(categoryID, objectID, getTemplate(categoryID), getData(categoryID, objectID));
     }
 
     public void duplicateObject(String categoryID, String objectID) {
-        Data objectData = data.get(categoryID).get(objectID);
+        Data objectData = getData(categoryID, objectID);
         Data objectDataCopy = objectData.createCopy();
         String newObjectID = generateDuplicateObjectID(categoryID, objectID);
         if (objectDataCopy instanceof DataObject dataObject) {
             dataObject.replaceID(newObjectID);
         }
         data.get(categoryID).put(newObjectID, objectDataCopy);
-        browserTree.addGameObject(categoryID, newObjectID, false);
-        browserTree.setSelectedNode(categoryID, objectID);
+        browserFrame.addGameObject(categoryID, newObjectID, false);
+        browserFrame.setSelectedNode(categoryID, objectID);
     }
 
     public void deleteObject(String categoryID, String objectID) {
         Object[] confirmOptions = {"Delete", "Cancel"};
-        int confirmResult = JOptionPane.showOptionDialog(browserTree, "Are you sure you want to delete " + objectID + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        int confirmResult = JOptionPane.showOptionDialog(browserFrame, "Are you sure you want to delete " + objectID + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
         if (confirmResult == 0) {
             data.get(categoryID).remove(objectID);
-            EditorFrame activeFrame = getActiveTopLevelFrame(categoryID, objectID);
-            if (activeFrame != null) {
-                activeFrame.dispose();
-                removeActiveTopLevelFrame(categoryID, objectID);
-            }
-            browserTree.removeGameObject(categoryID, objectID);
+            browserFrame.closeEditorFrameIfActive(categoryID, objectID);
+            browserFrame.removeGameObject(categoryID, objectID);
         }
-    }
-
-    public void openEditorFrame(String categoryID, String objectID) {
-        EditorFrame activeFrame = getActiveTopLevelFrame(categoryID, objectID);
-        if (activeFrame != null) {
-            activeFrame.toFront();
-            activeFrame.requestFocus();
-        } else {
-            Template template = templates.get(categoryID);
-            Data objectData = data.containsKey(categoryID) ? data.get(categoryID).get(objectID) : null;
-            EditorFrame editorFrame = new EditorFrame(this, template, objectData, this);
-            addActiveTopLevelFrame(categoryID, objectID, editorFrame);
-        }
-    }
-
-    @Override
-    public void onEditorFrameClose(EditorFrame frame) {
-        removeActiveTopLevelFrame(frame.getTemplate().id(), frame.getObjectID());
     }
 
     private String generateDuplicateObjectID(String categoryID, String objectID) {
@@ -363,39 +245,6 @@ public class Main implements DataSaveTarget {
             i += 1;
         }
         return baseCopyID + i;
-    }
-
-    private EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
-        if (categoryID == null | objectID == null) {
-            return null;
-        }
-        if (!topLevelEditorWindows.containsKey(categoryID)) {
-            return null;
-        }
-        return topLevelEditorWindows.get(categoryID).get(objectID);
-    }
-
-    private void addActiveTopLevelFrame(String categoryID, String objectID, EditorFrame frame) {
-        if (objectID == null) {
-            return;
-        }
-        if (!topLevelEditorWindows.containsKey(categoryID)) {
-            topLevelEditorWindows.put(categoryID, new HashMap<>());
-        }
-        topLevelEditorWindows.get(categoryID).put(objectID, frame);
-    }
-
-    private void removeActiveTopLevelFrame(String categoryID, String objectID) {
-        if (objectID == null) {
-            return;
-        }
-        if (!topLevelEditorWindows.containsKey(categoryID)) {
-            return;
-        }
-        topLevelEditorWindows.get(categoryID).remove(objectID);
-        if (topLevelEditorWindows.get(categoryID).isEmpty()) {
-            topLevelEditorWindows.remove(categoryID);
-        }
     }
 
 }
