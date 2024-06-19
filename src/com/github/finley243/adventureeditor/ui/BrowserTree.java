@@ -50,9 +50,9 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserCategoryNode categoryNode) {
-                    main.newObject(categoryNode.getCategoryID());
+                    main.getDataManager().newObject(categoryNode.getCategoryID());
                 } else if (node instanceof BrowserObjectNode objectNode) {
-                    main.newObject(objectNode.getCategoryID());
+                    main.getDataManager().newObject(objectNode.getCategoryID());
                 }
             }
         };
@@ -65,7 +65,7 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    main.editObject(objectNode.getCategoryID(), objectNode.getObjectID());
+                    main.getDataManager().editObject(objectNode.getCategoryID(), objectNode.getObjectID());
                 }
             }
         };
@@ -78,7 +78,7 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    main.duplicateObject(objectNode.getCategoryID(), objectNode.getObjectID());
+                    main.getDataManager().duplicateObject(objectNode.getCategoryID(), objectNode.getObjectID());
                 }
             }
         };
@@ -91,32 +91,32 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    main.deleteObject(objectNode.getCategoryID(), objectNode.getObjectID());
+                    main.getDataManager().deleteObject(objectNode.getCategoryID(), objectNode.getObjectID());
                 }
             }
         };
         Action newProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.newProject();
+                main.getProjectManager().newProject();
             }
         };
         Action openProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.openProjectFromMenu();
+                main.getProjectManager().openProjectFromMenu();
             }
         };
         Action saveProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.saveProjectToMenu();
+                main.getProjectManager().saveProjectToMenu();
             }
         };
         Action saveProjectAsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.saveProjectToCurrentPath();
+                main.getProjectManager().saveProjectToCurrentPath();
             }
         };
         Action openConfigAction = new AbstractAction() {
@@ -228,7 +228,7 @@ public class BrowserTree extends JTree {
         if (path != null) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
             if (node instanceof BrowserObjectNode objectNode) {
-                main.editObject(objectNode.getCategoryID(), objectNode.getObjectID());
+                main.getDataManager().editObject(objectNode.getCategoryID(), objectNode.getObjectID());
             }
         }
     }

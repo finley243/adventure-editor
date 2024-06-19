@@ -59,7 +59,7 @@ public class ConfigMenuHandler implements DataSaveTarget {
     @Override
     public void saveObjectData(Data data, Data initialData) {
         configData = data;
-        main.updateProjectName();
+        main.getProjectManager().updateProjectName();
     }
 
     @Override

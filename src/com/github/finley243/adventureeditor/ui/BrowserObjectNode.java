@@ -31,16 +31,16 @@ public class BrowserObjectNode extends DefaultMutableTreeNode {
     public void openContextMenu(Component component, Point point) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuOpen = new JMenuItem("Open");
-        menuOpen.addActionListener(e -> main.editObject(categoryID, objectID));
+        menuOpen.addActionListener(e -> main.getDataManager().editObject(categoryID, objectID));
         menu.add(menuOpen);
         /*JMenuItem menuNew = new JMenuItem("New " + main.getTemplate(categoryID).name());
         menuNew.addActionListener(e -> main.newObject(categoryID));
         menu.add(menuNew);*/
         JMenuItem menuDuplicate = new JMenuItem("Duplicate");
-        menuDuplicate.addActionListener(e -> main.duplicateObject(categoryID, objectID));
+        menuDuplicate.addActionListener(e -> main.getDataManager().duplicateObject(categoryID, objectID));
         menu.add(menuDuplicate);
         JMenuItem menuDelete = new JMenuItem("Delete");
-        menuDelete.addActionListener(e -> main.deleteObject(categoryID, objectID));
+        menuDelete.addActionListener(e -> main.getDataManager().deleteObject(categoryID, objectID));
         menu.add(menuDelete);
         menu.show(component, point.x, point.y);
     }

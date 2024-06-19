@@ -40,19 +40,19 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
         JMenuItem fileNew = new JMenuItem("New");
-        fileNew.addActionListener(e -> main.newProject());
+        fileNew.addActionListener(e -> main.getProjectManager().newProject());
         JMenuItem fileOpen = new JMenuItem("Open");
-        fileOpen.addActionListener(e -> main.openProjectFromMenu());
+        fileOpen.addActionListener(e -> main.getProjectManager().openProjectFromMenu());
         this.fileOpenRecent = new JMenu("Open Recent");
         JMenuItem fileSave = new JMenuItem("Save");
-        fileSave.addActionListener(e -> main.saveProjectToCurrentPath());
+        fileSave.addActionListener(e -> main.getProjectManager().saveProjectToCurrentPath());
         JMenuItem fileSaveAs = new JMenuItem("Save As");
-        fileSaveAs.addActionListener(e -> main.saveProjectToMenu());
+        fileSaveAs.addActionListener(e -> main.getProjectManager().saveProjectToMenu());
         fileMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
-                fileSave.setEnabled(main.isProjectLoaded());
-                fileSaveAs.setEnabled(main.isProjectLoaded());
+                fileSave.setEnabled(main.getProjectManager().isProjectLoaded());
+                fileSaveAs.setEnabled(main.getProjectManager().isProjectLoaded());
             }
             @Override
             public void menuDeselected(MenuEvent e) {}
@@ -74,7 +74,7 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         settingsMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
-                settingsProjectConfig.setEnabled(main.isProjectLoaded());
+                settingsProjectConfig.setEnabled(main.getProjectManager().isProjectLoaded());
             }
             @Override
             public void menuDeselected(MenuEvent e) {}
@@ -108,7 +108,7 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
     }
 
     public void updateRecentProjects() {
-        List<ProjectData> recentProjects = main.getRecentProjects();
+        List<ProjectData> recentProjects = main.getProjectManager().getRecentProjects();
         fileOpenRecent.setEnabled(!recentProjects.isEmpty());
         fileOpenRecent.removeAll();
         for (ProjectData recentProject : recentProjects) {
@@ -118,7 +118,7 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
                 if (recentProjectFile.exists()) {
                     recentProjects.remove(recentProject);
                     recentProjects.addFirst(recentProject);
-                    main.openProjectFromFile(recentProjectFile);
+                    main.getProjectManager().openProjectFromFile(recentProjectFile);
                 } else {
                     int choice = JOptionPane.showOptionDialog(this, "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
                     if (choice == JOptionPane.YES_OPTION) {
@@ -229,7 +229,7 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
 
     @Override
     public void saveObjectData(Data data, Data initialData) {
-        main.saveObjectData(data, initialData);
+        main.getDataManager().saveObjectData(data, initialData);
     }
 
     @Override
@@ -247,13 +247,13 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
             return false;
         }
         if (isNewInstance) {
-            if (main.getIDsForCategory(categoryID).contains(currentID)) {
+            if (main.getDataManager().getIDsForCategory(categoryID).contains(currentID)) {
                 JOptionPane.showMessageDialog(parentComponent, "An object with ID \"" + currentID + "\" already exists.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         } else {
             String initialID = ((DataObject) initialData).getID();
-            if (!initialID.equals(currentID) && main.getIDsForCategory(categoryID).contains(currentID)) {
+            if (!initialID.equals(currentID) && main.getDataManager().getIDsForCategory(categoryID).contains(currentID)) {
                 JOptionPane.showMessageDialog(parentComponent, "An object with ID \"" + currentID + "\" already exists.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
