@@ -108,6 +108,9 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
         getInnerPanel().add(buttonAdd, addConstraints);
         getInnerPanel().add(buttonEdit, editConstraints);
         getInnerPanel().add(buttonRemove, removeConstraints);
+        if (optional) {
+            setEnabledState(false);
+        }
     }
 
     public java.util.List<Data> getValue() {

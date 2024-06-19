@@ -63,17 +63,25 @@
         <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine" x="1" y="1" height="2"/>
         <parameter id="choice" dataType="objectSet" name="Choices" type="sceneChoice" topLevelOnly="true" x="2" y="0" height="3"/>
     </template>
-    <template id="sceneLine" name="Scene Line" topLevel="false" primaryParameter="text">
+    <template id="sceneLine" name="Scene Line" topLevel="false" primaryParameter="line">
         <parameter id="once" dataType="boolean" name="Show Once" format="attribute" x="0" y="0"/>
         <parameter id="exit" dataType="boolean" name="Exit After" format="attribute" x="1" y="0"/>
         <parameter id="from" dataType="reference" name="Show Only From" type="scene" format="attribute" optional="true" x="0" y="1" width="2"/>
         <parameter id="redirect" dataType="reference" name="Redirect To" type="scene" format="attribute" optional="true" x="0" y="2" width="2"/>
-        <parameter id="text" dataType="string" name="Text" format="current_tag" optional="true" x="2" y="0"/>
+        <parameter id="line" dataType="component" name="Line" componentFormat="textOrTags" x="2" y="0" height="4">
+            <component id="text" name="Text" object="sceneLineText"/>
+            <component id="tags" name="Logic" object="sceneLineLogic"/>
+        </parameter>
+    </template>
+    <template id="sceneLineLogic" name="Logic" topLevel="false">
         <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" x="2" y="1" height="2"/>
         <parameter id="scriptPre" dataType="object" name="Pre Script" type="script" optional="true" x="3" y="0" height="4"/>
         <parameter id="scriptPost" dataType="object" name="Post Script" type="script" optional="true" x="3" y="4" height="4"/>
         <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="4" y="0"/>
         <parameter id="line" dataType="objectSet" name="Sub-Lines" type="sceneLine" x="4" y="1" height="3"/>
+    </template>
+    <template id="sceneLineText" name="Text" topLevel="false" primaryParameter="text">
+        <parameter id="text" dataType="string" name="Text" format="current_tag" optional="true" x="0" y="0"/>
     </template>
     <template id="script" name="Script" topLevel="false">
         <parameter id="script" dataType="script" name="Script" format="current_tag"/>

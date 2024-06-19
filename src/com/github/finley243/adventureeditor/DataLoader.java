@@ -87,6 +87,7 @@ public class DataLoader {
                                 case "reference" -> TemplateParameter.ParameterDataType.REFERENCE;
                                 case "enum" -> TemplateParameter.ParameterDataType.ENUM;
                                 case "script" -> TemplateParameter.ParameterDataType.SCRIPT;
+                                case "component" -> TemplateParameter.ParameterDataType.COMPONENT;
                                 case null, default -> throw new IllegalArgumentException("Invalid parameter data type: " + dataTypeString);
                             };
                             String parameterID = LoadUtils.attribute(parameterElement, "id", null);
@@ -95,12 +96,25 @@ public class DataLoader {
                             boolean topLevelOnly = LoadUtils.attributeBool(parameterElement, "topLevelOnly", false);
                             boolean optional = LoadUtils.attributeBool(parameterElement, "optional", false);
                             TemplateParameter.ParameterFormat format = LoadUtils.attributeEnum(parameterElement, "format", TemplateParameter.ParameterFormat.class, TemplateParameter.ParameterFormat.CHILD_TAG);
+                            String componentFormatString = LoadUtils.attribute(parameterElement, "componentFormat", null);
+                            TemplateParameter.ComponentFormat componentFormat = switch (componentFormatString) {
+                                case "typeAttribute" -> TemplateParameter.ComponentFormat.TYPE_ATTRIBUTE;
+                                case "textOrTags" -> TemplateParameter.ComponentFormat.TEXT_OR_TAGS;
+                                case null, default -> null;
+                            };
+                            List<ComponentOption> componentOptions = new ArrayList<>();
+                            for (Element componentOptionElement : LoadUtils.directChildrenWithName(parameterElement, "component")) {
+                                String optionID = LoadUtils.attribute(componentOptionElement, "id", null);
+                                String optionName = LoadUtils.attribute(componentOptionElement, "name", null);
+                                String optionObject = LoadUtils.attribute(componentOptionElement, "object", null);
+                                componentOptions.add(new ComponentOption(optionID, optionName, optionObject));
+                            }
                             String group = LoadUtils.attribute(parameterElement, "group", null);
                             int x = LoadUtils.attributeInt(parameterElement, "x", 0);
                             int y = LoadUtils.attributeInt(parameterElement, "y", 0);
                             int width = LoadUtils.attributeInt(parameterElement, "width", 1);
                             int height = LoadUtils.attributeInt(parameterElement, "height", 1);
-                            parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, group, x, y, width, height));
+                            parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, group, x, y, width, height));
                         }
                         String primaryParameter = LoadUtils.attribute(templateElement, "primaryParameter", null);
                         Template template = new Template(id, name, topLevel, groups, tabGroups, parameters, primaryParameter);
@@ -351,6 +365,24 @@ public class DataLoader {
                         dataMap.put(parameter.id(), new DataScript(value));
                     }
                 }
+                case COMPONENT -> {
+                    //Element componentElement = LoadUtils.singleChildWithName(element, parameter.id());
+                    if (element == null) {
+                        System.out.println("Component element is null in " + template.id() + ":" + parameter.id());
+                        dataMap.put(parameter.id(), null);
+                    } else {
+                        String componentType = switch (parameter.componentFormat()) {
+                            case TYPE_ATTRIBUTE -> LoadUtils.attribute(element, "type", null);
+                            case TEXT_OR_TAGS -> LoadUtils.hasTextContent(element) ? "text" : "tags";
+                        };
+                        Map<String, ComponentOption> optionsMap = new HashMap<>();
+                        for (ComponentOption option : parameter.componentOptions()) {
+                            optionsMap.put(option.id(), option);
+                        }
+                        Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates);
+                        dataMap.put(parameter.id(), new DataComponent(componentType, objectData));
+                    }
+                }
             }
         }
         return new DataObject(template, dataMap);
@@ -480,6 +512,16 @@ public class DataLoader {
                         }
                         case CURRENT_TAG -> objectElement.setTextContent(value);
                     }
+                }
+                case COMPONENT -> {
+                    String componentType = ((DataComponent) parameterData).getType();
+                    DataObject componentObjectData = (DataObject) ((DataComponent) parameterData).getObjectData();
+                    //Element childElement = document.createElement(parameter.id());
+                    if (parameter.componentFormat() == TemplateParameter.ComponentFormat.TYPE_ATTRIBUTE) {
+                        objectElement.setAttribute("type", componentType);
+                    }
+                    addObjectToElement(componentObjectData, objectElement, document);
+                    //objectElement.appendChild(childElement);
                 }
             }
         }

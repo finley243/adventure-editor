@@ -1,7 +1,5 @@
 package com.github.finley243.adventureeditor.data;
 
-import java.util.Objects;
-
 public class DataInteger extends Data {
 
     private final int value;

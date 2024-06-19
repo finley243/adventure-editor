@@ -28,6 +28,9 @@ public class ParameterFieldBoolean extends EditorElement {
         }
         //getInnerPanel().add(checkBox);
         getInnerPanel().add(checkBoxPanel);
+        if (optional) {
+            setEnabledState(false);
+        }
     }
 
     public boolean getValue() {

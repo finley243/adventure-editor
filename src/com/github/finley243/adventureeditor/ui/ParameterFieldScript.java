@@ -59,6 +59,9 @@ public class ParameterFieldScript extends EditorElement {
         getInnerPanel().add(label, labelConstraints);
         //getInnerPanel().add(textPane, valueConstraints);
         getInnerPanel().add(scrollPane, valueConstraints);
+        if (optional) {
+            setEnabledState(false);
+        }
     }
 
     public String getValue() {

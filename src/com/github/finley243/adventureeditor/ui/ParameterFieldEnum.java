@@ -33,6 +33,9 @@ public class ParameterFieldEnum extends EditorElement {
         valueConstraints.gridy = 1;
         getInnerPanel().add(label, labelConstraints);
         getInnerPanel().add(dropdownMenu, valueConstraints);
+        if (optional) {
+            setEnabledState(false);
+        }
     }
 
     public String getValue() {

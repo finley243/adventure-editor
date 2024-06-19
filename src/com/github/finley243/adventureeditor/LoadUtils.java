@@ -139,7 +139,7 @@ public class LoadUtils {
 		return null;
 	}
 
-	private static boolean hasTextContent(Element parent) {
+	public static boolean hasTextContent(Element parent) {
 		if (parent == null) return false;
 		Node firstChild = parent.getFirstChild();
 		if (firstChild == null) return false;

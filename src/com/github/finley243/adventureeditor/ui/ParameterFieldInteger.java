@@ -33,6 +33,9 @@ public class ParameterFieldInteger extends EditorElement {
         valueConstraints.gridy = 1;
         getInnerPanel().add(label, labelConstraints);
         getInnerPanel().add(spinner, valueConstraints);
+        if (optional) {
+            setEnabledState(false);
+        }
     }
 
     public int getValue() {

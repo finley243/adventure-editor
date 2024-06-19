@@ -16,6 +16,7 @@ public class ParameterFactory {
             case REFERENCE -> new ParameterFieldReference(editorFrame, parameter.optional(), parameter.name(), main.getIDsForCategory(parameter.type()) == null || main.getIDsForCategory(parameter.type()).isEmpty() ? new String[0] : main.getIDsForCategory(parameter.type()).toArray(new String[0]));
             case ENUM -> new ParameterFieldEnum(editorFrame, parameter.optional(), parameter.name(), main.getEnumValues(parameter.type()).toArray(new String[0]));
             case SCRIPT -> new ParameterFieldScript(editorFrame, parameter.optional(), parameter.name());
+            case COMPONENT -> new ParameterFieldComponent(editorFrame, parameter.optional(), parameter.name(), parameter.componentFormat(), parameter.componentOptions(), main);
         };
     }
 

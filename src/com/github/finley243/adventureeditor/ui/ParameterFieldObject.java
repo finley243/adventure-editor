@@ -84,6 +84,9 @@ public class ParameterFieldObject extends EditorElement {
             setBorder(BorderFactory.createEmptyBorder());
             getInnerPanel().add(objectPanel);
         }
+        if (optional) {
+            setEnabledState(false);
+        }
     }
 
     @Override

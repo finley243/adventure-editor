@@ -1,20 +1,34 @@
 package com.github.finley243.adventureeditor.template;
 
-public record TemplateParameter(String id, ParameterDataType dataType, String name, String type, boolean topLevelOnly, boolean optional, ParameterFormat format, String group, int x, int y, int width, int height) {
+import java.util.List;
 
-    /*
-     * dataType is the type of parameter
-     * name is the name of the parameter
-     * type is the type of object or reference (unused for other data types)
-     * topLevelOnly determines whether the parameter is shown when template is used as a nested object
-     */
+/**
+ * Represents a parameter in a template.
+ * @param id The name of the parameter as it appears in the game data (must be unique within the template).
+ * @param dataType The type of data that the parameter represents.
+ * @param name The name of the parameter as it appears in the editor.
+ * @param type For object or object set parameter, a template ID. For enum parameter, an enum type ID.
+ * @param topLevelOnly Whether the parameter should only be shown when editing a top-level object instance.
+ * @param optional Whether the parameter can be disabled by the user.
+ * @param format The format of the parameter.
+ * @param group The group that the parameter belongs to.
+ * @param x The GridBag x position of the parameter in the editor window (or in the specified group).
+ * @param y The GridBag y position of the parameter in the editor window (or in the specified group).
+ * @param width The GridBag width of the parameter in the editor window (or in the specified group).
+ * @param height The GridBag height of the parameter in the editor window (or in the specified group).
+ */
+public record TemplateParameter(String id, ParameterDataType dataType, String name, String type, boolean topLevelOnly, boolean optional, ParameterFormat format, ComponentFormat componentFormat, List<ComponentOption> componentOptions, String group, int x, int y, int width, int height) {
 
     public enum ParameterDataType {
-        BOOLEAN, INTEGER, FLOAT, STRING, OBJECT, OBJECT_SET, REFERENCE, ENUM, SCRIPT
+        BOOLEAN, INTEGER, FLOAT, STRING, OBJECT, OBJECT_SET, REFERENCE, ENUM, SCRIPT, COMPONENT
     }
 
     public enum ParameterFormat {
         ATTRIBUTE, CHILD_TAG, CURRENT_TAG
+    }
+
+    public enum ComponentFormat {
+        TYPE_ATTRIBUTE, TEXT_OR_TAGS
     }
 
 }

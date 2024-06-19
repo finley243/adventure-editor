@@ -50,6 +50,9 @@ public class ParameterFieldString extends EditorElement {
         valueConstraints.gridy = 1;
         getInnerPanel().add(label, labelConstraints);
         getInnerPanel().add(textField, valueConstraints);
+        if (optional) {
+            setEnabledState(false);
+        }
     }
 
     public String getValue() {
