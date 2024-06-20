@@ -31,6 +31,8 @@ public class DataLoader {
     private static final String DATA_DIRECTORY = "/data";
     private static final String CONFIG_FILE = "/config.xml";
 
+    private static final String COMPONENT_TYPE_ATTRIBUTE_ID = "type";
+
     public static void loadTemplates(Map<String, Template> templates, Map<String, List<String>> enumTypes) throws ParserConfigurationException, IOException, SAXException {
         File dir = new File(TEMPLATE_DIRECTORY);
         if (dir.isDirectory()) {
@@ -331,11 +333,17 @@ public class DataLoader {
                     }
                 }
                 case OBJECT -> {
-                    Element objectElement = LoadUtils.singleChildWithName(element, parameter.id());
+                    //Element objectElement = LoadUtils.singleChildWithName(element, parameter.id());
+                    Element objectElement;
+                    if (parameter.format() == TemplateParameter.ParameterFormat.CURRENT_TAG) {
+                        objectElement = element;
+                    } else {
+                        objectElement = LoadUtils.singleChildWithName(element, parameter.id());
+                    }
                     if (objectElement == null) {
                         dataMap.put(parameter.id(), null);
                     } else {
-                        Data objectData = loadDataFromElement(LoadUtils.singleChildWithName(element, parameter.id()), templates.get(parameter.type()), templates, false);
+                        Data objectData = loadDataFromElement(objectElement, templates.get(parameter.type()), templates, false);
                         dataMap.put(parameter.id(), objectData);
                     }
                 }
@@ -389,17 +397,25 @@ public class DataLoader {
                         dataMap.put(parameter.id(), null);
                     } else {
                         String componentType = switch (parameter.componentFormat()) {
-                            case TYPE_ATTRIBUTE -> LoadUtils.attribute(element, "type", null);
+                            case TYPE_ATTRIBUTE -> LoadUtils.attribute(element, COMPONENT_TYPE_ATTRIBUTE_ID, null);
                             case TEXT_OR_TAGS -> LoadUtils.hasTextContent(element) ? "text" : "tags";
                         };
-                        Map<String, ComponentOption> optionsMap = new HashMap<>();
-                        for (ComponentOption option : parameter.componentOptions()) {
-                            optionsMap.put(option.id(), option);
+                        /*System.out.println("Template: " + template.id());
+                        System.out.println("Existing Data: " + dataMap);
+                        System.out.println("Component id: " + parameter.id());
+                        System.out.println("Component format: " + parameter.componentFormat());
+                        System.out.println("Component type: " + componentType);*/
+                        if (componentType == null) {
+                            dataMap.put(parameter.id(), null);
+                        } else {
+                            Map<String, ComponentOption> optionsMap = new HashMap<>();
+                            for (ComponentOption option : parameter.componentOptions()) {
+                                optionsMap.put(option.id(), option);
+                            }
+                            Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates, false);
+                            String nameOverride = parameter.useComponentTypeName() ? optionsMap.get(componentType).name() : null;
+                            dataMap.put(parameter.id(), new DataComponent(componentType, objectData, nameOverride));
                         }
-                        //System.out.println("Component type: " + componentType);
-                        Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates, false);
-                        String nameOverride = parameter.useComponentTypeName() ? optionsMap.get(componentType).name() : null;
-                        dataMap.put(parameter.id(), new DataComponent(componentType, objectData, nameOverride));
                     }
                 }
             }
@@ -485,7 +501,13 @@ public class DataLoader {
                     }
                 }
                 case OBJECT -> {
-                    Element childElement = document.createElement(parameter.id());
+                    //Element childElement = document.createElement(parameter.id());
+                    Element childElement;
+                    if (parameter.format() == TemplateParameter.ParameterFormat.CURRENT_TAG) {
+                        childElement = objectElement;
+                    } else {
+                        childElement = document.createElement(parameter.id());
+                    }
                     addObjectToElement((DataObject) parameterData, childElement, document);
                     objectElement.appendChild(childElement);
                 }
@@ -536,8 +558,8 @@ public class DataLoader {
                     String componentType = ((DataComponent) parameterData).getType();
                     DataObject componentObjectData = (DataObject) ((DataComponent) parameterData).getObjectData();
                     //Element childElement = document.createElement(parameter.id());
-                    if (parameter.componentFormat() == TemplateParameter.ComponentFormat.TYPE_ATTRIBUTE) {
-                        objectElement.setAttribute("type", componentType);
+                    if (parameter.componentFormat() == TemplateParameter.ComponentFormat.TYPE_ATTRIBUTE && componentType != null) {
+                        objectElement.setAttribute(COMPONENT_TYPE_ATTRIBUTE_ID, componentType);
                     }
                     addObjectToElement(componentObjectData, objectElement, document);
                     //objectElement.appendChild(childElement);

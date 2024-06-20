@@ -302,7 +302,7 @@
         <parameter id="conditionAdd" dataType="string" name="Add Condition" format="child_tag" y="4" optional="true"/>
         <parameter id="conditionRemove" dataType="string" name="Remove Condition" format="child_tag" y="5" optional="true"/>
         <parameter id="conditionActive" dataType="string" name="Active Condition" format="child_tag" y="6" optional="true"/>
-        <parameter id="component" dataType="component" name="Stat Modifier" componentFormat="typeAttribute" useComponentTypeName="true" y="7">
+        <parameter id="component" dataType="component" name="Stat Modifier" componentFormat="typeAttribute" format="current_tag" useComponentTypeName="true" optional="true" y="7">
             <component id="add" name="Add" object="effectComponentAdd"/>
             <component id="mult" name="Multiply" object="effectComponentMult"/>
             <component id="boolean" name="Boolean" object="effectComponentBoolean"/>
@@ -317,27 +317,34 @@
     <template id="effectComponentAdd" name="Add" topLevel="false">
         <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
         <parameter id="amount" dataType="integer" name="Add Amount" format="attribute" y="1"/>
-        <parameter id="statCondition" dataType="string" name="Condition" format="child_tag" y="2"/>
+        <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
     </template>
     <template id="effectComponentMult" name="Multiply" topLevel="false">
         <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
         <parameter id="amount" dataType="float" name="Multiplier" format="attribute" y="1"/>
-        <parameter id="statCondition" dataType="string" name="Condition" format="child_tag" y="2"/>
+        <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
     </template>
     <template id="effectComponentBoolean" name="Boolean" topLevel="false">
         <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
         <parameter id="value" dataType="boolean" name="Set True" format="attribute" y="1"/>
-        <parameter id="statCondition" dataType="string" name="Condition" format="child_tag" y="2"/>
+        <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
     </template>
     <template id="effectComponentString" name="String" topLevel="false">
         <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
         <parameter id="value" dataType="string" name="String Value" format="attribute" y="1"/>
-        <parameter id="statCondition" dataType="string" name="Condition" format="child_tag" y="2"/>
+        <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
     </template>
     <template id="effectComponentStringSet" name="String Set" topLevel="false">
+        <tabGroup id="values" y="1"/>
+        <group id="valuesAdd" tabGroup="values" name="Add"/>
+        <group id="valuesRemove" tabGroup="values" name="Remove"/>
         <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
-        <parameter id="amount" dataType="integer" name="Add Amount" format="attribute" y="1"/>
-        <parameter id="statCondition" dataType="string" name="Condition" format="child_tag" y="2"/>
+        <parameter id="add" dataType="objectSet" type="stringValue" name="Add Values" group="valuesAdd"/>
+        <parameter id="remove" dataType="objectSet" type="stringValue" name="Remove Values" group="valuesRemove"/>
+        <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
+    </template>
+    <template id="stringValue" name="String Value" topLevel="false" primaryParameter="value">
+        <parameter id="value" dataType="string" name="String Value" format="current_tag"/>
     </template>
     <template id="effectComponentCompound" name="Compound" topLevel="false">
         <parameter id="effect" dataType="objectSet" type="effect" name="Child Effects"/>
