@@ -50,6 +50,7 @@ public class ParameterFieldComponent extends EditorElement {
             CardLayout cardLayout = (CardLayout) objectPanel.getLayout();
             cardLayout.show(objectPanel, selectedOption.id());
             activeOption = selectedOption.id();
+            editorFrame.onEditorElementUpdated();
         });
         setActiveOption(componentOptions.getFirst().id());
         getInnerPanel().setLayout(new GridBagLayout());

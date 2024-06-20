@@ -67,6 +67,10 @@
         <value>destroy</value>
         <value>place</value>
     </enumType>
+    <enumType id="hitChanceType">
+        <value>independent</value>
+        <value>joint</value>
+    </enumType>
     <enumType id="effectType">
         <value>basic</value>
         <value>add</value>
@@ -87,5 +91,11 @@
         <value>PUBLIC</value>
         <value>PRIVATE</value>
         <value>HOSTILE</value>
+    </enumType>
+    <enumType id="scriptTriggersRoom">
+        <value>on_player_enter</value>
+    </enumType>
+    <enumType id="scriptTriggersArea">
+        <value>on_player_enter</value>
     </enumType>
 </data>

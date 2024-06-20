@@ -54,6 +54,8 @@ public class ParameterFieldObject extends EditorElement {
                 groupConstraints.gridy = group.y();
                 groupConstraints.gridwidth = group.width();
                 groupConstraints.gridheight = group.height();
+                groupConstraints.fill = GridBagConstraints.BOTH;
+                groupConstraints.anchor = GridBagConstraints.NORTH;
                 objectPanel.add(editorGroup, groupConstraints);
             }
         }
@@ -71,6 +73,8 @@ public class ParameterFieldObject extends EditorElement {
                     if (group == null) {
                         throw new IllegalArgumentException("Group " + parameter.group() + " not found in template " + template.id());
                     }
+                    parameterConstraints.anchor = GridBagConstraints.NORTHWEST;
+                    parameterConstraints.fill = GridBagConstraints.HORIZONTAL;
                     group.add(parameterElement, parameterConstraints);
                 } else {
                     objectPanel.add(parameterElement, parameterConstraints);

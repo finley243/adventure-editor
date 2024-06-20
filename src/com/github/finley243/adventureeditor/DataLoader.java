@@ -200,7 +200,7 @@ public class DataLoader {
                             String elementType = currentChild.getNodeName();
                             Template template = templates.get(elementType);
                             if (template != null && template.topLevel()) {
-                                DataObject data = loadDataFromElement(currentElement, template, templates);
+                                DataObject data = loadDataFromElement(currentElement, template, templates, true);
                                 if (!dataMap.containsKey(elementType)) {
                                     dataMap.put(elementType, new HashMap<>());
                                 }
@@ -253,7 +253,7 @@ public class DataLoader {
         if (rootElement == null) {
             return;
         }
-        Data configData = loadDataFromElement(rootElement, configTemplate, new HashMap<>());
+        Data configData = loadDataFromElement(rootElement, configTemplate, new HashMap<>(), true);
         configMenuHandler.setConfigData(configData);
     }
 
@@ -277,10 +277,10 @@ public class DataLoader {
         transformer.transform(source, result);
     }
 
-    private static DataObject loadDataFromElement(Element element, Template template, Map<String, Template> templates) {
+    private static DataObject loadDataFromElement(Element element, Template template, Map<String, Template> templates, boolean isTopLevel) {
         Map<String, Data> dataMap = new HashMap<>();
         for (TemplateParameter parameter : template.parameters()) {
-            Data defaultValueOrNull = parameter.optional() ? null : parameter.defaultValue();
+            Data defaultValueOrNull = (parameter.topLevelOnly() && !isTopLevel) || parameter.optional() ? null : parameter.defaultValue();
             switch (parameter.dataType()) {
                 case BOOLEAN -> {
                     Boolean value = switch (parameter.format()) {
@@ -335,14 +335,14 @@ public class DataLoader {
                     if (objectElement == null) {
                         dataMap.put(parameter.id(), null);
                     } else {
-                        Data objectData = loadDataFromElement(LoadUtils.singleChildWithName(element, parameter.id()), templates.get(parameter.type()), templates);
+                        Data objectData = loadDataFromElement(LoadUtils.singleChildWithName(element, parameter.id()), templates.get(parameter.type()), templates, false);
                         dataMap.put(parameter.id(), objectData);
                     }
                 }
                 case OBJECT_SET -> {
                     List<Data> objectList = new ArrayList<>();
                     for (Element objectElement : LoadUtils.directChildrenWithName(element, parameter.id())) {
-                        Data objectData = loadDataFromElement(objectElement, templates.get(parameter.type()), templates);
+                        Data objectData = loadDataFromElement(objectElement, templates.get(parameter.type()), templates, false);
                         objectList.add(objectData);
                     }
                     dataMap.put(parameter.id(), new DataObjectSet(objectList));
@@ -396,7 +396,7 @@ public class DataLoader {
                         for (ComponentOption option : parameter.componentOptions()) {
                             optionsMap.put(option.id(), option);
                         }
-                        Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates);
+                        Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates, false);
                         String nameOverride = parameter.useComponentTypeName() ? optionsMap.get(componentType).name() : null;
                         dataMap.put(parameter.id(), new DataComponent(componentType, objectData, nameOverride));
                     }
