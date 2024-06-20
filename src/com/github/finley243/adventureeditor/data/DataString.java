@@ -29,4 +29,9 @@ public class DataString extends Data {
         return o instanceof DataString dataString && Objects.equals(dataString.value, value);
     }
 
+    @Override
+    public boolean isDuplicateValue(Data data) {
+        return data instanceof DataString dataString && Objects.equals(dataString.value, value);
+    }
+
 }

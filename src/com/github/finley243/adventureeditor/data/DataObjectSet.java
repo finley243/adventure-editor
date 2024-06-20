@@ -35,4 +35,28 @@ public class DataObjectSet extends Data {
         return o instanceof DataObjectSet dataObjectSet && Objects.equals(value, dataObjectSet.value);
     }
 
+    @Override
+    public boolean isDuplicateValue(Data data) {
+        if (!(data instanceof DataObjectSet dataObjectSet)) {
+            return false;
+        }
+        if (value.isEmpty()) {
+            return false;
+        }
+        //Template template = ((DataObject) value.getFirst()).getTemplate();
+        for (Data innerData : value) {
+            boolean hasDuplicate = false;
+            for (Data otherInnerData : dataObjectSet.value) {
+                if (innerData.isDuplicateValue(otherInnerData)) {
+                    hasDuplicate = true;
+                    break;
+                }
+            }
+            if (!hasDuplicate) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

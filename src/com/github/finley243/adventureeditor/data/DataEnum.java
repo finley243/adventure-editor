@@ -29,4 +29,9 @@ public class DataEnum extends Data {
         return o instanceof DataEnum dataEnum && Objects.equals(dataEnum.value, value);
     }
 
+    @Override
+    public boolean isDuplicateValue(Data data) {
+        return data instanceof DataEnum dataEnum && Objects.equals(dataEnum.value, value);
+    }
+
 }

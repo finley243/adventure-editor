@@ -86,6 +86,7 @@ public class DataLoader {
                                 case "string" -> TemplateParameter.ParameterDataType.STRING;
                                 case "object" -> TemplateParameter.ParameterDataType.OBJECT;
                                 case "objectSet" -> TemplateParameter.ParameterDataType.OBJECT_SET;
+                                case "objectSetUnique" -> TemplateParameter.ParameterDataType.OBJECT_SET_UNIQUE;
                                 case "reference" -> TemplateParameter.ParameterDataType.REFERENCE;
                                 case "enum" -> TemplateParameter.ParameterDataType.ENUM;
                                 case "script" -> TemplateParameter.ParameterDataType.SCRIPT;
@@ -125,12 +126,10 @@ public class DataLoader {
                                     case INTEGER -> new DataInteger(Integer.parseInt(defaultValueString));
                                     case FLOAT -> new DataFloat(Float.parseFloat(defaultValueString));
                                     case STRING -> new DataString(defaultValueString);
-                                    case OBJECT -> null;
-                                    case OBJECT_SET -> null;
                                     case REFERENCE -> new DataReference(defaultValueString);
                                     case ENUM -> new DataEnum(defaultValueString);
                                     case SCRIPT -> new DataScript(defaultValueString);
-                                    case COMPONENT -> null;
+                                    case OBJECT, OBJECT_SET_UNIQUE, OBJECT_SET, COMPONENT -> null;
                                 };
                             }
                             parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height, defaultValue));
@@ -347,7 +346,7 @@ public class DataLoader {
                         dataMap.put(parameter.id(), objectData);
                     }
                 }
-                case OBJECT_SET -> {
+                case OBJECT_SET, OBJECT_SET_UNIQUE -> {
                     List<Data> objectList = new ArrayList<>();
                     for (Element objectElement : LoadUtils.directChildrenWithName(element, parameter.id())) {
                         Data objectData = loadDataFromElement(objectElement, templates.get(parameter.type()), templates, false);
@@ -511,7 +510,7 @@ public class DataLoader {
                     addObjectToElement((DataObject) parameterData, childElement, document);
                     objectElement.appendChild(childElement);
                 }
-                case OBJECT_SET -> {
+                case OBJECT_SET, OBJECT_SET_UNIQUE -> {
                     List<Data> values = ((DataObjectSet) parameterData).getValue();
                     for (Data value : values) {
                         Element childElement = document.createElement(parameter.id());

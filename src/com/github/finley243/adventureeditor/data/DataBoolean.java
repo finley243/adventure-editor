@@ -27,4 +27,9 @@ public class DataBoolean extends Data {
         return o instanceof DataBoolean dataBoolean && dataBoolean.value == value;
     }
 
+    @Override
+    public boolean isDuplicateValue(Data data) {
+        return data instanceof DataBoolean dataBoolean && dataBoolean.value == value;
+    }
+
 }

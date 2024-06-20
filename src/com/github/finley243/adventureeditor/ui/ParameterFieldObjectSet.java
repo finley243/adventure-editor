@@ -2,13 +2,16 @@ package com.github.finley243.adventureeditor.ui;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataObjectSet;
+import com.github.finley243.adventureeditor.data.DataString;
 import com.github.finley243.adventureeditor.template.Template;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ParameterFieldObjectSet extends EditorElement implements DataSaveTarget {
 
@@ -18,10 +21,16 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
     private final JButton buttonRemove;
 
     private final List<EditorFrame> editorFrames;
+    private final String name;
+    private final Template template;
+    private final boolean requireUniqueValues;
 
-    public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, Template template, Main main) {
+    public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, Template template, boolean requireUniqueValues, Main main) {
         super(editorFrame, optional, name);
         this.editorFrames = new ArrayList<>();
+        this.name = name;
+        this.template = template;
+        this.requireUniqueValues = requireUniqueValues;
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
         if (optional) {
@@ -174,13 +183,17 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
 
     @Override
     public boolean isDataValidOrShowDialog(Component parentComponent, Data currentData, Data initialData) {
+        if (requireUniqueValues && !isDataUnique(currentData, initialData)) {
+            String value = currentData.toString();
+            JOptionPane.showMessageDialog(parentComponent, name + " already contains the value " + value + ".", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
         return true;
     }
 
     @Override
     public Data getData() {
         if (!isOptionalEnabled()) {
-            //return null;
             return new DataObjectSet(new ArrayList<>());
         }
         List<Data> objectData = new ArrayList<>(getValue());
@@ -197,6 +210,19 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
             }
             setValue(objectData);
         }
+    }
+
+    private boolean isDataUnique(Data newData, Data initialData) {
+        for (int i = 0; i < objectList.getModel().getSize(); i++) {
+            Data currentData = objectList.getModel().getElementAt(i);
+            if (initialData != null && initialData.equals(currentData)) {
+                continue;
+            }
+            if (currentData.isDuplicateValue(newData)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

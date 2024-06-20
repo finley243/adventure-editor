@@ -4,4 +4,6 @@ public abstract class Data {
 
     public abstract Data createCopy();
 
+    public abstract boolean isDuplicateValue(Data data);
+
 }

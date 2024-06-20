@@ -25,8 +25,8 @@
         <parameter id="restriction" dataType="enum" type="areaRestrictionType" name="Restriction Type" format="attribute" optional="true" default="PUBLIC" x="0" y="3"/>
         <parameter id="allowAllies" dataType="boolean" name="Allow Allies" format="attribute" optional="true" default="false" x="0" y="4"/>
         <parameter id="description" dataType="object" name="Description" type="description" optional="true" x="1" y="0" height="5"/>
-        <parameter id="area" dataType="objectSet" name="Areas" type="area" x="2" y="0" height="3"/>
-        <parameter id="script" dataType="objectSet" type="scriptWithTriggerRoom" name="Script Triggers" x="3" y="0" height="3"/>
+        <parameter id="area" dataType="objectSetUnique" name="Areas" type="area" x="2" y="0" height="3"/>
+        <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerRoom" name="Script Triggers" x="3" y="0" height="3"/>
     </template>
     <template id="area" name="Area" topLevel="false" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
@@ -36,18 +36,18 @@
         <parameter id="restriction" dataType="enum" type="areaRestrictionType" name="Restriction Type" format="attribute" optional="true" default="PUBLIC" x="0" y="4"/>
         <parameter id="allowAllies" dataType="boolean" name="Allow Allies" format="attribute" optional="true" default="false" x="0" y="5"/>
         <parameter id="description" dataType="object" name="Description" type="description" optional="true" x="1" y="0" height="3"/>
-        <parameter id="link" dataType="objectSet" name="Links" type="areaLink" x="1" y="3" height="2"/>
-        <parameter id="script" dataType="objectSet" type="scriptWithTriggerArea" name="Script Triggers" x="1" y="5" height="2"/>
-        <parameter id="object" dataType="objectSet" type="objectInstance" name="Objects" x="2" y="0" height="2"/>
-        <parameter id="item" dataType="objectSet" type="itemInstance" name="Items" x="2" y="2" height="2"/>
-        <parameter id="actor" dataType="objectSet" type="actorInstance" name="Actors" x="2" y="4" height="2"/>
+        <parameter id="link" dataType="objectSetUnique" name="Links" type="areaLink" x="1" y="3" height="2"/>
+        <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerArea" name="Script Triggers" x="1" y="5" height="2"/>
+        <parameter id="object" dataType="objectSetUnique" type="objectInstance" name="Objects" x="2" y="0" height="2"/>
+        <parameter id="item" dataType="objectSetUnique" type="itemInstance" name="Items" x="2" y="2" height="2"/>
+        <parameter id="actor" dataType="objectSetUnique" type="actorInstance" name="Actors" x="2" y="4" height="2"/>
     </template>
     <template id="objectInstance" name="Object" topLevel="false" primaryParameter="id">
         <parameter id="template" dataType="reference" type="object" name="Template" format="attribute" y="0"/>
         <parameter id="id" dataType="string" name="ID" format="attribute" y="1"/>
         <parameter id="startDisabled" dataType="boolean" name="Start Disabled" format="attribute" default="false" y="2"/>
         <parameter id="startHidden" dataType="boolean" name="Start Hidden" format="attribute" default="false" y="3"/>
-        <parameter id="localVar" dataType="objectSet" type="localVar" y="4"/>
+        <parameter id="localVar" dataType="objectSetUnique" type="localVar" y="4"/>
     </template>
     <template id="itemInstance" name="Item" topLevel="false" primaryParameter="template">
         <parameter id="template" dataType="reference" type="item" name="Template" format="attribute"/>
@@ -168,7 +168,7 @@
     <template id="faction" name="Faction" topLevel="true">
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
         <parameter id="default" dataType="enum" type="factionRelation" name="Default Relation" format="attribute" x="0" y="1" default="NEUTRAL"/>
-        <parameter id="relation" dataType="objectSet" name="Relations" type="factionRelation" x="0" y="2"/>
+        <parameter id="relation" dataType="objectSetUnique" name="Relations" type="factionRelation" x="0" y="2"/>
     </template>
     <template id="factionRelation" name="Faction Relation" topLevel="false" primaryParameter="faction">
         <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" y="0"/>
@@ -177,7 +177,7 @@
     <template id="action" name="Action" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
         <parameter id="prompt" dataType="string" name="Prompt" format="child_tag" x="1" y="0"/>
-        <parameter id="parameter" dataType="objectSet" name="Parameters" type="actionParameter" x="0" y="1"/>
+        <parameter id="parameter" dataType="objectSetUnique" name="Parameters" type="actionParameter" x="0" y="1"/>
         <parameter id="condition" dataType="objectSet" name="Conditions" type="actionCondition" x="1" y="1"/>
         <parameter id="script" dataType="object" name="Script" type="script" x="2" y="0" height="2"/>
     </template>
@@ -199,12 +199,12 @@
         <parameter id="hp" dataType="integer" name="HP" format="attribute" optional="true" x="2" y="0"/>
         <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute" optional="true" x="3" y="0"/>
         <parameter id="movePoints" dataType="integer" name="Move Points" format="attribute" optional="true" x="4" y="0"/>
-        <parameter id="attribute" dataType="objectSet" name="Attributes" type="actorAttribute" optional="true" x="2" y="1" height="3"/>
-        <parameter id="skill" dataType="objectSet" name="Skills" type="actorSkill" optional="true" x="2" y="4" height="3"/>
-        <parameter id="senseType" dataType="objectSet" name="Sense Types" type="actorSenseType" optional="true" x="4" y="1" height="3"/>
-        <parameter id="limb" dataType="objectSet" name="Limbs" type="actorLimb" optional="true" x="3" y="1" height="3"/>
-        <parameter id="equipSlot" dataType="objectSet" name="Equip Slots" type="actorEquipSlot" optional="true" x="4" y="4" height="3"/>
-        <parameter id="damageResistance" dataType="objectSet" name="Damage Resistances" type="actorDamageResistance" optional="true" x="3" y="4" height="3"/>
+        <parameter id="attribute" dataType="objectSetUnique" name="Attributes" type="actorAttribute" optional="true" x="2" y="1" height="3"/>
+        <parameter id="skill" dataType="objectSetUnique" name="Skills" type="actorSkill" optional="true" x="2" y="4" height="3"/>
+        <parameter id="senseType" dataType="objectSetUnique" name="Sense Types" type="actorSenseType" optional="true" x="4" y="1" height="3"/>
+        <parameter id="limb" dataType="objectSetUnique" name="Limbs" type="actorLimb" optional="true" x="3" y="1" height="3"/>
+        <parameter id="equipSlot" dataType="objectSetUnique" name="Equip Slots" type="actorEquipSlot" optional="true" x="4" y="4" height="3"/>
+        <parameter id="damageResistance" dataType="objectSetUnique" name="Damage Resistances" type="actorDamageResistance" optional="true" x="3" y="4" height="3"/>
         <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" x="1" y="1" height="6"/>
         <parameter id="action" dataType="objectSet" name="Actions" type="customActionReference" x="5" y="1" height="3"/>
         <parameter id="itemAction" dataType="objectSet" name="Item Actions" type="customActionReference" x="5" y="4" height="3"/>
@@ -256,7 +256,7 @@
         <parameter id="skill" dataType="reference" type="skill" name="Override Attack Skill" format="attribute" optional="true" x="5" y="2"/>
         <parameter id="dodgeSkill" dataType="reference" type="skill" name="Dodge Skill" format="attribute" optional="true" x="5" y="3"/>
         <parameter id="nonIdealRange" dataType="boolean" name="Use Non-Ideal Ranges" format="attribute" default="false" x="5" y="0"/>
-        <parameter id="range" dataType="objectSet" type="weaponClassRange" name="Ranges" x="4" y="2" height="2"/>
+        <parameter id="range" dataType="objectSetUnique" type="weaponClassRange" name="Ranges" x="4" y="2" height="2"/>
         <parameter id="overrideEffects" dataType="boolean" name="Override Target Effects" default="false" x="5" y="1"/>
         <parameter id="targetEffect" dataType="objectSet" type="effectReference" name="Target Effects" x="4" y="4" height="2"/>
         <parameter id="hitPhrase" dataType="string" name="Hit Phrase" format="child_tag" optional="true" y="0" group="phrases"/>
@@ -339,8 +339,8 @@
         <group id="valuesAdd" tabGroup="values" name="Add"/>
         <group id="valuesRemove" tabGroup="values" name="Remove"/>
         <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
-        <parameter id="add" dataType="objectSet" type="stringValue" name="Add Values" group="valuesAdd"/>
-        <parameter id="remove" dataType="objectSet" type="stringValue" name="Remove Values" group="valuesRemove"/>
+        <parameter id="add" dataType="objectSetUnique" type="stringValue" name="Add Values" group="valuesAdd"/>
+        <parameter id="remove" dataType="objectSetUnique" type="stringValue" name="Remove Values" group="valuesRemove"/>
         <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
     </template>
     <template id="stringValue" name="String Value" topLevel="false" primaryParameter="value">
@@ -354,9 +354,9 @@
         <parameter id="price" dataType="integer" name="Price" format="attribute" y="1" default="0"/>
         <parameter id="name" dataType="object" type="itemName" name="Name" y="2"/>
         <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="3"/>
-        <parameter id="component" dataType="objectSet" type="itemComponent" name="Components" y="4"/>
+        <parameter id="component" dataType="objectSetUnique" type="itemComponent" name="Components" y="4"/>
         <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" y="5"/>
-        <parameter id="script" dataType="objectSet" type="scriptWithTriggerItem" name="Script Triggers" y="6"/>
+        <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerItem" name="Script Triggers" y="6"/>
     </template>
     <template id="itemName" name="Name" topLevel="false" primaryParameter="name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
@@ -382,8 +382,8 @@
         <parameter id="weaponEffect" dataType="objectSet" type="effectReference" name="Weapon Effects" y="1"/>
     </template>
     <template id="itemComponentArmor" name="Armor" topLevel="false">
-        <parameter id="damage" dataType="objectSet" type="itemComponentArmorDamage" name="Damage Data" y="0"/>
-        <parameter id="coveredLimb" dataType="objectSet" type="limbReference" name="Covered Limbs" y="1"/>
+        <parameter id="damage" dataType="objectSetUnique" type="itemComponentArmorDamage" name="Damage Data" y="0"/>
+        <parameter id="coveredLimb" dataType="objectSetUnique" type="limbReference" name="Covered Limbs" y="1"/>
         <parameter id="coversMainBody" dataType="boolean" name="Covers Main Body" format="attribute" y="2"/>
     </template>
     <template id="limbReference" name="Limb" topLevel="false" primaryParameter="limb">
@@ -401,24 +401,24 @@
     </template>
     <template id="itemComponentEffectible" name="Effectible" topLevel="false"/>
     <template id="itemComponentEquippable" name="Equippable" topLevel="false">
-        <parameter id="slotGroup" dataType="objectSet" type="itemComponentEquippableSlotData" name="Equip Slot Groups"/>
+        <parameter id="slotGroup" dataType="objectSetUnique" type="itemComponentEquippableSlotData" name="Equip Slot Groups"/>
     </template>
     <template id="itemComponentEquippableSlotData" name="Equip Slot Data" topLevel="false" primaryParameter="slot">
-        <parameter id="slot" dataType="objectSet" type="equipSlotReference" name="Equip Slot Group" y="0"/>
-        <parameter id="exposedComponent" dataType="objectSet" type="itemComponentReference" name="Exposed Components" y="1"/>
+        <parameter id="slot" dataType="objectSetUnique" type="equipSlotReference" name="Equip Slot Group" y="0"/>
+        <parameter id="exposedComponent" dataType="objectSetUnique" type="itemComponentReference" name="Exposed Components" y="1"/>
         <parameter id="effect" dataType="objectSet" type="effectReference" name="Equipped Effects" y="2"/>
         <parameter id="equippedAction" dataType="objectSet" type="customActionReference" name="Equipped Actions" y="3"/>
     </template>
     <template id="equipSlotReference" name="Equip Slot" topLevel="false" primaryParameter="slot">
         <parameter id="slot" dataType="string" name="Equip Slot" format="current_tag"/>
     </template>
-    <template id="itemComponentReference" name="Item Component" topLevel="false">
+    <template id="itemComponentReference" name="Item Component" topLevel="false" primaryParameter="component">
         <parameter id="component" dataType="enum" type="itemComponentTypes" name="Item Component" format="current_tag"/>
     </template>
     <template id="itemComponentMagazine" name="Ammo" topLevel="false">
         <parameter id="size" dataType="integer" name="Magazine Size" default="1" y="0"/>
         <parameter id="reloadActionPoints" dataType="integer" name="Reload Action Points" default="1" y="1"/>
-        <parameter id="ammoType" dataType="objectSet" type="ammoTypeReference" name="Ammo Types" y="2"/>
+        <parameter id="ammoType" dataType="objectSetUnique" type="ammoTypeReference" name="Ammo Types" y="2"/>
     </template>
     <template id="ammoTypeReference" name="Ammo Type" topLevel="false" primaryParameter="ammoType">
         <parameter id="ammoType" dataType="reference" type="item" name="Ammo Type" format="current_tag"/>
@@ -428,7 +428,7 @@
         <parameter id="effect" dataType="objectSet" type="effectReference" name="Effects" y="1"/>
     </template>
     <template id="itemComponentModdable" name="Moddable" topLevel="false">
-        <parameter id="modSlot" dataType="objectSet" type="itemComponentModdableSlot" name="Mod Slots"/>
+        <parameter id="modSlot" dataType="objectSetUnique" type="itemComponentModdableSlot" name="Mod Slots"/>
     </template>
     <template id="itemComponentModdableSlot" name="Mod Slot" topLevel="false" primaryParameter="name">
         <parameter id="name" dataType="string" name="Mod Slot ID" format="attribute" y="0"/>
@@ -452,8 +452,8 @@
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
         <parameter id="visible" dataType="boolean" name="Visible" format="attribute" y="1" default="true"/>
         <parameter id="moveAction" dataType="reference" type="action" name="Move Action" format="attribute" optional="true" y="2"/>
-        <parameter id="moveDistance" dataType="objectSet" type="linkMoveDistance" name="Move Distances" y="3"/>
-        <parameter id="vehicleMoveAction" dataType="objectSet" type="linkVehicleMoveAction" name="Vehicle Move Actions" y="4"/>
+        <parameter id="moveDistance" dataType="objectSetUnique" type="linkMoveDistance" name="Move Distances" y="3"/>
+        <parameter id="vehicleMoveAction" dataType="objectSetUnique" type="linkVehicleMoveAction" name="Vehicle Move Actions" y="4"/>
     </template>
     <template id="linkMoveDistance" name="Move Distance" topLevel="false" primaryParameter="distance">
         <parameter id="distance" dataType="enum" type="distance" format="current_tag"/>
@@ -493,7 +493,7 @@
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
         <parameter id="name" dataType="object" name="Name" type="objectName" y="1"/>
         <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="2"/>
-        <parameter id="component" dataType="objectSet" type="objectComponent" name="Components" y="3"/>
+        <parameter id="component" dataType="objectSetUnique" type="objectComponent" name="Components" y="3"/>
         <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" y="4"/>
     </template>
     <template id="objectComponent" name="Object Component" topLevel="false" primaryParameter="component">
@@ -519,7 +519,7 @@
     </template>
     <template id="objectComponentNetwork" name="Network" topLevel="false"/>
     <template id="objectComponentLink" name="Link" topLevel="false">
-        <parameter id="link" dataType="objectSet" type="objectComponentLinkData" name="Links"/>
+        <parameter id="link" dataType="objectSetUnique" type="objectComponentLinkData" name="Links"/>
     </template>
     <template id="objectComponentLinkData" name="Link" topLevel="false" primaryParameter="id">
         <parameter id="id" dataType="string" name="Link ID" format="attribute" y="0"/>
@@ -528,7 +528,7 @@
         <parameter id="visible" dataType="boolean" name="Is Visible" format="attribute" y="3" default="false"/>
     </template>
     <template id="objectComponentUsable" name="Usable" topLevel="false">
-        <parameter id="slot" dataType="objectSet" type="objectComponentUsableSlot" name="Usable Slots"/>
+        <parameter id="slot" dataType="objectSetUnique" type="objectComponentUsableSlot" name="Usable Slots"/>
     </template>
     <template id="objectComponentUsableSlot" name="Usable Slot" topLevel="false" primaryParameter="id">
         <parameter id="id" dataType="string" name="Slot ID" format="attribute" y="0"/>
@@ -541,7 +541,7 @@
         <parameter id="seeOtherAreas" dataType="boolean" name="User Can See Other Areas" format="attribute" y="7" default="true"/>
         <parameter id="localActions" dataType="boolean" name="User Can Perform Local Actions" format="attribute" y="8" default="true"/>
         <parameter id="parentActions" dataType="boolean" name="User Can Perform Parent Object Actions" format="attribute" y="9" default="true"/>
-        <parameter id="exposedComponent" dataType="objectSet" type="objectExposedComponent" name="Exposed Components" y="10"/>
+        <parameter id="exposedComponent" dataType="objectSetUnique" type="objectExposedComponent" name="Exposed Components" y="10"/>
         <parameter id="usingAction" dataType="objectSet" type="customActionReference" name="User Actions" y="11"/>
     </template>
     <template id="objectExposedComponent" name="Exposed Component" topLevel="false" primaryParameter="exposedComponent">
@@ -552,7 +552,7 @@
     </template>
     <template id="customActionReference" name="Action Reference" topLevel="false" primaryParameter="template">
         <parameter id="template" dataType="reference" type="action" name="Action" format="attribute" y="0"/>
-        <parameter id="parameter" dataType="objectSet" type="customActionReferenceParameter" name="Parameters" y="1"/>
+        <parameter id="parameter" dataType="objectSetUnique" type="customActionReferenceParameter" name="Parameters" y="1"/>
     </template>
     <template id="customActionReferenceParameter" name="Parameter" topLevel="false" primaryParameter="name">
         <parameter id="name" dataType="string" name="Name" format="attribute" y="0"/>
@@ -576,13 +576,13 @@
         <parameter id="isLoud" dataType="boolean" name="Is Loud" format="attribute" y="2" default="false"/>
         <parameter id="skill" dataType="reference" name="Skill" type="skill" format="attribute" y="3"/>
         <parameter id="name" dataType="string" name="Name" format="child_tag" y="4"/>
-        <parameter id="slotGroup" dataType="objectSet" name="Slot Groups" type="equipSlotGroup" y="5"/>
-        <parameter id="ammo" dataType="objectSet" name="Ammo Types" type="weaponClassAmmoType" y="6"/>
-        <parameter id="range" dataType="objectSet" name="Ranges" type="weaponClassRange" y="7"/>
-        <parameter id="attackType" dataType="objectSet" name="Attack Types" type="weaponClassAttackType" y="8"/>
+        <parameter id="slotGroup" dataType="objectSetUnique" name="Slot Groups" type="equipSlotGroup" y="5"/>
+        <parameter id="ammo" dataType="objectSetUnique" name="Ammo Types" type="weaponClassAmmoType" y="6"/>
+        <parameter id="range" dataType="objectSetUnique" name="Ranges" type="weaponClassRange" y="7"/>
+        <parameter id="attackType" dataType="objectSetUnique" name="Attack Types" type="weaponClassAttackType" y="8"/>
     </template>
     <template id="equipSlotGroup" name="Slot Group" topLevel="false" primaryParameter="slot">
-        <parameter id="slot" dataType="objectSet" name="Slots" type="weaponClassSlot"/>
+        <parameter id="slot" dataType="objectSetUnique" name="Slots" type="weaponClassSlot"/>
     </template>
     <template id="weaponClassSlot" name="Slot" topLevel="false" primaryParameter="slot">
         <parameter id="slot" dataType="string" name="Slot" format="current_tag"/>

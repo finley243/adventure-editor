@@ -33,6 +33,11 @@ public class DataComponent extends Data {
     }
 
     @Override
+    public boolean isDuplicateValue(Data data) {
+        return data instanceof DataComponent dataComponent && Objects.equals(type, dataComponent.type);
+    }
+
+    @Override
     public String toString() {
         if (nameOverride != null) {
             return nameOverride;

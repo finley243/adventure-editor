@@ -27,4 +27,9 @@ public class DataFloat extends Data {
         return o instanceof DataFloat dataFloat && dataFloat.value == value;
     }
 
+    @Override
+    public boolean isDuplicateValue(Data data) {
+        return data instanceof DataFloat dataFloat && dataFloat.value == value;
+    }
+
 }

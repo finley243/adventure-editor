@@ -29,4 +29,9 @@ public class DataReference extends Data {
         return o instanceof DataReference dataReference && Objects.equals(dataReference.value, value);
     }
 
+    @Override
+    public boolean isDuplicateValue(Data data) {
+        return data instanceof DataReference dataReference && Objects.equals(dataReference.value, value);
+    }
+
 }

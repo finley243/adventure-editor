@@ -78,4 +78,21 @@ public class DataObject extends Data {
         return true;
     }
 
+    @Override
+    public boolean isDuplicateValue(Data data) {
+        if (!(data instanceof DataObject dataObject)) {
+            return false;
+        }
+        if (!Objects.equals(getTemplate(), dataObject.getTemplate())) {
+            return false;
+        }
+        String primaryParameter = template.primaryParameter();
+        if (primaryParameter == null) {
+            return false;
+        }
+        Data primaryParameterData = value.get(primaryParameter);
+        Data comparisonPrimaryParameterData = dataObject.value.get(primaryParameter);
+        return primaryParameterData.isDuplicateValue(comparisonPrimaryParameterData);
+    }
+
 }

@@ -27,4 +27,9 @@ public class DataInteger extends Data {
         return o instanceof DataInteger dataInteger && dataInteger.value == value;
     }
 
+    @Override
+    public boolean isDuplicateValue(Data data) {
+        return data instanceof DataInteger dataInteger && dataInteger.value == value;
+    }
+
 }

@@ -29,4 +29,9 @@ public class DataScript extends Data {
         return o instanceof DataScript dataString && Objects.equals(dataString.value, value);
     }
 
+    @Override
+    public boolean isDuplicateValue(Data data) {
+        return data instanceof DataScript dataString && Objects.equals(dataString.value, value);
+    }
+
 }
