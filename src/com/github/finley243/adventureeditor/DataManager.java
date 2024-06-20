@@ -6,6 +6,7 @@ import com.github.finley243.adventureeditor.data.DataObject;
 import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class DataManager {
@@ -113,6 +114,22 @@ public class DataManager {
             main.getBrowserFrame().closeEditorFrameIfActive(categoryID, objectID);
             main.getBrowserFrame().removeGameObject(categoryID, objectID);
         }
+    }
+
+    public Map<String, Map<String, Data>> getAllDataCopy() {
+        Map<String, Map<String, Data>> dataCopy = new HashMap<>();
+        for (Map.Entry<String, Map<String, Data>> categoryEntry : data.entrySet()) {
+            Map<String, Data> categoryDataCopy = new HashMap<>();
+            for (Map.Entry<String, Data> objectEntry : categoryEntry.getValue().entrySet()) {
+                categoryDataCopy.put(objectEntry.getKey(), objectEntry.getValue() == null ? null : objectEntry.getValue().createCopy());
+            }
+            dataCopy.put(categoryEntry.getKey(), categoryDataCopy);
+        }
+        return dataCopy;
+    }
+
+    public boolean hasChangesFrom(Map<String, Map<String, Data>> comparisonData) {
+        return !Objects.equals(data, comparisonData);
     }
 
     private String generateDuplicateObjectID(String categoryID, String objectID) {

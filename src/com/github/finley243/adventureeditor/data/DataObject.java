@@ -26,7 +26,7 @@ public class DataObject extends Data {
     public Data createCopy() {
         Map<String, Data> copyMap = new HashMap<>();
         for (Map.Entry<String, Data> entry : value.entrySet()) {
-            copyMap.put(entry.getKey(), entry.getValue().createCopy());
+            copyMap.put(entry.getKey(), entry.getValue() == null ? null : entry.getValue().createCopy());
         }
         return new DataObject(template, copyMap);
     }

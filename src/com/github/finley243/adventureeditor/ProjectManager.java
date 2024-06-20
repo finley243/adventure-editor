@@ -1,5 +1,6 @@
 package com.github.finley243.adventureeditor;
 
+import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.ProjectData;
 import org.xml.sax.SAXException;
 
@@ -10,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ProjectManager {
 
@@ -22,6 +24,7 @@ public class ProjectManager {
 
     private boolean isProjectLoaded;
     private String loadedProjectPath;
+    private Map<String, Map<String, Data>> lastSavedData;
 
     public ProjectManager(Main main) {
         this.main = main;
@@ -35,7 +38,17 @@ public class ProjectManager {
     }
 
     public boolean isProjectSaved() {
-        return isProjectLoaded && loadedProjectPath == null;
+        return isProjectLoaded && loadedProjectPath != null;
+    }
+
+    public boolean hasUnsavedChanges() {
+        if (!isProjectLoaded()) {
+            return false;
+        }
+        if (!isProjectSaved()) {
+            return true;
+        }
+        return main.getDataManager().hasChangesFrom(lastSavedData);
     }
 
     public List<ProjectData> getRecentProjects() {
@@ -104,6 +117,7 @@ public class ProjectManager {
             addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
             loadedProjectPath = selectedDirectory.getAbsolutePath();
+            lastSavedData = main.getDataManager().getAllDataCopy();
             updateProjectName();
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
@@ -140,6 +154,7 @@ public class ProjectManager {
             addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
             loadedProjectPath = file.getAbsolutePath();
+            lastSavedData = main.getDataManager().getAllDataCopy();
             updateProjectName();
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
@@ -163,6 +178,7 @@ public class ProjectManager {
                 DataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler());
                 ProjectData project = new ProjectData(loadedDirectory.getName(), loadedDirectory.getAbsolutePath());
                 addOrMoveRecentProjectToTop(project);
+                lastSavedData = main.getDataManager().getAllDataCopy();
                 return true;
             } catch (IOException e) {
                 //throw new RuntimeException(e);
@@ -189,6 +205,7 @@ public class ProjectManager {
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             loadedProjectPath = selectedDirectory.getAbsolutePath();
+            lastSavedData = main.getDataManager().getAllDataCopy();
             return true;
         } catch (IOException e) {
             //throw new RuntimeException(e);
@@ -221,13 +238,6 @@ public class ProjectManager {
         }
         DataLoader.saveRecentProjects(recentProjects);
         main.getBrowserFrame().updateRecentProjects();
-    }
-
-    private boolean hasUnsavedChanges() {
-        if (!isProjectLoaded()) {
-            return false;
-        }
-        return true; // TODO - Add a real check, testing for object data changes from initially data (initial data set at last project load/save)
     }
 
 }

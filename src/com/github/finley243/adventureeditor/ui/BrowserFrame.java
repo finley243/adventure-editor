@@ -1,6 +1,5 @@
 package com.github.finley243.adventureeditor.ui;
 
-import com.github.finley243.adventureeditor.DataLoader;
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
@@ -12,7 +11,6 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +50,7 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         fileMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
-                fileSave.setEnabled(main.getProjectManager().isProjectLoaded());
+                fileSave.setEnabled(main.getProjectManager().hasUnsavedChanges());
                 fileSaveAs.setEnabled(main.getProjectManager().isProjectLoaded());
             }
             @Override
