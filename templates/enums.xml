@@ -71,20 +71,23 @@
         <value>independent</value>
         <value>joint</value>
     </enumType>
-    <enumType id="effectType">
-        <value>add</value>
-        <value>mult</value>
-        <value>boolean</value>
-        <value>string</value>
-        <value>stringSet</value>
-        <value>compound</value>
-    </enumType>
     <enumType id="objectComponentTypes">
         <value>inventory</value>
         <value>network</value>
         <value>link</value>
         <value>usable</value>
         <value>vehicle</value>
+    </enumType>
+    <enumType id="itemComponentTypes">
+        <value>ammo</value>
+        <value>armor</value>
+        <value>consumable</value>
+        <value>effectible</value>
+        <value>equippable</value>
+        <value>magazine</value>
+        <value>mod</value>
+        <value>moddable</value>
+        <value>weapon</value>
     </enumType>
     <enumType id="areaRestrictionType">
         <value>PUBLIC</value>
@@ -96,5 +99,14 @@
     </enumType>
     <enumType id="scriptTriggersArea">
         <value>on_player_enter</value>
+    </enumType>
+    <enumType id="scriptTriggersItem">
+        <value>on_player_enter</value>
+    </enumType>
+    <enumType id="scriptTriggersObject">
+        <value>on_player_enter</value>
+    </enumType>
+    <enumType id="scriptTriggersActor">
+        <value>on_death</value>
     </enumType>
 </data>

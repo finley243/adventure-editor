@@ -228,13 +228,10 @@
     <template id="actorLimb" name="Limb" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
         <parameter id="name" dataType="string" name="Name" y="1"/>
-        <parameter id="hitEffect" dataType="objectSet" name="Hit Effects" type="limbHitEffect" optional="true" y="2"/>
+        <parameter id="hitEffect" dataType="objectSet" name="Hit Effects" type="effectReference" optional="true" y="2"/>
         <parameter id="hitChance" dataType="float" name="Hit Chance" format="attribute" y="3" default="1.0"/>
         <parameter id="damageMult" dataType="float" name="Damage Multiplier" format="attribute" y="4" default="1.0"/>
         <parameter id="apparelSlot" dataType="reference" name="Apparel Slot" type="actorEquipSlot" format="attribute" y="5"/>
-    </template>
-    <template id="limbHitEffect" name="Hit Effect" primaryParameter="effect">
-        <parameter id="effect" dataType="reference" name="Effect" type="effect" format="current_tag"/>
     </template>
     <template id="actorEquipSlot" name="Equip Slot" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
@@ -298,27 +295,151 @@
         <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
     <template id="effect" name="Effect" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" topLevelOnly="true" y="0"/>
         <parameter id="permanent" dataType="boolean" name="Is Permanent" format="attribute" y="1" default="false"/>
-        <parameter id="type" dataType="enum" type="effectType" name="Type" optional="true" format="attribute" y="2"/>
-        <parameter id="duration" dataType="integer" name="Duration" format="attribute" y="3" default="0"/>
-        <parameter id="stack" dataType="boolean" name="Can Stack" format="attribute" y="4" default="true"/>
-        <parameter id="conditionAdd" dataType="string" name="Add Condition" format="child_tag" y="5" optional="true"/>
-        <parameter id="conditionRemove" dataType="string" name="Remove Condition" format="child_tag" y="6" optional="true"/>
-        <parameter id="conditionActive" dataType="string" name="Active Condition" format="child_tag" y="7" optional="true"/>
+        <parameter id="duration" dataType="integer" name="Duration" format="attribute" y="2" default="0"/>
+        <parameter id="stack" dataType="boolean" name="Can Stack" format="attribute" y="3" default="true"/>
+        <parameter id="conditionAdd" dataType="string" name="Add Condition" format="child_tag" y="4" optional="true"/>
+        <parameter id="conditionRemove" dataType="string" name="Remove Condition" format="child_tag" y="5" optional="true"/>
+        <parameter id="conditionActive" dataType="string" name="Active Condition" format="child_tag" y="6" optional="true"/>
+        <parameter id="component" dataType="component" name="Stat Modifier" componentFormat="typeAttribute" useComponentTypeName="true" y="7">
+            <component id="add" name="Add" object="effectComponentAdd"/>
+            <component id="mult" name="Multiply" object="effectComponentMult"/>
+            <component id="boolean" name="Boolean" object="effectComponentBoolean"/>
+            <component id="string" name="String" object="effectComponentString"/>
+            <component id="stringSet" name="String Set" object="effectComponentStringSet"/>
+            <component id="compound" name="Compound" object="effectComponentCompound"/>
+        </parameter>
         <parameter id="scriptAdd" dataType="script" name="Add Script" format="child_tag" optional="true" x="1" y="0" height="3"/>
         <parameter id="scriptRemove" dataType="script" name="Remove Script" format="child_tag" optional="true" x="1" y="3" height="3"/>
         <parameter id="scriptRound" dataType="script" name="Each Round Script" format="child_tag" optional="true" x="1" y="6" height="3"/>
+    </template>
+    <template id="effectComponentAdd" name="Add" topLevel="false">
+        <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
+        <parameter id="amount" dataType="integer" name="Add Amount" format="attribute" y="1"/>
+        <parameter id="statCondition" dataType="string" name="Condition" format="child_tag" y="2"/>
+    </template>
+    <template id="effectComponentMult" name="Multiply" topLevel="false">
+        <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
+        <parameter id="amount" dataType="float" name="Multiplier" format="attribute" y="1"/>
+        <parameter id="statCondition" dataType="string" name="Condition" format="child_tag" y="2"/>
+    </template>
+    <template id="effectComponentBoolean" name="Boolean" topLevel="false">
+        <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
+        <parameter id="value" dataType="boolean" name="Set True" format="attribute" y="1"/>
+        <parameter id="statCondition" dataType="string" name="Condition" format="child_tag" y="2"/>
+    </template>
+    <template id="effectComponentString" name="String" topLevel="false">
+        <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
+        <parameter id="value" dataType="string" name="String Value" format="attribute" y="1"/>
+        <parameter id="statCondition" dataType="string" name="Condition" format="child_tag" y="2"/>
+    </template>
+    <template id="effectComponentStringSet" name="String Set" topLevel="false">
+        <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
+        <parameter id="amount" dataType="integer" name="Add Amount" format="attribute" y="1"/>
+        <parameter id="statCondition" dataType="string" name="Condition" format="child_tag" y="2"/>
+    </template>
+    <template id="effectComponentCompound" name="Compound" topLevel="false">
+        <parameter id="effect" dataType="objectSet" type="effect" name="Child Effects"/>
     </template>
     <template id="item" name="Item" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
         <parameter id="price" dataType="integer" name="Price" format="attribute" y="1" default="0"/>
         <parameter id="name" dataType="object" type="itemName" name="Name" y="2"/>
         <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="3"/>
+        <parameter id="component" dataType="objectSet" type="itemComponent" name="Components" y="4"/>
+        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" y="5"/>
+        <parameter id="script" dataType="objectSet" type="scriptWithTriggerItem" name="Script Triggers" y="6"/>
     </template>
     <template id="itemName" name="Name" topLevel="false" primaryParameter="name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
         <parameter id="proper" dataType="boolean" name="Is Proper" default="false" format="attribute" y="1"/>
+    </template>
+    <template id="itemComponent" name="Item Component" topLevel="false" primaryParameter="component">
+        <parameter id="startEnabled" dataType="boolean" name="Start Enabled" format="attribute" x="0" y="0" default="true"/>
+        <parameter id="restricted" dataType="boolean" name="Actions Restricted" format="attribute" x="1" y="0" default="false"/>
+        <parameter id="component" dataType="component" name="Component" componentFormat="typeAttribute" useComponentTypeName="true" x="0" y="1" width="2">
+            <component id="ammo" name="Ammo" object="itemComponentAmmo"/>
+            <component id="armor" name="Armor" object="itemComponentArmor"/>
+            <component id="consumable" name="Consumable" object="itemComponentConsumable"/>
+            <component id="effectible" name="Effectible" object="itemComponentEffectible"/>
+            <component id="equippable" name="Equippable" object="itemComponentEquippable"/>
+            <component id="magazine" name="Magazine" object="itemComponentMagazine"/>
+            <component id="mod" name="Mod" object="itemComponentMod"/>
+            <component id="moddable" name="Moddable" object="itemComponentModdable"/>
+            <component id="weapon" name="Weapon" object="itemComponentWeapon"/>
+        </parameter>
+    </template>
+    <template id="itemComponentAmmo" name="Ammo" topLevel="false">
+        <parameter id="isReusable" dataType="boolean" name="Is Reusable" format="attribute" default="false" y="0"/>
+        <parameter id="weaponEffect" dataType="objectSet" type="effectReference" name="Weapon Effects" y="1"/>
+    </template>
+    <template id="itemComponentArmor" name="Armor" topLevel="false">
+        <parameter id="damage" dataType="objectSet" type="itemComponentArmorDamage" name="Damage Data" y="0"/>
+        <parameter id="coveredLimb" dataType="objectSet" type="limbReference" name="Covered Limbs" y="1"/>
+        <parameter id="coversMainBody" dataType="boolean" name="Covers Main Body" format="attribute" y="2"/>
+    </template>
+    <template id="limbReference" name="Limb" topLevel="false" primaryParameter="limb">
+        <parameter id="limb" dataType="string" name="Limb" format="current_tag"/>
+    </template>
+    <template id="itemComponentArmorDamage" name="Armor Data" topLevel="false" primaryParameter="type">
+        <parameter id="type" dataType="reference" type="damageType" name="Damage Type" format="attribute" y="0"/>
+        <parameter id="resistance" dataType="integer" name="Damage Resistance" format="attribute" optional="true" y="1"/>
+        <parameter id="mult" dataType="float" name="Damage Mult" format="attribute" optional="true" y="2"/>
+    </template>
+    <template id="itemComponentConsumable" name="Consumable" topLevel="false">
+        <parameter id="consumePrompt" dataType="string" name="Consume Prompt" format="child_tag" y="0"/>
+        <parameter id="consumePhrase" dataType="string" name="Consume Phrase" format="child_tag" y="1"/>
+        <parameter id="effect" dataType="objectSet" type="effectReference" name="Effects" y="2"/>
+    </template>
+    <template id="itemComponentEffectible" name="Effectible" topLevel="false"/>
+    <template id="itemComponentEquippable" name="Equippable" topLevel="false">
+        <parameter id="slotGroup" dataType="objectSet" type="itemComponentEquippableSlotData" name="Equip Slot Groups"/>
+    </template>
+    <template id="itemComponentEquippableSlotData" name="Equip Slot Data" topLevel="false" primaryParameter="slot">
+        <parameter id="slot" dataType="objectSet" type="equipSlotReference" name="Equip Slot Group" y="0"/>
+        <parameter id="exposedComponent" dataType="objectSet" type="itemComponentReference" name="Exposed Components" y="1"/>
+        <parameter id="effect" dataType="objectSet" type="effectReference" name="Equipped Effects" y="2"/>
+        <parameter id="equippedAction" dataType="objectSet" type="customActionReference" name="Equipped Actions" y="3"/>
+    </template>
+    <template id="equipSlotReference" name="Equip Slot" topLevel="false" primaryParameter="slot">
+        <parameter id="slot" dataType="string" name="Equip Slot" format="current_tag"/>
+    </template>
+    <template id="itemComponentReference" name="Item Component" topLevel="false">
+        <parameter id="component" dataType="enum" type="itemComponentTypes" name="Item Component" format="current_tag"/>
+    </template>
+    <template id="itemComponentMagazine" name="Ammo" topLevel="false">
+        <parameter id="size" dataType="integer" name="Magazine Size" default="1" y="0"/>
+        <parameter id="reloadActionPoints" dataType="integer" name="Reload Action Points" default="1" y="1"/>
+        <parameter id="ammoType" dataType="objectSet" type="ammoTypeReference" name="Ammo Types" y="2"/>
+    </template>
+    <template id="ammoTypeReference" name="Ammo Type" topLevel="false" primaryParameter="ammoType">
+        <parameter id="ammoType" dataType="reference" type="item" name="Ammo Type" format="current_tag"/>
+    </template>
+    <template id="itemComponentMod" name="Mod" topLevel="false">
+        <parameter id="modSlot" dataType="string" name="Mod Slot ID" format="attribute" y="0"/>
+        <parameter id="effect" dataType="objectSet" type="effectReference" name="Effects" y="1"/>
+    </template>
+    <template id="itemComponentModdable" name="Moddable" topLevel="false">
+        <parameter id="modSlot" dataType="objectSet" type="itemComponentModdableSlot" name="Mod Slots"/>
+    </template>
+    <template id="itemComponentModdableSlot" name="Mod Slot" topLevel="false" primaryParameter="name">
+        <parameter id="name" dataType="string" name="Mod Slot ID" format="attribute" y="0"/>
+        <parameter id="count" dataType="integer" name="Count" format="attribute" default="1" y="1"/>
+    </template>
+    <template id="itemComponentWeapon" name="Weapon" topLevel="false">
+        <parameter id="class" dataType="reference" type="weaponClass" name="Weapon Class" format="attribute" y="0"/>
+        <parameter id="rate" dataType="integer" name="Attack Rate" format="child_tag" default="1" y="1"/>
+        <parameter id="damage" dataType="object" type="itemComponentWeaponDamage" name="Damage" y="2"/>
+        <parameter id="critChance" dataType="float" name="Critical Chance" format="attribute" default="0.0" y="3"/>
+        <parameter id="armorMult" dataType="float" name="Armor Mult" format="attribute" optional="true" default="1.0" y="4"/>
+        <parameter id="silenced" dataType="boolean" name="Is Silenced" format="attribute" default="false" y="5"/>
+        <parameter id="targetEffect" dataType="objectSet" type="effectReference" name="Target Effects" y="6"/>
+    </template>
+    <template id="itemComponentWeaponDamage" name="Damage" topLevel="false">
+        <parameter id="base" dataType="integer" name="Base Damage" format="attribute" y="0"/>
+        <parameter id="crit" dataType="integer" name="Critical Damage" format="attribute" y="1"/>
+        <parameter id="type" dataType="reference" type="damageType" name="Damage Type" optional="true" y="2"/>
     </template>
     <template id="linkType" name="Link Type" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
@@ -448,12 +569,12 @@
         <parameter id="isLoud" dataType="boolean" name="Is Loud" format="attribute" y="2" default="false"/>
         <parameter id="skill" dataType="reference" name="Skill" type="skill" format="attribute" y="3"/>
         <parameter id="name" dataType="string" name="Name" format="child_tag" y="4"/>
-        <parameter id="slotGroup" dataType="objectSet" name="Slot Groups" type="weaponClassSlotGroup" y="5"/>
+        <parameter id="slotGroup" dataType="objectSet" name="Slot Groups" type="equipSlotGroup" y="5"/>
         <parameter id="ammo" dataType="objectSet" name="Ammo Types" type="weaponClassAmmoType" y="6"/>
         <parameter id="range" dataType="objectSet" name="Ranges" type="weaponClassRange" y="7"/>
         <parameter id="attackType" dataType="objectSet" name="Attack Types" type="weaponClassAttackType" y="8"/>
     </template>
-    <template id="weaponClassSlotGroup" name="Slot Group" topLevel="false" primaryParameter="slot">
+    <template id="equipSlotGroup" name="Slot Group" topLevel="false" primaryParameter="slot">
         <parameter id="slot" dataType="objectSet" name="Slots" type="weaponClassSlot"/>
     </template>
     <template id="weaponClassSlot" name="Slot" topLevel="false" primaryParameter="slot">
@@ -474,6 +595,18 @@
     </template>
     <template id="scriptWithTriggerArea" name="Script Trigger" topLevel="false" primaryParameter="trigger">
         <parameter id="trigger" dataType="enum" type="scriptTriggersArea" name="Trigger" format="attribute"/>
+        <parameter id="script" dataType="script" name="Script" format="current_tag"/>
+    </template>
+    <template id="scriptWithTriggerItem" name="Script Trigger" topLevel="false" primaryParameter="trigger">
+        <parameter id="trigger" dataType="enum" type="scriptTriggersItem" name="Trigger" format="attribute"/>
+        <parameter id="script" dataType="script" name="Script" format="current_tag"/>
+    </template>
+    <template id="scriptWithTriggerObject" name="Script Trigger" topLevel="false" primaryParameter="trigger">
+        <parameter id="trigger" dataType="enum" type="scriptTriggersObject" name="Trigger" format="attribute"/>
+        <parameter id="script" dataType="script" name="Script" format="current_tag"/>
+    </template>
+    <template id="scriptWithTriggerActor" name="Script Trigger" topLevel="false" primaryParameter="trigger">
+        <parameter id="trigger" dataType="enum" type="scriptTriggersActor" name="Trigger" format="attribute"/>
         <parameter id="script" dataType="script" name="Script" format="current_tag"/>
     </template>
 </data>

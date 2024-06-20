@@ -396,6 +396,7 @@ public class DataLoader {
                         for (ComponentOption option : parameter.componentOptions()) {
                             optionsMap.put(option.id(), option);
                         }
+                        //System.out.println("Component type: " + componentType);
                         Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates, false);
                         String nameOverride = parameter.useComponentTypeName() ? optionsMap.get(componentType).name() : null;
                         dataMap.put(parameter.id(), new DataComponent(componentType, objectData, nameOverride));
