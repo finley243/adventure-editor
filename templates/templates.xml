@@ -62,12 +62,12 @@
     <template id="actorBehaviorSet" name="Behaviors" topLevel="false">
         <parameter id="behavior" dataType="objectSet" type="actorBehavior" name="Behaviors"/>
     </template>
-    <template id="actorBehavior" name="Behavior" topLevel="false" primaryParameter="type">
+    <template id="actorBehavior" name="Behavior" topLevel="false" primaryParameter="behaviorType">
         <parameter id="condition" dataType="string" name="Condition" optional="true" y="0"/>
         <parameter id="scriptEachRound" dataType="script" name="Each Round Script" optional="true" y="1"/>
         <parameter id="duration" dataType="integer" name="Duration" default="0" y="2"/>
         <parameter id="idle" dataType="objectSet" type="idle" name="Idles" y="3"/>
-        <parameter id="behaviorType" dataType="component" componentFormat="typeAttribute" name="Behavior Type" y="4">
+        <parameter id="behaviorType" dataType="component" componentFormat="typeAttribute" useComponentTypeName="true" name="Behavior Type" y="4">
             <component id="move" name="Move" object="behaviorMove"/>
             <component id="use" name="Use" object="behaviorUse"/>
             <component id="guard" name="Guard" object="behaviorGuard"/>
