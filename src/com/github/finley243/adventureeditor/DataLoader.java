@@ -115,7 +115,23 @@ public class DataLoader {
                             int y = LoadUtils.attributeInt(parameterElement, "y", 0);
                             int width = LoadUtils.attributeInt(parameterElement, "width", 1);
                             int height = LoadUtils.attributeInt(parameterElement, "height", 1);
-                            parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height));
+                            Data defaultValue = null;
+                            String defaultValueString = LoadUtils.attribute(parameterElement, "default", null);
+                            if (defaultValueString != null) {
+                                defaultValue = switch (dataType) {
+                                    case BOOLEAN -> new DataBoolean(Boolean.parseBoolean(defaultValueString));
+                                    case INTEGER -> new DataInteger(Integer.parseInt(defaultValueString));
+                                    case FLOAT -> new DataFloat(Float.parseFloat(defaultValueString));
+                                    case STRING -> new DataString(defaultValueString);
+                                    case OBJECT -> null;
+                                    case OBJECT_SET -> null;
+                                    case REFERENCE -> new DataReference(defaultValueString);
+                                    case ENUM -> new DataEnum(defaultValueString);
+                                    case SCRIPT -> new DataScript(defaultValueString);
+                                    case COMPONENT -> null;
+                                };
+                            }
+                            parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height, defaultValue));
                         }
                         String primaryParameter = LoadUtils.attribute(templateElement, "primaryParameter", null);
                         Template template = new Template(id, name, topLevel, groups, tabGroups, parameters, primaryParameter);
@@ -264,6 +280,7 @@ public class DataLoader {
     private static DataObject loadDataFromElement(Element element, Template template, Map<String, Template> templates) {
         Map<String, Data> dataMap = new HashMap<>();
         for (TemplateParameter parameter : template.parameters()) {
+            Data defaultValueOrNull = parameter.optional() ? null : parameter.defaultValue();
             switch (parameter.dataType()) {
                 case BOOLEAN -> {
                     Boolean value = switch (parameter.format()) {
@@ -272,7 +289,7 @@ public class DataLoader {
                         default -> null;
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), null);
+                        dataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
                         dataMap.put(parameter.id(), new DataBoolean(value));
                     }
@@ -284,7 +301,7 @@ public class DataLoader {
                         default -> null;
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), null);
+                        dataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
                         dataMap.put(parameter.id(), new DataInteger(value));
                     }
@@ -296,7 +313,7 @@ public class DataLoader {
                         default -> null;
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), null);
+                        dataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
                         dataMap.put(parameter.id(), new DataFloat(value));
                     }
@@ -308,7 +325,7 @@ public class DataLoader {
                         case CURRENT_TAG -> LoadUtils.textContent(element, null);
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), null);
+                        dataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
                         dataMap.put(parameter.id(), new DataString(value));
                     }
@@ -337,7 +354,7 @@ public class DataLoader {
                         case CURRENT_TAG -> LoadUtils.textContent(element, null);
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), null);
+                        dataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
                         dataMap.put(parameter.id(), new DataReference(value));
                     }
@@ -349,7 +366,7 @@ public class DataLoader {
                         case CURRENT_TAG -> LoadUtils.textContent(element, null);
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), null);
+                        dataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
                         dataMap.put(parameter.id(), new DataEnum(value));
                     }
@@ -361,7 +378,7 @@ public class DataLoader {
                         default -> null;
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), null);
+                        dataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
                         dataMap.put(parameter.id(), new DataScript(value));
                     }

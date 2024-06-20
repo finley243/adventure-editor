@@ -6,7 +6,7 @@ import com.github.finley243.adventureeditor.template.TemplateParameter;
 public class ParameterFactory {
 
     public static EditorElement create(TemplateParameter parameter, Main main, EditorFrame editorFrame) {
-        return switch (parameter.dataType()) {
+        EditorElement parameterElement = switch (parameter.dataType()) {
             case BOOLEAN -> new ParameterFieldBoolean(editorFrame, parameter.optional(), parameter.name());
             case INTEGER -> new ParameterFieldInteger(editorFrame, parameter.optional(), parameter.name());
             case FLOAT -> new ParameterFieldFloat(editorFrame, parameter.optional(), parameter.name());
@@ -18,6 +18,10 @@ public class ParameterFactory {
             case SCRIPT -> new ParameterFieldScript(editorFrame, parameter.optional(), parameter.name());
             case COMPONENT -> new ParameterFieldComponent(editorFrame, parameter.optional(), parameter.name(), parameter.componentFormat(), parameter.componentOptions(), parameter.useComponentTypeName(), main);
         };
+        if (parameter.defaultValue() != null && !parameter.optional()) {
+            parameterElement.setData(parameter.defaultValue());
+        }
+        return parameterElement;
     }
 
 }

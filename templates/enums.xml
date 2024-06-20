@@ -83,4 +83,9 @@
         <value>usable</value>
         <value>vehicle</value>
     </enumType>
+    <enumType id="areaRestrictionType">
+        <value>PUBLIC</value>
+        <value>PRIVATE</value>
+        <value>HOSTILE</value>
+    </enumType>
 </data>

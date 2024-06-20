@@ -1,5 +1,7 @@
 package com.github.finley243.adventureeditor.data;
 
+import java.util.Objects;
+
 public class DataComponent extends Data {
 
     private final String type;
@@ -23,6 +25,11 @@ public class DataComponent extends Data {
     @Override
     public Data createCopy() {
         return new DataComponent(type, objectData.createCopy(), nameOverride);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DataComponent dataComponent && Objects.equals(type, dataComponent.type) && Objects.equals(objectData, dataComponent.objectData);
     }
 
     @Override

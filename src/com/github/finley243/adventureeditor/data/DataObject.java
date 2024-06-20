@@ -2,9 +2,7 @@ package com.github.finley243.adventureeditor.data;
 
 import com.github.finley243.adventureeditor.template.Template;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class DataObject extends Data {
 
@@ -61,7 +59,23 @@ public class DataObject extends Data {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof DataObject dataObject && Objects.equals(dataObject.value, value);
+        if (!(o instanceof DataObject dataObject)) {
+            return false;
+        }
+        Set<String> combinedKeys = new HashSet<>(value.keySet());
+        combinedKeys.addAll(dataObject.value.keySet());
+        for (String parameterKey : combinedKeys) {
+            if (!value.containsKey(parameterKey) && dataObject.value.get(parameterKey) != null) {
+                return false;
+            }
+            if (!dataObject.value.containsKey(parameterKey) && value.get(parameterKey) != null) {
+                return false;
+            }
+            if (!Objects.equals(value.get(parameterKey), dataObject.value.get(parameterKey))) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
