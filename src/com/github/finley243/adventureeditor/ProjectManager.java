@@ -14,6 +14,7 @@ import java.util.List;
 public class ProjectManager {
 
     private static final boolean OPEN_CONFIG_MENU_ON_NEW_PROJECT = true;
+    private static final int RECENT_PROJECTS_MAXIMUM = 5;
     private static final String UNNAMED_PROJECT_NAME = "Unnamed Project";
 
     private final Main main;
@@ -38,12 +39,22 @@ public class ProjectManager {
     }
 
     public List<ProjectData> getRecentProjects() {
-        return recentProjects;
+        return new ArrayList<>(recentProjects);
     }
 
-    public void setRecentProjects(List<ProjectData> recentProjects) {
+    public void setRecentProjects(List<ProjectData> projects) {
         this.recentProjects.clear();
-        this.recentProjects.addAll(recentProjects);
+        this.recentProjects.addAll(projects);
+        while (recentProjects.size() > RECENT_PROJECTS_MAXIMUM) {
+            recentProjects.removeLast();
+        }
+        DataLoader.saveRecentProjects(recentProjects);
+        main.getBrowserFrame().updateRecentProjects();
+    }
+
+    public void removeRecentProject(ProjectData project) {
+        recentProjects.remove(project);
+        DataLoader.saveRecentProjects(recentProjects);
         main.getBrowserFrame().updateRecentProjects();
     }
 
@@ -57,7 +68,10 @@ public class ProjectManager {
     }
 
     public void newProject() {
-        // TODO - Add save confirmation if a project is open
+        boolean continueCheck = saveConfirmationIfHasUnsavedData();
+        if (!continueCheck) {
+            return;
+        }
         main.getDataManager().clearData();
         main.getConfigMenuHandler().clearConfigData();
         main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
@@ -70,7 +84,10 @@ public class ProjectManager {
     }
 
     public void openProjectFromMenu() {
-        // TODO - Add save confirmation if a project is open
+        boolean continueCheck = saveConfirmationIfHasUnsavedData();
+        if (!continueCheck) {
+            return;
+        }
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int result = fileChooser.showOpenDialog(main.getBrowserFrame());
@@ -84,9 +101,7 @@ public class ProjectManager {
             DataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler());
             main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
-            recentProjects.remove(project);
-            recentProjects.addFirst(project);
-            main.getBrowserFrame().updateRecentProjects();
+            addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
             loadedProjectPath = selectedDirectory.getAbsolutePath();
             updateProjectName();
@@ -103,13 +118,26 @@ public class ProjectManager {
         }
     }
 
-    public void openProjectFromFile(File file) {
-        // TODO - Add save confirmation if a project is open
+    public void openRecentProject(ProjectData projectData) {
+        File file = new File(projectData.absolutePath());
+        if (!file.exists()) {
+            int choice = JOptionPane.showOptionDialog(main.getBrowserFrame(), "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
+            if (choice == JOptionPane.YES_OPTION) {
+                removeRecentProject(projectData);
+            }
+            return;
+        }
+        boolean continueCheck = saveConfirmationIfHasUnsavedData();
+        if (!continueCheck) {
+            return;
+        }
         main.getDataManager().clearData();
         main.getConfigMenuHandler().clearConfigData();
         try {
             DataLoader.loadFromDir(file, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler());
             main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
+            ProjectData project = new ProjectData(file.getName(), file.getAbsolutePath());
+            addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
             loadedProjectPath = file.getAbsolutePath();
             updateProjectName();
@@ -126,49 +154,80 @@ public class ProjectManager {
         }
     }
 
-    public void saveProjectToCurrentPath() {
+    public boolean saveProjectToCurrentPath() {
         if (loadedProjectPath == null) {
-            saveProjectToMenu();
+            return saveProjectToMenu();
         } else {
             File loadedDirectory = new File(loadedProjectPath);
             try {
                 DataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler());
                 ProjectData project = new ProjectData(loadedDirectory.getName(), loadedDirectory.getAbsolutePath());
-                recentProjects.remove(project);
-                recentProjects.addFirst(project);
-                main.getBrowserFrame().updateRecentProjects();
+                addOrMoveRecentProjectToTop(project);
+                return true;
             } catch (IOException e) {
                 //throw new RuntimeException(e);
                 JOptionPane.showMessageDialog(main.getBrowserFrame(), "Project could not be saved to the current directory.", "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
             } catch (ParserConfigurationException | TransformerException e) {
                 //throw new RuntimeException(e);
                 JOptionPane.showMessageDialog(main.getBrowserFrame(), "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
             }
         }
     }
 
-    public void saveProjectToMenu() {
+    public boolean saveProjectToMenu() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int result = fileChooser.showSaveDialog(main.getBrowserFrame());
         if (result != JFileChooser.APPROVE_OPTION) {
-            return;
+            return false;
         }
         File selectedDirectory = fileChooser.getSelectedFile();
         try {
             DataLoader.saveToDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler());
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
-            recentProjects.remove(project);
-            recentProjects.addFirst(project);
-            main.getBrowserFrame().updateRecentProjects();
+            addOrMoveRecentProjectToTop(project);
             loadedProjectPath = selectedDirectory.getAbsolutePath();
+            return true;
         } catch (IOException e) {
             //throw new RuntimeException(e);
             JOptionPane.showMessageDialog(main.getBrowserFrame(), "Project could not be saved to the selected directory.", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
         } catch (ParserConfigurationException | TransformerException e) {
             //throw new RuntimeException(e);
             JOptionPane.showMessageDialog(main.getBrowserFrame(), "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
         }
+    }
+
+    public boolean saveConfirmationIfHasUnsavedData() {
+        if (!hasUnsavedChanges()) {
+            return true;
+        }
+        int result = JOptionPane.showConfirmDialog(main.getBrowserFrame(), "Save changes to the current project?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+            return saveProjectToCurrentPath();
+        } else {
+            return result == JOptionPane.NO_OPTION;
+        }
+    }
+
+    private void addOrMoveRecentProjectToTop(ProjectData project) {
+        recentProjects.remove(project);
+        recentProjects.addFirst(project);
+        while (recentProjects.size() > RECENT_PROJECTS_MAXIMUM) {
+            recentProjects.removeLast();
+        }
+        DataLoader.saveRecentProjects(recentProjects);
+        main.getBrowserFrame().updateRecentProjects();
+    }
+
+    private boolean hasUnsavedChanges() {
+        if (!isProjectLoaded()) {
+            return false;
+        }
+        return true; // TODO - Add a real check, testing for object data changes from initially data (initial data set at last project load/save)
     }
 
 }

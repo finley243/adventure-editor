@@ -11,6 +11,7 @@ import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import java.awt.*;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -113,24 +114,9 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         fileOpenRecent.removeAll();
         for (ProjectData recentProject : recentProjects) {
             JMenuItem recentProjectItem = new JMenuItem(recentProject.name());
-            recentProjectItem.addActionListener(e -> {
-                File recentProjectFile = new File(recentProject.absolutePath());
-                if (recentProjectFile.exists()) {
-                    recentProjects.remove(recentProject);
-                    recentProjects.addFirst(recentProject);
-                    main.getProjectManager().openProjectFromFile(recentProjectFile);
-                } else {
-                    int choice = JOptionPane.showOptionDialog(this, "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
-                    if (choice == JOptionPane.YES_OPTION) {
-                        recentProjects.remove(recentProject);
-                        DataLoader.saveRecentProjects(recentProjects);
-                        updateRecentProjects();
-                    }
-                }
-            });
+            recentProjectItem.addActionListener(e -> main.getProjectManager().openRecentProject(recentProject));
             fileOpenRecent.add(recentProjectItem);
         }
-        DataLoader.saveRecentProjects(recentProjects);
     }
 
     public void addGameObject(String categoryID, String newObjectID, boolean selectedAfterLoading) {
@@ -224,6 +210,18 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         topLevelEditorWindows.get(categoryID).remove(objectID);
         if (topLevelEditorWindows.get(categoryID).isEmpty()) {
             topLevelEditorWindows.remove(categoryID);
+        }
+    }
+
+    @Override
+    protected void processWindowEvent(WindowEvent e) {
+        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+            boolean shouldClose = main.getProjectManager().saveConfirmationIfHasUnsavedData();
+            if (shouldClose) {
+                super.processWindowEvent(e);
+            }
+        } else {
+            super.processWindowEvent(e);
         }
     }
 
