@@ -206,6 +206,8 @@
         <parameter id="equipSlot" dataType="objectSet" name="Equip Slots" type="actorEquipSlot" optional="true" x="4" y="4" height="3"/>
         <parameter id="damageResistance" dataType="objectSet" name="Damage Resistances" type="actorDamageResistance" optional="true" x="3" y="4" height="3"/>
         <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" x="1" y="1" height="6"/>
+        <parameter id="action" dataType="objectSet" name="Actions" type="customActionReference" x="5" y="1" height="3"/>
+        <parameter id="itemAction" dataType="objectSet" name="Item Actions" type="customActionReference" x="5" y="4" height="3"/>
     </template>
     <template id="actorName" name="Name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
@@ -298,7 +300,7 @@
     <template id="effect" name="Effect" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
         <parameter id="permanent" dataType="boolean" name="Is Permanent" format="attribute" y="1" default="false"/>
-        <parameter id="type" dataType="enum" type="effectType" name="Type" format="attribute" y="2"/>
+        <parameter id="type" dataType="enum" type="effectType" name="Type" optional="true" format="attribute" y="2"/>
         <parameter id="duration" dataType="integer" name="Duration" format="attribute" y="3" default="0"/>
         <parameter id="stack" dataType="boolean" name="Can Stack" format="attribute" y="4" default="true"/>
         <parameter id="conditionAdd" dataType="string" name="Add Condition" format="child_tag" y="5" optional="true"/>
@@ -316,7 +318,7 @@
     </template>
     <template id="itemName" name="Name" topLevel="false" primaryParameter="name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
-        <parameter id="proper" dataType="boolean" name="Is Proper" format="attribute" y="1"/>
+        <parameter id="proper" dataType="boolean" name="Is Proper" default="false" format="attribute" y="1"/>
     </template>
     <template id="linkType" name="Link Type" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
@@ -364,6 +366,7 @@
         <parameter id="name" dataType="object" name="Name" type="objectName" y="1"/>
         <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="2"/>
         <parameter id="component" dataType="objectSet" type="objectComponent" name="Components" y="3"/>
+        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" y="4"/>
     </template>
     <template id="objectComponent" name="Object Component" topLevel="false" primaryParameter="component">
         <parameter id="startEnabled" dataType="boolean" name="Start Enabled" format="attribute" x="0" y="0" default="true"/>
@@ -419,7 +422,7 @@
     <template id="objectComponentVehicle" name="Vehicle" topLevel="false">
         <parameter id="vehicleType" dataType="string" name="Vehicle Type" format="attribute"/>
     </template>
-    <template id="customActionReference" name="Action Reference" topLevel="false">
+    <template id="customActionReference" name="Action Reference" topLevel="false" primaryParameter="template">
         <parameter id="template" dataType="reference" type="action" name="Action" format="attribute" y="0"/>
         <parameter id="parameter" dataType="objectSet" type="customActionReferenceParameter" name="Parameters" y="1"/>
     </template>

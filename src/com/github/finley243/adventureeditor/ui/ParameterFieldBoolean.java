@@ -15,11 +15,11 @@ public class ParameterFieldBoolean extends EditorElement {
         super(editorFrame, optional, name);
         this.checkBox = new JCheckBox(name);
         //checkBox.setPreferredSize(new Dimension(140, 20));
-        checkBox.setHorizontalAlignment(SwingConstants.LEFT);
+        //checkBox.setHorizontalAlignment(SwingConstants.LEFT);
         checkBox.setVerticalTextPosition(SwingConstants.TOP);
         checkBox.addActionListener(e -> editorFrame.onEditorElementUpdated());
         JPanel checkBoxPanel = new JPanel();
-        checkBoxPanel.setAlignmentX(LEFT_ALIGNMENT);
+        //checkBoxPanel.setAlignmentX(LEFT_ALIGNMENT);
         checkBoxPanel.add(checkBox);
         if (optional) {
             checkBoxPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));

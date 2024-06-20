@@ -32,7 +32,7 @@ public class DataObjectSet extends Data {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof DataObjectSet dataObjectSet && Objects.equals(dataObjectSet.value, value);
+        return o instanceof DataObjectSet dataObjectSet && Objects.equals(value, dataObjectSet.value);
     }
 
 }

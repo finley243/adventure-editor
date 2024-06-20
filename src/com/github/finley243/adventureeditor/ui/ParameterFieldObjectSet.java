@@ -180,7 +180,8 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
     @Override
     public Data getData() {
         if (!isOptionalEnabled()) {
-            return null;
+            //return null;
+            return new DataObjectSet(new ArrayList<>());
         }
         List<Data> objectData = new ArrayList<>(getValue());
         return new DataObjectSet(objectData);

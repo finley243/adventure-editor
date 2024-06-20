@@ -72,7 +72,6 @@
         <value>joint</value>
     </enumType>
     <enumType id="effectType">
-        <value>basic</value>
         <value>add</value>
         <value>mult</value>
         <value>boolean</value>
