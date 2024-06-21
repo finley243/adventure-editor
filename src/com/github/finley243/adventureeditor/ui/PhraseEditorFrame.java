@@ -76,8 +76,7 @@ public class PhraseEditorFrame extends JFrame {
         Action newPhraseAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String newPhraseKey = main.getPhraseEditorManager().newPhrase();
-                selectPhrase(newPhraseKey);
+                main.getPhraseEditorManager().newPhrase();
             }
         };
         Action editPhraseAction = new AbstractAction() {
@@ -155,17 +154,7 @@ public class PhraseEditorFrame extends JFrame {
         }
     }
 
-    private int indexOfPhrase(String phraseKey) {
-        for (int i = 0; i < phraseTable.getRowCount(); i++) {
-            String rowKey = (String) tableModel.getValueAt(i, 0);
-            if (rowKey.equals(phraseKey)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private void selectPhrase(String phraseKey) {
+    public void selectPhrase(String phraseKey) {
         if (phraseKey == null) return;
         for (int i = 0; i < phraseTable.getRowCount(); i++) {
             int modelIndex = phraseTable.convertRowIndexToModel(i);
@@ -175,6 +164,16 @@ public class PhraseEditorFrame extends JFrame {
                 break;
             }
         }
+    }
+
+    private int indexOfPhrase(String phraseKey) {
+        for (int i = 0; i < phraseTable.getRowCount(); i++) {
+            String rowKey = (String) tableModel.getValueAt(i, 0);
+            if (rowKey.equals(phraseKey)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private void selectRow(int viewIndex) {
@@ -200,8 +199,7 @@ public class PhraseEditorFrame extends JFrame {
         menu.add(menuOpen);
         JMenuItem menuNew = new JMenuItem("New");
         menuNew.addActionListener(e -> {
-            String newPhraseKey = main.getPhraseEditorManager().newPhrase();
-            selectPhrase(newPhraseKey);
+            main.getPhraseEditorManager().newPhrase();
         });
         menu.add(menuNew);
         JMenuItem menuDuplicate = new JMenuItem("Duplicate");
