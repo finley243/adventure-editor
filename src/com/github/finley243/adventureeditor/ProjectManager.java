@@ -73,7 +73,7 @@ public class ProjectManager {
     }
 
     public void updateProjectName() {
-        String configProjectName = main.getConfigMenuHandler().getProjectName();
+        String configProjectName = main.getConfigMenuManager().getProjectName();
         if (configProjectName == null && isProjectLoaded()) {
             main.getBrowserFrame().setProjectName(UNNAMED_PROJECT_NAME);
         } else {
@@ -87,13 +87,13 @@ public class ProjectManager {
             return;
         }
         main.getDataManager().clearData();
-        main.getConfigMenuHandler().clearConfigData();
+        main.getConfigMenuManager().clearConfigData();
         main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
         isProjectLoaded = true;
         loadedProjectPath = null;
         updateProjectName();
         if (OPEN_CONFIG_MENU_ON_NEW_PROJECT) {
-            main.openConfigMenu();
+            main.getConfigMenuManager().openConfigMenu();
         }
     }
 
@@ -110,9 +110,9 @@ public class ProjectManager {
         }
         File selectedDirectory = fileChooser.getSelectedFile();
         main.getDataManager().clearData();
-        main.getConfigMenuHandler().clearConfigData();
+        main.getConfigMenuManager().clearConfigData();
         try {
-            DataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler(), new HashMap<>(), main.getDataManager().getPhrases());
+            DataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), new HashMap<>(), main.getPhraseEditorManager().getPhrases());
             main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
@@ -123,12 +123,12 @@ public class ProjectManager {
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
             main.getDataManager().clearData();
-            main.getConfigMenuHandler().clearConfigData();
+            main.getConfigMenuManager().clearConfigData();
             JOptionPane.showMessageDialog(main.getBrowserFrame(), "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             //throw new RuntimeException(e);
             main.getDataManager().clearData();
-            main.getConfigMenuHandler().clearConfigData();
+            main.getConfigMenuManager().clearConfigData();
             JOptionPane.showMessageDialog(main.getBrowserFrame(), "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -147,9 +147,9 @@ public class ProjectManager {
             return;
         }
         main.getDataManager().clearData();
-        main.getConfigMenuHandler().clearConfigData();
+        main.getConfigMenuManager().clearConfigData();
         try {
-            DataLoader.loadFromDir(file, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler(), new HashMap<>(), main.getDataManager().getPhrases());
+            DataLoader.loadFromDir(file, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), new HashMap<>(), main.getPhraseEditorManager().getPhrases());
             main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
             ProjectData project = new ProjectData(file.getName(), file.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
@@ -160,12 +160,12 @@ public class ProjectManager {
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
             main.getDataManager().clearData();
-            main.getConfigMenuHandler().clearConfigData();
+            main.getConfigMenuManager().clearConfigData();
             JOptionPane.showMessageDialog(main.getBrowserFrame(), "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             //throw new RuntimeException(e);
             main.getDataManager().clearData();
-            main.getConfigMenuHandler().clearConfigData();
+            main.getConfigMenuManager().clearConfigData();
             JOptionPane.showMessageDialog(main.getBrowserFrame(), "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -176,7 +176,7 @@ public class ProjectManager {
         } else {
             File loadedDirectory = new File(loadedProjectPath);
             try {
-                DataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler(), main.getDataManager().getPhrases());
+                DataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getPhraseEditorManager().getPhrases());
                 ProjectData project = new ProjectData(loadedDirectory.getName(), loadedDirectory.getAbsolutePath());
                 addOrMoveRecentProjectToTop(project);
                 lastSavedData = main.getDataManager().getAllDataCopy();
@@ -202,7 +202,7 @@ public class ProjectManager {
         }
         File selectedDirectory = fileChooser.getSelectedFile();
         try {
-            DataLoader.saveToDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler(), main.getDataManager().getPhrases());
+            DataLoader.saveToDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getPhraseEditorManager().getPhrases());
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             loadedProjectPath = selectedDirectory.getAbsolutePath();

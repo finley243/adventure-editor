@@ -13,12 +13,10 @@ public class DataManager {
 
     private final Main main;
     private final Map<String, Map<String, Data>> data;
-    private final Map<String, String> phrases;
 
     public DataManager(Main main) {
         this.main = main;
         this.data = new HashMap<>();
-        this.phrases = new HashMap<>();
     }
 
     public Set<String> getIDsForCategory(String categoryID) {
@@ -45,10 +43,6 @@ public class DataManager {
 
     public Map<String, Map<String, Data>> getAllData() {
         return data;
-    }
-
-    public Map<String, String> getPhrases() {
-        return phrases;
     }
 
     public void clearData() {

@@ -177,9 +177,9 @@ public class DataLoader {
         }
     }
 
-    public static void loadFromDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuHandler configMenuHandler, Map<String, String> scripts, Map<String, String> phrases) throws ParserConfigurationException, IOException, SAXException {
+    public static void loadFromDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> scripts, Map<String, String> phrases) throws ParserConfigurationException, IOException, SAXException {
         if (dir.isDirectory()) {
-            loadConfigData(dir, templates.get(ConfigMenuHandler.CONFIG_TEMPLATE), configMenuHandler);
+            loadConfigData(dir, templates.get(ConfigMenuManager.CONFIG_TEMPLATE), configMenuManager);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
             if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
                 return;
@@ -231,9 +231,9 @@ public class DataLoader {
         }
     }
 
-    public static void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuHandler configMenuHandler, Map<String, String> phrases) throws IOException, TransformerException, ParserConfigurationException {
+    public static void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> phrases) throws IOException, TransformerException, ParserConfigurationException {
         if (dir.isDirectory()) {
-            saveConfigData(dir, templates.get(ConfigMenuHandler.CONFIG_TEMPLATE), configMenuHandler);
+            saveConfigData(dir, templates.get(ConfigMenuManager.CONFIG_TEMPLATE), configMenuManager);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
             dataDirectory.mkdirs();
 
@@ -276,7 +276,7 @@ public class DataLoader {
         }
     }
 
-    private static void loadConfigData(File dir, Template configTemplate, ConfigMenuHandler configMenuHandler) throws ParserConfigurationException, IOException, SAXException {
+    private static void loadConfigData(File dir, Template configTemplate, ConfigMenuManager configMenuManager) throws ParserConfigurationException, IOException, SAXException {
         File configFile = new File(dir, CONFIG_FILE);
         if (!configFile.exists()) {
             return;
@@ -289,10 +289,10 @@ public class DataLoader {
             return;
         }
         Data configData = loadDataFromElement(rootElement, configTemplate, new HashMap<>(), true);
-        configMenuHandler.setConfigData(configData);
+        configMenuManager.setConfigData(configData);
     }
 
-    private static void saveConfigData(File dir, Template configTemplate, ConfigMenuHandler configMenuHandler) throws IOException, ParserConfigurationException, TransformerException {
+    private static void saveConfigData(File dir, Template configTemplate, ConfigMenuManager configMenuManager) throws IOException, ParserConfigurationException, TransformerException {
         File configFile = new File(dir, CONFIG_FILE);
         if (!configFile.exists()) {
             configFile.createNewFile();
@@ -302,7 +302,7 @@ public class DataLoader {
         Document document = builder.newDocument();
         Element rootElement = document.createElement("data");
         document.appendChild(rootElement);
-        DataObject objectData = (DataObject) configMenuHandler.getConfigData();
+        DataObject objectData = (DataObject) configMenuManager.getConfigData();
         addObjectToElement(objectData, rootElement, document);
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();

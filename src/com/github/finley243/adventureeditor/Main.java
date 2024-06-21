@@ -1,7 +1,5 @@
 package com.github.finley243.adventureeditor;
 
-import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.ProjectData;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.*;
@@ -19,9 +17,10 @@ public class Main {
     private final Map<String, Template> templates;
     private final Map<String, List<String>> enumTypes;
 
-    private final ConfigMenuHandler configMenuHandler;
+    private final ConfigMenuManager configMenuManager;
     private final ProjectManager projectManager;
     private final DataManager dataManager;
+    private final PhraseEditorManager phraseEditorManager;
 
     private final BrowserFrame browserFrame;
 
@@ -39,10 +38,11 @@ public class Main {
 
         this.templates = new HashMap<>();
         this.enumTypes = new HashMap<>();
-        this.configMenuHandler = new ConfigMenuHandler(this);
+        this.configMenuManager = new ConfigMenuManager(this);
         this.projectManager = new ProjectManager(this);
         this.dataManager = new DataManager(this);
         this.browserFrame = new BrowserFrame(this);
+        this.phraseEditorManager = new PhraseEditorManager(this);
         initialLoad();
     }
 
@@ -53,8 +53,8 @@ public class Main {
         projectManager.setRecentProjects(recentProjects);
     }
 
-    public ConfigMenuHandler getConfigMenuHandler() {
-        return configMenuHandler;
+    public ConfigMenuManager getConfigMenuManager() {
+        return configMenuManager;
     }
 
     public ProjectManager getProjectManager() {
@@ -69,10 +69,8 @@ public class Main {
         return browserFrame;
     }
 
-    public void openConfigMenu() {
-        if (getProjectManager().isProjectLoaded()) {
-            configMenuHandler.openConfigMenu();
-        }
+    public PhraseEditorManager getPhraseEditorManager() {
+        return phraseEditorManager;
     }
 
     public Template getTemplate(String categoryID) {

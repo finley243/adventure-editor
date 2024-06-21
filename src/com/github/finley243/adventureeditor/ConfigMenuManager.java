@@ -9,7 +9,7 @@ import com.github.finley243.adventureeditor.ui.EditorFrame;
 import javax.swing.*;
 import java.awt.*;
 
-public class ConfigMenuHandler implements DataSaveTarget {
+public class ConfigMenuManager implements DataSaveTarget {
 
     public static final String CONFIG_TEMPLATE = "config";
     private static final String PROJECT_NAME_KEY = "gameName";
@@ -19,11 +19,14 @@ public class ConfigMenuHandler implements DataSaveTarget {
     private Data configData;
     private EditorFrame configFrame;
 
-    public ConfigMenuHandler(Main main) {
+    public ConfigMenuManager(Main main) {
         this.main = main;
     }
 
     public void openConfigMenu() {
+        if (!main.getProjectManager().isProjectLoaded()) {
+            return;
+        }
         if (configFrame != null) {
             configFrame.toFront();
             configFrame.requestFocus();

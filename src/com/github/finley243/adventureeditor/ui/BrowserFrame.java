@@ -65,10 +65,26 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         fileMenu.add(fileSave);
         fileMenu.add(fileSaveAs);
 
+        JMenu toolsMenu = new JMenu("Tools");
+        menuBar.add(toolsMenu);
+        JMenuItem toolsPhraseEditor = new JMenuItem("Phrase Editor");
+        toolsPhraseEditor.addActionListener(e -> main.getPhraseEditorManager().openPhraseEditor());
+        toolsMenu.add(toolsPhraseEditor);
+        toolsMenu.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                toolsPhraseEditor.setEnabled(main.getProjectManager().isProjectLoaded());
+            }
+            @Override
+            public void menuDeselected(MenuEvent e) {}
+            @Override
+            public void menuCanceled(MenuEvent e) {}
+        });
+
         JMenu settingsMenu = new JMenu("Settings");
         menuBar.add(settingsMenu);
         JMenuItem settingsProjectConfig = new JMenuItem("Project Configuration");
-        settingsProjectConfig.addActionListener(e -> main.openConfigMenu());
+        settingsProjectConfig.addActionListener(e -> main.getConfigMenuManager().openConfigMenu());
         settingsMenu.add(settingsProjectConfig);
         settingsMenu.addMenuListener(new MenuListener() {
             @Override

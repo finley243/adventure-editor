@@ -122,7 +122,7 @@ public class BrowserTree extends JTree {
         Action openConfigAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.openConfigMenu();
+                main.getConfigMenuManager().openConfigMenu();
             }
         };
 
