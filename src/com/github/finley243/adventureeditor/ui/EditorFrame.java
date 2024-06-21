@@ -75,6 +75,10 @@ public class EditorFrame extends JFrame {
     }
 
     public boolean requestClose(boolean canCancel, boolean forceClose, boolean forceSave) {
+        boolean editorElementClosed = editorElement.requestClose(false, forceClose, forceSave);
+        if (!editorElementClosed) {
+            return false;
+        }
         if (forceClose || !hasUnsavedChanges()) {
             if (forceSave) {
                 if (isDataValidOrShowDialog()) {

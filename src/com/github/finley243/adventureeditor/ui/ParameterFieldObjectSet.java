@@ -18,6 +18,7 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
     private final JButton buttonRemove;
 
     private final List<EditorFrame> editorFrames;
+    private final List<EditorFrame> unsavedEditorFrames;
     private final String name;
     private final Template template;
     private final boolean requireUniqueValues;
@@ -25,6 +26,7 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
     public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, Template template, boolean requireUniqueValues, Main main) {
         super(editorFrame, optional, name);
         this.editorFrames = new ArrayList<>();
+        this.unsavedEditorFrames = new ArrayList<>();
         this.name = name;
         this.template = template;
         this.requireUniqueValues = requireUniqueValues;
@@ -80,6 +82,7 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
         });
         buttonAdd.addActionListener(e -> {
             EditorFrame objectFrame = new EditorFrame(main, template, null, this);
+            unsavedEditorFrames.add(objectFrame);
         });
         buttonEdit.addActionListener(e -> {
             Data objectData = objectList.getSelectedValue();
@@ -97,10 +100,13 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
         buttonRemove.addActionListener(e -> {
             int selectedIndex = objectList.getSelectedIndex();
             if (selectedIndex != -1) {
-                ((DefaultListModel<Data>) objectList.getModel()).removeElementAt(selectedIndex);
                 if (editorFrames.get(selectedIndex) != null) {
-                    editorFrames.get(selectedIndex).dispose();
+                    boolean didClose = editorFrames.get(selectedIndex).requestClose(false, false, false);
+                    if (!didClose) {
+                        return;
+                    }
                 }
+                ((DefaultListModel<Data>) objectList.getModel()).removeElementAt(selectedIndex);
                 editorFrames.remove(selectedIndex);
                 if (objectList.getModel().getSize() > selectedIndex) {
                     objectList.setSelectedIndex(selectedIndex);
@@ -136,6 +142,26 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
         for (int i = 0; i < value.size(); i++) {
             editorFrames.add(null);
         }
+    }
+
+    @Override
+    public boolean requestClose(boolean canCancel, boolean forceClose, boolean forceSave) {
+        for (int i = 0; i < editorFrames.size(); i++) {
+            if (editorFrames.get(i) != null) {
+                boolean didClose = editorFrames.get(i).requestClose(canCancel, forceClose, forceSave);
+                if (!didClose) {
+                    return false;
+                }
+            }
+        }
+        while (!unsavedEditorFrames.isEmpty()) {
+            EditorFrame frame = unsavedEditorFrames.getFirst();
+            boolean didClose = frame.requestClose(canCancel, forceClose, forceSave);
+            if (!didClose) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -177,6 +203,8 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
          int index = editorFrames.indexOf(frame);
          if (index != -1) {
              editorFrames.set(index, null);
+         } else {
+             unsavedEditorFrames.remove(frame);
          }
     }
 

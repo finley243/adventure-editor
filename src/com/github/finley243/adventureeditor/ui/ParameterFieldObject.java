@@ -10,7 +10,9 @@ import com.github.finley243.adventureeditor.template.TemplateParameter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ParameterFieldObject extends EditorElement {
@@ -92,6 +94,17 @@ public class ParameterFieldObject extends EditorElement {
         if (optional) {
             setEnabledState(false);
         }
+    }
+
+    @Override
+    public boolean requestClose(boolean canCancel, boolean forceClose, boolean forceSave) {
+        for (EditorElement editorElement : editorElements.values()) {
+            boolean didClose = editorElement.requestClose(canCancel, forceClose, forceSave);
+            if (!didClose) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

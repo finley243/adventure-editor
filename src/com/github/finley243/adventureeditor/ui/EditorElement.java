@@ -74,6 +74,10 @@ public abstract class EditorElement extends JPanel {
         }
     }
 
+    public boolean requestClose(boolean canCancel, boolean forceClose, boolean forceSave) {
+        return true;
+    }
+
     public abstract void setEnabledState(boolean enabled);
 
     public abstract Data getData();
