@@ -6,8 +6,7 @@ import com.github.finley243.adventureeditor.data.DataString;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.EditorFrame;
 
-import javax.swing.*;
-import java.awt.*;
+import java.util.Objects;
 
 public class ConfigMenuManager implements DataSaveTarget {
 
@@ -59,6 +58,10 @@ public class ConfigMenuManager implements DataSaveTarget {
         configData = null;
     }
 
+    public boolean hasChangesFrom(Data otherData) {
+        return !Objects.equals(configData, otherData);
+    }
+
     @Override
     public void saveObjectData(Data data, Data initialData) {
         configData = data;
@@ -71,13 +74,12 @@ public class ConfigMenuManager implements DataSaveTarget {
     }
 
     @Override
-    public boolean isDataValidOrShowDialog(Component parentComponent, Data currentData, Data initialData) {
+    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
         String currentProjectName = ((DataString) ((DataObject) currentData).getValue().get(PROJECT_NAME_KEY)).getValue();
         if (currentProjectName == null || currentProjectName.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(parentComponent, "Game name cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
-            return false;
+            return new ErrorData(true, "Game name cannot be empty.");
         }
-        return true;
+        return new ErrorData(false, null);
     }
 
 }

@@ -51,32 +51,13 @@ public class EditorFrame extends JFrame {
         Action saveAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (isDataValidOrShowDialog()) {
-                    saveTarget.saveObjectData(editorElement.getData(), initialData);
-                    saveTarget.onEditorFrameClose(thisFrame);
-                    thisFrame.dispose();
-                }
+                requestClose(false, false, true);
             }
         };
         Action closeAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String[] confirmOptions = {"Yes", "No", "Cancel"};
-                int confirmResult = JOptionPane.showOptionDialog(thisFrame, "Would you like to save changes?", "Save Confirmation",
-                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, confirmOptions, confirmOptions[2]);
-                if (confirmResult == 0) {
-                    // Save
-                    if (isDataValidOrShowDialog()) {
-                        saveTarget.saveObjectData(editorElement.getData(), initialData);
-                        saveTarget.onEditorFrameClose(thisFrame);
-                        thisFrame.dispose();
-                    }
-                } else if (confirmResult == 1) {
-                    // Don't save
-                    saveTarget.onEditorFrameClose(thisFrame);
-                    thisFrame.dispose();
-                }
-                // Cancel (do nothing)
+                requestClose(true, false, false);
             }
         };
 
@@ -91,6 +72,47 @@ public class EditorFrame extends JFrame {
         this.pack();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
+    }
+
+    public boolean requestClose(boolean canCancel, boolean forceClose, boolean forceSave) {
+        if (forceClose || !hasUnsavedChanges()) {
+            if (forceSave) {
+                if (isDataValidOrShowDialog()) {
+                    saveTarget.saveObjectData(editorElement.getData(), initialData);
+                }
+            }
+            saveTarget.onEditorFrameClose(this);
+            this.dispose();
+            return true;
+        }
+        if (forceSave) {
+            if (isDataValidOrShowDialog()) {
+                saveTarget.saveObjectData(editorElement.getData(), initialData);
+                saveTarget.onEditorFrameClose(this);
+                this.dispose();
+                return true;
+            }
+            return false;
+        }
+        String[] confirmOptions = canCancel ? new String[] {"Yes", "No", "Cancel"} : new String[] {"Yes", "No"};
+        int confirmResult = JOptionPane.showOptionDialog(this, "Would you like to save changes?", "Save Confirmation",
+                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        if (confirmResult == 0) {
+            // Save
+            if (isDataValidOrShowDialog()) {
+                saveTarget.saveObjectData(editorElement.getData(), initialData);
+                saveTarget.onEditorFrameClose(this);
+                this.dispose();
+                return true;
+            }
+        } else if (confirmResult == 1) {
+            // Don't save
+            saveTarget.onEditorFrameClose(this);
+            this.dispose();
+            return true;
+        }
+        // Cancel (do nothing)
+        return false;
     }
 
     public Template getTemplate() {
@@ -108,16 +130,11 @@ public class EditorFrame extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
         saveButton.addActionListener(e -> {
-            if (isDataValidOrShowDialog()) {
-                saveTarget.saveObjectData(editorElement.getData(), initialData);
-                saveTarget.onEditorFrameClose(this);
-                this.dispose();
-            }
+            requestClose(false, false, true);
         });
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> {
-            saveTarget.onEditorFrameClose(this);
-            this.dispose();
+            requestClose(false, true, false);
         });
         buttonPanel.add(saveButton);
         buttonPanel.add(cancelButton);
@@ -134,27 +151,7 @@ public class EditorFrame extends JFrame {
     @Override
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-            if (!hasUnsavedChanges()) {
-                saveTarget.onEditorFrameClose(this);
-                super.processWindowEvent(e);
-                return;
-            }
-            String[] confirmOptions = {"Yes", "No", "Cancel"};
-            int confirmResult = JOptionPane.showOptionDialog(this, "Would you like to save changes to this data?", "Save Confirmation",
-                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, confirmOptions, confirmOptions[2]);
-            if (confirmResult == 0) {
-                // Save
-                if (isDataValidOrShowDialog()) {
-                    saveTarget.saveObjectData(editorElement.getData(), initialData);
-                    saveTarget.onEditorFrameClose(this);
-                    super.processWindowEvent(e);
-                }
-            } else if (confirmResult == 1) {
-                // Don't save
-                saveTarget.onEditorFrameClose(this);
-                super.processWindowEvent(e);
-            }
-            // Cancel (do nothing)
+            requestClose(true, false, false);
         } else {
             super.processWindowEvent(e);
         }
@@ -162,7 +159,12 @@ public class EditorFrame extends JFrame {
 
     // Returns true if data is valid, shows error dialog and returns false if not
     private boolean isDataValidOrShowDialog() {
-        return saveTarget.isDataValidOrShowDialog(this, editorElement.getData(), initialData);
+        DataSaveTarget.ErrorData errorData = saveTarget.isDataValidOrShowDialog(editorElement.getData(), initialData);
+        if (!errorData.hasError()) {
+            return true;
+        }
+        JOptionPane.showMessageDialog(this, errorData.message(), "Error", JOptionPane.ERROR_MESSAGE);
+        return false;
     }
 
     private boolean hasUnsavedChanges() {

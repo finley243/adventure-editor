@@ -51,16 +51,20 @@ public class PhraseEditorManager implements DataSaveTarget {
         }
     }
 
-    public void onClosePhraseEditor() {
+    public boolean onClosePhraseEditor() {
+        // These MUST be while-loops to prevent concurrent modification exceptions
+        while (activeEditorFrames.values().iterator().hasNext()) {
+            EditorFrame editorFrame = activeEditorFrames.values().iterator().next();
+            boolean didClose = editorFrame.requestClose(false, false, false);
+            if (!didClose) return false;
+        }
+        while (!activeEditorFramesUnsaved.isEmpty()) {
+            EditorFrame editorFrame = activeEditorFramesUnsaved.getFirst();
+            boolean didClose = editorFrame.requestClose(false, false, false);
+            if (!didClose) return false;
+        }
         phraseEditorFrame = null;
-        for (EditorFrame editorFrame : activeEditorFrames.values()) {
-            // TODO - Replace with a requestClose function on editor frames, which opens a save confirmation if necessary
-            editorFrame.dispose();
-        }
-        for (EditorFrame editorFrame : activeEditorFramesUnsaved) {
-            // TODO - Replace with a requestClose function on editor frames, which opens a save confirmation if necessary
-            editorFrame.dispose();
-        }
+        return true;
     }
 
     public void newPhrase() {
@@ -126,23 +130,24 @@ public class PhraseEditorManager implements DataSaveTarget {
     }
 
     @Override
-    public boolean isDataValidOrShowDialog(Component parentComponent, Data currentData, Data initialData) {
+    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
         String newKey = ((DataString) ((DataObject) currentData).getValue().get("key")).getValue();
         if (newKey.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(parentComponent, "Key cannot be empty.", "Invalid Key", JOptionPane.ERROR_MESSAGE);
-            return false;
+            return new ErrorData(true, "Key cannot be empty.");
         }
         String newPhrase = ((DataString) ((DataObject) currentData).getValue().get("text")).getValue();
         if (newPhrase.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(parentComponent, "Phrase cannot be empty.", "Invalid Phrase", JOptionPane.ERROR_MESSAGE);
-            return false;
+            return new ErrorData(true, "Phrase cannot be empty.");
         }
         String initialKey = initialData == null ? null : ((DataString) ((DataObject) initialData).getValue().get("key")).getValue();
         if (phrases.containsKey(newKey) && !Objects.equals(newKey, initialKey)) {
-            JOptionPane.showMessageDialog(parentComponent, "A phrase with the key " + newKey + " already exists.", "Duplicate Key", JOptionPane.ERROR_MESSAGE);
-            return false;
+            return new ErrorData(true, "A phrase with the key " + newKey + " already exists.");
         }
-        return true;
+        return new ErrorData(false, null);
+    }
+
+    public boolean hasChangesFrom(Map<String, String> lastSavedPhrases) {
+        return !Objects.equals(phrases, lastSavedPhrases);
     }
 
     private Data generateDataForPhrase(String phraseKey) {

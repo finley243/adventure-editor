@@ -2,16 +2,13 @@ package com.github.finley243.adventureeditor.ui;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataObjectSet;
-import com.github.finley243.adventureeditor.data.DataString;
 import com.github.finley243.adventureeditor.template.Template;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class ParameterFieldObjectSet extends EditorElement implements DataSaveTarget {
 
@@ -184,13 +181,12 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
     }
 
     @Override
-    public boolean isDataValidOrShowDialog(Component parentComponent, Data currentData, Data initialData) {
+    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
         if (requireUniqueValues && !isDataUnique(currentData, initialData)) {
             String value = currentData.toString();
-            JOptionPane.showMessageDialog(parentComponent, name + " already contains the value " + value + ".", "Error", JOptionPane.ERROR_MESSAGE);
-            return false;
+            return new ErrorData(true, name + " already contains the value " + value + ".");
         }
-        return true;
+        return new ErrorData(false, null);
     }
 
     @Override

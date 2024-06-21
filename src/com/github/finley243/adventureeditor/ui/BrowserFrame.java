@@ -250,27 +250,24 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
     }
 
     @Override
-    public boolean isDataValidOrShowDialog(Component parentComponent, Data currentData, Data initialData) {
+    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
         boolean isNewInstance = initialData == null;
         String categoryID = ((DataObject) currentData).getTemplate().id();
         String currentID = ((DataObject) currentData).getID();
         if (currentID == null || currentID.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(parentComponent, "ID cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
-            return false;
+            return new ErrorData(true, "ID cannot be empty.");
         }
         if (isNewInstance) {
             if (main.getDataManager().getIDsForCategory(categoryID).contains(currentID)) {
-                JOptionPane.showMessageDialog(parentComponent, "An object with ID \"" + currentID + "\" already exists.", "Error", JOptionPane.ERROR_MESSAGE);
-                return false;
+                return new ErrorData(true, "An object with ID \"" + currentID + "\" already exists.");
             }
         } else {
             String initialID = ((DataObject) initialData).getID();
             if (!initialID.equals(currentID) && main.getDataManager().getIDsForCategory(categoryID).contains(currentID)) {
-                JOptionPane.showMessageDialog(parentComponent, "An object with ID \"" + currentID + "\" already exists.", "Error", JOptionPane.ERROR_MESSAGE);
-                return false;
+                return new ErrorData(true, "An object with ID \"" + currentID + "\" already exists.");
             }
         }
-        return true;
+        return new ErrorData(false, null);
     }
 
 }

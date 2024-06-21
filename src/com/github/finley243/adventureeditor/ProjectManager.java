@@ -26,6 +26,8 @@ public class ProjectManager {
     private boolean isProjectLoaded;
     private String loadedProjectPath;
     private Map<String, Map<String, Data>> lastSavedData;
+    private Data lastSavedConfigData;
+    private Map<String, String> lastSavedPhrases;
 
     public ProjectManager(Main main) {
         this.main = main;
@@ -47,6 +49,12 @@ public class ProjectManager {
             return false;
         }
         if (!isProjectSaved()) {
+            return true;
+        }
+        if (main.getPhraseEditorManager().hasChangesFrom(lastSavedPhrases)) {
+            return true;
+        }
+        if (main.getConfigMenuManager().hasChangesFrom(lastSavedConfigData)) {
             return true;
         }
         return main.getDataManager().hasChangesFrom(lastSavedData);
@@ -118,7 +126,7 @@ public class ProjectManager {
             addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
             loadedProjectPath = selectedDirectory.getAbsolutePath();
-            lastSavedData = main.getDataManager().getAllDataCopy();
+            updateLastSavedData();
             updateProjectName();
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
@@ -155,7 +163,7 @@ public class ProjectManager {
             addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
             loadedProjectPath = file.getAbsolutePath();
-            lastSavedData = main.getDataManager().getAllDataCopy();
+            updateLastSavedData();
             updateProjectName();
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
@@ -179,7 +187,7 @@ public class ProjectManager {
                 DataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getPhraseEditorManager().getPhrases());
                 ProjectData project = new ProjectData(loadedDirectory.getName(), loadedDirectory.getAbsolutePath());
                 addOrMoveRecentProjectToTop(project);
-                lastSavedData = main.getDataManager().getAllDataCopy();
+                updateLastSavedData();
                 return true;
             } catch (IOException e) {
                 //throw new RuntimeException(e);
@@ -206,7 +214,7 @@ public class ProjectManager {
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             loadedProjectPath = selectedDirectory.getAbsolutePath();
-            lastSavedData = main.getDataManager().getAllDataCopy();
+            updateLastSavedData();
             return true;
         } catch (IOException e) {
             //throw new RuntimeException(e);
@@ -239,6 +247,12 @@ public class ProjectManager {
         }
         DataLoader.saveRecentProjects(recentProjects);
         main.getBrowserFrame().updateRecentProjects();
+    }
+
+    private void updateLastSavedData() {
+        lastSavedData = main.getDataManager().getAllDataCopy();
+        lastSavedConfigData = main.getConfigMenuManager().getConfigData().createCopy();
+        lastSavedPhrases = new HashMap<>(main.getPhraseEditorManager().getPhrases());
     }
 
 }

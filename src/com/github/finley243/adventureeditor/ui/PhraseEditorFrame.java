@@ -188,8 +188,10 @@ public class PhraseEditorFrame extends JFrame {
     }
 
     private void closeEditor() {
-        main.getPhraseEditorManager().onClosePhraseEditor();
-        this.dispose();
+        boolean didClose = main.getPhraseEditorManager().onClosePhraseEditor();
+        if (didClose) {
+            this.dispose();
+        }
     }
 
     private void openContextMenu(Component component, Point point, String selectedPhraseKey, int viewRowIndex) {
