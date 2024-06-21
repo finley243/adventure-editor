@@ -62,6 +62,8 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
         valueConstraints.gridx = 0;
         valueConstraints.gridy = 1;
         valueConstraints.gridwidth = 3;
+        valueConstraints.weightx = 1;
+        valueConstraints.weighty = 1;
         valueConstraints.fill = GridBagConstraints.BOTH;
         addConstraints.gridx = 0;
         addConstraints.gridy = 2;

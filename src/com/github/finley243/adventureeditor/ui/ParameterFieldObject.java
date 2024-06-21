@@ -67,6 +67,7 @@ public class ParameterFieldObject extends EditorElement {
                 parameterConstraints.gridy = parameter.y();
                 parameterConstraints.gridwidth = parameter.width();
                 parameterConstraints.gridheight = parameter.height();
+                parameterConstraints.fill = GridBagConstraints.BOTH;
                 editorElements.put(parameter.id(), parameterElement);
                 if (parameter.group() != null) {
                     EditorGroup group = groups.get(parameter.group());
