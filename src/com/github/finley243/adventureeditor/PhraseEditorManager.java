@@ -10,9 +10,7 @@ import com.github.finley243.adventureeditor.ui.EditorFrame;
 import com.github.finley243.adventureeditor.ui.PhraseEditorFrame;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 public class PhraseEditorManager implements DataSaveTarget {
 
@@ -23,16 +21,14 @@ public class PhraseEditorManager implements DataSaveTarget {
 
     private final Main main;
     private final Map<String, String> phrases;
-    private final Map<String, EditorFrame> activeEditorFrames;
-    private final List<EditorFrame> activeEditorFramesUnsaved;
+    private final ChildFrameHandler<String> childFrameHandler;
 
     private PhraseEditorFrame phraseEditorFrame;
 
     public PhraseEditorManager(Main main) {
         this.main = main;
         this.phrases = new HashMap<>();
-        this.activeEditorFrames = new HashMap<>();
-        this.activeEditorFramesUnsaved = new ArrayList<>();
+        this.childFrameHandler = new ChildFrameHandler<>();
     }
 
     public Map<String, String> getPhrases() {
@@ -52,35 +48,25 @@ public class PhraseEditorManager implements DataSaveTarget {
     }
 
     public boolean onClosePhraseEditor() {
-        // These MUST be while-loops to prevent concurrent modification exceptions
-        while (activeEditorFrames.values().iterator().hasNext()) {
-            EditorFrame editorFrame = activeEditorFrames.values().iterator().next();
-            boolean didClose = editorFrame.requestClose(false, false, false);
-            if (!didClose) return false;
+        boolean didCloseAll = childFrameHandler.closeAll();
+        if (didCloseAll) {
+            phraseEditorFrame = null;
+            return true;
         }
-        while (!activeEditorFramesUnsaved.isEmpty()) {
-            EditorFrame editorFrame = activeEditorFramesUnsaved.getFirst();
-            boolean didClose = editorFrame.requestClose(false, false, false);
-            if (!didClose) return false;
-        }
-        phraseEditorFrame = null;
-        return true;
+        return false;
     }
 
     public void newPhrase() {
         EditorFrame editorFrame = new EditorFrame(main, PHRASE_TEMPLATE, null, this);
-        activeEditorFramesUnsaved.add(editorFrame);
+        childFrameHandler.add(null, editorFrame);
     }
 
     public void editPhrase(String phraseKey) {
-        if (activeEditorFrames.containsKey(phraseKey)) {
-            EditorFrame editorFrame = activeEditorFrames.get(phraseKey);
-            editorFrame.toFront();
-            editorFrame.requestFocus();
-        } else {
+        boolean isAlreadyOpen = childFrameHandler.requestFocusIfOpen(phraseKey);
+        if (!isAlreadyOpen) {
             Data initialData = generateDataForPhrase(phraseKey);
             EditorFrame editorFrame = new EditorFrame(main, PHRASE_TEMPLATE, initialData, this);
-            activeEditorFrames.put(phraseKey, editorFrame);
+            childFrameHandler.add(phraseKey, editorFrame);
         }
     }
 
@@ -115,18 +101,7 @@ public class PhraseEditorManager implements DataSaveTarget {
 
     @Override
     public void onEditorFrameClose(EditorFrame frame) {
-        if (activeEditorFramesUnsaved.contains(frame)) {
-            activeEditorFramesUnsaved.remove(frame);
-        } else {
-            Iterator<Map.Entry<String, EditorFrame>> iterator = activeEditorFrames.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, EditorFrame> entry = iterator.next();
-                if (entry.getValue().equals(frame)) {
-                    iterator.remove();
-                    return;
-                }
-            }
-        }
+        childFrameHandler.removeChildFrame(frame);
     }
 
     @Override
