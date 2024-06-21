@@ -177,7 +177,7 @@ public class DataLoader {
         }
     }
 
-    public static void loadFromDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuHandler configMenuHandler) throws ParserConfigurationException, IOException, SAXException {
+    public static void loadFromDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuHandler configMenuHandler, Map<String, String> scripts, Map<String, String> phrases) throws ParserConfigurationException, IOException, SAXException {
         if (dir.isDirectory()) {
             loadConfigData(dir, templates.get(ConfigMenuHandler.CONFIG_TEMPLATE), configMenuHandler);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
@@ -213,20 +213,43 @@ public class DataLoader {
                         }
                         currentChild = currentChild.getNextSibling();
                     }
+                } else if (file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("ascr")) {
+                    String scriptName = file.getName().substring(0, file.getName().lastIndexOf("."));
+                    String scriptPath = file.getAbsolutePath();
+                    scripts.put(scriptName, scriptPath);
+                } else if (file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("aphr")) {
+                    Scanner scanner = new Scanner(file);
+                    while (scanner.hasNextLine()) {
+                        String line = scanner.nextLine();
+                        String[] split = line.split(":");
+                        if (split.length != 2) throw new UnsupportedOperationException("Invalid phrase file format - line: " + line);
+                        phrases.put(split[0].trim(), split[1].trim());
+                    }
+                    scanner.close();
                 }
             }
         }
     }
 
-    public static void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuHandler configMenuHandler) throws IOException, TransformerException, ParserConfigurationException {
+    public static void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuHandler configMenuHandler, Map<String, String> phrases) throws IOException, TransformerException, ParserConfigurationException {
         if (dir.isDirectory()) {
             saveConfigData(dir, templates.get(ConfigMenuHandler.CONFIG_TEMPLATE), configMenuHandler);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
             dataDirectory.mkdirs();
 
-            // Delete all existing .xml files in the directory
+            // Delete all existing game files in the directory
             Path dirPath = Paths.get(dataDirectory.getAbsolutePath());
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*.xml")) {
+                for (Path path : stream) {
+                    Files.delete(path);
+                }
+            }
+            /*try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*.ascr")) {
+                for (Path path : stream) {
+                    Files.delete(path);
+                }
+            }*/
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*.aphr")) {
                 for (Path path : stream) {
                     Files.delete(path);
                 }
@@ -238,6 +261,17 @@ public class DataLoader {
                 File categoryFile = new File(dataDirectory, categoryID + ".xml");
                 categoryFile.createNewFile();
                 saveDataToFile(categoryData, categoryFile, templates);
+            }
+
+            File phraseFile = new File(dataDirectory, "phrases.aphr");
+            phraseFile.createNewFile();
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(phraseFile))) {
+                for (Map.Entry<String, String> phrase : phrases.entrySet()) {
+                    writer.write(phrase.getKey() + ":" + phrase.getValue());
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

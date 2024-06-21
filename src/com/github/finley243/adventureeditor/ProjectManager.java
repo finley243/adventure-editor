@@ -10,6 +10,7 @@ import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -111,7 +112,7 @@ public class ProjectManager {
         main.getDataManager().clearData();
         main.getConfigMenuHandler().clearConfigData();
         try {
-            DataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler());
+            DataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler(), new HashMap<>(), main.getDataManager().getPhrases());
             main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
@@ -148,7 +149,7 @@ public class ProjectManager {
         main.getDataManager().clearData();
         main.getConfigMenuHandler().clearConfigData();
         try {
-            DataLoader.loadFromDir(file, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler());
+            DataLoader.loadFromDir(file, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler(), new HashMap<>(), main.getDataManager().getPhrases());
             main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
             ProjectData project = new ProjectData(file.getName(), file.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
@@ -175,7 +176,7 @@ public class ProjectManager {
         } else {
             File loadedDirectory = new File(loadedProjectPath);
             try {
-                DataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler());
+                DataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler(), main.getDataManager().getPhrases());
                 ProjectData project = new ProjectData(loadedDirectory.getName(), loadedDirectory.getAbsolutePath());
                 addOrMoveRecentProjectToTop(project);
                 lastSavedData = main.getDataManager().getAllDataCopy();
@@ -201,7 +202,7 @@ public class ProjectManager {
         }
         File selectedDirectory = fileChooser.getSelectedFile();
         try {
-            DataLoader.saveToDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler());
+            DataLoader.saveToDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuHandler(), main.getDataManager().getPhrases());
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             loadedProjectPath = selectedDirectory.getAbsolutePath();
