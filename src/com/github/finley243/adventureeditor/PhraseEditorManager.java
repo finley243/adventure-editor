@@ -138,7 +138,7 @@ public class PhraseEditorManager implements DataSaveTarget {
             return false;
         }
         String initialKey = initialData == null ? null : ((DataString) ((DataObject) initialData).getValue().get("key")).getValue();
-        if (phrases.containsKey(newKey) && Objects.equals(newKey, initialKey)) {
+        if (phrases.containsKey(newKey) && !Objects.equals(newKey, initialKey)) {
             JOptionPane.showMessageDialog(parentComponent, "A phrase with the key " + newKey + " already exists.", "Duplicate Key", JOptionPane.ERROR_MESSAGE);
             return false;
         }
