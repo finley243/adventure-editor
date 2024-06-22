@@ -131,7 +131,7 @@ public class DataLoader {
                                     case REFERENCE -> new DataReference(defaultValueString);
                                     case ENUM -> new DataEnum(defaultValueString);
                                     case SCRIPT -> new DataScript(defaultValueString);
-                                    case OBJECT, OBJECT_SET_UNIQUE, OBJECT_SET, COMPONENT -> null;
+                                    case OBJECT, OBJECT_SET_UNIQUE, OBJECT_SET, COMPONENT, REFERENCE_SET -> null;
                                 };
                             }
                             parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height, defaultValue));

@@ -66,22 +66,28 @@ public class DataManager {
                     data.put(categoryID, new HashMap<>());
                 }
                 data.get(categoryID).remove(initialID);
-                main.getBrowserFrame().removeGameObject(categoryID, initialID);
                 data.get(categoryID).put(objectID, objectData);
-                main.getBrowserFrame().addGameObject(categoryID, objectID, true);
+                if (objectDataCast.getTemplate().topLevel()) {
+                    main.getBrowserFrame().removeGameObject(categoryID, initialID);
+                    main.getBrowserFrame().addGameObject(categoryID, objectID, true);
+                }
             } else { // Edit with same ID
                 if (!data.containsKey(categoryID)) {
                     data.put(categoryID, new HashMap<>());
                 }
                 data.get(categoryID).put(objectID, objectData);
-                main.getBrowserFrame().updateCategory(categoryID);
+                if (objectDataCast.getTemplate().topLevel()) {
+                    main.getBrowserFrame().updateCategory(categoryID);
+                }
             }
         } else { // New object instance
             if (!data.containsKey(categoryID)) {
                 data.put(categoryID, new HashMap<>());
             }
             data.get(categoryID).put(objectID, objectData);
-            main.getBrowserFrame().addGameObject(categoryID, objectID, true);
+            if (objectDataCast.getTemplate().topLevel()) {
+                main.getBrowserFrame().addGameObject(categoryID, objectID, true);
+            }
         }
     }
 

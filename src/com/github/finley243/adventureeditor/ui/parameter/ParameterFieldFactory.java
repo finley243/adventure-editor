@@ -17,6 +17,7 @@ public class ParameterFieldFactory {
             case OBJECT_SET -> new ParameterFieldObjectSet(editorFrame, parameter.optional(), parameter.name(), main.getTemplate(parameter.type()), false, main);
             case OBJECT_SET_UNIQUE -> new ParameterFieldObjectSet(editorFrame, parameter.optional(), parameter.name(), main.getTemplate(parameter.type()), true, main);
             case REFERENCE -> new ParameterFieldReference(editorFrame, parameter.optional(), parameter.name(), main, parameter.type());
+            case REFERENCE_SET -> new ParameterFieldReferenceSet(editorFrame, parameter.optional(), parameter.name(), main.getTemplate(parameter.type()), main);
             case ENUM -> new ParameterFieldEnum(editorFrame, parameter.optional(), parameter.name(), main.getEnumValues(parameter.type()).toArray(new String[0]));
             case SCRIPT -> new ParameterFieldScript(editorFrame, parameter.optional(), parameter.name());
             case COMPONENT -> new ParameterFieldComponent(editorFrame, parameter.optional(), parameter.name(), parameter.componentFormat(), parameter.componentOptions(), parameter.useComponentTypeName(), main);
