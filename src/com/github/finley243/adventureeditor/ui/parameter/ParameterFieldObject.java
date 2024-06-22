@@ -71,7 +71,10 @@ public class ParameterFieldObject extends ParameterField {
                 parameterConstraints.gridy = parameter.y();
                 parameterConstraints.gridwidth = parameter.width();
                 parameterConstraints.gridheight = parameter.height();
+                parameterConstraints.weightx = 1;
+                parameterConstraints.weighty = 1;
                 parameterConstraints.fill = GridBagConstraints.BOTH;
+                parameterConstraints.anchor = GridBagConstraints.LINE_START;
                 editorElements.put(parameter.id(), parameterElement);
                 if (parameter.group() != null) {
                     EditorGroup group = groups.get(parameter.group());
@@ -79,7 +82,7 @@ public class ParameterFieldObject extends ParameterField {
                         throw new IllegalArgumentException("Group " + parameter.group() + " not found in template " + template.id());
                     }
                     parameterConstraints.anchor = GridBagConstraints.NORTHWEST;
-                    parameterConstraints.fill = GridBagConstraints.HORIZONTAL;
+                    //parameterConstraints.fill = GridBagConstraints.HORIZONTAL;
                     group.add(parameterElement, parameterConstraints);
                 } else {
                     objectPanel.add(parameterElement, parameterConstraints);

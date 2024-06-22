@@ -36,6 +36,9 @@ public class ParameterFieldFloat extends ParameterField {
         labelConstraints.insets = new Insets(2, 2, 2, 2);
         valueConstraints.gridx = 0;
         valueConstraints.gridy = 1;
+        valueConstraints.weightx = 1;
+        valueConstraints.weighty = 0;
+        valueConstraints.fill = GridBagConstraints.HORIZONTAL;
         getInnerPanel().add(label, labelConstraints);
         getInnerPanel().add(spinner, valueConstraints);
         if (optional) {
