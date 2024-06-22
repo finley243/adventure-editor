@@ -236,12 +236,11 @@ public class BrowserTree extends JTree {
     private void onRightClick(Point mousePos) {
         TreePath path = this.getPathForLocation(mousePos.x, mousePos.y);
         if (path != null) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+            BrowserNode node = (BrowserNode) path.getLastPathComponent();
             this.setSelectionPath(path);
-            if (node instanceof BrowserObjectNode objectNode) {
-                objectNode.openContextMenu(this, mousePos);
-            } else if (node instanceof BrowserCategoryNode categoryNode) {
-                categoryNode.openContextMenu(this, mousePos);
+            JPopupMenu contextMenu = node.getContextMenu();
+            if (contextMenu != null) {
+                contextMenu.show(this, mousePos.x, mousePos.y);
             }
         }
     }

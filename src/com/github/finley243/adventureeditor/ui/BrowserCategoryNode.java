@@ -3,13 +3,11 @@ package com.github.finley243.adventureeditor.ui;
 import com.github.finley243.adventureeditor.Main;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import java.awt.*;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BrowserCategoryNode extends DefaultMutableTreeNode {
+public class BrowserCategoryNode extends BrowserNode {
 
     private final Main main;
     private final String categoryID;
@@ -47,12 +45,23 @@ public class BrowserCategoryNode extends DefaultMutableTreeNode {
         return objectNodes.get(objectID);
     }
 
-    public void openContextMenu(Component component, Point point) {
+    @Override
+    protected JPopupMenu getContextMenu() {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuNew = new JMenuItem("New " + name);
         menuNew.addActionListener(e -> main.getDataManager().newObject(categoryID));
         menu.add(menuNew);
-        menu.show(component, point.x, point.y);
+        return menu;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof BrowserCategoryNode categoryNode && categoryNode.categoryID.equals(categoryID);
+    }
+
+    @Override
+    public int hashCode() {
+        return categoryID.hashCode();
     }
 
 }

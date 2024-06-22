@@ -188,7 +188,7 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         for (String categoryID : topLevelEditorWindows.keySet()) {
             for (String objectID : topLevelEditorWindows.get(categoryID).keySet()) {
                 // TODO - Check if user wants to save changes in each window if applicable
-                topLevelEditorWindows.get(categoryID).get(objectID).dispose();
+                topLevelEditorWindows.get(categoryID).get(objectID).requestClose(false, false, false);
             }
         }
         topLevelEditorWindows.clear();

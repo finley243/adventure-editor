@@ -84,6 +84,7 @@ public class DataLoader {
                                 case "integer" -> TemplateParameter.ParameterDataType.INTEGER;
                                 case "float" -> TemplateParameter.ParameterDataType.FLOAT;
                                 case "string" -> TemplateParameter.ParameterDataType.STRING;
+                                case "stringLong" -> TemplateParameter.ParameterDataType.STRING_LONG;
                                 case "object" -> TemplateParameter.ParameterDataType.OBJECT;
                                 case "objectSet" -> TemplateParameter.ParameterDataType.OBJECT_SET;
                                 case "objectSetUnique" -> TemplateParameter.ParameterDataType.OBJECT_SET_UNIQUE;
@@ -125,7 +126,7 @@ public class DataLoader {
                                     case BOOLEAN -> new DataBoolean(Boolean.parseBoolean(defaultValueString));
                                     case INTEGER -> new DataInteger(Integer.parseInt(defaultValueString));
                                     case FLOAT -> new DataFloat(Float.parseFloat(defaultValueString));
-                                    case STRING -> new DataString(defaultValueString);
+                                    case STRING, STRING_LONG -> new DataString(defaultValueString);
                                     case REFERENCE -> new DataReference(defaultValueString);
                                     case ENUM -> new DataEnum(defaultValueString);
                                     case SCRIPT -> new DataScript(defaultValueString);
@@ -313,6 +314,9 @@ public class DataLoader {
     }
 
     private static DataObject loadDataFromElement(Element element, Template template, Map<String, Template> templates, boolean isTopLevel) {
+        if (element == null) {
+            return null;
+        }
         Map<String, Data> dataMap = new HashMap<>();
         for (TemplateParameter parameter : template.parameters()) {
             Data defaultValueOrNull = (parameter.topLevelOnly() && !isTopLevel) || parameter.optional() ? null : parameter.defaultValue();
@@ -353,7 +357,7 @@ public class DataLoader {
                         dataMap.put(parameter.id(), new DataFloat(value));
                     }
                 }
-                case STRING -> {
+                case STRING, STRING_LONG -> {
                     String value = switch (parameter.format()) {
                         case ATTRIBUTE -> LoadUtils.attribute(element, parameter.id(), null);
                         case CHILD_TAG -> LoadUtils.singleTag(element, parameter.id(), null);
@@ -366,7 +370,6 @@ public class DataLoader {
                     }
                 }
                 case OBJECT -> {
-                    //Element objectElement = LoadUtils.singleChildWithName(element, parameter.id());
                     Element objectElement;
                     if (parameter.format() == TemplateParameter.ParameterFormat.CURRENT_TAG) {
                         objectElement = element;
@@ -425,30 +428,20 @@ public class DataLoader {
                     }
                 }
                 case COMPONENT -> {
-                    //Element componentElement = LoadUtils.singleChildWithName(element, parameter.id());
-                    if (element == null) {
+                    String componentType = switch (parameter.componentFormat()) {
+                        case TYPE_ATTRIBUTE -> LoadUtils.attribute(element, COMPONENT_TYPE_ATTRIBUTE_ID, null);
+                        case TEXT_OR_TAGS -> LoadUtils.hasTextContent(element) ? "text" : "tags";
+                    };
+                    if (componentType == null) {
                         dataMap.put(parameter.id(), null);
                     } else {
-                        String componentType = switch (parameter.componentFormat()) {
-                            case TYPE_ATTRIBUTE -> LoadUtils.attribute(element, COMPONENT_TYPE_ATTRIBUTE_ID, null);
-                            case TEXT_OR_TAGS -> LoadUtils.hasTextContent(element) ? "text" : "tags";
-                        };
-                        /*System.out.println("Template: " + template.id());
-                        System.out.println("Existing Data: " + dataMap);
-                        System.out.println("Component id: " + parameter.id());
-                        System.out.println("Component format: " + parameter.componentFormat());
-                        System.out.println("Component type: " + componentType);*/
-                        if (componentType == null) {
-                            dataMap.put(parameter.id(), null);
-                        } else {
-                            Map<String, ComponentOption> optionsMap = new HashMap<>();
-                            for (ComponentOption option : parameter.componentOptions()) {
-                                optionsMap.put(option.id(), option);
-                            }
-                            Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates, false);
-                            String nameOverride = parameter.useComponentTypeName() ? optionsMap.get(componentType).name() : null;
-                            dataMap.put(parameter.id(), new DataComponent(componentType, objectData, nameOverride));
+                        Map<String, ComponentOption> optionsMap = new HashMap<>();
+                        for (ComponentOption option : parameter.componentOptions()) {
+                            optionsMap.put(option.id(), option);
                         }
+                        Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates, false);
+                        String nameOverride = parameter.useComponentTypeName() ? optionsMap.get(componentType).name() : null;
+                        dataMap.put(parameter.id(), new DataComponent(componentType, objectData, nameOverride));
                     }
                 }
             }
@@ -521,7 +514,7 @@ public class DataLoader {
                         }
                     }
                 }
-                case STRING -> {
+                case STRING, STRING_LONG -> {
                     String value = ((DataString) parameterData).getValue();
                     switch (parameter.format()) {
                         case ATTRIBUTE -> objectElement.setAttribute(parameter.id(), value);

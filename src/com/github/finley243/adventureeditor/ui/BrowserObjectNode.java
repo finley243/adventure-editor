@@ -3,11 +3,8 @@ package com.github.finley243.adventureeditor.ui;
 import com.github.finley243.adventureeditor.Main;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import java.awt.*;
-import java.util.Set;
 
-public class BrowserObjectNode extends DefaultMutableTreeNode {
+public class BrowserObjectNode extends BrowserNode {
 
     private final Main main;
     private final String objectID;
@@ -28,7 +25,8 @@ public class BrowserObjectNode extends DefaultMutableTreeNode {
         return categoryID;
     }
 
-    public void openContextMenu(Component component, Point point) {
+    @Override
+    protected JPopupMenu getContextMenu() {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuOpen = new JMenuItem("Open");
         menuOpen.addActionListener(e -> main.getDataManager().editObject(categoryID, objectID));
@@ -42,7 +40,7 @@ public class BrowserObjectNode extends DefaultMutableTreeNode {
         JMenuItem menuDelete = new JMenuItem("Delete");
         menuDelete.addActionListener(e -> main.getDataManager().deleteObject(categoryID, objectID));
         menu.add(menuDelete);
-        menu.show(component, point.x, point.y);
+        return menu;
     }
 
     @Override

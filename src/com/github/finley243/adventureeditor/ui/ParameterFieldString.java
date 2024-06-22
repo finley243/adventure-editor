@@ -12,7 +12,7 @@ public class ParameterFieldString extends EditorElement {
 
     private final JTextField textField;
 
-    public ParameterFieldString(EditorFrame editorFrame, boolean optional, String name) {
+    public ParameterFieldString(EditorFrame editorFrame, boolean optional, String name, boolean useWide) {
         super(editorFrame, optional, name);
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
@@ -22,7 +22,12 @@ public class ParameterFieldString extends EditorElement {
             label = new JLabel(name);
         }
         this.textField = new JTextField();
-        textField.setPreferredSize(new Dimension(150, 20));
+        if (useWide) {
+            textField.setPreferredSize(new Dimension(300, 20));
+            textField.setFont(textField.getFont().deriveFont(12.0f));
+        } else {
+            textField.setPreferredSize(new Dimension(150, 20));
+        }
         textField.addActionListener(e -> editorFrame.onEditorElementUpdated());
         textField.getDocument().addDocumentListener(new DocumentListener() {
             @Override

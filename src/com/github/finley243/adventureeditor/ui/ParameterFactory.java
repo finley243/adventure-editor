@@ -10,7 +10,8 @@ public class ParameterFactory {
             case BOOLEAN -> new ParameterFieldBoolean(editorFrame, parameter.optional(), parameter.name());
             case INTEGER -> new ParameterFieldInteger(editorFrame, parameter.optional(), parameter.name());
             case FLOAT -> new ParameterFieldFloat(editorFrame, parameter.optional(), parameter.name());
-            case STRING -> new ParameterFieldString(editorFrame, parameter.optional(), parameter.name());
+            case STRING -> new ParameterFieldString(editorFrame, parameter.optional(), parameter.name(), false);
+            case STRING_LONG -> new ParameterFieldString(editorFrame, parameter.optional(), parameter.name(), true);
             case OBJECT -> new ParameterFieldObject(editorFrame, parameter.optional(), parameter.name(), main.getTemplate(parameter.type()), main, false, false);
             case OBJECT_SET -> new ParameterFieldObjectSet(editorFrame, parameter.optional(), parameter.name(), main.getTemplate(parameter.type()), false, main);
             case OBJECT_SET_UNIQUE -> new ParameterFieldObjectSet(editorFrame, parameter.optional(), parameter.name(), main.getTemplate(parameter.type()), true, main);
