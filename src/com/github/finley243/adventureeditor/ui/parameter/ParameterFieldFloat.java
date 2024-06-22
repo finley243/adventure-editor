@@ -14,6 +14,7 @@ public class ParameterFieldFloat extends ParameterField {
 
     public ParameterFieldFloat(EditorFrame editorFrame, boolean optional, String name) {
         super(editorFrame, optional, name);
+        setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
         if (optional) {

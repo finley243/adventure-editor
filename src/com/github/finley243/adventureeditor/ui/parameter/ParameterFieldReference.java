@@ -18,6 +18,7 @@ public class ParameterFieldReference extends ParameterField {
 
     public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, Main main, String categoryID) {
         super(editorFrame, optional, name);
+        setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
         if (optional) {

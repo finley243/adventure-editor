@@ -27,6 +27,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
 
     public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, Template template, boolean requireUniqueValues, Main main) {
         super(editorFrame, optional, name);
+        setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.editorFrames = new ArrayList<>();
         this.unsavedEditorFrames = new ArrayList<>();
         this.name = name;

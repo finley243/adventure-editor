@@ -29,6 +29,7 @@ public class ParameterFieldObject extends ParameterField {
         /*if (!isSeparateWindow) {
             objectPanel.setBorder(BorderFactory.createTitledBorder(name));
         }*/
+        getInnerPanel().setLayout(new BorderLayout());
         objectPanel.setLayout(new GridBagLayout());
         this.editorElements = new HashMap<>();
         Map<String, EditorTabGroup> tabGroups = new HashMap<>();
@@ -40,6 +41,11 @@ public class ParameterFieldObject extends ParameterField {
             tabGroupConstraints.gridy = tabGroup.y();
             tabGroupConstraints.gridwidth = tabGroup.width();
             tabGroupConstraints.gridheight = tabGroup.height();
+            tabGroupConstraints.weightx = 1;
+            tabGroupConstraints.weighty = 1;
+            tabGroupConstraints.fill = GridBagConstraints.BOTH;
+            tabGroupConstraints.anchor = GridBagConstraints.NORTHWEST;
+            //tabGroupConstraints.insets = new Insets(2, 2, 2, 2);
             objectPanel.add(editorTabGroup, tabGroupConstraints);
         }
         Map<String, EditorGroup> groups = new HashMap<>();
@@ -58,8 +64,11 @@ public class ParameterFieldObject extends ParameterField {
                 groupConstraints.gridy = group.y();
                 groupConstraints.gridwidth = group.width();
                 groupConstraints.gridheight = group.height();
+                groupConstraints.weightx = 1;
+                groupConstraints.weighty = 1;
                 groupConstraints.fill = GridBagConstraints.BOTH;
-                groupConstraints.anchor = GridBagConstraints.NORTH;
+                groupConstraints.anchor = GridBagConstraints.NORTHWEST;
+                //groupConstraints.insets = new Insets(2, 2, 2, 2);
                 objectPanel.add(editorGroup, groupConstraints);
             }
         }
@@ -74,14 +83,19 @@ public class ParameterFieldObject extends ParameterField {
                 parameterConstraints.weightx = 1;
                 parameterConstraints.weighty = 1;
                 parameterConstraints.fill = GridBagConstraints.BOTH;
-                parameterConstraints.anchor = GridBagConstraints.LINE_START;
+                parameterConstraints.anchor = GridBagConstraints.NORTHWEST;
+                //parameterConstraints.insets = new Insets(2, 2, 2, 2);
                 editorElements.put(parameter.id(), parameterElement);
+                /*if (parameterElement instanceof ParameterFieldObject) {
+                    parameterElement.setBorder(BorderFactory.createDashedBorder(Color.RED));
+                    parameterElement.getInnerPanel().setBorder(BorderFactory.createDashedBorder(Color.BLUE));
+                }*/
                 if (parameter.group() != null) {
                     EditorGroup group = groups.get(parameter.group());
                     if (group == null) {
                         throw new IllegalArgumentException("Group " + parameter.group() + " not found in template " + template.id());
                     }
-                    parameterConstraints.anchor = GridBagConstraints.NORTHWEST;
+                    //parameterConstraints.anchor = GridBagConstraints.NORTHWEST;
                     //parameterConstraints.fill = GridBagConstraints.HORIZONTAL;
                     group.add(parameterElement, parameterConstraints);
                 } else {
@@ -91,10 +105,10 @@ public class ParameterFieldObject extends ParameterField {
         }
         //getInnerPanel().add(objectPanel);
         if (optional) {
-            getInnerPanel().add(new OptionalBorderedPanel(name, objectPanel, getOptionalCheckbox()));
+            getInnerPanel().add(new OptionalBorderedPanel(name, objectPanel, getOptionalCheckbox()), BorderLayout.CENTER);
         } else {
             setBorder(BorderFactory.createEmptyBorder());
-            getInnerPanel().add(objectPanel);
+            getInnerPanel().add(objectPanel, BorderLayout.CENTER);
         }
         if (optional) {
             setEnabledState(false);

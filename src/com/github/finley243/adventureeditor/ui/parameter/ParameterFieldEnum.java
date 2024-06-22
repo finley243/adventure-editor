@@ -13,6 +13,7 @@ public class ParameterFieldEnum extends ParameterField {
 
     public ParameterFieldEnum(EditorFrame editorFrame, boolean optional, String name, String[] values) {
         super(editorFrame, optional, name);
+        setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
         if (optional) {
