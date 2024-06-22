@@ -43,7 +43,7 @@ public class EditorFrame extends JDialog {
         JScrollPane scrollPane = new JScrollPane(parameterField);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         boolean isNewInstance = objectData == null;
-        this.saveButton = new JButton("Save");
+        this.saveButton = new JButton("OK");
         saveButton.setEnabled(isNewInstance);
         JPanel buttonPanel = getButtonPanel();
         mainPanel.add(buttonPanel, BorderLayout.PAGE_END);
@@ -152,15 +152,13 @@ public class EditorFrame extends JDialog {
     private JPanel getButtonPanel() {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        buttonPanel.add(Box.createHorizontalGlue());
         saveButton.addActionListener(e -> {
             requestClose(false, true);
         });
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(e -> {
-            requestClose(true, false);
-        });
+        saveButton.setPreferredSize(new Dimension(100, saveButton.getPreferredSize().height));
         buttonPanel.add(saveButton);
-        buttonPanel.add(cancelButton);
         return buttonPanel;
     }
 
