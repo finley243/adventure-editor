@@ -4,6 +4,9 @@ import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterField;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +15,7 @@ import java.awt.event.*;
 public class EditorFrame extends JDialog {
 
     private final Main main;
-    private final EditorElement editorElement;
+    private final ParameterField parameterField;
     private final Template template;
     private final Data initialData;
     private final DataSaveTarget saveTarget;
@@ -33,32 +36,31 @@ public class EditorFrame extends JDialog {
         this.saveTarget = saveTarget;
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
-        this.editorElement = new ParameterFieldObject(this, false, template.name(), template, main, saveTarget instanceof BrowserFrame, true);
+        this.parameterField = new ParameterFieldObject(this, false, template.name(), template, main, saveTarget instanceof BrowserFrame, true);
         if (objectData != null) {
-            editorElement.setData(objectData);
+            parameterField.setData(objectData);
         }
-        JScrollPane scrollPane = new JScrollPane(editorElement);
+        JScrollPane scrollPane = new JScrollPane(parameterField);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         boolean isNewInstance = objectData == null;
         this.saveButton = new JButton("Save");
         saveButton.setEnabled(isNewInstance);
-        JPanel buttonPanel = getButtonPanel(isNewInstance);
+        JPanel buttonPanel = getButtonPanel();
         mainPanel.add(buttonPanel, BorderLayout.PAGE_END);
         this.getContentPane().add(mainPanel);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setResizable(false);
 
-        EditorFrame thisFrame = this;
         Action saveAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                requestClose(false, false, true);
+                requestClose(false, true);
             }
         };
         Action closeAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                requestClose(true, false, false);
+                requestClose(false, false);
             }
         };
 
@@ -75,43 +77,59 @@ public class EditorFrame extends JDialog {
         this.setVisible(true);
     }
 
-    public boolean requestClose(boolean canCancel, boolean forceClose, boolean forceSave) {
-        boolean editorElementClosed = editorElement.requestClose(false, forceClose, forceSave);
-        if (!editorElementClosed) {
-            return false;
-        }
-        if (forceClose || !hasUnsavedChanges()) {
-            if (forceSave) {
-                if (isDataValidOrShowDialog()) {
-                    saveTarget.saveObjectData(editorElement.getData(), initialData);
-                }
+    public boolean requestClose(boolean forceClose, boolean forceSave) {
+        if (forceSave) {
+            boolean subElementsClosed = parameterField.requestClose(false, false);
+            if (!subElementsClosed) {
+                return false;
+            }
+            if (isDataValidOrShowDialog()) {
+                saveTarget.saveObjectData(parameterField.getData(), initialData);
+                saveTarget.onEditorFrameClose(this);
+                this.dispose();
+                return true;
+            }
+            return true;
+        } else if (forceClose) {
+            boolean subElementsClosed = parameterField.requestClose(true, false);
+            if (!subElementsClosed) {
+                return false;
             }
             saveTarget.onEditorFrameClose(this);
             this.dispose();
             return true;
         }
-        if (forceSave) {
-            if (isDataValidOrShowDialog()) {
-                saveTarget.saveObjectData(editorElement.getData(), initialData);
-                saveTarget.onEditorFrameClose(this);
-                this.dispose();
-                return true;
-            }
+        boolean subElementsClosed = parameterField.requestClose(false, false);
+        if (!subElementsClosed) {
             return false;
         }
-        String[] confirmOptions = canCancel ? new String[] {"Yes", "No", "Cancel"} : new String[] {"Yes", "No"};
+        boolean hasUnsavedChanges = hasUnsavedChanges();
+        if (!hasUnsavedChanges) {
+            saveTarget.onEditorFrameClose(this);
+            this.dispose();
+            return true;
+        }
+        String[] confirmOptions = new String[] {"Yes", "No", "Cancel"};
         int confirmResult = JOptionPane.showOptionDialog(this, "Would you like to save changes?", "Save Confirmation",
                 JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, confirmOptions, confirmOptions[0]);
         if (confirmResult == 0) {
             // Save
+            boolean editorElementClosed = parameterField.requestClose(false, false);
+            if (!editorElementClosed) {
+                return false;
+            }
             if (isDataValidOrShowDialog()) {
-                saveTarget.saveObjectData(editorElement.getData(), initialData);
+                saveTarget.saveObjectData(parameterField.getData(), initialData);
                 saveTarget.onEditorFrameClose(this);
                 this.dispose();
                 return true;
             }
         } else if (confirmResult == 1) {
             // Don't save
+            boolean editorElementClosed = parameterField.requestClose(true, false);
+            if (!editorElementClosed) {
+                return false;
+            }
             saveTarget.onEditorFrameClose(this);
             this.dispose();
             return true;
@@ -131,15 +149,15 @@ public class EditorFrame extends JDialog {
         return ((DataObject) initialData).getID();
     }
 
-    private JPanel getButtonPanel(boolean isNewInstance) {
+    private JPanel getButtonPanel() {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
         saveButton.addActionListener(e -> {
-            requestClose(false, false, true);
+            requestClose(false, true);
         });
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> {
-            requestClose(false, true, false);
+            requestClose(true, false);
         });
         buttonPanel.add(saveButton);
         buttonPanel.add(cancelButton);
@@ -156,7 +174,7 @@ public class EditorFrame extends JDialog {
     @Override
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-            requestClose(true, false, false);
+            requestClose(false, false);
         } else {
             super.processWindowEvent(e);
         }
@@ -164,7 +182,7 @@ public class EditorFrame extends JDialog {
 
     // Returns true if data is valid, shows error dialog and returns false if not
     private boolean isDataValidOrShowDialog() {
-        DataSaveTarget.ErrorData errorData = saveTarget.isDataValidOrShowDialog(editorElement.getData(), initialData);
+        DataSaveTarget.ErrorData errorData = saveTarget.isDataValidOrShowDialog(parameterField.getData(), initialData);
         if (!errorData.hasError()) {
             return true;
         }
@@ -176,7 +194,7 @@ public class EditorFrame extends JDialog {
         if (initialData == null) {
             return true;
         }
-        Data currentData = editorElement.getData();
+        Data currentData = parameterField.getData();
         return !initialData.equals(currentData);
     }
 

@@ -1,12 +1,13 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataEnum;
+import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class ParameterFieldEnum extends EditorElement {
+public class ParameterFieldEnum extends ParameterField {
 
     private final JComboBox<String> dropdownMenu;
 

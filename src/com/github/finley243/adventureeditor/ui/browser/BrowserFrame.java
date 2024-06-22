@@ -1,10 +1,12 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.browser;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
-import com.github.finley243.adventureeditor.template.ProjectData;
+import com.github.finley243.adventureeditor.ProjectData;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -188,7 +190,7 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         for (String categoryID : topLevelEditorWindows.keySet()) {
             for (String objectID : topLevelEditorWindows.get(categoryID).keySet()) {
                 // TODO - Check if user wants to save changes in each window if applicable
-                topLevelEditorWindows.get(categoryID).get(objectID).requestClose(false, false, false);
+                topLevelEditorWindows.get(categoryID).get(objectID).requestClose(false, false);
             }
         }
         topLevelEditorWindows.clear();

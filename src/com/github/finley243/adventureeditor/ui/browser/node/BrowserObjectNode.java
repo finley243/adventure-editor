@@ -1,4 +1,4 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.browser.node;
 
 import com.github.finley243.adventureeditor.Main;
 
@@ -26,7 +26,7 @@ public class BrowserObjectNode extends BrowserNode {
     }
 
     @Override
-    protected JPopupMenu getContextMenu() {
+    public JPopupMenu getContextMenu() {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuOpen = new JMenuItem("Open");
         menuOpen.addActionListener(e -> main.getDataManager().editObject(categoryID, objectID));

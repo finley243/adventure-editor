@@ -1,13 +1,12 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.EtchedBorder;
 import java.awt.*;
 
-public abstract class EditorElement extends JPanel {
+public abstract class ParameterField extends JPanel {
 
     protected final EditorFrame parentFrame;
     private final JPanel innerPanel;
@@ -15,7 +14,7 @@ public abstract class EditorElement extends JPanel {
     private final boolean isOptional;
     private boolean isOptionalEnabled;
 
-    public EditorElement(EditorFrame parentFrame, boolean isOptional, String name) {
+    public ParameterField(EditorFrame parentFrame, boolean isOptional, String name) {
         this.parentFrame = parentFrame;
         this.isOptional = isOptional;
         this.innerPanel = new JPanel();
@@ -74,7 +73,7 @@ public abstract class EditorElement extends JPanel {
         }
     }
 
-    public boolean requestClose(boolean canCancel, boolean forceClose, boolean forceSave) {
+    public boolean requestClose(boolean forceClose, boolean forceSave) {
         return true;
     }
 

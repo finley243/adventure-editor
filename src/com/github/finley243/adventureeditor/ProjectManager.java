@@ -1,7 +1,6 @@
 package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.template.ProjectData;
 import org.xml.sax.SAXException;
 
 import javax.swing.*;

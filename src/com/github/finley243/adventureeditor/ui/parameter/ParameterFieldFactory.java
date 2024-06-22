@@ -1,12 +1,13 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
+import com.github.finley243.adventureeditor.ui.EditorFrame;
 
-public class ParameterFactory {
+public class ParameterFieldFactory {
 
-    public static EditorElement create(TemplateParameter parameter, Main main, EditorFrame editorFrame) {
-        EditorElement parameterElement = switch (parameter.dataType()) {
+    public static ParameterField create(TemplateParameter parameter, Main main, EditorFrame editorFrame) {
+        ParameterField parameterElement = switch (parameter.dataType()) {
             case BOOLEAN -> new ParameterFieldBoolean(editorFrame, parameter.optional(), parameter.name());
             case INTEGER -> new ParameterFieldInteger(editorFrame, parameter.optional(), parameter.name());
             case FLOAT -> new ParameterFieldFloat(editorFrame, parameter.optional(), parameter.name());

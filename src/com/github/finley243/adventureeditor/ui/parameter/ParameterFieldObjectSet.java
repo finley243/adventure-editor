@@ -1,16 +1,18 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObjectSet;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParameterFieldObjectSet extends EditorElement implements DataSaveTarget {
+public class ParameterFieldObjectSet extends ParameterField implements DataSaveTarget {
 
     private final JList<Data> objectList;
     private final JButton buttonAdd;
@@ -101,7 +103,7 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
             int selectedIndex = objectList.getSelectedIndex();
             if (selectedIndex != -1) {
                 if (editorFrames.get(selectedIndex) != null) {
-                    boolean didClose = editorFrames.get(selectedIndex).requestClose(false, false, false);
+                    boolean didClose = editorFrames.get(selectedIndex).requestClose(false, false);
                     if (!didClose) {
                         return;
                     }
@@ -145,10 +147,10 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
     }
 
     @Override
-    public boolean requestClose(boolean canCancel, boolean forceClose, boolean forceSave) {
+    public boolean requestClose(boolean forceClose, boolean forceSave) {
         for (int i = 0; i < editorFrames.size(); i++) {
             if (editorFrames.get(i) != null) {
-                boolean didClose = editorFrames.get(i).requestClose(canCancel, forceClose, forceSave);
+                boolean didClose = editorFrames.get(i).requestClose(forceClose, forceSave);
                 if (!didClose) {
                     return false;
                 }
@@ -156,7 +158,7 @@ public class ParameterFieldObjectSet extends EditorElement implements DataSaveTa
         }
         while (!unsavedEditorFrames.isEmpty()) {
             EditorFrame frame = unsavedEditorFrames.getFirst();
-            boolean didClose = frame.requestClose(canCancel, forceClose, forceSave);
+            boolean didClose = frame.requestClose(forceClose, forceSave);
             if (!didClose) {
                 return false;
             }

@@ -1,4 +1,4 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
@@ -7,17 +7,19 @@ import com.github.finley243.adventureeditor.template.Group;
 import com.github.finley243.adventureeditor.template.TabGroup;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
+import com.github.finley243.adventureeditor.ui.EditorFrame;
+import com.github.finley243.adventureeditor.ui.EditorGroup;
+import com.github.finley243.adventureeditor.ui.EditorTabGroup;
+import com.github.finley243.adventureeditor.ui.OptionalBorderedPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class ParameterFieldObject extends EditorElement {
+public class ParameterFieldObject extends ParameterField {
 
-    private final Map<String, EditorElement> editorElements;
+    private final Map<String, ParameterField> editorElements;
     private final Template template;
 
     public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, Template template, Main main, boolean isTopLevelEditor, boolean isSeparateWindow) {
@@ -63,7 +65,7 @@ public class ParameterFieldObject extends EditorElement {
         }
         for (TemplateParameter parameter : template.parameters()) {
             if (isTopLevelEditor || !parameter.topLevelOnly()) {
-                EditorElement parameterElement = ParameterFactory.create(parameter, main, editorFrame);
+                ParameterField parameterElement = ParameterFieldFactory.create(parameter, main, editorFrame);
                 GridBagConstraints parameterConstraints = new GridBagConstraints();
                 parameterConstraints.gridx = parameter.x();
                 parameterConstraints.gridy = parameter.y();
@@ -97,9 +99,9 @@ public class ParameterFieldObject extends EditorElement {
     }
 
     @Override
-    public boolean requestClose(boolean canCancel, boolean forceClose, boolean forceSave) {
-        for (EditorElement editorElement : editorElements.values()) {
-            boolean didClose = editorElement.requestClose(canCancel, forceClose, forceSave);
+    public boolean requestClose(boolean forceClose, boolean forceSave) {
+        for (ParameterField parameterField : editorElements.values()) {
+            boolean didClose = parameterField.requestClose(forceClose, forceSave);
             if (!didClose) {
                 return false;
             }
@@ -109,7 +111,7 @@ public class ParameterFieldObject extends EditorElement {
 
     @Override
     public void setEnabledState(boolean enabled) {
-        for (EditorElement element : editorElements.values()) {
+        for (ParameterField element : editorElements.values()) {
             element.setEnabledFromParent(enabled);
         }
     }
@@ -120,7 +122,7 @@ public class ParameterFieldObject extends EditorElement {
             return null;
         }
         Map<String, Data> objectParameters = new HashMap<>();
-        for (Map.Entry<String, EditorElement> entry : editorElements.entrySet()) {
+        for (Map.Entry<String, ParameterField> entry : editorElements.entrySet()) {
             Data parameterData = entry.getValue().getData();
             objectParameters.put(entry.getKey(), parameterData);
         }

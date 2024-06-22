@@ -1,13 +1,14 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataReference;
+import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 
-public class ParameterFieldReference extends EditorElement {
+public class ParameterFieldReference extends ParameterField {
 
     private final JComboBox<String> dropdownMenu;
 

@@ -1,14 +1,15 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataString;
+import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 
-public class ParameterFieldString extends EditorElement {
+public class ParameterFieldString extends ParameterField {
 
     private final JTextField textField;
 

@@ -1,11 +1,10 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataComponent;
-import com.github.finley243.adventureeditor.data.DataEnum;
-import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.*;
+import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -14,9 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ParameterFieldComponent extends EditorElement {
+public class ParameterFieldComponent extends ParameterField {
 
-    private final Map<String, EditorElement> editorElements;
+    private final Map<String, ParameterField> editorElements;
     private final Main main;
     private final TemplateParameter.ComponentFormat componentFormat;
     private final JPanel objectPanel;
@@ -37,7 +36,7 @@ public class ParameterFieldComponent extends EditorElement {
         objectPanel.setLayout(new CardLayout());
         objectPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         for (ComponentOption option : componentOptions) {
-            EditorElement element = new ParameterFieldObject(editorFrame, false, option.name(), main.getTemplate(option.object()), main, false, false);
+            ParameterField element = new ParameterFieldObject(editorFrame, false, option.name(), main.getTemplate(option.object()), main, false, false);
             objectPanel.add(element, option.id());
             editorElements.put(option.id(), element);
             componentOptionMap.put(option.id(), option);
@@ -82,7 +81,7 @@ public class ParameterFieldComponent extends EditorElement {
 
     @Override
     public void setEnabledState(boolean enabled) {
-        for (EditorElement element : editorElements.values()) {
+        for (ParameterField element : editorElements.values()) {
             element.setEnabledFromParent(enabled);
         }
         dropdownMenu.setEnabled(enabled);

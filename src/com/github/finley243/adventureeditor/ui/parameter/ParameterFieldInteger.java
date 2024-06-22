@@ -1,12 +1,13 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataInteger;
+import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class ParameterFieldInteger extends EditorElement {
+public class ParameterFieldInteger extends ParameterField {
 
     private final JSpinner spinner;
 

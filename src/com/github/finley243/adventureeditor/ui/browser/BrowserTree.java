@@ -1,6 +1,10 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.browser;
 
 import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.ui.browser.node.BrowserCategoryNode;
+import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
+import com.github.finley243.adventureeditor.ui.browser.node.BrowserObjectNode;
+import com.github.finley243.adventureeditor.ui.browser.node.BrowserRootNode;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
