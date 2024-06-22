@@ -55,6 +55,7 @@ public class DataLoader {
                         String id = LoadUtils.attribute(templateElement, "id", null);
                         String name = LoadUtils.attribute(templateElement, "name", null);
                         boolean topLevel = LoadUtils.attributeBool(templateElement, "topLevel", false);
+                        boolean isUnique = LoadUtils.attributeBool(templateElement, "unique", topLevel);
                         List<TabGroup> tabGroups = new ArrayList<>();
                         for (Element tabGroupElement : LoadUtils.directChildrenWithName(templateElement, "tabGroup")) {
                             String groupID = LoadUtils.attribute(tabGroupElement, "id", null);
@@ -136,7 +137,7 @@ public class DataLoader {
                             parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height, defaultValue));
                         }
                         String primaryParameter = LoadUtils.attribute(templateElement, "primaryParameter", null);
-                        Template template = new Template(id, name, topLevel, groups, tabGroups, parameters, primaryParameter);
+                        Template template = new Template(id, name, topLevel, isUnique, groups, tabGroups, parameters, primaryParameter);
                         templates.put(id, template);
                     }
                 }
@@ -202,7 +203,7 @@ public class DataLoader {
                             String elementType = currentChild.getNodeName();
                             Template template = templates.get(elementType);
                             if (template != null && template.topLevel()) {
-                                DataObject data = loadDataFromElement(currentElement, template, templates, true);
+                                DataObject data = loadDataFromElement(currentElement, template, templates, true, dataMap);
                                 if (!dataMap.containsKey(elementType)) {
                                     dataMap.put(elementType, new HashMap<>());
                                 }
@@ -289,7 +290,7 @@ public class DataLoader {
         if (rootElement == null) {
             return;
         }
-        Data configData = loadDataFromElement(rootElement, configTemplate, new HashMap<>(), true);
+        Data configData = loadDataFromElement(rootElement, configTemplate, new HashMap<>(), true, new HashMap<>());
         configMenuManager.setConfigData(configData);
     }
 
@@ -313,11 +314,11 @@ public class DataLoader {
         transformer.transform(source, result);
     }
 
-    private static DataObject loadDataFromElement(Element element, Template template, Map<String, Template> templates, boolean isTopLevel) {
+    private static DataObject loadDataFromElement(Element element, Template template, Map<String, Template> templates, boolean isTopLevel, Map<String, Map<String, Data>> globalDataMap) {
         if (element == null) {
             return null;
         }
-        Map<String, Data> dataMap = new HashMap<>();
+        Map<String, Data> objectDataMap = new HashMap<>();
         for (TemplateParameter parameter : template.parameters()) {
             Data defaultValueOrNull = (parameter.topLevelOnly() && !isTopLevel) || parameter.optional() ? null : parameter.defaultValue();
             switch (parameter.dataType()) {
@@ -328,9 +329,9 @@ public class DataLoader {
                         default -> null;
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), defaultValueOrNull);
+                        objectDataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
-                        dataMap.put(parameter.id(), new DataBoolean(value));
+                        objectDataMap.put(parameter.id(), new DataBoolean(value));
                     }
                 }
                 case INTEGER -> {
@@ -340,9 +341,9 @@ public class DataLoader {
                         default -> null;
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), defaultValueOrNull);
+                        objectDataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
-                        dataMap.put(parameter.id(), new DataInteger(value));
+                        objectDataMap.put(parameter.id(), new DataInteger(value));
                     }
                 }
                 case FLOAT -> {
@@ -352,9 +353,9 @@ public class DataLoader {
                         default -> null;
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), defaultValueOrNull);
+                        objectDataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
-                        dataMap.put(parameter.id(), new DataFloat(value));
+                        objectDataMap.put(parameter.id(), new DataFloat(value));
                     }
                 }
                 case STRING, STRING_LONG -> {
@@ -364,9 +365,9 @@ public class DataLoader {
                         case CURRENT_TAG -> LoadUtils.textContent(element, null);
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), defaultValueOrNull);
+                        objectDataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
-                        dataMap.put(parameter.id(), new DataString(value));
+                        objectDataMap.put(parameter.id(), new DataString(value));
                     }
                 }
                 case OBJECT -> {
@@ -377,19 +378,41 @@ public class DataLoader {
                         objectElement = LoadUtils.singleChildWithName(element, parameter.id());
                     }
                     if (objectElement == null) {
-                        dataMap.put(parameter.id(), null);
+                        objectDataMap.put(parameter.id(), null);
                     } else {
-                        Data objectData = loadDataFromElement(objectElement, templates.get(parameter.type()), templates, false);
-                        dataMap.put(parameter.id(), objectData);
+                        Template objectTemplate = templates.get(parameter.type());
+                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templates, false, globalDataMap);
+                        if (!objectTemplate.topLevel() && objectTemplate.unique()) {
+                            String objectType = parameter.type();
+                            if (!globalDataMap.containsKey(objectType)) {
+                                globalDataMap.put(objectType, new HashMap<>());
+                            }
+                            String objectID = objectData.getID();
+                            if (objectID != null) {
+                                globalDataMap.get(objectType).put(objectID, objectData);
+                            }
+                        }
+                        objectDataMap.put(parameter.id(), objectData);
                     }
                 }
                 case OBJECT_SET, OBJECT_SET_UNIQUE -> {
                     List<Data> objectList = new ArrayList<>();
+                    Template objectTemplate = templates.get(parameter.type());
                     for (Element objectElement : LoadUtils.directChildrenWithName(element, parameter.id())) {
-                        Data objectData = loadDataFromElement(objectElement, templates.get(parameter.type()), templates, false);
+                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templates, false, globalDataMap);
+                        if (!objectTemplate.topLevel() && objectTemplate.unique()) {
+                            String objectType = parameter.type();
+                            if (!globalDataMap.containsKey(objectType)) {
+                                globalDataMap.put(objectType, new HashMap<>());
+                            }
+                            String objectID = objectData.getID();
+                            if (objectID != null) {
+                                globalDataMap.get(objectType).put(objectID, objectData);
+                            }
+                        }
                         objectList.add(objectData);
                     }
-                    dataMap.put(parameter.id(), new DataObjectSet(objectList));
+                    objectDataMap.put(parameter.id(), new DataObjectSet(objectList));
                 }
                 case REFERENCE -> {
                     String value = switch (parameter.format()) {
@@ -398,9 +421,9 @@ public class DataLoader {
                         case CURRENT_TAG -> LoadUtils.textContent(element, null);
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), defaultValueOrNull);
+                        objectDataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
-                        dataMap.put(parameter.id(), new DataReference(value));
+                        objectDataMap.put(parameter.id(), new DataReference(value));
                     }
                 }
                 case ENUM -> {
@@ -410,9 +433,9 @@ public class DataLoader {
                         case CURRENT_TAG -> LoadUtils.textContent(element, null);
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), defaultValueOrNull);
+                        objectDataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
-                        dataMap.put(parameter.id(), new DataEnum(value));
+                        objectDataMap.put(parameter.id(), new DataEnum(value));
                     }
                 }
                 case SCRIPT -> {
@@ -422,9 +445,9 @@ public class DataLoader {
                         default -> null;
                     };
                     if (value == null) {
-                        dataMap.put(parameter.id(), defaultValueOrNull);
+                        objectDataMap.put(parameter.id(), defaultValueOrNull);
                     } else {
-                        dataMap.put(parameter.id(), new DataScript(value));
+                        objectDataMap.put(parameter.id(), new DataScript(value));
                     }
                 }
                 case COMPONENT -> {
@@ -433,20 +456,20 @@ public class DataLoader {
                         case TEXT_OR_TAGS -> LoadUtils.hasTextContent(element) ? "text" : "tags";
                     };
                     if (componentType == null) {
-                        dataMap.put(parameter.id(), null);
+                        objectDataMap.put(parameter.id(), null);
                     } else {
                         Map<String, ComponentOption> optionsMap = new HashMap<>();
                         for (ComponentOption option : parameter.componentOptions()) {
                             optionsMap.put(option.id(), option);
                         }
-                        Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates, false);
+                        Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates, false, globalDataMap);
                         String nameOverride = parameter.useComponentTypeName() ? optionsMap.get(componentType).name() : null;
-                        dataMap.put(parameter.id(), new DataComponent(componentType, objectData, nameOverride));
+                        objectDataMap.put(parameter.id(), new DataComponent(componentType, objectData, nameOverride));
                     }
                 }
             }
         }
-        return new DataObject(template, dataMap);
+        return new DataObject(template, objectDataMap);
     }
 
     private static void saveDataToFile(Map<String, Data> data, File file, Map<String, Template> templates) throws TransformerException, ParserConfigurationException {
@@ -457,7 +480,8 @@ public class DataLoader {
         document.appendChild(rootElement);
         for (Data currentData : data.values()) {
             DataObject objectData = (DataObject) currentData;
-            if (objectData != null) {
+            Template objectTemplate = objectData.getTemplate();
+            if (objectTemplate.topLevel()) {
                 Element objectElement = document.createElement(objectData.getTemplate().id());
                 addObjectToElement(objectData, objectElement, document);
                 rootElement.appendChild(objectElement);

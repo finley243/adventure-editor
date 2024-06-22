@@ -28,7 +28,7 @@
         <parameter id="area" dataType="objectSetUnique" name="Areas" type="area" x="2" y="0" height="3"/>
         <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerRoom" name="Script Triggers" x="3" y="0" height="3"/>
     </template>
-    <template id="area" name="Area" topLevel="false" primaryParameter="id">
+    <template id="area" name="Area" topLevel="false" unique="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
         <parameter id="name" dataType="object" name="Name" type="areaName" optional="true" x="0" y="1"/>
         <parameter id="landmark" dataType="reference" name="Landmark" type="objectInstance" format="attribute" optional="true" x="0" y="2"/>

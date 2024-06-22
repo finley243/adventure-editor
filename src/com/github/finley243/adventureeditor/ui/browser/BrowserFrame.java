@@ -161,8 +161,10 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
             }
         }
         for (String category : data.keySet()) {
-            for (String object : data.get(category).keySet()) {
-                this.addGameObject(category, object, false);
+            if (templates.get(category).topLevel()) {
+                for (String object : data.get(category).keySet()) {
+                    this.addGameObject(category, object, false);
+                }
             }
         }
     }
