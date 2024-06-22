@@ -171,7 +171,7 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
             activeFrame.toFront();
             activeFrame.requestFocus();
         } else {
-            EditorFrame editorFrame = new EditorFrame(main, template, objectData, this);
+            EditorFrame editorFrame = new EditorFrame(main, this, template, objectData, this);
             addActiveTopLevelFrame(categoryID, objectID, editorFrame);
         }
     }

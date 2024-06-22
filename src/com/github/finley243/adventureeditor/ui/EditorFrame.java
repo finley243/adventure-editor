@@ -7,12 +7,9 @@ import com.github.finley243.adventureeditor.template.Template;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 
-public class EditorFrame extends JFrame {
+public class EditorFrame extends JDialog {
 
     private final Main main;
     private final EditorElement editorElement;
@@ -21,8 +18,12 @@ public class EditorFrame extends JFrame {
     private final DataSaveTarget saveTarget;
     private final JButton saveButton;
 
-    public EditorFrame(Main main, Template template, Data objectData, DataSaveTarget saveTarget) {
-        super(template.name());
+    public EditorFrame(Main main, Window parentWindow, Template template, Data objectData, DataSaveTarget saveTarget) {
+        //super(template.name());
+        super(parentWindow);
+        //this.setAutoRequestFocus(false);
+        this.setTitle(template.name());
+        this.setModalityType(ModalityType.MODELESS);
         if (saveTarget == null) {
             throw new IllegalArgumentException("Save target cannot be null");
         }

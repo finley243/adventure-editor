@@ -10,7 +10,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
 
-public class PhraseEditorFrame extends JFrame {
+public class PhraseEditorFrame extends JDialog {
 
     private static final String PHRASE_EDITOR_TITLE = "Phrases";
 
@@ -19,8 +19,10 @@ public class PhraseEditorFrame extends JFrame {
     private final JTable phraseTable;
 
     public PhraseEditorFrame(Main main) {
-        super(PHRASE_EDITOR_TITLE);
+        super(main.getBrowserFrame());
         this.main = main;
+        this.setTitle(PHRASE_EDITOR_TITLE);
+        this.setModalityType(ModalityType.MODELESS);
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
 

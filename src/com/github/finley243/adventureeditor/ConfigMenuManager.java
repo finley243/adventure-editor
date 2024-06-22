@@ -30,7 +30,7 @@ public class ConfigMenuManager implements DataSaveTarget {
             configFrame.toFront();
             configFrame.requestFocus();
         } else {
-            configFrame = new EditorFrame(main, main.getTemplate(CONFIG_TEMPLATE), configData, this);
+            configFrame = new EditorFrame(main, main.getBrowserFrame(), main.getTemplate(CONFIG_TEMPLATE), configData, this);
         }
     }
 
