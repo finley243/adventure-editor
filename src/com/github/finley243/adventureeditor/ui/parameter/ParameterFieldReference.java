@@ -1,18 +1,22 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
+import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataReference;
 import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.Arrays;
 
 public class ParameterFieldReference extends ParameterField {
 
     private final JComboBox<String> dropdownMenu;
+    private final JButton openReferenceButton;
 
-    public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, String[] values) {
+    public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, Main main, String categoryID) {
         super(editorFrame, optional, name);
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
@@ -21,38 +25,49 @@ public class ParameterFieldReference extends ParameterField {
         } else {
             label = new JLabel(name);
         }
+        String[] values = main.getDataManager().getIDsForCategoryArray(categoryID);
         Arrays.sort(values);
         this.dropdownMenu = new JComboBox<>(values);
         dropdownMenu.setPreferredSize(new Dimension(150, 20));
         dropdownMenu.setEditable(true);
         dropdownMenu.addActionListener(e -> editorFrame.onEditorElementUpdated());
-        // TODO - Document listener not working, find another solution
-        /*((JTextField) dropdownMenu.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
+        this.openReferenceButton = new JButton("...");
+        openReferenceButton.setPreferredSize(new Dimension(20, 20));
+        openReferenceButton.addActionListener(e -> {
+            String value = (String) dropdownMenu.getSelectedItem();
+            if (value != null && main.getDataManager().getIDsForCategory(categoryID).contains(value)) {
+                main.getDataManager().editObject(categoryID, value);
+            }
+        });
+        ((JTextField) dropdownMenu.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 editorFrame.onEditorElementUpdated();
             }
-
             @Override
             public void removeUpdate(DocumentEvent e) {
                 editorFrame.onEditorElementUpdated();
             }
-
             @Override
             public void changedUpdate(DocumentEvent e) {
                 editorFrame.onEditorElementUpdated();
             }
-        });*/
+        });
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
         labelConstraints.gridx = 0;
         labelConstraints.gridy = 0;
+        labelConstraints.gridwidth = 2;
         labelConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
         labelConstraints.insets = new Insets(2, 2, 2, 2);
         valueConstraints.gridx = 0;
         valueConstraints.gridy = 1;
+        GridBagConstraints buttonConstraints = new GridBagConstraints();
+        buttonConstraints.gridx = 1;
+        buttonConstraints.gridy = 1;
         getInnerPanel().add(label, labelConstraints);
         getInnerPanel().add(dropdownMenu, valueConstraints);
+        getInnerPanel().add(openReferenceButton, buttonConstraints);
         if (optional) {
             setEnabledState(false);
         }
@@ -69,6 +84,7 @@ public class ParameterFieldReference extends ParameterField {
     @Override
     public void setEnabledState(boolean enabled) {
         dropdownMenu.setEnabled(enabled);
+        openReferenceButton.setEnabled(enabled);
     }
 
     @Override
