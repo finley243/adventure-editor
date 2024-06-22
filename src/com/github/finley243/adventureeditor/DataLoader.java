@@ -259,6 +259,10 @@ public class DataLoader {
 
             for (Map.Entry<String, Map<String, Data>> entry : dataMap.entrySet()) {
                 String categoryID = entry.getKey();
+                Template categoryTemplate = templates.get(categoryID);
+                if (!categoryTemplate.topLevel()) {
+                    continue;
+                }
                 Map<String, Data> categoryData = entry.getValue();
                 File categoryFile = new File(dataDirectory, categoryID + ".xml");
                 categoryFile.createNewFile();
@@ -480,8 +484,7 @@ public class DataLoader {
         document.appendChild(rootElement);
         for (Data currentData : data.values()) {
             DataObject objectData = (DataObject) currentData;
-            Template objectTemplate = objectData.getTemplate();
-            if (objectTemplate.topLevel()) {
+            if (objectData != null) {
                 Element objectElement = document.createElement(objectData.getTemplate().id());
                 addObjectToElement(objectData, objectElement, document);
                 rootElement.appendChild(objectElement);
