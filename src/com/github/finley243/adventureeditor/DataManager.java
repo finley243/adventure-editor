@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
+import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 
 import javax.swing.*;
 import java.util.HashMap;
@@ -92,14 +93,22 @@ public class DataManager {
     }
 
     public void newObject(String categoryID) {
-        main.getBrowserFrame().openEditorFrame(categoryID, null, main.getTemplate(categoryID), null);
+        main.getBrowserFrame().openEditorFrame(categoryID, null, main.getTemplate(categoryID), null, null);
+    }
+
+    public void newObject(String categoryID, DataSaveTarget saveTargetOverride) {
+        main.getBrowserFrame().openEditorFrame(categoryID, null, main.getTemplate(categoryID), null, saveTargetOverride);
     }
 
     public void editObject(String categoryID, String objectID) {
-        main.getBrowserFrame().openEditorFrame(categoryID, objectID, main.getTemplate(categoryID), getData(categoryID, objectID));
+        main.getBrowserFrame().openEditorFrame(categoryID, objectID, main.getTemplate(categoryID), getData(categoryID, objectID), null);
     }
 
-    public void duplicateObject(String categoryID, String objectID) {
+    public void editObject(String categoryID, String objectID, DataSaveTarget saveTargetOverride) {
+        main.getBrowserFrame().openEditorFrame(categoryID, objectID, main.getTemplate(categoryID), getData(categoryID, objectID), saveTargetOverride);
+    }
+
+    public String duplicateObject(String categoryID, String objectID) {
         Data objectData = getData(categoryID, objectID);
         Data objectDataCopy = objectData.createCopy();
         String newObjectID = generateDuplicateObjectID(categoryID, objectID);
@@ -107,18 +116,25 @@ public class DataManager {
             dataObject.replaceID(newObjectID);
         }
         data.get(categoryID).put(newObjectID, objectDataCopy);
-        main.getBrowserFrame().addGameObject(categoryID, newObjectID, false);
-        main.getBrowserFrame().setSelectedNode(categoryID, objectID);
+        if (main.getTemplate(categoryID).topLevel()) {
+            main.getBrowserFrame().addGameObject(categoryID, newObjectID, false);
+            main.getBrowserFrame().setSelectedNode(categoryID, objectID);
+        }
+        return newObjectID;
     }
 
-    public void deleteObject(String categoryID, String objectID) {
+    public boolean deleteObject(String categoryID, String objectID) {
         Object[] confirmOptions = {"Delete", "Cancel"};
         int confirmResult = JOptionPane.showOptionDialog(main.getBrowserFrame(), "Are you sure you want to delete " + objectID + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
         if (confirmResult == 0) {
             data.get(categoryID).remove(objectID);
             main.getBrowserFrame().closeEditorFrameIfActive(categoryID, objectID);
-            main.getBrowserFrame().removeGameObject(categoryID, objectID);
+            if (main.getTemplate(categoryID).topLevel()) {
+                main.getBrowserFrame().removeGameObject(categoryID, objectID);
+            }
+            return true;
         }
+        return false;
     }
 
     public Map<String, Map<String, Data>> getAllDataCopy() {

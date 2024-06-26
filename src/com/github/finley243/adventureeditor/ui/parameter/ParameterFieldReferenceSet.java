@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataReferenceSet;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
@@ -14,20 +15,18 @@ import java.util.List;
 
 public class ParameterFieldReferenceSet extends ParameterField implements DataSaveTarget {
 
+    private final Main main;
     private final JList<String> referenceList;
     private final JButton buttonAdd;
     private final JButton buttonEdit;
     private final JButton buttonRemove;
 
-    //private final List<EditorFrame> editorFrames;
-    //private final List<EditorFrame> unsavedEditorFrames;
     private final String name;
 
     public ParameterFieldReferenceSet(EditorFrame editorFrame, boolean optional, String name, Template template, Main main) {
         super(editorFrame, optional, name);
+        this.main = main;
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-        //this.editorFrames = new ArrayList<>();
-        //this.unsavedEditorFrames = new ArrayList<>();
         this.name = name;
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
@@ -80,42 +79,17 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
             buttonRemove.setEnabled(enableSelectionButtons);
         });
         buttonAdd.addActionListener(e -> {
-            main.getDataManager().newObject(template.id());
-            /*EditorFrame objectFrame = new EditorFrame(main, editorFrame, template, null, this);
-            unsavedEditorFrames.add(objectFrame);*/
+            main.getDataManager().newObject(template.id(), this);
         });
         buttonEdit.addActionListener(e -> {
-            main.getDataManager().editObject(template.id(), referenceList.getSelectedValue());
-            /*Data objectData = referenceList.getSelectedValue();
-            int objectIndex = referenceList.getSelectedIndex();
-            if (objectData != null) {
-                if (editorFrames.get(objectIndex) != null) {
-                    editorFrames.get(objectIndex).toFront();
-                    editorFrames.get(objectIndex).requestFocus();
-                } else {
-                    EditorFrame objectFrame = new EditorFrame(main, editorFrame, template, objectData, this);
-                    editorFrames.set(objectIndex, objectFrame);
-                }
-            }*/
+            main.getDataManager().editObject(template.id(), referenceList.getSelectedValue(), this);
         });
         buttonRemove.addActionListener(e -> {
-            main.getDataManager().deleteObject(template.id(), referenceList.getSelectedValue());
-            /*int selectedIndex = referenceList.getSelectedIndex();
-            if (selectedIndex != -1) {
-                if (editorFrames.get(selectedIndex) != null) {
-                    boolean didClose = editorFrames.get(selectedIndex).requestClose(false, false);
-                    if (!didClose) {
-                        return;
-                    }
-                }
-                ((DefaultListModel<Data>) referenceList.getModel()).removeElementAt(selectedIndex);
-                editorFrames.remove(selectedIndex);
-                if (referenceList.getModel().getSize() > selectedIndex) {
-                    referenceList.setSelectedIndex(selectedIndex);
-                } else if (referenceList.getModel().getSize() == selectedIndex) {
-                    referenceList.setSelectedIndex(selectedIndex - 1);
-                }
-            }*/
+            int selectedIndex = referenceList.getSelectedIndex();
+            boolean didDelete = main.getDataManager().deleteObject(template.id(), referenceList.getSelectedValue());
+            if (didDelete) {
+                referenceList.remove(selectedIndex);
+            }
         });
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -143,26 +117,6 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
     }
 
     @Override
-    public boolean requestClose(boolean forceClose, boolean forceSave) {
-        /*for (int i = 0; i < editorFrames.size(); i++) {
-            if (editorFrames.get(i) != null) {
-                boolean didClose = editorFrames.get(i).requestClose(forceClose, forceSave);
-                if (!didClose) {
-                    return false;
-                }
-            }
-        }
-        while (!unsavedEditorFrames.isEmpty()) {
-            EditorFrame frame = unsavedEditorFrames.getFirst();
-            boolean didClose = frame.requestClose(forceClose, forceSave);
-            if (!didClose) {
-                return false;
-            }
-        }*/
-        return true;
-    }
-
-    @Override
     public void setEnabledState(boolean enabled) {
         if (!enabled) {
             referenceList.setSelectedIndex(-1);
@@ -182,28 +136,26 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
 
     @Override
     public void saveObjectData(Data data, Data initialData) {
-        /*int addIndex = referenceList.getSelectedIndex() + 1;
+        main.getBrowserFrame().saveObjectData(data, initialData);
+        int addIndex = referenceList.getSelectedIndex() + 1;
         if (addIndex == 0) {
             addIndex = referenceList.getModel().getSize();
         }
+        String objectID = ((DataObject) data).getID();
         if (initialData != null) {
-            addIndex = ((DefaultListModel<String>) referenceList.getModel()).indexOf(initialData);
-            ((DefaultListModel<String>) referenceList.getModel()).remove(addIndex);
-            editorFrames.remove(addIndex);
+            String initialID = ((DataObject) initialData).getID();
+            if (!initialID.equals(objectID)) {
+                addIndex = ((DefaultListModel<String>) referenceList.getModel()).indexOf(initialID);
+                ((DefaultListModel<String>) referenceList.getModel()).remove(addIndex);}
+        } else {
+            ((DefaultListModel<String>) referenceList.getModel()).add(addIndex, objectID);
         }
-        ((DefaultListModel<String>) referenceList.getModel()).add(addIndex, data);
-        editorFrames.add(addIndex, null);
-        parentFrame.onEditorElementUpdated();*/
+        parentFrame.onEditorElementUpdated();
     }
 
     @Override
     public void onEditorFrameClose(EditorFrame frame) {
-         /*int index = editorFrames.indexOf(frame);
-         if (index != -1) {
-             editorFrames.set(index, null);
-         } else {
-             unsavedEditorFrames.remove(frame);
-         }*/
+        main.getBrowserFrame().onEditorFrameClose(frame);
     }
 
     @Override
@@ -235,15 +187,5 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
             setValue(objectData);
         }
     }
-
-    /*private boolean isDataUnique(Data newData, Data initialData) {
-        for (int i = 0; i < referenceList.getModel().getSize(); i++) {
-            String currentData = referenceList.getModel().getElementAt(i);
-            if (initialData == null && currentData.equals(currentData)) {
-                return false;
-            }
-        }
-        return true;
-    }*/
 
 }

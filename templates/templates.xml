@@ -25,7 +25,7 @@
         <parameter id="restriction" dataType="enum" type="areaRestrictionType" name="Restriction Type" format="attribute" optional="true" default="PUBLIC" x="0" y="3"/>
         <parameter id="allowAllies" dataType="boolean" name="Allow Allies" format="attribute" optional="true" default="false" x="0" y="4"/>
         <parameter id="description" dataType="object" name="Description" type="description" optional="true" x="1" y="0" height="5"/>
-        <parameter id="area" dataType="objectSetUnique" name="Areas" type="area" x="2" y="0" height="3"/>
+        <parameter id="area" dataType="referenceSet" name="Areas" type="area" x="2" y="0" height="3"/>
         <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerRoom" name="Script Triggers" x="3" y="0" height="3"/>
     </template>
     <template id="area" name="Area" topLevel="false" unique="true" primaryParameter="id">

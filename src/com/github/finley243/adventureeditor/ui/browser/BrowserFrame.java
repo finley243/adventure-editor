@@ -169,13 +169,13 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         }
     }
 
-    public void openEditorFrame(String categoryID, String objectID, Template template, Data objectData) {
+    public void openEditorFrame(String categoryID, String objectID, Template template, Data objectData, DataSaveTarget saveTargetOverride) {
         EditorFrame activeFrame = getActiveTopLevelFrame(categoryID, objectID);
         if (activeFrame != null) {
             activeFrame.toFront();
             activeFrame.requestFocus();
         } else {
-            EditorFrame editorFrame = new EditorFrame(main, this, template, objectData, this);
+            EditorFrame editorFrame = new EditorFrame(main, this, template, objectData, saveTargetOverride != null ? saveTargetOverride : this);
             addActiveTopLevelFrame(categoryID, objectID, editorFrame);
         }
     }

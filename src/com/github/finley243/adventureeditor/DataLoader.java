@@ -90,6 +90,7 @@ public class DataLoader {
                                 case "objectSet" -> TemplateParameter.ParameterDataType.OBJECT_SET;
                                 case "objectSetUnique" -> TemplateParameter.ParameterDataType.OBJECT_SET_UNIQUE;
                                 case "reference" -> TemplateParameter.ParameterDataType.REFERENCE;
+                                case "referenceSet" -> TemplateParameter.ParameterDataType.REFERENCE_SET;
                                 case "enum" -> TemplateParameter.ParameterDataType.ENUM;
                                 case "script" -> TemplateParameter.ParameterDataType.SCRIPT;
                                 case "component" -> TemplateParameter.ParameterDataType.COMPONENT;
@@ -235,7 +236,7 @@ public class DataLoader {
 
     public static void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> phrases) throws IOException, TransformerException, ParserConfigurationException {
         if (dir.isDirectory()) {
-            saveConfigData(dir, templates.get(ConfigMenuManager.CONFIG_TEMPLATE), configMenuManager);
+            saveConfigData(dir, templates.get(ConfigMenuManager.CONFIG_TEMPLATE), configMenuManager, dataMap);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
             dataDirectory.mkdirs();
 
@@ -266,7 +267,7 @@ public class DataLoader {
                 Map<String, Data> categoryData = entry.getValue();
                 File categoryFile = new File(dataDirectory, categoryID + ".xml");
                 categoryFile.createNewFile();
-                saveDataToFile(categoryData, categoryFile, templates);
+                saveDataToFile(categoryData, categoryFile, templates, dataMap);
             }
 
             File phraseFile = new File(dataDirectory, "phrases.aphr");
@@ -298,7 +299,7 @@ public class DataLoader {
         configMenuManager.setConfigData(configData);
     }
 
-    private static void saveConfigData(File dir, Template configTemplate, ConfigMenuManager configMenuManager) throws IOException, ParserConfigurationException, TransformerException {
+    private static void saveConfigData(File dir, Template configTemplate, ConfigMenuManager configMenuManager, Map<String, Map<String, Data>> globalDataMap) throws IOException, ParserConfigurationException, TransformerException {
         File configFile = new File(dir, CONFIG_FILE);
         if (!configFile.exists()) {
             configFile.createNewFile();
@@ -309,7 +310,7 @@ public class DataLoader {
         Element rootElement = document.createElement("data");
         document.appendChild(rootElement);
         DataObject objectData = (DataObject) configMenuManager.getConfigData();
-        addObjectToElement(objectData, rootElement, document);
+        addObjectToElement(objectData, rootElement, document, globalDataMap);
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -418,6 +419,25 @@ public class DataLoader {
                     }
                     objectDataMap.put(parameter.id(), new DataObjectSet(objectList));
                 }
+                case REFERENCE_SET -> {
+                    List<String> referenceList = new ArrayList<>();
+                    Template objectTemplate = templates.get(parameter.type());
+                    for (Element objectElement : LoadUtils.directChildrenWithName(element, parameter.id())) {
+                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templates, false, globalDataMap);
+                        String objectID = objectData.getID();
+                        if (!objectTemplate.topLevel() && objectTemplate.unique()) {
+                            String objectType = parameter.type();
+                            if (!globalDataMap.containsKey(objectType)) {
+                                globalDataMap.put(objectType, new HashMap<>());
+                            }
+                            if (objectID != null) {
+                                globalDataMap.get(objectType).put(objectID, objectData);
+                            }
+                        }
+                        referenceList.add(objectID);
+                    }
+                    objectDataMap.put(parameter.id(), new DataReferenceSet(referenceList));
+                }
                 case REFERENCE -> {
                     String value = switch (parameter.format()) {
                         case ATTRIBUTE -> LoadUtils.attribute(element, parameter.id(), null);
@@ -476,7 +496,7 @@ public class DataLoader {
         return new DataObject(template, objectDataMap);
     }
 
-    private static void saveDataToFile(Map<String, Data> data, File file, Map<String, Template> templates) throws TransformerException, ParserConfigurationException {
+    private static void saveDataToFile(Map<String, Data> data, File file, Map<String, Template> templates, Map<String, Map<String, Data>> globalDataMap) throws TransformerException, ParserConfigurationException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.newDocument();
@@ -486,7 +506,7 @@ public class DataLoader {
             DataObject objectData = (DataObject) currentData;
             if (objectData != null) {
                 Element objectElement = document.createElement(objectData.getTemplate().id());
-                addObjectToElement(objectData, objectElement, document);
+                addObjectToElement(objectData, objectElement, document, globalDataMap);
                 rootElement.appendChild(objectElement);
             }
         }
@@ -498,7 +518,7 @@ public class DataLoader {
         transformer.transform(source, result);
     }
 
-    private static void addObjectToElement(DataObject objectData, Element objectElement, Document document) {
+    private static void addObjectToElement(DataObject objectData, Element objectElement, Document document, Map<String, Map<String, Data>> globalDataMap) {
         if (objectData == null) {
             return;
         }
@@ -561,14 +581,23 @@ public class DataLoader {
                     } else {
                         childElement = document.createElement(parameter.id());
                     }
-                    addObjectToElement((DataObject) parameterData, childElement, document);
+                    addObjectToElement((DataObject) parameterData, childElement, document, globalDataMap);
                     objectElement.appendChild(childElement);
                 }
                 case OBJECT_SET, OBJECT_SET_UNIQUE -> {
                     List<Data> values = ((DataObjectSet) parameterData).getValue();
                     for (Data value : values) {
                         Element childElement = document.createElement(parameter.id());
-                        addObjectToElement((DataObject) value, childElement, document);
+                        addObjectToElement((DataObject) value, childElement, document, globalDataMap);
+                        objectElement.appendChild(childElement);
+                    }
+                }
+                case REFERENCE_SET -> {
+                    List<String> values = ((DataReferenceSet) parameterData).getValue();
+                    for (String referenceID : values) {
+                        Data value = globalDataMap.get(parameter.type()).get(referenceID);
+                        Element childElement = document.createElement(parameter.id());
+                        addObjectToElement((DataObject) value, childElement, document, globalDataMap);
                         objectElement.appendChild(childElement);
                     }
                 }
@@ -614,7 +643,7 @@ public class DataLoader {
                     if (parameter.componentFormat() == TemplateParameter.ComponentFormat.TYPE_ATTRIBUTE && componentType != null) {
                         objectElement.setAttribute(COMPONENT_TYPE_ATTRIBUTE_ID, componentType);
                     }
-                    addObjectToElement(componentObjectData, objectElement, document);
+                    addObjectToElement(componentObjectData, objectElement, document, globalDataMap);
                     //objectElement.appendChild(childElement);
                 }
             }
