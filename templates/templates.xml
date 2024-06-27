@@ -593,23 +593,23 @@
         <parameter id="attackType" dataType="reference" name="Attack Type" type="attackType" format="current_tag"/>
     </template>
     <template id="scriptWithTriggerRoom" name="Script Trigger" topLevel="false" primaryParameter="trigger">
-        <parameter id="trigger" dataType="enum" type="scriptTriggersRoom" name="Trigger" format="attribute"/>
-        <parameter id="script" dataType="script" name="Script" format="current_tag"/>
+        <parameter id="trigger" dataType="enum" type="scriptTriggersRoom" name="Trigger" format="attribute" y="0"/>
+        <parameter id="script" dataType="script" name="Script" format="current_tag" y="1"/>
     </template>
     <template id="scriptWithTriggerArea" name="Script Trigger" topLevel="false" primaryParameter="trigger">
-        <parameter id="trigger" dataType="enum" type="scriptTriggersArea" name="Trigger" format="attribute"/>
-        <parameter id="script" dataType="script" name="Script" format="current_tag"/>
+        <parameter id="trigger" dataType="enum" type="scriptTriggersArea" name="Trigger" format="attribute" y="0"/>
+        <parameter id="script" dataType="script" name="Script" format="current_tag" y="1"/>
     </template>
     <template id="scriptWithTriggerItem" name="Script Trigger" topLevel="false" primaryParameter="trigger">
-        <parameter id="trigger" dataType="enum" type="scriptTriggersItem" name="Trigger" format="attribute"/>
-        <parameter id="script" dataType="script" name="Script" format="current_tag"/>
+        <parameter id="trigger" dataType="enum" type="scriptTriggersItem" name="Trigger" format="attribute" y="0"/>
+        <parameter id="script" dataType="script" name="Script" format="current_tag" y="1"/>
     </template>
     <template id="scriptWithTriggerObject" name="Script Trigger" topLevel="false" primaryParameter="trigger">
-        <parameter id="trigger" dataType="enum" type="scriptTriggersObject" name="Trigger" format="attribute"/>
-        <parameter id="script" dataType="script" name="Script" format="current_tag"/>
+        <parameter id="trigger" dataType="enum" type="scriptTriggersObject" name="Trigger" format="attribute" y="0"/>
+        <parameter id="script" dataType="script" name="Script" format="current_tag" y="1"/>
     </template>
     <template id="scriptWithTriggerActor" name="Script Trigger" topLevel="false" primaryParameter="trigger">
-        <parameter id="trigger" dataType="enum" type="scriptTriggersActor" name="Trigger" format="attribute"/>
-        <parameter id="script" dataType="script" name="Script" format="current_tag"/>
+        <parameter id="trigger" dataType="enum" type="scriptTriggersActor" name="Trigger" format="attribute" y="0"/>
+        <parameter id="script" dataType="script" name="Script" format="current_tag" y="1"/>
     </template>
 </data>
