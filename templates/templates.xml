@@ -71,7 +71,6 @@
             <component id="move" name="Move" object="behaviorMove"/>
             <component id="use" name="Use" object="behaviorUse"/>
             <component id="guard" name="Guard" object="behaviorGuard"/>
-            <component id="sleep" name="Sleep" object="behaviorSleep"/>
             <component id="follow" name="Follow" object="behaviorFollow"/>
             <component id="procedure" name="Procedure" object="behaviorProcedure"/>
         </parameter>
@@ -89,9 +88,6 @@
     </template>
     <template id="behaviorGuard" name="Guard" topLevel="false">
         <parameter id="object" dataType="reference" type="object" name="Guard Object" format="attribute"/>
-    </template>
-    <template id="behaviorSleep" name="Sleep" topLevel="false">
-        <parameter id="bed" dataType="reference" type="object" name="Target Bed Object" format="attribute"/>
     </template>
     <template id="behaviorFollow" name="Follow" topLevel="false">
         <parameter id="actor" dataType="reference" type="actor" name="Target Actor" format="attribute"/>
