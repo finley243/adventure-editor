@@ -60,9 +60,11 @@ public class ParameterFieldComponent extends ParameterField {
         GridBagConstraints dropdownConstraints = new GridBagConstraints();
         dropdownConstraints.gridx = 0;
         dropdownConstraints.gridy = optional ? 1 : 0;
+        dropdownConstraints.fill = GridBagConstraints.HORIZONTAL;
         GridBagConstraints panelConstraints = new GridBagConstraints();
         panelConstraints.gridx = 0;
         panelConstraints.gridy = optional ? 2 : 1;
+        panelConstraints.fill = GridBagConstraints.BOTH;
         if (optional) {
             getInnerPanel().add(getOptionalCheckbox(), optionalConstraints);
         }
