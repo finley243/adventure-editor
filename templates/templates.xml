@@ -63,11 +63,13 @@
         <parameter id="behavior" dataType="objectSet" type="actorBehavior" name="Behaviors"/>
     </template>
     <template id="actorBehavior" name="Behavior" topLevel="false" primaryParameter="behaviorType">
+        <tabGroup id="scriptTabs" name="Scripts" x="0" y="1"/>
+        <group id="scriptStartGroup" name="Start" tabGroup="scriptTabs"/>
+        <group id="scriptEachRoundGroup" name="Each Round" tabGroup="scriptTabs"/>
         <parameter id="condition" dataType="string" name="Condition" optional="true" x="0" y="0"/>
-        <parameter id="duration" dataType="integer" name="Duration" default="0" format="attribute" x="1" y="0"/>
-        <parameter id="scriptEachRound" dataType="script" name="Each Round Script" optional="true" x="1" y="1"/>
-        <parameter id="idle" dataType="objectSet" type="idle" name="Idles" x="0" y="1"/>
-        <parameter id="behaviorType" dataType="component" componentFormat="typeAttribute" useComponentTypeName="true" name="Behavior Type" x="0" y="2" width="2">
+        <parameter id="scriptStart" dataType="script" name="Start Script" optional="true" group="scriptStartGroup"/>
+        <parameter id="scriptEachRound" dataType="script" name="Each Round Script" optional="true" group="scriptEachRoundGroup"/>
+        <parameter id="behaviorType" dataType="component" componentFormat="typeAttribute" useComponentTypeName="true" name="Behavior Type" x="1" y="0" height="2">
             <component id="move" name="Move" object="behaviorMove"/>
             <component id="action" name="Action" object="behaviorAction"/>
             <component id="use" name="Use" object="behaviorUse"/>
@@ -80,22 +82,31 @@
         <parameter id="condition" dataType="string" name="Condition" format="child_tag" optional="true" y="0"/>
         <parameter id="phrase" dataType="string" name="Phrase" format="child_tag" y="1"/>
     </template>
+    <template id="behaviorCommonObject" name="Core" topLevel="false">
+        <parameter id="duration" dataType="integer" name="Duration" default="0" format="attribute" y="0"/>
+        <parameter id="idle" dataType="objectSet" type="idle" name="Idles" y="1"/>
+    </template>
     <template id="behaviorMove" name="Move" topLevel="false">
-        <parameter id="area" dataType="reference" type="area" name="Target Area" format="attribute"/>
+        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag" y="0"/>
+        <parameter id="area" dataType="reference" type="area" name="Target Area" format="attribute" y="1"/>
     </template>
     <template id="behaviorAction" name="Action" topLevel="false">
-        <parameter id="action" dataType="reference" type="action" name="Action" format="attribute" y="0"/>
-        <parameter id="actionCondition" dataType="string" name="Action Condition" format="child_tag" y="1"/>
+        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag" y="0"/>
+        <parameter id="action" dataType="reference" type="action" name="Action" format="attribute" y="1"/>
+        <parameter id="actionCondition" dataType="string" name="Action Condition" format="child_tag" y="2"/>
     </template>
     <template id="behaviorUse" name="Use" topLevel="false">
-        <parameter id="object" dataType="reference" type="object" name="Target Object" format="attribute" y="0"/>
-        <parameter id="slot" dataType="string" name="Use Slot" format="attribute" y="1"/>
+        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag" y="0"/>
+        <parameter id="object" dataType="reference" type="object" name="Target Object" format="attribute" y="1"/>
+        <parameter id="slot" dataType="string" name="Use Slot" format="attribute" y="2"/>
     </template>
     <template id="behaviorGuard" name="Guard" topLevel="false">
-        <parameter id="object" dataType="reference" type="object" name="Guard Object" format="attribute"/>
+        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag" y="0"/>
+        <parameter id="object" dataType="reference" type="object" name="Guard Object" format="attribute" y="1"/>
     </template>
     <template id="behaviorFollow" name="Follow" topLevel="false">
-        <parameter id="actor" dataType="reference" type="actor" name="Target Actor" format="attribute"/>
+        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag" y="0"/>
+        <parameter id="actor" dataType="reference" type="actor" name="Target Actor" format="attribute" y="1"/>
     </template>
     <template id="behaviorProcedure" name="Procedure" topLevel="false">
         <parameter id="isCycle" dataType="boolean" name="Is Cycle" format="attribute" default="false" y="0"/>
