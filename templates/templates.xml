@@ -38,11 +38,11 @@
         <parameter id="description" dataType="object" name="Description" type="description" optional="true" x="1" y="0" height="3"/>
         <parameter id="link" dataType="objectSetUnique" name="Links" type="areaLink" x="1" y="3" height="2"/>
         <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerArea" name="Script Triggers" x="1" y="5" height="2"/>
-        <parameter id="object" dataType="objectSetUnique" type="objectInstance" name="Objects" x="2" y="0" height="2"/>
+        <parameter id="object" dataType="referenceSet" type="objectInstance" name="Objects" x="2" y="0" height="2"/>
         <parameter id="item" dataType="objectSetUnique" type="itemInstance" name="Items" x="2" y="2" height="2"/>
-        <parameter id="actor" dataType="objectSetUnique" type="actorInstance" name="Actors" x="2" y="4" height="2"/>
+        <parameter id="actor" dataType="referenceSet" type="actorInstance" name="Actors" x="2" y="4" height="2"/>
     </template>
-    <template id="objectInstance" name="Object" topLevel="false" primaryParameter="id">
+    <template id="objectInstance" name="Object" topLevel="false" unique="true" primaryParameter="id">
         <parameter id="template" dataType="reference" type="object" name="Template" format="attribute" y="0"/>
         <parameter id="id" dataType="string" name="ID" format="attribute" y="1"/>
         <parameter id="startDisabled" dataType="boolean" name="Start Disabled" format="attribute" default="false" y="2"/>
@@ -52,7 +52,7 @@
     <template id="itemInstance" name="Item" topLevel="false" primaryParameter="template">
         <parameter id="template" dataType="reference" type="item" name="Template" format="attribute"/>
     </template>
-    <template id="actorInstance" name="Actor" topLevel="false" primaryParameter="id">
+    <template id="actorInstance" name="Actor" topLevel="false" unique="true" primaryParameter="id">
         <parameter id="template" dataType="reference" type="actor" name="Template" format="attribute" y="0"/>
         <parameter id="id" dataType="string" name="ID" format="attribute" y="1"/>
         <parameter id="startDead" dataType="boolean" name="Start Dead" default="false" format="attribute" y="2"/>
@@ -113,8 +113,8 @@
         <parameter id="behavior" dataType="objectSet" type="actorBehavior" name="Behaviors" y="1"/>
     </template>
     <template id="localVar" name="Local Variable" topLevel="false" primaryParameter="name">
-        <parameter id="name" dataType="string" name="Name" format="attribute"/>
-        <parameter id="expression" dataType="string" name="Expression" format="current_tag"/>
+        <parameter id="name" dataType="string" name="Name" format="attribute" y="0"/>
+        <parameter id="expression" dataType="string" name="Expression" format="current_tag" y="1"/>
     </template>
     <template id="description" name="Description" topLevel="false">
         <group id="lines" name="Lines" x="0" y="1"/>
