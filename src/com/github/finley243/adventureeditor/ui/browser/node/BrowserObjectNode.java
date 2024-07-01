@@ -40,6 +40,9 @@ public class BrowserObjectNode extends BrowserNode {
         JMenuItem menuDelete = new JMenuItem("Delete");
         menuDelete.addActionListener(e -> main.getDataManager().deleteObject(categoryID, objectID));
         menu.add(menuDelete);
+        JMenuItem menuReferences = new JMenuItem("Find references");
+        menuReferences.addActionListener(e -> main.getDataManager().findReferences(categoryID, objectID));
+        menu.add(menuReferences);
         return menu;
     }
 
