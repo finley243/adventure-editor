@@ -50,7 +50,8 @@
         <parameter id="localVar" dataType="objectSetUnique" type="localVar" y="4"/>
     </template>
     <template id="itemInstance" name="Item" topLevel="false" primaryParameter="template">
-        <parameter id="template" dataType="reference" type="item" name="Template" format="attribute"/>
+        <parameter id="template" dataType="reference" type="item" name="Template" format="attribute" y="0"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" optional="true" y="1"/>
     </template>
     <template id="actorInstance" name="Actor" topLevel="false" unique="true" primaryParameter="id">
         <parameter id="template" dataType="reference" type="actor" name="Template" format="attribute" y="0"/>
