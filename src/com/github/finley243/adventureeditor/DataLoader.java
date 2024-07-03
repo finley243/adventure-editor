@@ -94,7 +94,7 @@ public class DataLoader {
                                 case "enum" -> TemplateParameter.ParameterDataType.ENUM;
                                 case "script" -> TemplateParameter.ParameterDataType.SCRIPT;
                                 case "component" -> TemplateParameter.ParameterDataType.COMPONENT;
-                                case null, default -> throw new IllegalArgumentException("Invalid parameter data type: " + dataTypeString);
+                                case null, default -> throw new IllegalArgumentException("Invalid parameter data type in template " + id + ": " + dataTypeString);
                             };
                             String parameterID = LoadUtils.attribute(parameterElement, "id", null);
                             String parameterName = LoadUtils.attribute(parameterElement, "name", null);
@@ -132,7 +132,8 @@ public class DataLoader {
                                     case REFERENCE -> new DataReference(defaultValueString);
                                     case ENUM -> new DataEnum(defaultValueString);
                                     case SCRIPT -> new DataScript(defaultValueString);
-                                    case OBJECT, OBJECT_SET_UNIQUE, OBJECT_SET, COMPONENT, REFERENCE_SET -> null;
+                                    case COMPONENT -> new DataComponent(defaultValueString, null, null);
+                                    case OBJECT, OBJECT_SET_UNIQUE, OBJECT_SET, REFERENCE_SET -> null;
                                 };
                             }
                             parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height, defaultValue));
@@ -476,7 +477,7 @@ public class DataLoader {
                 }
                 case COMPONENT -> {
                     String componentType = switch (parameter.componentFormat()) {
-                        case TYPE_ATTRIBUTE -> LoadUtils.attribute(element, COMPONENT_TYPE_ATTRIBUTE_ID, null);
+                        case TYPE_ATTRIBUTE -> LoadUtils.attribute(element, COMPONENT_TYPE_ATTRIBUTE_ID, parameter.defaultValue() == null ? null : ((DataComponent) parameter.defaultValue()).getType());
                         case TEXT_OR_TAGS -> LoadUtils.hasTextContent(element) ? "text" : "tags";
                     };
                     if (componentType == null) {

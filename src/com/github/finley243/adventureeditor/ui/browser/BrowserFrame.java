@@ -16,6 +16,7 @@ import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BrowserFrame extends JFrame implements DataSaveTarget {
 
@@ -261,13 +262,14 @@ public class BrowserFrame extends JFrame implements DataSaveTarget {
         if (currentID == null || currentID.trim().isEmpty()) {
             return new ErrorData(true, "ID cannot be empty.");
         }
+        Set<String> objectIDsInCategory = main.getDataManager().getIDsForCategory(categoryID);
         if (isNewInstance) {
-            if (main.getDataManager().getIDsForCategory(categoryID).contains(currentID)) {
+            if (objectIDsInCategory != null && objectIDsInCategory.contains(currentID)) {
                 return new ErrorData(true, "An object with ID \"" + currentID + "\" already exists.");
             }
         } else {
             String initialID = ((DataObject) initialData).getID();
-            if (!initialID.equals(currentID) && main.getDataManager().getIDsForCategory(categoryID).contains(currentID)) {
+            if (!initialID.equals(currentID) && objectIDsInCategory != null && objectIDsInCategory.contains(currentID)) {
                 return new ErrorData(true, "An object with ID \"" + currentID + "\" already exists.");
             }
         }
