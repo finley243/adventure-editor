@@ -10,6 +10,9 @@ import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.List;
@@ -100,6 +103,51 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         JPanel primaryPanel = new JPanel();
         primaryPanel.setLayout(new BorderLayout());
         this.getContentPane().add(primaryPanel);
+
+        Action newProjectAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                main.getProjectManager().newProject();
+            }
+        };
+        Action openProjectAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                main.getProjectManager().openProjectFromMenu();
+            }
+        };
+        Action saveProjectAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                main.getProjectManager().saveProjectToMenu();
+            }
+        };
+        Action saveProjectAsAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                main.getProjectManager().saveProjectToCurrentPath();
+            }
+        };
+        Action openConfigAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                main.getConfigMenuManager().openConfigMenu();
+            }
+        };
+
+        ActionMap actionMap = getRootPane().getActionMap();
+        actionMap.put("newProject", newProjectAction);
+        actionMap.put("openProject", openProjectAction);
+        actionMap.put("saveProject", saveProjectAction);
+        actionMap.put("saveProjectAs", saveProjectAsAction);
+        actionMap.put("openConfig", openConfigAction);
+
+        InputMap inputMapWindow = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "newProject");
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK), "openProject");
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "saveProject");
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "saveProjectAs");
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "openConfig");
 
         this.pack();
         this.setVisible(true);
