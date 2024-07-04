@@ -204,24 +204,32 @@
         <parameter id="script" dataType="string" name="Expression" format="child_tag" y="1"/>
     </template>
     <template id="actor" name="Actor" topLevel="true" primaryParameter="id">
+        <tabGroup id="tabs" x="1" y="1" width="2" height="8"/>
+        <group id="stats" name="Stats" tabGroup="tabs"/>
+        <group id="inventory" name="Inventory" tabGroup="tabs"/>
+        <group id="actions" name="Actions" tabGroup="tabs"/>
+        <group id="limbs" name="Limbs" tabGroup="tabs"/>
+        <group id="damage" name="Resistances" tabGroup="tabs"/>
+        <group id="senses" name="Senses" tabGroup="tabs"/>
+        <group id="equipSlots" name="Equip Slots" tabGroup="tabs"/>
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
         <parameter id="parent" dataType="reference" name="Parent" type="actor" format="attribute" optional="true" x="1" y="0"/>
         <parameter id="name" dataType="object" name="Name" type="actorName" x="0" y="1" height="3"/>
-        <parameter id="dialogueStart" dataType="reference" name="Dialogue Start" type="scene" format="attribute" optional="true" x="0" y="4"/>
-        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" optional="true" x="0" y="5"/>
-        <parameter id="isEnforcer" dataType="boolean" name="Is Enforcer" format="attribute" optional="true" x="0" y="6"/>
-        <parameter id="hp" dataType="integer" name="HP" format="attribute" optional="true" x="2" y="0"/>
-        <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute" optional="true" x="3" y="0"/>
-        <parameter id="movePoints" dataType="integer" name="Move Points" format="attribute" optional="true" x="4" y="0"/>
-        <parameter id="attribute" dataType="objectSetUnique" name="Attributes" type="actorAttribute" optional="true" x="2" y="1" height="3"/>
-        <parameter id="skill" dataType="objectSetUnique" name="Skills" type="actorSkill" optional="true" x="2" y="4" height="3"/>
-        <parameter id="senseType" dataType="objectSetUnique" name="Sense Types" type="actorSenseType" optional="true" x="4" y="1" height="3"/>
-        <parameter id="limb" dataType="objectSetUnique" name="Limbs" type="actorLimb" optional="true" x="3" y="1" height="3"/>
-        <parameter id="equipSlot" dataType="objectSetUnique" name="Equip Slots" type="actorEquipSlot" optional="true" x="4" y="4" height="3"/>
-        <parameter id="damageResistance" dataType="objectSetUnique" name="Damage Resistances" type="actorDamageResistance" optional="true" x="3" y="4" height="3"/>
-        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" x="1" y="1" height="6"/>
-        <parameter id="action" dataType="objectSet" name="Actions" type="customActionReference" x="5" y="1" height="3"/>
-        <parameter id="itemAction" dataType="objectSet" name="Item Actions" type="customActionReference" x="5" y="4" height="3"/>
+        <parameter id="dialogueStart" dataType="reference" name="Dialogue Start" type="scene" format="attribute" optional="true" x="2" y="0"/>
+        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" optional="true" x="0" y="4"/>
+        <parameter id="isEnforcer" dataType="boolean" name="Is Enforcer" format="attribute" optional="true" x="0" y="5"/>
+        <parameter id="hp" dataType="integer" name="HP" format="attribute" optional="true" x="0" y="6"/>
+        <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute" optional="true" x="0" y="7"/>
+        <parameter id="movePoints" dataType="integer" name="Move Points" format="attribute" optional="true" x="0" y="8"/>
+        <parameter id="attribute" dataType="objectSetUnique" name="Attributes" type="actorAttribute" optional="true" y="0" group="stats"/>
+        <parameter id="skill" dataType="objectSetUnique" name="Skills" type="actorSkill" optional="true" y="1" group="stats"/>
+        <parameter id="senseType" dataType="objectSetUnique" name="Sense Types" type="actorSenseType" optional="true" group="senses"/>
+        <parameter id="limb" dataType="objectSetUnique" name="Limbs" type="actorLimb" optional="true" group="limbs"/>
+        <parameter id="equipSlot" dataType="objectSetUnique" name="Equip Slots" type="actorEquipSlot" optional="true" group="equipSlots"/>
+        <parameter id="damageResistance" dataType="objectSetUnique" name="Damage Resistances" type="actorDamageResistance" optional="true" group="damage"/>
+        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" group="inventory"/>
+        <parameter id="action" dataType="objectSet" name="Actions" type="customActionReference" y="0" group="actions"/>
+        <parameter id="itemAction" dataType="objectSet" name="Item Actions" type="customActionReference" y="1" group="actions"/>
     </template>
     <template id="actorName" name="Name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>

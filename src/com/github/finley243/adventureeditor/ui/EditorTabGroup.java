@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor.ui;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
+import java.awt.*;
 
 public class EditorTabGroup extends JPanel {
 
@@ -19,7 +20,8 @@ public class EditorTabGroup extends JPanel {
         }/* else {
             this.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         }*/
-        this.add(tabbedPane);
+        this.setLayout(new BorderLayout());
+        this.add(tabbedPane, BorderLayout.CENTER);
     }
 
     public String getID() {
