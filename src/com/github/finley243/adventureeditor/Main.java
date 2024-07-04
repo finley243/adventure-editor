@@ -21,6 +21,7 @@ public class Main {
     private final ProjectManager projectManager;
     private final DataManager dataManager;
     private final PhraseEditorManager phraseEditorManager;
+    private final EditorManager editorManager;
 
     private final MainFrame mainFrame;
     private final BrowserFrame browserFrame;
@@ -42,6 +43,7 @@ public class Main {
         this.configMenuManager = new ConfigMenuManager(this);
         this.projectManager = new ProjectManager(this);
         this.dataManager = new DataManager(this);
+        this.editorManager = new EditorManager(this);
         this.mainFrame = new MainFrame(this);
         this.browserFrame = new BrowserFrame(this, mainFrame);
         this.phraseEditorManager = new PhraseEditorManager(this);
@@ -65,6 +67,10 @@ public class Main {
 
     public DataManager getDataManager() {
         return dataManager;
+    }
+
+    public EditorManager getEditorManager() {
+        return editorManager;
     }
 
     public MainFrame getMainFrame() {

@@ -94,19 +94,19 @@ public class DataManager {
     }
 
     public void newObject(String categoryID) {
-        main.getMainFrame().openEditorFrame(categoryID, null, main.getTemplate(categoryID), null, null);
+        main.getEditorManager().openEditorFrame(categoryID, null, main.getTemplate(categoryID), null, null);
     }
 
     public void newObject(String categoryID, DataSaveTarget saveTargetOverride) {
-        main.getMainFrame().openEditorFrame(categoryID, null, main.getTemplate(categoryID), null, saveTargetOverride);
+        main.getEditorManager().openEditorFrame(categoryID, null, main.getTemplate(categoryID), null, saveTargetOverride);
     }
 
     public void editObject(String categoryID, String objectID) {
-        main.getMainFrame().openEditorFrame(categoryID, objectID, main.getTemplate(categoryID), getData(categoryID, objectID), null);
+        main.getEditorManager().openEditorFrame(categoryID, objectID, main.getTemplate(categoryID), getData(categoryID, objectID), null);
     }
 
     public void editObject(String categoryID, String objectID, DataSaveTarget saveTargetOverride) {
-        main.getMainFrame().openEditorFrame(categoryID, objectID, main.getTemplate(categoryID), getData(categoryID, objectID), saveTargetOverride);
+        main.getEditorManager().openEditorFrame(categoryID, objectID, main.getTemplate(categoryID), getData(categoryID, objectID), saveTargetOverride);
     }
 
     public String duplicateObject(String categoryID, String objectID) {
@@ -129,7 +129,7 @@ public class DataManager {
         int confirmResult = JOptionPane.showOptionDialog(main.getBrowserFrame(), "Are you sure you want to delete " + objectID + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
         if (confirmResult == 0) {
             data.get(categoryID).remove(objectID);
-            main.getMainFrame().closeEditorFrameIfActive(categoryID, objectID);
+            main.getEditorManager().closeEditorFrameIfActive(categoryID, objectID);
             if (main.getTemplate(categoryID).topLevel()) {
                 main.getBrowserFrame().removeGameObject(categoryID, objectID);
             }

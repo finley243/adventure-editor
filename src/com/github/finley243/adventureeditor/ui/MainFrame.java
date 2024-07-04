@@ -24,12 +24,9 @@ public class MainFrame extends JFrame implements DataSaveTarget {
     private final Main main;
     private final JMenu fileOpenRecent;
 
-    private final Map<String, Map<String, EditorFrame>> topLevelEditorWindows;
-
     public MainFrame(Main main) {
         super("AdventureEditor");
         this.main = main;
-        this.topLevelEditorWindows = new HashMap<>();
 
         this.setSize(800, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -97,8 +94,6 @@ public class MainFrame extends JFrame implements DataSaveTarget {
             @Override
             public void menuCanceled(MenuEvent e) {}
         });
-
-        //updateRecentProjects();
 
         JPanel primaryPanel = new JPanel();
         primaryPanel.setLayout(new BorderLayout());
@@ -174,68 +169,6 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         }
     }
 
-    public void openEditorFrame(String categoryID, String objectID, Template template, Data objectData, DataSaveTarget saveTargetOverride) {
-        EditorFrame activeFrame = getActiveTopLevelFrame(categoryID, objectID);
-        if (activeFrame != null) {
-            activeFrame.toFront();
-            activeFrame.requestFocus();
-        } else {
-            EditorFrame editorFrame = new EditorFrame(main, this, template, objectData, saveTargetOverride != null ? saveTargetOverride : this, true);
-            addActiveTopLevelFrame(categoryID, objectID, editorFrame);
-        }
-    }
-
-    public void closeEditorFrameIfActive(String categoryID, String objectID) {
-        EditorFrame activeFrame = getActiveTopLevelFrame(categoryID, objectID);
-        if (activeFrame != null) {
-            activeFrame.dispose();
-            removeActiveTopLevelFrame(categoryID, objectID);
-        }
-    }
-
-    public void closeAllActiveEditorFrames() {
-        for (String categoryID : topLevelEditorWindows.keySet()) {
-            for (String objectID : topLevelEditorWindows.get(categoryID).keySet()) {
-                // TODO - Check if user wants to save changes in each window if applicable
-                topLevelEditorWindows.get(categoryID).get(objectID).requestClose(false, false);
-            }
-        }
-        topLevelEditorWindows.clear();
-    }
-
-    private EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
-        if (categoryID == null | objectID == null) {
-            return null;
-        }
-        if (!topLevelEditorWindows.containsKey(categoryID)) {
-            return null;
-        }
-        return topLevelEditorWindows.get(categoryID).get(objectID);
-    }
-
-    private void addActiveTopLevelFrame(String categoryID, String objectID, EditorFrame frame) {
-        if (objectID == null) {
-            return;
-        }
-        if (!topLevelEditorWindows.containsKey(categoryID)) {
-            topLevelEditorWindows.put(categoryID, new HashMap<>());
-        }
-        topLevelEditorWindows.get(categoryID).put(objectID, frame);
-    }
-
-    private void removeActiveTopLevelFrame(String categoryID, String objectID) {
-        if (objectID == null) {
-            return;
-        }
-        if (!topLevelEditorWindows.containsKey(categoryID)) {
-            return;
-        }
-        topLevelEditorWindows.get(categoryID).remove(objectID);
-        if (topLevelEditorWindows.get(categoryID).isEmpty()) {
-            topLevelEditorWindows.remove(categoryID);
-        }
-    }
-
     @Override
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
@@ -255,7 +188,7 @@ public class MainFrame extends JFrame implements DataSaveTarget {
 
     @Override
     public void onEditorFrameClose(EditorFrame frame) {
-        this.closeEditorFrameIfActive(frame.getTemplate().id(), frame.getObjectID());
+        main.getEditorManager().closeEditorFrameIfActive(frame.getTemplate().id(), frame.getObjectID());
     }
 
     @Override

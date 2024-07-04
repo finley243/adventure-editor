@@ -64,7 +64,7 @@ public class BrowserFrame extends JDialog {
     }
 
     public void reloadBrowserData(Map<String, Template> templates, Map<String, Map<String, Data>> data) {
-        main.getMainFrame().closeAllActiveEditorFrames();
+        main.getEditorManager().closeAllActiveEditorFrames();
         browserTree.clearData();
         browserTree.expandRow(0);
         for (String category : templates.keySet()) {
