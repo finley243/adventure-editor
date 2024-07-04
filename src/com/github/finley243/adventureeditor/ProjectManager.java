@@ -70,21 +70,21 @@ public class ProjectManager {
             recentProjects.removeLast();
         }
         DataLoader.saveRecentProjects(recentProjects);
-        main.getBrowserFrame().updateRecentProjects();
+        main.getMainFrame().updateRecentProjects();
     }
 
     public void removeRecentProject(ProjectData project) {
         recentProjects.remove(project);
         DataLoader.saveRecentProjects(recentProjects);
-        main.getBrowserFrame().updateRecentProjects();
+        main.getMainFrame().updateRecentProjects();
     }
 
     public void updateProjectName() {
         String configProjectName = main.getConfigMenuManager().getProjectName();
         if (configProjectName == null && isProjectLoaded()) {
-            main.getBrowserFrame().setProjectName(UNNAMED_PROJECT_NAME);
+            main.getMainFrame().setProjectName(UNNAMED_PROJECT_NAME);
         } else {
-            main.getBrowserFrame().setProjectName(configProjectName);
+            main.getMainFrame().setProjectName(configProjectName);
         }
     }
 
@@ -245,7 +245,7 @@ public class ProjectManager {
             recentProjects.removeLast();
         }
         DataLoader.saveRecentProjects(recentProjects);
-        main.getBrowserFrame().updateRecentProjects();
+        main.getMainFrame().updateRecentProjects();
     }
 
     private void updateLastSavedData() {

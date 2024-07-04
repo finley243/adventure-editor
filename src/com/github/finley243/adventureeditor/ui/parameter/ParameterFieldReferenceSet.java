@@ -136,7 +136,7 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
 
     @Override
     public void saveObjectData(Data data, Data initialData) {
-        main.getBrowserFrame().saveObjectData(data, initialData);
+        main.getMainFrame().saveObjectData(data, initialData);
         int addIndex = referenceList.getSelectedIndex() + 1;
         if (addIndex == 0) {
             addIndex = referenceList.getModel().getSize();
@@ -155,7 +155,7 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
 
     @Override
     public void onEditorFrameClose(EditorFrame frame) {
-        main.getBrowserFrame().onEditorFrameClose(frame);
+        main.getMainFrame().onEditorFrameClose(frame);
     }
 
     @Override

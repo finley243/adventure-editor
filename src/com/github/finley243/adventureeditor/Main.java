@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
+import com.github.finley243.adventureeditor.ui.browser.MainFrame;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ public class Main {
     private final DataManager dataManager;
     private final PhraseEditorManager phraseEditorManager;
 
+    private final MainFrame mainFrame;
     private final BrowserFrame browserFrame;
 
     public static void main(String[] args) throws ParserConfigurationException, IOException, SAXException {
@@ -40,7 +42,8 @@ public class Main {
         this.configMenuManager = new ConfigMenuManager(this);
         this.projectManager = new ProjectManager(this);
         this.dataManager = new DataManager(this);
-        this.browserFrame = new BrowserFrame(this);
+        this.mainFrame = new MainFrame(this);
+        this.browserFrame = new BrowserFrame(this, mainFrame);
         this.phraseEditorManager = new PhraseEditorManager(this);
         initialLoad();
     }
@@ -62,6 +65,10 @@ public class Main {
 
     public DataManager getDataManager() {
         return dataManager;
+    }
+
+    public MainFrame getMainFrame() {
+        return mainFrame;
     }
 
     public BrowserFrame getBrowserFrame() {
