@@ -192,7 +192,8 @@
         <parameter id="prompt" dataType="string" name="Prompt" format="child_tag" x="1" y="0"/>
         <parameter id="parameter" dataType="objectSetUnique" name="Parameters" type="actionParameter" x="0" y="1"/>
         <parameter id="condition" dataType="objectSet" name="Conditions" type="actionCondition" x="1" y="1"/>
-        <parameter id="script" dataType="object" name="Script" type="script" x="2" y="0" height="2"/>
+        <parameter id="conditionShow" dataType="string" name="Display Condition" optional="true" format="child_tag" x="2" y="0"/>
+        <parameter id="script" dataType="object" name="Script" type="script" x="2" y="1" height="1"/>
     </template>
     <template id="actionParameter" name="Parameter" topLevel="false" primaryParameter="name">
         <parameter id="name" dataType="string" name="Name" format="attribute" y="0"/>
@@ -200,7 +201,7 @@
     </template>
     <template id="actionCondition" name="Condition" topLevel="false" primaryParameter="blockMessage">
         <parameter id="blockMessage" dataType="string" name="Block Message" format="child_tag" y="0"/>
-        <parameter id="script" dataType="string" name="Script" format="child_tag" y="1"/>
+        <parameter id="script" dataType="string" name="Expression" format="child_tag" y="1"/>
     </template>
     <template id="actor" name="Actor" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
@@ -529,9 +530,9 @@
     <template id="object" name="Object" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
         <parameter id="name" dataType="object" name="Name" type="objectName" y="1"/>
-        <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="2"/>
-        <parameter id="component" dataType="objectSetUnique" type="objectComponent" name="Components" y="3"/>
-        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" y="4"/>
+        <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="2" height="3"/>
+        <parameter id="component" dataType="objectSetUnique" type="objectComponent" name="Components" x="1" y="0" height="3"/>
+        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" x="1" y="3" height="2"/>
     </template>
     <template id="objectComponent" name="Object Component" topLevel="false" primaryParameter="component">
         <parameter id="startEnabled" dataType="boolean" name="Start Enabled" format="attribute" x="0" y="0" default="true"/>
@@ -545,14 +546,14 @@
         </parameter>
     </template>
     <template id="objectComponentInventory" name="Inventory" topLevel="false">
-        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" x="0" y="0"/>
-        <parameter id="takePrompt" dataType="string" name="Take Prompt" format="child_tag" x="0" y="1"/>
-        <parameter id="takePhrase" dataType="string" name="Take Phrase" format="child_tag" x="0" y="2"/>
-        <parameter id="storePrompt" dataType="string" name="Store Prompt" format="child_tag" x="0" y="3"/>
-        <parameter id="storePhrase" dataType="string" name="Store Phrase" format="child_tag" x="0" y="4"/>
-        <parameter id="enableTake" dataType="boolean" name="Enable Take" format="attribute" x="0" y="5" default="true"/>
-        <parameter id="enableStore" dataType="boolean" name="Enable Store" format="attribute" x="0" y="6" default="true"/>
-        <parameter id="itemAction" dataType="objectSet" type="customActionReference" name="Per-Item Actions" x="0" y="7"/>
+        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" x="0" y="0" height="5"/>
+        <parameter id="takePrompt" dataType="string" name="Take Prompt" format="child_tag" x="1" y="1" width="2"/>
+        <parameter id="takePhrase" dataType="string" name="Take Phrase" format="child_tag" x="1" y="2" width="2"/>
+        <parameter id="storePrompt" dataType="string" name="Store Prompt" format="child_tag" x="1" y="3" width="2"/>
+        <parameter id="storePhrase" dataType="string" name="Store Phrase" format="child_tag" x="1" y="4" width="2"/>
+        <parameter id="enableTake" dataType="boolean" name="Enable Take" format="attribute" x="1" y="0" default="true"/>
+        <parameter id="enableStore" dataType="boolean" name="Enable Store" format="attribute" x="2" y="0" default="true"/>
+        <parameter id="itemAction" dataType="objectSet" type="customActionReference" name="Per-Item Actions" x="3" y="0" height="5"/>
     </template>
     <template id="objectComponentNetwork" name="Network" topLevel="false"/>
     <template id="objectComponentLink" name="Link" topLevel="false">
@@ -568,18 +569,21 @@
         <parameter id="slot" dataType="objectSetUnique" type="objectComponentUsableSlot" name="Usable Slots"/>
     </template>
     <template id="objectComponentUsableSlot" name="Usable Slot" topLevel="false" primaryParameter="id">
+        <group id="prompts" name="Prompts" y="1" height="2"/>
+        <group id="phrases" name="Phrases" y="3" height="2"/>
+        <group id="flags" name="Flags" x="1" y="0" height="5"/>
         <parameter id="id" dataType="string" name="Slot ID" format="attribute" y="0"/>
-        <parameter id="startPrompt" dataType="string" name="Start Prompt" format="child_tag" y="1"/>
-        <parameter id="endPrompt" dataType="string" name="End Prompt" format="child_tag" y="2"/>
-        <parameter id="startPhrase" dataType="string" name="Start Phrase" format="child_tag" y="3"/>
-        <parameter id="endPhrase" dataType="string" name="End Phrase" format="child_tag" y="4"/>
-        <parameter id="cover" dataType="boolean" name="Provides Cover" format="attribute" y="5"/>
-        <parameter id="hidden" dataType="boolean" name="Hides User" format="attribute" y="6"/>
-        <parameter id="seeOtherAreas" dataType="boolean" name="User Can See Other Areas" format="attribute" y="7" default="true"/>
-        <parameter id="localActions" dataType="boolean" name="User Can Perform Local Actions" format="attribute" y="8" default="true"/>
-        <parameter id="parentActions" dataType="boolean" name="User Can Perform Parent Object Actions" format="attribute" y="9" default="true"/>
-        <parameter id="exposedComponent" dataType="objectSetUnique" type="objectExposedComponent" name="Exposed Components" y="10"/>
-        <parameter id="usingAction" dataType="objectSet" type="customActionReference" name="User Actions" y="11"/>
+        <parameter id="startPrompt" dataType="string" name="Start Prompt" format="child_tag" y="0" group="prompts"/>
+        <parameter id="endPrompt" dataType="string" name="End Prompt" format="child_tag" y="1" group="prompts"/>
+        <parameter id="startPhrase" dataType="string" name="Start Phrase" format="child_tag" y="0" group="phrases"/>
+        <parameter id="endPhrase" dataType="string" name="End Phrase" format="child_tag" y="1" group="phrases"/>
+        <parameter id="cover" dataType="boolean" name="Provides Cover" format="attribute" y="0" group="flags"/>
+        <parameter id="hidden" dataType="boolean" name="Hides User" format="attribute" y="1" group="flags"/>
+        <parameter id="seeOtherAreas" dataType="boolean" name="User Can See Other Areas" format="attribute" y="2" default="true" group="flags"/>
+        <parameter id="localActions" dataType="boolean" name="User Can Perform Local Actions" format="attribute" y="3" default="true" group="flags"/>
+        <parameter id="parentActions" dataType="boolean" name="User Can Perform Parent Object Actions" format="attribute" y="4" default="true" group="flags"/>
+        <parameter id="exposedComponent" dataType="objectSetUnique" type="objectExposedComponent" name="Exposed Components" y="5"/>
+        <parameter id="usingAction" dataType="objectSet" type="customActionReference" name="User Actions" x="1" y="5"/>
     </template>
     <template id="objectExposedComponent" name="Exposed Component" topLevel="false" primaryParameter="exposedComponent">
         <parameter id="exposedComponent" dataType="enum" type="objectComponentTypes" name="Component Type" format="current_tag"/>

@@ -18,7 +18,6 @@ public class BrowserFrame extends JDialog {
         super(mainFrame);
         this.main = main;
 
-        this.setSize(800, 600);
         this.setTitle("Browser");
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -30,10 +29,9 @@ public class BrowserFrame extends JDialog {
         JPanel browserPanel = new JPanel();
         browserPanel.setLayout(new BorderLayout());
 
-        browserTree.setPreferredSize(new Dimension(400, 400));
         JScrollPane browserScrollPane = new JScrollPane(browserTree);
         browserScrollPane.setViewportView(browserTree);
-        browserScrollPane.setPreferredSize(new Dimension(400, 800));
+        browserScrollPane.setPreferredSize(new Dimension(350, 500));
         browserPanel.add(browserScrollPane, BorderLayout.CENTER);
         this.getContentPane().add(browserPanel);
 

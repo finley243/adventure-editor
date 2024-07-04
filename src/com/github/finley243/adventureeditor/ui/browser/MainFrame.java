@@ -134,7 +134,7 @@ public class MainFrame extends JFrame implements DataSaveTarget {
             activeFrame.toFront();
             activeFrame.requestFocus();
         } else {
-            EditorFrame editorFrame = new EditorFrame(main, this, template, objectData, saveTargetOverride != null ? saveTargetOverride : this);
+            EditorFrame editorFrame = new EditorFrame(main, this, template, objectData, saveTargetOverride != null ? saveTargetOverride : this, true);
             addActiveTopLevelFrame(categoryID, objectID, editorFrame);
         }
     }

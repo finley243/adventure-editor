@@ -84,7 +84,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
             buttonRemove.setEnabled(enableSelectionButtons);
         });
         buttonAdd.addActionListener(e -> {
-            EditorFrame objectFrame = new EditorFrame(main, editorFrame, template, null, this);
+            EditorFrame objectFrame = new EditorFrame(main, editorFrame, template, null, this, false);
             unsavedEditorFrames.add(objectFrame);
         });
         buttonEdit.addActionListener(e -> {
@@ -95,7 +95,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
                     editorFrames.get(objectIndex).toFront();
                     editorFrames.get(objectIndex).requestFocus();
                 } else {
-                    EditorFrame objectFrame = new EditorFrame(main, editorFrame, template, objectData, this);
+                    EditorFrame objectFrame = new EditorFrame(main, editorFrame, template, objectData, this, false);
                     editorFrames.set(objectIndex, objectFrame);
                 }
             }

@@ -4,7 +4,6 @@ import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterField;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldObject;
 
@@ -21,7 +20,7 @@ public class EditorFrame extends JDialog {
     private final DataSaveTarget saveTarget;
     private final JButton saveButton;
 
-    public EditorFrame(Main main, Window parentWindow, Template template, Data objectData, DataSaveTarget saveTarget) {
+    public EditorFrame(Main main, Window parentWindow, Template template, Data objectData, DataSaveTarget saveTarget, boolean isTopLevel) {
         //super(template.name());
         super(parentWindow);
         //this.setAutoRequestFocus(false);
@@ -36,7 +35,7 @@ public class EditorFrame extends JDialog {
         this.saveTarget = saveTarget;
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
-        this.parameterField = new ParameterFieldObject(this, false, template.name(), template, main, saveTarget instanceof BrowserFrame, true);
+        this.parameterField = new ParameterFieldObject(this, false, template.name(), template, main, isTopLevel, true);
         if (objectData != null) {
             parameterField.setData(objectData);
         }
