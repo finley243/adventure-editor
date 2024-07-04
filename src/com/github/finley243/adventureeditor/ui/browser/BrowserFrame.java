@@ -37,7 +37,14 @@ public class BrowserFrame extends JDialog {
 
         this.pack();
         this.setVisible(true);
-        this.setLocationRelativeTo(null);
+        //this.setLocationRelativeTo(null);
+        //Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int windowX = ((JFrame) getParent()).getContentPane().getLocationOnScreen().x;
+        int windowY = ((JFrame) getParent()).getContentPane().getLocationOnScreen().y;
+        int windowWidth = getWidth();
+        int windowHeight = ((JFrame) getParent()).getContentPane().getHeight();
+        this.setSize(windowWidth, windowHeight);
+        this.setLocation(windowX, windowY);
     }
 
     public void addGameObject(String categoryID, String newObjectID, boolean selectedAfterLoading) {

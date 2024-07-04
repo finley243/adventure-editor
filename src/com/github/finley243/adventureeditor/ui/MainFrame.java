@@ -1,12 +1,10 @@
-package com.github.finley243.adventureeditor.ui.browser;
+package com.github.finley243.adventureeditor.ui;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.ProjectData;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
