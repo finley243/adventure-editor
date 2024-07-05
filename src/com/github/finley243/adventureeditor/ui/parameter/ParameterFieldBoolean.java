@@ -42,7 +42,7 @@ public class ParameterFieldBoolean extends ParameterField {
         valueConstraints.gridx = optional ? 1 : 0;
         valueConstraints.gridy = 0;
         valueConstraints.weightx = 1;
-        valueConstraints.weighty = 0;
+        valueConstraints.weighty = 1;
         //valueConstraints.fill = GridBagConstraints.HORIZONTAL;
         valueConstraints.anchor = GridBagConstraints.WEST;
         getInnerPanel().add(checkBoxPanel, valueConstraints);

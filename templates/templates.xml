@@ -221,8 +221,8 @@
         <parameter id="hp" dataType="integer" name="HP" format="attribute" optional="true" x="0" y="6"/>
         <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute" optional="true" x="0" y="7"/>
         <parameter id="movePoints" dataType="integer" name="Move Points" format="attribute" optional="true" x="0" y="8"/>
-        <parameter id="attribute" dataType="objectSetUnique" name="Attributes" type="actorAttribute" optional="true" y="0" group="stats"/>
-        <parameter id="skill" dataType="objectSetUnique" name="Skills" type="actorSkill" optional="true" y="1" group="stats"/>
+        <parameter id="attribute" dataType="objectSetUnique" name="Attributes" type="actorAttribute" y="0" group="stats"/>
+        <parameter id="skill" dataType="objectSetUnique" name="Skills" type="actorSkill" y="1" group="stats"/>
         <parameter id="senseType" dataType="objectSetUnique" name="Sense Types" type="actorSenseType" optional="true" group="senses"/>
         <parameter id="limb" dataType="objectSetUnique" name="Limbs" type="actorLimb" optional="true" group="limbs"/>
         <parameter id="equipSlot" dataType="objectSetUnique" name="Equip Slots" type="actorEquipSlot" optional="true" group="equipSlots"/>
@@ -317,14 +317,19 @@
         <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
     <template id="effect" name="Effect" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" topLevelOnly="true" y="0"/>
-        <parameter id="permanent" dataType="boolean" name="Is Permanent" format="attribute" y="1" default="false"/>
-        <parameter id="duration" dataType="integer" name="Duration" format="attribute" y="2" default="0"/>
-        <parameter id="stack" dataType="boolean" name="Can Stack" format="attribute" y="3" default="true"/>
-        <parameter id="conditionAdd" dataType="string" name="Add Condition" format="child_tag" y="4" optional="true"/>
-        <parameter id="conditionRemove" dataType="string" name="Remove Condition" format="child_tag" y="5" optional="true"/>
-        <parameter id="conditionActive" dataType="string" name="Active Condition" format="child_tag" y="6" optional="true"/>
-        <parameter id="component" dataType="component" name="Stat Modifier" componentFormat="typeAttribute" format="current_tag" useComponentTypeName="true" optional="true" y="7">
+        <tabGroup id="scripts" name="Scripts" x="3" y="0" width="1" height="6"/>
+        <group id="tabAdd" name="Add" tabGroup="scripts"/>
+        <group id="tabRemove" name="Remove" tabGroup="scripts"/>
+        <group id="tabRound" name="Each Round" tabGroup="scripts"/>
+        <group id="conditions" name="Conditions" x="0" y="3" width="2"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" topLevelOnly="true" x="0" y="0" width="2"/>
+        <parameter id="permanent" dataType="boolean" name="Is Permanent" format="attribute" x="0" y="1" default="false"/>
+        <parameter id="stack" dataType="boolean" name="Can Stack" format="attribute" x="1" y="1" default="true"/>
+        <parameter id="duration" dataType="integer" name="Duration" format="attribute" x="0" y="2" width="2" default="0"/>
+        <parameter id="conditionAdd" dataType="string" name="Add Condition" format="child_tag" x="0" y="0" optional="true" group="conditions"/>
+        <parameter id="conditionRemove" dataType="string" name="Remove Condition" format="child_tag" x="0" y="1" optional="true" group="conditions"/>
+        <parameter id="conditionActive" dataType="string" name="Active Condition" format="child_tag" x="0" y="2" optional="true" group="conditions"/>
+        <parameter id="component" dataType="component" name="Stat Modifier" componentFormat="typeAttribute" format="current_tag" useComponentTypeName="true" optional="true" x="2" y="0" width="1" height="6">
             <component id="add" name="Add" object="effectComponentAdd"/>
             <component id="mult" name="Multiply" object="effectComponentMult"/>
             <component id="boolean" name="Boolean" object="effectComponentBoolean"/>
@@ -332,9 +337,9 @@
             <component id="stringSet" name="String Set" object="effectComponentStringSet"/>
             <component id="compound" name="Compound" object="effectComponentCompound"/>
         </parameter>
-        <parameter id="scriptAdd" dataType="script" name="Add Script" format="child_tag" optional="true" x="1" y="0" height="3"/>
-        <parameter id="scriptRemove" dataType="script" name="Remove Script" format="child_tag" optional="true" x="1" y="3" height="3"/>
-        <parameter id="scriptRound" dataType="script" name="Each Round Script" format="child_tag" optional="true" x="1" y="6" height="3"/>
+        <parameter id="scriptAdd" dataType="script" name="Add Script" format="child_tag" optional="true" group="tabAdd"/>
+        <parameter id="scriptRemove" dataType="script" name="Remove Script" format="child_tag" optional="true" group="tabRemove"/>
+        <parameter id="scriptRound" dataType="script" name="Each Round Script" format="child_tag" optional="true" group="tabRound"/>
     </template>
     <template id="effectComponentAdd" name="Add" topLevel="false">
         <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
