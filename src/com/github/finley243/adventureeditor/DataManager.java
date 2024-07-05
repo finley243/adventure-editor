@@ -6,10 +6,7 @@ import com.github.finley243.adventureeditor.template.TemplateParameter;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 
 import javax.swing.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class DataManager {
 
@@ -139,16 +136,16 @@ public class DataManager {
     }
 
     public void findReferences(String referenceCategoryID, String referenceObjectID) {
-        Map<String, String> references = new HashMap<>();
+        Set<Reference> references = new HashSet<>();
         for (String category : data.keySet()) {
             for (String object : data.get(category).keySet()) {
                 Data currentObject = data.get(category).get(object);
                 if (dataContainsReference(currentObject, referenceCategoryID, referenceObjectID)) {
-                    references.put(category, object);
+                    references.add(new Reference(category, object));
                 }
             }
         }
-        // TODO - Generate references menu
+        main.getReferenceListManager().openReferenceList(references);
     }
 
     public Map<String, Map<String, Data>> getAllDataCopy() {

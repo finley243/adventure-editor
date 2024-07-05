@@ -21,6 +21,7 @@ public class Main {
     private final ProjectManager projectManager;
     private final DataManager dataManager;
     private final PhraseEditorManager phraseEditorManager;
+    private final ReferenceListManager referenceListManager;
     private final EditorManager editorManager;
 
     private final MainFrame mainFrame;
@@ -47,6 +48,7 @@ public class Main {
         this.mainFrame = new MainFrame(this);
         this.browserFrame = new BrowserFrame(this, mainFrame);
         this.phraseEditorManager = new PhraseEditorManager(this);
+        this.referenceListManager = new ReferenceListManager(this);
         initialLoad();
     }
 
@@ -83,6 +85,10 @@ public class Main {
 
     public PhraseEditorManager getPhraseEditorManager() {
         return phraseEditorManager;
+    }
+
+    public ReferenceListManager getReferenceListManager() {
+        return referenceListManager;
     }
 
     public Template getTemplate(String categoryID) {
