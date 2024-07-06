@@ -47,7 +47,7 @@ public class EditorFrame extends JDialog {
         JPanel buttonPanel = getButtonPanel();
         mainPanel.add(buttonPanel, BorderLayout.PAGE_END);
         this.getContentPane().add(mainPanel);
-        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.setResizable(false);
 
         Action saveAction = new AbstractAction() {
@@ -59,7 +59,7 @@ public class EditorFrame extends JDialog {
         Action closeAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                requestClose(false, false);
+                requestClose(true, false);
             }
         };
 
@@ -171,7 +171,7 @@ public class EditorFrame extends JDialog {
     @Override
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-            requestClose(false, false);
+            requestClose(true, false);
         } else {
             super.processWindowEvent(e);
         }
