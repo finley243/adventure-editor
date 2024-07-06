@@ -37,6 +37,10 @@ public class DataObject extends Data {
         }
     }
 
+    public void replaceValue(String key, Data newValue) {
+        value.put(key, newValue);
+    }
+
     public String getID() {
         if (!value.containsKey("id") || !(value.get("id") instanceof DataString)) {
             return null;

@@ -117,7 +117,7 @@ public class ProjectManager {
         }
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int result = fileChooser.showOpenDialog(main.getBrowserFrame());
+        int result = fileChooser.showOpenDialog(main.getMainFrame());
         if (result != JFileChooser.APPROVE_OPTION) {
             return;
         }
@@ -137,19 +137,19 @@ public class ProjectManager {
             //throw new RuntimeException(e);
             main.getDataManager().clearData();
             main.getConfigMenuManager().clearConfigData();
-            JOptionPane.showMessageDialog(main.getBrowserFrame(), "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             //throw new RuntimeException(e);
             main.getDataManager().clearData();
             main.getConfigMenuManager().clearConfigData();
-            JOptionPane.showMessageDialog(main.getBrowserFrame(), "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public void openRecentProject(ProjectData projectData) {
         File file = new File(projectData.absolutePath());
         if (!file.exists()) {
-            int choice = JOptionPane.showOptionDialog(main.getBrowserFrame(), "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
+            int choice = JOptionPane.showOptionDialog(main.getMainFrame(), "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
             if (choice == JOptionPane.YES_OPTION) {
                 removeRecentProject(projectData);
             }
@@ -174,12 +174,12 @@ public class ProjectManager {
             //throw new RuntimeException(e);
             main.getDataManager().clearData();
             main.getConfigMenuManager().clearConfigData();
-            JOptionPane.showMessageDialog(main.getBrowserFrame(), "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             //throw new RuntimeException(e);
             main.getDataManager().clearData();
             main.getConfigMenuManager().clearConfigData();
-            JOptionPane.showMessageDialog(main.getBrowserFrame(), "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -196,11 +196,11 @@ public class ProjectManager {
                 return true;
             } catch (IOException e) {
                 //throw new RuntimeException(e);
-                JOptionPane.showMessageDialog(main.getBrowserFrame(), "Project could not be saved to the current directory.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(main.getMainFrame(), "Project could not be saved to the current directory.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             } catch (ParserConfigurationException | TransformerException e) {
                 //throw new RuntimeException(e);
-                JOptionPane.showMessageDialog(main.getBrowserFrame(), "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(main.getMainFrame(), "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         }
@@ -209,7 +209,7 @@ public class ProjectManager {
     public boolean saveProjectToMenu() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int result = fileChooser.showSaveDialog(main.getBrowserFrame());
+        int result = fileChooser.showSaveDialog(main.getMainFrame());
         if (result != JFileChooser.APPROVE_OPTION) {
             return false;
         }
@@ -223,11 +223,11 @@ public class ProjectManager {
             return true;
         } catch (IOException e) {
             //throw new RuntimeException(e);
-            JOptionPane.showMessageDialog(main.getBrowserFrame(), "Project could not be saved to the selected directory.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(main.getMainFrame(), "Project could not be saved to the selected directory.", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         } catch (ParserConfigurationException | TransformerException e) {
             //throw new RuntimeException(e);
-            JOptionPane.showMessageDialog(main.getBrowserFrame(), "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(main.getMainFrame(), "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }
@@ -236,7 +236,7 @@ public class ProjectManager {
         if (!hasUnsavedChanges()) {
             return true;
         }
-        int result = JOptionPane.showConfirmDialog(main.getBrowserFrame(), "Save changes to the current project?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION);
+        int result = JOptionPane.showConfirmDialog(main.getMainFrame(), "Save changes to the current project?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION);
         if (result == JOptionPane.YES_OPTION) {
             return saveProjectToCurrentPath();
         } else {

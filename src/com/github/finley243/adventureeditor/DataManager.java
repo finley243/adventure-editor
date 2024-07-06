@@ -70,6 +70,7 @@ public class DataManager {
                     main.getBrowserFrame().removeGameObject(categoryID, initialID);
                     main.getBrowserFrame().addGameObject(categoryID, objectID, true);
                 }
+                renameReferences(categoryID, initialID, objectID);
             } else { // Edit with same ID
                 if (!data.containsKey(categoryID)) {
                     data.put(categoryID, new HashMap<>());
@@ -148,6 +149,15 @@ public class DataManager {
         main.getReferenceListManager().openReferenceList(references);
     }
 
+    public void renameReferences(String referenceCategoryID, String referenceObjectID, String newObjectID) {
+        for (String category : data.keySet()) {
+            for (String object : data.get(category).keySet()) {
+                Data currentObject = data.get(category).get(object);
+                renameReferencesInData(currentObject, referenceCategoryID, referenceObjectID, newObjectID);
+            }
+        }
+    }
+
     public Map<String, Map<String, Data>> getAllDataCopy() {
         Map<String, Map<String, Data>> dataCopy = new HashMap<>();
         for (Map.Entry<String, Map<String, Data>> categoryEntry : data.entrySet()) {
@@ -206,6 +216,36 @@ public class DataManager {
             }
         }
         return false;
+    }
+
+    private void renameReferencesInData(Data data, String categoryID, String objectID, String newObjectID) {
+        if (!(data instanceof DataObject dataObject)) {
+            throw new IllegalArgumentException("Data must be an object");
+        }
+        Template template = dataObject.getTemplate();
+        for (TemplateParameter parameter : template.parameters()) {
+            Data innerData = dataObject.getValue().get(parameter.id());
+            if (innerData instanceof DataReference innerReference) {
+                if (parameter.type().equals(categoryID) && innerReference.getValue().equals(objectID)) {
+                    dataObject.replaceValue(parameter.id(), new DataReference(newObjectID));
+                }
+            } else if (innerData instanceof DataReferenceSet innerReferenceSet) {
+                if (parameter.type().equals(categoryID)) {
+                    int indexOfReference = innerReferenceSet.getValue().indexOf(objectID);
+                    if (indexOfReference != -1) {
+                        innerReferenceSet.getValue().set(indexOfReference, newObjectID);
+                    }
+                }
+            } else if (innerData instanceof DataObject innerObject) {
+                renameReferencesInData(innerObject, categoryID, objectID, newObjectID);
+            } else if (innerData instanceof DataObjectSet innerObjectSet) {
+                for (Data innerObject : innerObjectSet.getValue()) {
+                    renameReferencesInData(innerObject, categoryID, objectID, newObjectID);
+                }
+            } else if (innerData instanceof DataComponent innerComponent) {
+                renameReferencesInData(innerComponent.getObjectData(), categoryID, objectID, newObjectID);
+            }
+        }
     }
 
 }
