@@ -79,6 +79,12 @@ public class ProjectManager {
         main.getMainFrame().updateRecentProjects();
     }
 
+    public void clearRecentProjects() {
+        recentProjects.clear();
+        DataLoader.saveRecentProjects(recentProjects);
+        main.getMainFrame().updateRecentProjects();
+    }
+
     public void updateProjectName() {
         String configProjectName = main.getConfigMenuManager().getProjectName();
         if (configProjectName == null && isProjectLoaded()) {

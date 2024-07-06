@@ -167,6 +167,11 @@ public class MainFrame extends JFrame implements DataSaveTarget {
             recentProjectItem.addActionListener(e -> main.getProjectManager().openRecentProject(recentProject));
             fileOpenRecent.add(recentProjectItem);
         }
+        JSeparator separator = new JSeparator();
+        fileOpenRecent.add(separator);
+        JMenuItem clearRecentProjects = new JMenuItem("Clear Recent Projects");
+        clearRecentProjects.addActionListener(e -> main.getProjectManager().clearRecentProjects());
+        fileOpenRecent.add(clearRecentProjects);
     }
 
     @Override
