@@ -10,6 +10,8 @@ import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +80,20 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
             buttonEdit.setEnabled(enableSelectionButtons);
             buttonRemove.setEnabled(enableSelectionButtons);
         });
+        referenceList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int index = referenceList.locationToIndex(e.getPoint());
+                    if (index >= 0) {
+                        String selectedItem = referenceList.getModel().getElementAt(index);
+                        if (selectedItem != null) {
+                            main.getDataManager().editObject(template.id(), selectedItem, ParameterFieldReferenceSet.this);
+                        }
+                    }
+                }
+            }
+        });
         buttonAdd.addActionListener(e -> {
             main.getDataManager().newObject(template.id(), this);
         });
@@ -88,7 +104,7 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
             int selectedIndex = referenceList.getSelectedIndex();
             boolean didDelete = main.getDataManager().deleteObject(template.id(), referenceList.getSelectedValue());
             if (didDelete) {
-                referenceList.remove(selectedIndex);
+                ((DefaultListModel<String>) referenceList.getModel()).remove(selectedIndex);
             }
         });
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -147,9 +163,8 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
             if (!initialID.equals(objectID)) {
                 addIndex = ((DefaultListModel<String>) referenceList.getModel()).indexOf(initialID);
                 ((DefaultListModel<String>) referenceList.getModel()).remove(addIndex);}
-        } else {
-            ((DefaultListModel<String>) referenceList.getModel()).add(addIndex, objectID);
         }
+        ((DefaultListModel<String>) referenceList.getModel()).add(addIndex, objectID);
         parentFrame.onEditorElementUpdated();
     }
 
@@ -160,11 +175,7 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
 
     @Override
     public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
-        /*if (!isDataUnique(currentData, initialData)) {
-            String value = currentData.toString();
-            return new ErrorData(true, name + " already contains the value " + value + ".");
-        }*/
-        return new ErrorData(false, null);
+        return main.getMainFrame().isDataValidOrShowDialog(currentData, initialData);
     }
 
     @Override

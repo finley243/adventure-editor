@@ -9,6 +9,8 @@ import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +53,26 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
         objectList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         // May not be the ideal listener to use
         objectList.addListSelectionListener(e -> editorFrame.onEditorElementUpdated());
+        objectList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int index = objectList.locationToIndex(e.getPoint());
+                    if (index >= 0) {
+                        Data selectedItem = objectList.getModel().getElementAt(index);
+                        if (selectedItem != null) {
+                            if (editorFrames.get(index) != null) {
+                                editorFrames.get(index).toFront();
+                                editorFrames.get(index).requestFocus();
+                            } else {
+                                EditorFrame objectFrame = new EditorFrame(main, editorFrame, template, selectedItem, ParameterFieldObjectSet.this, false);
+                                editorFrames.set(index, objectFrame);
+                            }
+                        }
+                    }
+                }
+            }
+        });
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
         GridBagConstraints addConstraints = new GridBagConstraints();
