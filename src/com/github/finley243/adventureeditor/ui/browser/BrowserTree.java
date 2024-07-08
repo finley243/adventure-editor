@@ -31,6 +31,8 @@ public class BrowserTree extends JTree {
         this.setModel(treeModel);
         this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         this.addMouseListener(new MouseAdapter() {
+            private DefaultMutableTreeNode lastClickedNode;
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON3) {
@@ -39,9 +41,17 @@ public class BrowserTree extends JTree {
             }
 
             @Override
+            public void mousePressed(MouseEvent e) {
+                TreePath path = BrowserTree.this.getPathForLocation(e.getX(), e.getY());
+                if (path != null) {
+                    lastClickedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+                }
+            }
+
+            @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
-                    onDoubleClick(e.getPoint());
+                if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1 && lastClickedNode != null) {
+                    onDoubleClick(lastClickedNode);
                 }
             }
         });
@@ -186,13 +196,9 @@ public class BrowserTree extends JTree {
         }
     }
 
-    private void onDoubleClick(Point mousePos) {
-        TreePath path = this.getPathForLocation(mousePos.x, mousePos.y);
-        if (path != null) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-            if (node instanceof BrowserObjectNode objectNode) {
-                main.getDataManager().editObject(objectNode.getCategoryID(), objectNode.getObjectID());
-            }
+    private void onDoubleClick(DefaultMutableTreeNode node) {
+        if (node instanceof BrowserObjectNode objectNode) {
+            main.getDataManager().editObject(objectNode.getCategoryID(), objectNode.getObjectID());
         }
     }
 
