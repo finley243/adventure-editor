@@ -206,6 +206,7 @@
     <template id="actor" name="Actor" topLevel="true" primaryParameter="id">
         <tabGroup id="tabs" x="1" y="1" width="2" height="8"/>
         <group id="stats" name="Stats" tabGroup="tabs"/>
+        <group id="level" name="Leveling" tabGroup="tabs"/>
         <group id="inventory" name="Inventory" tabGroup="tabs"/>
         <group id="actions" name="Actions" tabGroup="tabs"/>
         <group id="limbs" name="Limbs" tabGroup="tabs"/>
@@ -230,6 +231,8 @@
         <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" group="inventory"/>
         <parameter id="action" dataType="objectSet" name="Actions" type="customActionReference" y="0" group="actions"/>
         <parameter id="itemAction" dataType="objectSet" name="Item Actions" type="customActionReference" y="1" group="actions"/>
+        <parameter id="startLevel" dataType="integer" name="Starting Level" optional="true" format="attribute" y="0" group="level"/>
+        <parameter id="levelUpThreshold" dataType="string" name="Level-Up Threshold Expression" optional="true" format="child_tag" y="1" group="level"/>
     </template>
     <template id="actorName" name="Name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
