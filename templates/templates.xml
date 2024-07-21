@@ -267,7 +267,7 @@
         <parameter id="value" dataType="integer" name="Value" format="attribute" y="1"/>
     </template>
     <template id="attackType" name="Attack Type" topLevel="true" primaryParameter="id">
-        <group id="phrases" name="Phrases" x="0" y="1" width="2" height="5"/>
+        <group id="phrases" name="Phrases" x="0" y="1" width="1" height="4"/>
         <group id="hitChance" name="Hit Chance" x="2" y="2" width="2" height="2"/>
         <group id="damage" name="Damage" x="2" y="4" width="2" height="2"/>
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
@@ -284,22 +284,10 @@
         <parameter id="range" dataType="objectSetUnique" type="weaponClassRange" name="Ranges" x="4" y="2" height="2"/>
         <parameter id="overrideEffects" dataType="boolean" name="Override Target Effects" default="false" x="5" y="1"/>
         <parameter id="targetEffect" dataType="objectSet" type="effectReference" name="Target Effects" x="4" y="4" height="2"/>
-        <parameter id="hitPhrase" dataType="string" name="Hit Phrase" format="child_tag" optional="true" y="0" group="phrases"/>
-        <parameter id="hitPhraseRepeat" dataType="string" name="Hit Repeat Phrase" format="child_tag" optional="true" y="1" group="phrases"/>
-        <parameter id="hitOverallPhrase" dataType="string" name="Overall Hit Phrase" format="child_tag" optional="true" y="2" group="phrases"/>
-        <parameter id="hitOverallPhraseRepeat" dataType="string" name="Overall Hit Repeat Phrase" format="child_tag" optional="true" y="3" group="phrases"/>
-        <parameter id="hitPhraseAudible" dataType="string" name="Audible Hit Phrase" format="child_tag" optional="true" y="4" group="phrases"/>
-        <parameter id="hitPhraseRepeatAudible" dataType="string" name="Audible Hit Repeat Phrase" format="child_tag" optional="true" y="5" group="phrases"/>
-        <parameter id="hitOverallPhraseAudible" dataType="string" name="Audible Overall Hit Phrase" format="child_tag" optional="true" y="6" group="phrases"/>
-        <parameter id="hitOverallPhraseRepeatAudible" dataType="string" name="Audible Overall Hit Repeat Phrase" format="child_tag" optional="true" y="7" group="phrases"/>
-        <parameter id="missPhrase" dataType="string" name="Miss Phrase" format="child_tag" optional="true" x="1" y="0" group="phrases"/>
-        <parameter id="missPhraseRepeat" dataType="string" name="Miss Repeat Phrase" format="child_tag" optional="true" x="1" y="1" group="phrases"/>
-        <parameter id="missOverallPhrase" dataType="string" name="Overall Miss Phrase" format="child_tag" optional="true" x="1" y="2" group="phrases"/>
-        <parameter id="missOverallPhraseRepeat" dataType="string" name="Overall Miss Repeat Phrase" format="child_tag" optional="true" x="1" y="3" group="phrases"/>
-        <parameter id="missPhraseAudible" dataType="string" name="Audible Miss Phrase" format="child_tag" optional="true" x="1" y="4" group="phrases"/>
-        <parameter id="missPhraseRepeatAudible" dataType="string" name="Audible Miss Repeat Phrase" format="child_tag" optional="true" x="1" y="5" group="phrases"/>
-        <parameter id="missOverallPhraseAudible" dataType="string" name="Audible Overall Miss Phrase" format="child_tag" optional="true" x="1" y="6" group="phrases"/>
-        <parameter id="missOverallPhraseRepeatAudible" dataType="string" name="Audible Overall Miss Repeat Phrase" format="child_tag" optional="true" x="1" y="7" group="phrases"/>
+        <parameter id="attackPhrase" dataType="string" name="Per-Target Phrase" format="child_tag" optional="true" y="0" group="phrases"/>
+        <parameter id="attackOverallPhrase" dataType="string" name="Overall Phrase" format="child_tag" optional="true" y="1" group="phrases"/>
+        <parameter id="attackPhraseAudible" dataType="string" name="Audible Per-Target Phrase" format="child_tag" optional="true" y="2" group="phrases"/>
+        <parameter id="attackOverallPhraseAudible" dataType="string" name="Audible Overall Phrase" format="child_tag" optional="true" y="3" group="phrases"/>
         <parameter id="hitChanceType" dataType="enum" type="hitChanceType" name="Hit Chance Type" format="attribute" default="independent" x="0" y="0" group="hitChance"/>
         <parameter id="hitChanceMult" dataType="float" name="Hit Chance Mult" format="attribute" optional="true" x="1" y="0" group="hitChance"/>
         <parameter id="hitChanceMin" dataType="float" name="Hit Chance Min" format="attribute" optional="true" x="0" y="1" group="hitChance"/>
