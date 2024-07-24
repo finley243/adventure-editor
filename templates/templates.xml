@@ -278,8 +278,6 @@
         <parameter id="weaponConsumeType" dataType="enum" type="attackTypeWeaponConsumeType" name="Weapon Consume Type" format="attribute" x="4" y="1" default="none"/>
         <parameter id="rate" dataType="integer" name="Override Rate" format="attribute" optional="true" x="3" y="1"/>
         <parameter id="isLoudOverride" dataType="boolean" name="Override Is Loud" format="attribute" optional="true" x="2" y="1"/>
-        <parameter id="skill" dataType="reference" type="skill" name="Override Attack Skill" format="attribute" optional="true" x="5" y="2"/>
-        <parameter id="dodgeSkill" dataType="reference" type="skill" name="Dodge Skill" format="attribute" optional="true" x="5" y="3"/>
         <parameter id="nonIdealRange" dataType="boolean" name="Use Non-Ideal Ranges" format="attribute" default="false" x="5" y="0"/>
         <parameter id="range" dataType="objectSetUnique" type="weaponClassRange" name="Ranges" x="4" y="2" height="2"/>
         <parameter id="overrideEffects" dataType="boolean" name="Override Target Effects" default="false" x="5" y="1"/>
@@ -288,10 +286,9 @@
         <parameter id="attackOverallPhrase" dataType="string" name="Overall Phrase" format="child_tag" optional="true" y="1" group="phrases"/>
         <parameter id="attackPhraseAudible" dataType="string" name="Audible Per-Target Phrase" format="child_tag" optional="true" y="2" group="phrases"/>
         <parameter id="attackOverallPhraseAudible" dataType="string" name="Audible Overall Phrase" format="child_tag" optional="true" y="3" group="phrases"/>
-        <parameter id="hitChanceType" dataType="enum" type="hitChanceType" name="Hit Chance Type" format="attribute" default="independent" x="0" y="0" group="hitChance"/>
+        <parameter id="hitChance" dataType="string" name="Hit Chance" format="child_tag" optional="true" group="hitChance" x="0" y="0"/>
+        <parameter id="hitChanceOverall" dataType="string" name="Hit Chance Overall" format="child_tag" optional="true" x="0" y="1" group="hitChance"/>
         <parameter id="hitChanceMult" dataType="float" name="Hit Chance Mult" format="attribute" optional="true" x="1" y="0" group="hitChance"/>
-        <parameter id="hitChanceMin" dataType="float" name="Hit Chance Min" format="attribute" optional="true" x="0" y="1" group="hitChance"/>
-        <parameter id="hitChanceMax" dataType="float" name="Hit Chance Max" format="attribute" optional="true" x="1" y="1" group="hitChance"/>
         <parameter id="damageMult" dataType="float" name="Damage Mult" format="attribute" optional="true" x="0" y="0" group="damage"/>
         <parameter id="damage" dataType="string" name="Override Damage" format="child_tag" optional="true" x="1" y="0" group="damage"/>
         <parameter id="damageType" dataType="reference" type="damageType" name="Override Damage Type" format="attribute" optional="true" x="0" y="1" group="damage"/>

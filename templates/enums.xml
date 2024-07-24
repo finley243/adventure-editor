@@ -67,10 +67,6 @@
         <value>destroy</value>
         <value>place</value>
     </enumType>
-    <enumType id="hitChanceType">
-        <value>independent</value>
-        <value>joint</value>
-    </enumType>
     <enumType id="objectComponentTypes">
         <value>inventory</value>
         <value>network</value>
