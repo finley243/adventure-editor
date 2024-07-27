@@ -267,21 +267,21 @@
         <parameter id="value" dataType="integer" name="Value" format="attribute" y="1"/>
     </template>
     <template id="attackType" name="Attack Type" topLevel="true" primaryParameter="id">
-        <group id="phrases" name="Phrases" x="0" y="1" width="1" height="4"/>
-        <group id="hitChance" name="Hit Chance" x="2" y="2" width="2" height="2"/>
-        <group id="damage" name="Damage" x="2" y="4" width="2" height="2"/>
+        <group id="phrases" name="Phrases" x="0" y="2" width="1" height="3"/>
+        <group id="hitChance" name="Hit Chance" x="1" y="2" width="2" height="1"/>
+        <group id="damage" name="Damage" x="1" y="3" width="2" height="1"/>
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
-        <parameter id="prompt" dataType="string" name="Prompt" format="child_tag" x="1" y="0"/>
-        <parameter id="category" dataType="enum" type="attackTypeCategory" name="Category" format="attribute" x="2" y="0" default="single"/>
-        <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute" x="3" y="0" default="1"/>
-        <parameter id="ammoConsumed" dataType="integer" name="Ammo Consumed" format="attribute" x="4" y="0" default="1"/>
-        <parameter id="weaponConsumeType" dataType="enum" type="attackTypeWeaponConsumeType" name="Weapon Consume Type" format="attribute" x="4" y="1" default="none"/>
-        <parameter id="rate" dataType="integer" name="Override Rate" format="attribute" optional="true" x="3" y="1"/>
-        <parameter id="isLoudOverride" dataType="boolean" name="Override Is Loud" format="attribute" optional="true" x="2" y="1"/>
-        <parameter id="nonIdealRange" dataType="boolean" name="Use Non-Ideal Ranges" format="attribute" default="false" x="5" y="0"/>
+        <parameter id="prompt" dataType="string" name="Prompt" format="child_tag" x="0" y="1"/>
+        <parameter id="category" dataType="enum" type="attackTypeCategory" name="Category" format="attribute" x="1" y="0" default="single"/>
+        <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute" x="2" y="0" default="1"/>
+        <parameter id="ammoConsumed" dataType="integer" name="Ammo Consumed" format="attribute" x="3" y="0" default="1"/>
+        <parameter id="weaponConsumeType" dataType="enum" type="attackTypeWeaponConsumeType" name="Weapon Consume Type" format="attribute" x="4" y="0" default="none"/>
+        <parameter id="rate" dataType="integer" name="Override Rate" format="attribute" optional="true" x="2" y="1"/>
+        <parameter id="isLoudOverride" dataType="boolean" name="Override Is Loud" format="attribute" optional="true" x="1" y="1"/>
+        <parameter id="nonIdealRange" dataType="boolean" name="Use Non-Ideal Ranges" format="attribute" default="false" x="4" y="1"/>
         <parameter id="range" dataType="objectSetUnique" type="weaponClassRange" name="Ranges" x="4" y="2" height="2"/>
-        <parameter id="overrideEffects" dataType="boolean" name="Override Target Effects" default="false" x="5" y="1"/>
-        <parameter id="targetEffect" dataType="objectSet" type="effectReference" name="Target Effects" x="4" y="4" height="2"/>
+        <parameter id="overrideEffects" dataType="boolean" name="Override Target Effects" default="false" x="3" y="1"/>
+        <parameter id="targetEffect" dataType="objectSet" type="effectReference" name="Target Effects" x="3" y="2" height="2"/>
         <parameter id="attackPhrase" dataType="string" name="Per-Target Phrase" format="child_tag" optional="true" y="0" group="phrases"/>
         <parameter id="attackOverallPhrase" dataType="string" name="Overall Phrase" format="child_tag" optional="true" y="1" group="phrases"/>
         <parameter id="attackPhraseAudible" dataType="string" name="Audible Per-Target Phrase" format="child_tag" optional="true" y="2" group="phrases"/>
@@ -365,13 +365,17 @@
         <parameter id="effect" dataType="objectSet" type="effect" name="Child Effects"/>
     </template>
     <template id="item" name="Item" topLevel="true" primaryParameter="id">
+        <tabGroup id="tabs" x="2" y="0" height="5"/>
+        <group id="components" name="Components" tabGroup="tabs"/>
+        <group id="actions" name="Actions" tabGroup="tabs"/>
+        <group id="scripts" name="Scripts" tabGroup="tabs"/>
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
-        <parameter id="price" dataType="integer" name="Price" format="attribute" y="1" default="0"/>
-        <parameter id="name" dataType="object" type="itemName" name="Name" y="2"/>
-        <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="3"/>
-        <parameter id="component" dataType="objectSetUnique" type="itemComponent" name="Components" y="4"/>
-        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" y="5"/>
-        <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerItem" name="Script Triggers" y="6"/>
+        <parameter id="name" dataType="object" type="itemName" name="Name" y="1" height="2"/>
+        <parameter id="price" dataType="integer" name="Price" format="attribute" y="3" default="0"/>
+        <parameter id="description" dataType="object" type="description" name="Description" optional="true" x="1" y="0" height="5"/>
+        <parameter id="component" dataType="objectSetUnique" type="itemComponent" name="Components" group="components"/>
+        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" group="actions"/>
+        <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerItem" name="Script Triggers" group="scripts"/>
     </template>
     <template id="itemName" name="Name" topLevel="false" primaryParameter="name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
