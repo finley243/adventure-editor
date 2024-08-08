@@ -61,7 +61,8 @@
         <parameter id="behaviors" dataType="object" type="actorBehaviorSet" name="Behaviors" y="4"/>
     </template>
     <template id="actorBehaviorSet" name="Behaviors" topLevel="false">
-        <parameter id="behavior" dataType="objectSet" type="actorBehavior" name="Behaviors"/>
+        <!--<parameter id="behavior" dataType="objectSet" type="actorBehavior" name="Behaviors"/>-->
+        <parameter id="behavior" dataType="tree" type="actorBehavior" name="Behaviors"/>
     </template>
     <template id="actorBehavior" name="Behavior" topLevel="false" primaryParameter="behaviorType">
         <tabGroup id="scriptTabs" name="Scripts" x="0" y="1"/>
