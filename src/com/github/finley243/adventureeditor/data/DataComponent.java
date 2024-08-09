@@ -22,6 +22,10 @@ public class DataComponent extends Data {
         return objectData;
     }
 
+    public String getNameOverride() {
+        return nameOverride;
+    }
+
     @Override
     public Data createCopy() {
         return new DataComponent(type, objectData.createCopy(), nameOverride);
@@ -43,6 +47,11 @@ public class DataComponent extends Data {
             return nameOverride;
         }
         return objectData.toString();
+    }
+
+    @Override
+    public String getDebugString() {
+        return "Component: " + type + " (" + objectData.getDebugString() + ")";
     }
 
 }

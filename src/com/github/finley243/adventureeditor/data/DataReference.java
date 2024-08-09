@@ -34,4 +34,9 @@ public class DataReference extends Data {
         return data instanceof DataReference dataReference && Objects.equals(dataReference.value, value);
     }
 
+    @Override
+    public String getDebugString() {
+        return "Reference(" + value + ")";
+    }
+
 }

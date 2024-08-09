@@ -32,4 +32,9 @@ public class DataInteger extends Data {
         return data instanceof DataInteger dataInteger && dataInteger.value == value;
     }
 
+    @Override
+    public String getDebugString() {
+        return Integer.toString(value);
+    }
+
 }

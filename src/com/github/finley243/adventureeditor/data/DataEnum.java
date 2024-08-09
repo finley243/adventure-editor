@@ -34,4 +34,9 @@ public class DataEnum extends Data {
         return data instanceof DataEnum dataEnum && Objects.equals(dataEnum.value, value);
     }
 
+    @Override
+    public String getDebugString() {
+        return "Enum(" + value + ")";
+    }
+
 }

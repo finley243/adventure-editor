@@ -32,4 +32,9 @@ public class DataBoolean extends Data {
         return data instanceof DataBoolean dataBoolean && dataBoolean.value == value;
     }
 
+    @Override
+    public String getDebugString() {
+        return Boolean.toString(value);
+    }
+
 }

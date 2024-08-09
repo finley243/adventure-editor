@@ -6,4 +6,6 @@ public abstract class Data {
 
     public abstract boolean isDuplicateValue(Data data);
 
+    public abstract String getDebugString();
+
 }

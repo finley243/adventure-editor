@@ -34,4 +34,9 @@ public class DataString extends Data {
         return data instanceof DataString dataString && Objects.equals(dataString.value, value);
     }
 
+    @Override
+    public String getDebugString() {
+        return "String(" + value + ")";
+    }
+
 }

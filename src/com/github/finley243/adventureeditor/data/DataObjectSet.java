@@ -59,4 +59,20 @@ public class DataObjectSet extends Data {
         return true;
     }
 
+    @Override
+    public String getDebugString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Object Set: [");
+        boolean isFirst = true;
+        for (Data data : value) {
+            if (!isFirst) {
+                sb.append(", ");
+            }
+            isFirst = false;
+            sb.append(data.getDebugString());
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
 }

@@ -32,4 +32,9 @@ public class DataFloat extends Data {
         return data instanceof DataFloat dataFloat && dataFloat.value == value;
     }
 
+    @Override
+    public String getDebugString() {
+        return Float.toString(value);
+    }
+
 }

@@ -3,6 +3,7 @@ package com.github.finley243.adventureeditor.ui.parameter;
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
+import com.github.finley243.adventureeditor.data.DataTreeBranch;
 import com.github.finley243.adventureeditor.template.Group;
 import com.github.finley243.adventureeditor.template.TabGroup;
 import com.github.finley243.adventureeditor.template.Template;
@@ -14,6 +15,7 @@ import com.github.finley243.adventureeditor.ui.OptionalBorderedPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -146,6 +148,13 @@ public class ParameterFieldObject extends ParameterField {
             Data parameterData = entry.getValue().getData();
             objectParameters.put(entry.getKey(), parameterData);
         }
+        for (TemplateParameter parameter : template.parameters()) {
+            if (parameter.dataType() == TemplateParameter.ParameterDataType.TREE_BRANCH) {
+                objectParameters.put(parameter.id(), new DataTreeBranch(new ArrayList<>()));
+            } else if (!objectParameters.containsKey(parameter.id()) && parameter.defaultValue() != null) {
+                objectParameters.put(parameter.id(), parameter.defaultValue().createCopy());
+            }
+        }
         return new DataObject(template, objectParameters);
     }
 
@@ -156,6 +165,11 @@ public class ParameterFieldObject extends ParameterField {
             for (Map.Entry<String, Data> entry : dataObject.getValue().entrySet()) {
                 if (editorElements.containsKey(entry.getKey())) {
                     editorElements.get(entry.getKey()).setData(entry.getValue());
+                }
+            }
+            for (TemplateParameter parameter : template.parameters()) {
+                if (!dataObject.getValue().containsKey(parameter.id())) {
+                    editorElements.get(parameter.id()).setData(parameter.defaultValue());
                 }
             }
         }

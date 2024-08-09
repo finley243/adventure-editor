@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class DataTree extends Data {
-    
+
     private final List<Data> topNodes;
 
     public DataTree(List<Data> topNodes) {
@@ -57,6 +57,22 @@ public class DataTree extends Data {
             }
         }
         return true;
+    }
+
+    @Override
+    public String getDebugString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Tree: [");
+        boolean isFirst = true;
+        for (Data data : topNodes) {
+            if (!isFirst) {
+                sb.append(", ");
+            }
+            isFirst = false;
+            sb.append(data.getDebugString());
+        }
+        sb.append("]");
+        return sb.toString();
     }
 
 }

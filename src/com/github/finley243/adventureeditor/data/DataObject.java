@@ -70,12 +70,15 @@ public class DataObject extends Data {
         combinedKeys.addAll(dataObject.value.keySet());
         for (String parameterKey : combinedKeys) {
             if (!value.containsKey(parameterKey) && dataObject.value.get(parameterKey) != null) {
+                //System.out.println("Non-matching object parameter data (parameter only present in original data): " + parameterKey + " (in object: " + template.id() + ")");
                 return false;
             }
             if (!dataObject.value.containsKey(parameterKey) && value.get(parameterKey) != null) {
+                //System.out.println("Non-matching object parameter data (parameter only present in current data): " + parameterKey + " (in object: " + template.id() + ")");
                 return false;
             }
             if (!Objects.equals(value.get(parameterKey), dataObject.value.get(parameterKey))) {
+                //System.out.println("Non-matching object parameter data (parameters are present but have different values): " + parameterKey + " (in object: " + template.id() + ")");
                 return false;
             }
         }
@@ -97,6 +100,26 @@ public class DataObject extends Data {
         Data primaryParameterData = value.get(primaryParameter);
         Data comparisonPrimaryParameterData = dataObject.value.get(primaryParameter);
         return primaryParameterData.isDuplicateValue(comparisonPrimaryParameterData);
+    }
+
+    @Override
+    public String getDebugString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Object: ");
+        sb.append(template.id());
+        sb.append(" {");
+        boolean isFirst = true;
+        for (Map.Entry<String, Data> entry : value.entrySet()) {
+            if (!isFirst) {
+                sb.append(", ");
+            }
+            isFirst = false;
+            sb.append(entry.getKey());
+            sb.append(": ");
+            sb.append(entry.getValue() == null ? null : entry.getValue().getDebugString());
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
 }

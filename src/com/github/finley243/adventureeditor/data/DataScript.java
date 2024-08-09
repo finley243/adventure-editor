@@ -34,4 +34,9 @@ public class DataScript extends Data {
         return data instanceof DataScript dataString && Objects.equals(dataString.value, value);
     }
 
+    @Override
+    public String getDebugString() {
+        return "Script(" + value + ")";
+    }
+
 }

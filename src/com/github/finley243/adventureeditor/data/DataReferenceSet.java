@@ -43,4 +43,20 @@ public class DataReferenceSet extends Data {
         return Objects.equals(valueSet, otherValueSet);
     }
 
+    @Override
+    public String getDebugString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Reference Set: [");
+        boolean isFirst = true;
+        for (String reference : value) {
+            if (!isFirst) {
+                sb.append(", ");
+            }
+            isFirst = false;
+            sb.append(reference);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
 }

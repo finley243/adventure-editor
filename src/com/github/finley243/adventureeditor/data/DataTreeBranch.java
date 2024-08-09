@@ -16,6 +16,11 @@ public class DataTreeBranch extends Data {
         return topNodes;
     }
 
+    public void setValue(List<Data> nodeData) {
+        topNodes.clear();
+        topNodes.addAll(nodeData);
+    }
+
     @Override
     public Data createCopy() {
         List<Data> copyList = new ArrayList<>();
@@ -57,6 +62,22 @@ public class DataTreeBranch extends Data {
             }
         }
         return true;
+    }
+
+    @Override
+    public String getDebugString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Tree Branch: [");
+        boolean isFirst = true;
+        for (Data data : topNodes) {
+            if (!isFirst) {
+                sb.append(", ");
+            }
+            isFirst = false;
+            sb.append(data.getDebugString());
+        }
+        sb.append("]");
+        return sb.toString();
     }
 
 }

@@ -27,7 +27,7 @@ public class ObjectTree extends JTree {
     private final Main main;
 
     public ObjectTree(Main main, ParameterFieldTree parameterFieldTree) {
-        this.treeRoot = new ObjectTreeNode("Root", null);
+        this.treeRoot = new ObjectTreeNode("Root", null, null);
         this.main = main;
         this.treeModel = new DefaultTreeModel(treeRoot, false);
         this.setModel(treeModel);
@@ -39,7 +39,7 @@ public class ObjectTree extends JTree {
             }
         });
         /*this.addMouseListener(new MouseAdapter() {
-            private DefaultMutableTreeNode lastClickedNode;
+            private ObjectTreeNode lastClickedNode;
 
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -52,18 +52,18 @@ public class ObjectTree extends JTree {
             public void mousePressed(MouseEvent e) {
                 TreePath path = ObjectTree.this.getPathForLocation(e.getX(), e.getY());
                 if (path != null) {
-                    lastClickedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+                    lastClickedNode = (ObjectTreeNode) path.getLastPathComponent();
                 }
             }
 
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1 && lastClickedNode != null) {
-                    onDoubleClick(lastClickedNode);
+                    parameterFieldTree.setSelectedNode(lastClickedNode);
                 }
             }
-        });
-        Action newAction = new AbstractAction() {
+        });*/
+        /*Action newAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 TreePath path = getSelectionPath();
