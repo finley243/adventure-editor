@@ -6,6 +6,7 @@ import com.github.finley243.adventureeditor.ui.browser.node.BrowserCategoryNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserObjectNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserRootNode;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldTree;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -14,7 +15,9 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ObjectTree extends JTree {
@@ -23,12 +26,18 @@ public class ObjectTree extends JTree {
     private final DefaultTreeModel treeModel;
     private final Main main;
 
-    public ObjectTree(Main main) {
+    public ObjectTree(Main main, ParameterFieldTree parameterFieldTree) {
         this.treeRoot = new ObjectTreeNode("Root", null);
         this.main = main;
         this.treeModel = new DefaultTreeModel(treeRoot, false);
         this.setModel(treeModel);
         this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        this.addTreeSelectionListener(e -> {
+            ObjectTreeNode node = (ObjectTreeNode) this.getLastSelectedPathComponent();
+            if (node != null) {
+                parameterFieldTree.setSelectedNode(node);
+            }
+        });
         /*this.addMouseListener(new MouseAdapter() {
             private DefaultMutableTreeNode lastClickedNode;
 
@@ -130,6 +139,10 @@ public class ObjectTree extends JTree {
         super.collapsePath(path);
     }
 
+    public List<ObjectTreeNode> getTopNodes() {
+        return treeRoot.getObjectTreeChildren();
+    }
+
     public void addNode(ObjectTreeNode parentNode, ObjectTreeNode node) {
         if (parentNode == null) {
             treeRoot.add(node);
@@ -152,21 +165,21 @@ public class ObjectTree extends JTree {
     }
 
     private void onDoubleClick(DefaultMutableTreeNode node) {
-        if (node instanceof BrowserObjectNode objectNode) {
+        /*if (node instanceof BrowserObjectNode objectNode) {
             main.getDataManager().editObject(objectNode.getCategoryID(), objectNode.getObjectID());
-        }
+        }*/
     }
 
     private void onRightClick(Point mousePos) {
         TreePath path = this.getPathForLocation(mousePos.x, mousePos.y);
-        if (path != null) {
+        /*if (path != null) {
             BrowserNode node = (BrowserNode) path.getLastPathComponent();
             this.setSelectionPath(path);
             JPopupMenu contextMenu = node.getContextMenu();
             if (contextMenu != null) {
                 contextMenu.show(this, mousePos.x, mousePos.y);
             }
-        }
+        }*/
     }
 
 }

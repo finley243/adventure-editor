@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class DataTree extends Data {
-    
+public class DataTreeBranch extends Data {
+
     private final List<Data> topNodes;
 
-    public DataTree(List<Data> topNodes) {
+    public DataTreeBranch(List<Data> topNodes) {
         this.topNodes = topNodes;
     }
 
@@ -22,7 +22,7 @@ public class DataTree extends Data {
         for (Data data : topNodes) {
             copyList.add(data.createCopy());
         }
-        return new DataTree(copyList);
+        return new DataTreeBranch(copyList);
     }
 
     @Override
@@ -32,12 +32,12 @@ public class DataTree extends Data {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof DataTree dataTree && Objects.equals(topNodes, dataTree.topNodes);
+        return o instanceof DataTreeBranch dataTree && Objects.equals(topNodes, dataTree.topNodes);
     }
 
     @Override
     public boolean isDuplicateValue(Data data) {
-        if (!(data instanceof DataTree dataTree)) {
+        if (!(data instanceof DataTreeBranch dataTree)) {
             return false;
         }
         if (topNodes.isEmpty()) {

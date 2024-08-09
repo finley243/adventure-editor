@@ -22,7 +22,7 @@ import java.util.List;
 public record TemplateParameter(String id, ParameterDataType dataType, String name, String type, boolean topLevelOnly, boolean optional, ParameterFormat format, ComponentFormat componentFormat, List<ComponentOption> componentOptions, boolean useComponentTypeName, String group, int x, int y, int width, int height, Data defaultValue) {
 
     public enum ParameterDataType {
-        BOOLEAN, INTEGER, FLOAT, STRING, STRING_LONG, OBJECT, OBJECT_SET, OBJECT_SET_UNIQUE, REFERENCE, REFERENCE_SET, ENUM, SCRIPT, COMPONENT, TREE
+        BOOLEAN, INTEGER, FLOAT, STRING, STRING_LONG, OBJECT, OBJECT_SET, OBJECT_SET_UNIQUE, REFERENCE, REFERENCE_SET, ENUM, SCRIPT, COMPONENT, TREE, TREE_BRANCH
     }
 
     public enum ParameterFormat {

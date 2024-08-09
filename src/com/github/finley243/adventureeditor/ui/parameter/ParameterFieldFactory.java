@@ -21,8 +21,12 @@ public class ParameterFieldFactory {
             case ENUM -> new ParameterFieldEnum(editorFrame, parameter.optional(), parameter.name(), main.getEnumValues(parameter.type()).toArray(new String[0]));
             case SCRIPT -> new ParameterFieldScript(editorFrame, parameter.optional(), parameter.name());
             case COMPONENT -> new ParameterFieldComponent(editorFrame, parameter.optional(), parameter.name(), parameter.componentFormat(), parameter.componentOptions(), parameter.useComponentTypeName(), main);
-            case TREE -> new ParameterFieldTree(editorFrame, parameter.optional(), parameter.name(), main.getTemplate(parameter.type()), main);
+            case TREE -> new ParameterFieldTree(editorFrame, parameter.optional(), parameter.name(), main.getTemplate(parameter.type()), parameter.id(), main);
+            case TREE_BRANCH -> null;
         };
+        if (parameterElement == null) {
+            return null;
+        }
         if (parameter.defaultValue() != null && !parameter.optional()) {
             parameterElement.setData(parameter.defaultValue());
         }

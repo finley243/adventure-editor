@@ -95,6 +95,7 @@ public class DataLoader {
                                 case "script" -> TemplateParameter.ParameterDataType.SCRIPT;
                                 case "component" -> TemplateParameter.ParameterDataType.COMPONENT;
                                 case "tree" -> TemplateParameter.ParameterDataType.TREE;
+                                case "treeBranch" -> TemplateParameter.ParameterDataType.TREE_BRANCH;
                                 case null, default -> throw new IllegalArgumentException("Invalid parameter data type in template " + id + ": " + dataTypeString);
                             };
                             String parameterID = LoadUtils.attribute(parameterElement, "id", null);
@@ -134,7 +135,7 @@ public class DataLoader {
                                     case ENUM -> new DataEnum(defaultValueString);
                                     case SCRIPT -> new DataScript(defaultValueString);
                                     case COMPONENT -> new DataComponent(defaultValueString, null, null);
-                                    case OBJECT, OBJECT_SET_UNIQUE, OBJECT_SET, REFERENCE_SET, TREE -> null;
+                                    case OBJECT, OBJECT_SET_UNIQUE, OBJECT_SET, REFERENCE_SET, TREE, TREE_BRANCH -> null;
                                 };
                             }
                             parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height, defaultValue));
@@ -512,6 +513,15 @@ public class DataLoader {
                     }
                     objectDataMap.put(parameter.id(), new DataTree(topNodes));
                 }
+                case TREE_BRANCH -> {
+                    List<Data> topNodes = new ArrayList<>();
+                    Template objectTemplate = templates.get(parameter.type());
+                    for (Element objectElement : LoadUtils.directChildrenWithName(element, parameter.id())) {
+                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templates, false, globalDataMap);
+                        topNodes.add(objectData);
+                    }
+                    objectDataMap.put(parameter.id(), new DataTreeBranch(topNodes));
+                }
             }
         }
         return new DataObject(template, objectDataMap);
@@ -669,6 +679,14 @@ public class DataLoader {
                 }
                 case TREE -> {
                     List<Data> values = ((DataTree) parameterData).getValue();
+                    for (Data value : values) {
+                        Element childElement = document.createElement(parameter.id());
+                        addObjectToElement((DataObject) value, childElement, document, globalDataMap);
+                        objectElement.appendChild(childElement);
+                    }
+                }
+                case TREE_BRANCH -> {
+                    List<Data> values = ((DataTreeBranch) parameterData).getValue();
                     for (Data value : values) {
                         Element childElement = document.createElement(parameter.id());
                         addObjectToElement((DataObject) value, childElement, document, globalDataMap);

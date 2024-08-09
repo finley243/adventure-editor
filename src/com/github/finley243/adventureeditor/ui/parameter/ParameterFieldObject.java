@@ -75,6 +75,9 @@ public class ParameterFieldObject extends ParameterField {
         for (TemplateParameter parameter : template.parameters()) {
             if (isTopLevelEditor || !parameter.topLevelOnly()) {
                 ParameterField parameterElement = ParameterFieldFactory.create(parameter, main, editorFrame);
+                if (parameterElement == null) {
+                    continue;
+                }
                 GridBagConstraints parameterConstraints = new GridBagConstraints();
                 parameterConstraints.gridx = parameter.x();
                 parameterConstraints.gridy = parameter.y();

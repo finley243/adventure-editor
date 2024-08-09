@@ -112,7 +112,8 @@
     </template>
     <template id="behaviorProcedure" name="Procedure" topLevel="false">
         <parameter id="isCycle" dataType="boolean" name="Is Cycle" format="attribute" default="false" y="0"/>
-        <parameter id="behavior" dataType="objectSet" type="actorBehavior" name="Behaviors" y="1"/>
+        <!--<parameter id="behavior" dataType="objectSet" type="actorBehavior" name="Behaviors" y="1"/>-->
+        <parameter id="behavior" dataType="treeBranch" type="actorBehavior" name="Behaviors"/>
     </template>
     <template id="localVar" name="Local Variable" topLevel="false" primaryParameter="name">
         <parameter id="name" dataType="string" name="Name" format="attribute" y="0"/>
