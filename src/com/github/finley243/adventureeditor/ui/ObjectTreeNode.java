@@ -50,6 +50,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         //System.out.println("New Data: " + newData.getDebugString());
         this.data = newData;
         this.childBranchPoint = findNextTreeBranch(data);
+        // TODO - Update name whenever value is updated, not only on changing node selection
         setUserObject(data.toString());
     }
 

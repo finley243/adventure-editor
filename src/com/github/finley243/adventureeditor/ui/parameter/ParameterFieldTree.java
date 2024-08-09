@@ -19,10 +19,14 @@ public class ParameterFieldTree extends ParameterField {
 
     private final Main main;
     private final Template template;
+    private final EditorFrame editorFrame;
     private final String treeID;
     private final ObjectTree treePanel;
+    private final CardLayout cardLayout;
+    private final Map<String, ParameterFieldObject> objectFields;
+    private final Map<String, ObjectTreeNode> nodes;
     private final JPanel objectPanel;
-    private final ParameterFieldObject objectField;
+    //private final ParameterFieldObject objectField;
     private ObjectTreeNode currentUnsavedNode;
 
     public ParameterFieldTree(EditorFrame editorFrame, boolean optional, String name, Template template, String treeID, Main main) {
@@ -30,12 +34,17 @@ public class ParameterFieldTree extends ParameterField {
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.main = main;
         this.template = template;
+        this.editorFrame = editorFrame;
         this.treeID = treeID;
+        this.objectFields = new HashMap<>();
+        this.nodes = new HashMap<>();
         this.objectPanel = new JPanel();
+        this.cardLayout = new CardLayout();
+        objectPanel.setLayout(cardLayout);
         objectPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         this.treePanel = new ObjectTree(main, this);
-        this.objectField = new ParameterFieldObject(editorFrame, false, name, template, main, false, false);
-        objectPanel.add(objectField);
+        //this.objectField = new ParameterFieldObject(editorFrame, false, name, template, main, false, false);
+        //objectPanel.add(objectField);
         getInnerPanel().setLayout(new GridBagLayout());
         GridBagConstraints optionalConstraints = new GridBagConstraints();
         optionalConstraints.gridx = 0;
@@ -64,7 +73,7 @@ public class ParameterFieldTree extends ParameterField {
     }
 
     public void setSelectedNode(ObjectTreeNode node) {
-        saveCurrentNode();
+        /*saveCurrentNode();
         if (node == null || node.getData() == null) {
             objectField.setData(null);
             objectField.setEnabledState(false);
@@ -73,13 +82,16 @@ public class ParameterFieldTree extends ParameterField {
             objectField.setEnabledState(true);
             objectField.setData(node.getData());
             currentUnsavedNode = node;
-        }
+        }*/
+        cardLayout.show(objectPanel, node == null ? null : node.getUniqueID());
     }
 
     @Override
     public void setEnabledState(boolean enabled) {
         treePanel.setEnabled(enabled);
-        objectField.setEnabledFromParent(enabled);
+        for (ParameterFieldObject objectField : objectFields.values()) {
+            objectField.setEnabledState(enabled);
+        }
         //dropdownMenu.setEnabled(enabled);
     }
 
@@ -101,7 +113,8 @@ public class ParameterFieldTree extends ParameterField {
 
     @Override
     public Data getData() {
-        saveCurrentNode();
+        //saveCurrentNode();
+        updateNodeDataFromFields();
         if (!isOptionalEnabled()) {
             return null;
         }
@@ -111,6 +124,15 @@ public class ParameterFieldTree extends ParameterField {
             topNodes.add(data);
         }
         return new DataTree(topNodes);
+    }
+
+    private void updateNodeDataFromFields() {
+        for (Map.Entry<String, ParameterFieldObject> entry : objectFields.entrySet()) {
+            ObjectTreeNode node = nodes.get(entry.getKey());
+            if (node != null) {
+                node.setData(entry.getValue().getData());
+            }
+        }
     }
 
     /*private Data getDataForNode(ObjectTreeNode node) {
@@ -201,6 +223,7 @@ public class ParameterFieldTree extends ParameterField {
     public void setData(Data data) {
         setOptionalEnabled(data != null);
         treePanel.clearNodes();
+        clearCards();
         if (data instanceof DataTree dataTree) {
             for (Data topNodeData : dataTree.getValue()) {
                 setDataForNode(topNodeData, null);
@@ -222,12 +245,30 @@ public class ParameterFieldTree extends ParameterField {
         BranchDataContainer nextBranch = findNextTreeBranch(dataObject);
         ObjectTreeNode currentNode = new ObjectTreeNode(nextBranch.dataUpToBranch().toString(), nextBranch.dataUpToBranch(), nextBranch.branchPoint());
         treePanel.addNode(parentNode, currentNode);
+        addCardForNode(currentNode);
         if (nextBranch.branchPoint() != null) {
             DataTreeBranch treeBranchData = nextBranch.branchPoint();
             for (Data childNodeData : treeBranchData.getValue()) {
                 setDataForNode(childNodeData, currentNode);
             }
         }
+    }
+
+    private void clearCards() {
+        objectPanel.removeAll();
+        objectPanel.revalidate();
+        objectPanel.repaint();
+        objectFields.clear();
+        nodes.clear();
+    }
+
+    private void addCardForNode(ObjectTreeNode node) {
+        ParameterFieldObject objectField = new ParameterFieldObject(editorFrame, false, null, template, main, false, false);
+        objectField.setData(node.getData());
+        objectPanel.add(objectField, node.getUniqueID());
+        objectFields.put(node.getUniqueID(), objectField);
+        nodes.put(node.getUniqueID(), node);
+        cardLayout.show(objectPanel, node.getUniqueID());
     }
 
     /*private void setDataForNode(Data data, ObjectTreeNode parentNode) {
@@ -278,12 +319,12 @@ public class ParameterFieldTree extends ParameterField {
         }
     }
 
-    private void saveCurrentNode() {
+    /*private void saveCurrentNode() {
         if (currentUnsavedNode != null) {
             currentUnsavedNode.setData(objectField.getData());
             currentUnsavedNode = null;
         }
-    }
+    }*/
 
     private record BranchDataContainer(DataTreeBranch branchPoint, Data dataUpToBranch) {}
 
