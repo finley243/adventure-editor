@@ -160,9 +160,8 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
         String objectID = ((DataObject) data).getID();
         if (initialData != null) {
             String initialID = ((DataObject) initialData).getID();
-            if (!initialID.equals(objectID)) {
-                addIndex = ((DefaultListModel<String>) referenceList.getModel()).indexOf(initialID);
-                ((DefaultListModel<String>) referenceList.getModel()).remove(addIndex);}
+            addIndex = ((DefaultListModel<String>) referenceList.getModel()).indexOf(initialID);
+            ((DefaultListModel<String>) referenceList.getModel()).remove(addIndex);
         }
         ((DefaultListModel<String>) referenceList.getModel()).add(addIndex, objectID);
         parentFrame.onEditorElementUpdated();
