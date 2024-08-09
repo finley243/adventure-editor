@@ -4,24 +4,26 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataComponent;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataTreeBranch;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldTree;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ObjectTreeNode extends DefaultMutableTreeNode {
 
     private Data data;
     // A reference to the DataTreeBranch in the provided Data, to which data from this node's children will be appended
     private DataTreeBranch childBranchPoint;
+    private final String uniqueID;
 
     public ObjectTreeNode(String name, Data data, DataTreeBranch childBranchPoint) {
         super(name);
         this.data = data;
         this.childBranchPoint = childBranchPoint;
+        this.uniqueID = UUID.randomUUID().toString();
+    }
+
+    public String getUniqueID() {
+        return uniqueID;
     }
 
     public Data getData() {
