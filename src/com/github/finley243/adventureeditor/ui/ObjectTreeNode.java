@@ -39,15 +39,13 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         }
         Data dataCopy = data.createCopy();
         DataTreeBranch branchPointCopy = findNextTreeBranch(dataCopy);
-        branchPointCopy.setValue(childData);
-        //childBranchPoint.setValue(childData);
+        if (branchPointCopy != null) {
+            branchPointCopy.setValue(childData);
+        }
         return dataCopy;
     }
 
     public void setData(Data newData) {
-        //System.out.println("ObjectTreeNode setData()");
-        //System.out.println("Old Data: " + data.getDebugString());
-        //System.out.println("New Data: " + newData.getDebugString());
         this.data = newData;
         this.childBranchPoint = findNextTreeBranch(data);
         // TODO - Update name whenever value is updated, not only on changing node selection
@@ -58,6 +56,11 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         List<ObjectTreeNode> children = new ArrayList<>();
         this.children().asIterator().forEachRemaining(e -> children.add((ObjectTreeNode) e));
         return children;
+    }
+
+    @Override
+    public boolean getAllowsChildren() {
+        return childBranchPoint != null;
     }
 
     private DataTreeBranch findNextTreeBranch(Data data) {

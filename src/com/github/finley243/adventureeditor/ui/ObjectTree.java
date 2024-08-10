@@ -9,12 +9,18 @@ import com.github.finley243.adventureeditor.ui.browser.node.BrowserRootNode;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldTree;
 
 import javax.swing.*;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,44 +31,53 @@ public class ObjectTree extends JTree {
     private final ObjectTreeNode treeRoot;
     private final DefaultTreeModel treeModel;
     private final Main main;
+    private final EditorFrame editorFrame;
 
-    public ObjectTree(Main main, ParameterFieldTree parameterFieldTree) {
+    public ObjectTree(Main main, ParameterFieldTree parameterFieldTree, EditorFrame editorFrame) {
         this.treeRoot = new ObjectTreeNode("Root", null, null);
         this.main = main;
+        this.editorFrame = editorFrame;
         this.treeModel = new DefaultTreeModel(treeRoot, false);
         this.setModel(treeModel);
         this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        this.setDragEnabled(true);
+        this.setDropMode(DropMode.ON_OR_INSERT);
+        this.setTransferHandler(new ObjectTreeTransferHandler(treeModel));
+        treeModel.addTreeModelListener(new TreeModelListener() {
+            @Override
+            public void treeNodesChanged(TreeModelEvent e) {
+                editorFrame.onEditorElementUpdated();
+            }
+
+            @Override
+            public void treeNodesInserted(TreeModelEvent e) {
+                editorFrame.onEditorElementUpdated();
+            }
+
+            @Override
+            public void treeNodesRemoved(TreeModelEvent e) {
+                editorFrame.onEditorElementUpdated();
+            }
+
+            @Override
+            public void treeStructureChanged(TreeModelEvent e) {
+                editorFrame.onEditorElementUpdated();
+            }
+        });
         this.addTreeSelectionListener(e -> {
             ObjectTreeNode node = (ObjectTreeNode) this.getLastSelectedPathComponent();
             if (node != null) {
                 parameterFieldTree.setSelectedNode(node);
             }
         });
-        /*this.addMouseListener(new MouseAdapter() {
-            private ObjectTreeNode lastClickedNode;
-
+        this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON3) {
                     onRightClick(e.getPoint());
                 }
             }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                TreePath path = ObjectTree.this.getPathForLocation(e.getX(), e.getY());
-                if (path != null) {
-                    lastClickedNode = (ObjectTreeNode) path.getLastPathComponent();
-                }
-            }
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1 && lastClickedNode != null) {
-                    parameterFieldTree.setSelectedNode(lastClickedNode);
-                }
-            }
-        });*/
+        });
         /*Action newAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -164,22 +179,115 @@ public class ObjectTree extends JTree {
         }
     }
 
-    private void onDoubleClick(DefaultMutableTreeNode node) {
-        /*if (node instanceof BrowserObjectNode objectNode) {
-            main.getDataManager().editObject(objectNode.getCategoryID(), objectNode.getObjectID());
-        }*/
-    }
-
     private void onRightClick(Point mousePos) {
         TreePath path = this.getPathForLocation(mousePos.x, mousePos.y);
-        /*if (path != null) {
-            BrowserNode node = (BrowserNode) path.getLastPathComponent();
+        if (path != null) {
+            ObjectTreeNode node = (ObjectTreeNode) path.getLastPathComponent();
             this.setSelectionPath(path);
-            JPopupMenu contextMenu = node.getContextMenu();
-            if (contextMenu != null) {
-                contextMenu.show(this, mousePos.x, mousePos.y);
+            // TODO - Open right-click context menu for node
+        }
+    }
+
+    private static class ObjectTreeTransferHandler extends TransferHandler {
+        private final DataFlavor nodesFlavor;
+        private final DefaultTreeModel treeModel;
+        private DefaultMutableTreeNode[] nodesToTransfer;
+
+        public ObjectTreeTransferHandler(DefaultTreeModel treeModel) {
+            this.treeModel = treeModel;
+            nodesFlavor = new DataFlavor(DefaultMutableTreeNode[].class, "Array of DefaultMutableTreeNode");
+        }
+
+        @Override
+        protected Transferable createTransferable(JComponent c) {
+            JTree tree = (JTree) c;
+            TreePath[] paths = tree.getSelectionPaths();
+            if (paths != null) {
+                nodesToTransfer = new DefaultMutableTreeNode[paths.length];
+                for (int i = 0; i < paths.length; i++) {
+                    nodesToTransfer[i] = (DefaultMutableTreeNode) paths[i].getLastPathComponent();
+                }
+                return new NodesTransferable(nodesToTransfer);
             }
-        }*/
+            return null;
+        }
+
+        @Override
+        public int getSourceActions(JComponent c) {
+            return MOVE;
+        }
+
+        @Override
+        public boolean canImport(TransferSupport support) {
+            if (!support.isDrop() || !support.isDataFlavorSupported(nodesFlavor)) {
+                return false;
+            }
+            JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
+            if (dropLocation == null) {
+                return false;
+            }
+            TreePath dropPath = dropLocation.getPath();
+            if (dropPath == null) {
+                return false;
+            }
+            DefaultMutableTreeNode targetNode = (DefaultMutableTreeNode) dropPath.getLastPathComponent();
+            if (!targetNode.getAllowsChildren()) {
+                return false;
+            }
+            for (DefaultMutableTreeNode node : nodesToTransfer) {
+                if (node.isNodeDescendant(targetNode)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public boolean importData(TransferSupport support) {
+            if (!canImport(support)) {
+                return false;
+            }
+            JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
+            if (dropLocation == null) {
+                return false;
+            }
+            TreePath dropPath = dropLocation.getPath();
+            if (dropPath == null) {
+                return false;
+            }
+            DefaultMutableTreeNode targetNode = (DefaultMutableTreeNode) dropPath.getLastPathComponent();
+            for (DefaultMutableTreeNode node : nodesToTransfer) {
+                treeModel.removeNodeFromParent(node);
+                treeModel.insertNodeInto(node, targetNode, targetNode.getChildCount());
+            }
+            return true;
+        }
+
+        private static class NodesTransferable implements Transferable {
+            private final DefaultMutableTreeNode[] nodes;
+
+            public NodesTransferable(DefaultMutableTreeNode[] nodes) {
+                this.nodes = nodes;
+            }
+
+            @Override
+            public DataFlavor[] getTransferDataFlavors() {
+                return new DataFlavor[]{new DataFlavor(DefaultMutableTreeNode[].class, "Array of DefaultMutableTreeNode")};
+            }
+
+            @Override
+            public boolean isDataFlavorSupported(DataFlavor flavor) {
+                return flavor.equals(new DataFlavor(DefaultMutableTreeNode[].class, "Array of DefaultMutableTreeNode"));
+            }
+
+            @Override
+            public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+                if (!isDataFlavorSupported(flavor)) {
+                    throw new UnsupportedFlavorException(flavor);
+                }
+                return nodes;
+            }
+        }
     }
 
 }
