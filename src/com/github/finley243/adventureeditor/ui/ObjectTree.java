@@ -54,7 +54,12 @@ public class ObjectTree extends JTree {
         });
         this.addTreeSelectionListener(e -> {
             ObjectTreeNode node = (ObjectTreeNode) this.getLastSelectedPathComponent();
-            if (node != null) {
+            if (node == null) {
+                return;
+            }
+            if (node.isRoot()) {
+                parameterFieldTree.setSelectedNode(null);
+            } else {
                 parameterFieldTree.setSelectedNode(node);
             }
         });

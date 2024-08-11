@@ -60,6 +60,9 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
 
     @Override
     public boolean getAllowsChildren() {
+        if (isRoot()) {
+            return true;
+        }
         return childBranchPoint != null;
     }
 

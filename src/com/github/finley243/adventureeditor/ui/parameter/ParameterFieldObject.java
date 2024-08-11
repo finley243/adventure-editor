@@ -22,6 +22,7 @@ import java.util.Map;
 public class ParameterFieldObject extends ParameterField {
 
     private final Map<String, ParameterField> editorElements;
+    private final Map<String, EditorTabGroup> tabGroups;
     private final Template template;
 
     public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, Main main, boolean isTopLevelEditor, boolean isSeparateWindow) {
@@ -34,7 +35,7 @@ public class ParameterFieldObject extends ParameterField {
         getInnerPanel().setLayout(new BorderLayout());
         objectPanel.setLayout(new GridBagLayout());
         this.editorElements = new HashMap<>();
-        Map<String, EditorTabGroup> tabGroups = new HashMap<>();
+        this.tabGroups = new HashMap<>();
         for (TabGroup tabGroup : template.tabGroups()) {
             EditorTabGroup editorTabGroup = new EditorTabGroup(tabGroup.id(), tabGroup.name());
             tabGroups.put(tabGroup.id(), editorTabGroup);
@@ -135,6 +136,9 @@ public class ParameterFieldObject extends ParameterField {
     public void setEnabledState(boolean enabled) {
         for (ParameterField element : editorElements.values()) {
             element.setEnabledFromParent(enabled);
+        }
+        for (EditorTabGroup tabGroup : tabGroups.values()) {
+            tabGroup.setEnabled(enabled);
         }
     }
 

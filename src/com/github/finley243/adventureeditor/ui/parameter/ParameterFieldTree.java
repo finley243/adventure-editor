@@ -20,6 +20,8 @@ import java.util.Map;
 
 public class ParameterFieldTree extends ParameterField {
 
+    private static final String BLANK_PANEL_KEY = "EMPTY";
+
     private final Main main;
     private final Template template;
     private final EditorFrame editorFrame;
@@ -72,11 +74,12 @@ public class ParameterFieldTree extends ParameterField {
         if (optional) {
             setEnabledState(false);
         }
+        addBlankPanel();
         setSelectedNode(null);
     }
 
     public void setSelectedNode(ObjectTreeNode node) {
-        cardLayout.show(objectPanel, node == null ? null : node.getUniqueID());
+        cardLayout.show(objectPanel, node == null ? BLANK_PANEL_KEY : node.getUniqueID());
     }
 
     public void addNode(ObjectTreeNode parentNode, ObjectTreeNode node) {
@@ -132,6 +135,7 @@ public class ParameterFieldTree extends ParameterField {
                 setDataForNode(topNodeData, null);
             }
         }
+        expandAllNodes();
     }
 
     @Override
@@ -139,6 +143,18 @@ public class ParameterFieldTree extends ParameterField {
         // TODO - Improve efficiency (no need to process every node every time, only the active node)
         updateNodeDataFromFields();
         super.onFieldUpdated();
+    }
+
+    private void addBlankPanel() {
+        ParameterFieldObject blankObjectField = new ParameterFieldObject(editorFrame, false, null, this, template, main, false, false);
+        blankObjectField.setEnabledFromParent(false);
+        objectPanel.add(blankObjectField, BLANK_PANEL_KEY);
+    }
+
+    private void expandAllNodes() {
+        for (int i = 0; i < treePanel.getRowCount(); i++) {
+            treePanel.expandRow(i);
+        }
     }
 
     private void updateNodeDataFromFields() {
@@ -187,6 +203,7 @@ public class ParameterFieldTree extends ParameterField {
         objectPanel.repaint();
         objectFields.clear();
         nodes.clear();
+        addBlankPanel();
     }
 
     private void addCardForNode(ObjectTreeNode node) {
@@ -197,7 +214,6 @@ public class ParameterFieldTree extends ParameterField {
         objectPanel.add(objectField, node.getUniqueID());
         objectFields.put(node.getUniqueID(), objectField);
         nodes.put(node.getUniqueID(), node);
-        cardLayout.show(objectPanel, node.getUniqueID());
     }
 
     private void removeCardForNode(ObjectTreeNode node) {

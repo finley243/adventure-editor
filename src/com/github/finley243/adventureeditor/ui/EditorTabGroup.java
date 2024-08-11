@@ -28,6 +28,12 @@ public class EditorTabGroup extends JPanel {
         return id;
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        tabbedPane.setEnabled(enabled);
+    }
+
     public void addGroupTab(EditorGroup group) {
         tabbedPane.addTab(group.getName(), group);
         group.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
