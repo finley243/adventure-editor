@@ -11,8 +11,8 @@ public class ParameterFieldInteger extends ParameterField {
 
     private final JSpinner spinner;
 
-    public ParameterFieldInteger(EditorFrame editorFrame, boolean optional, String name) {
-        super(editorFrame, optional, name);
+    public ParameterFieldInteger(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField) {
+        super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
@@ -24,7 +24,7 @@ public class ParameterFieldInteger extends ParameterField {
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0, null, null, 1);
         this.spinner = new JSpinner(spinnerModel);
         spinner.setPreferredSize(new Dimension(150, 20));
-        spinner.addChangeListener(e -> editorFrame.onEditorElementUpdated());
+        spinner.addChangeListener(e -> onFieldUpdated());
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
         labelConstraints.gridx = 0;

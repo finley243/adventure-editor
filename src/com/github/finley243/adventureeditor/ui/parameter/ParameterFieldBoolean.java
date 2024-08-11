@@ -12,14 +12,14 @@ public class ParameterFieldBoolean extends ParameterField {
 
     private final JCheckBox checkBox;
 
-    public ParameterFieldBoolean(EditorFrame editorFrame, boolean optional, String name) {
-        super(editorFrame, optional, name);
+    public ParameterFieldBoolean(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField) {
+        super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.checkBox = new JCheckBox(name);
         //checkBox.setPreferredSize(new Dimension(140, 20));
         //checkBox.setHorizontalAlignment(SwingConstants.LEFT);
         checkBox.setVerticalTextPosition(SwingConstants.TOP);
-        checkBox.addActionListener(e -> editorFrame.onEditorElementUpdated());
+        checkBox.addActionListener(e -> onFieldUpdated());
         JPanel checkBoxPanel = new JPanel();
         checkBoxPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         //checkBoxPanel.setAlignmentX(LEFT_ALIGNMENT);

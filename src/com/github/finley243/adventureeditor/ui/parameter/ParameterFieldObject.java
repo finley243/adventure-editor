@@ -24,8 +24,8 @@ public class ParameterFieldObject extends ParameterField {
     private final Map<String, ParameterField> editorElements;
     private final Template template;
 
-    public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, Template template, Main main, boolean isTopLevelEditor, boolean isSeparateWindow) {
-        super(editorFrame, optional, name);
+    public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, Main main, boolean isTopLevelEditor, boolean isSeparateWindow) {
+        super(editorFrame, optional, name, parentField);
         this.template = template;
         JPanel objectPanel = new JPanel();
         /*if (!isSeparateWindow) {
@@ -76,7 +76,7 @@ public class ParameterFieldObject extends ParameterField {
         }
         for (TemplateParameter parameter : template.parameters()) {
             if (isTopLevelEditor || !parameter.topLevelOnly()) {
-                ParameterField parameterElement = ParameterFieldFactory.create(parameter, main, editorFrame);
+                ParameterField parameterElement = ParameterFieldFactory.create(parameter, main, editorFrame, parentField);
                 if (parameterElement == null) {
                     continue;
                 }

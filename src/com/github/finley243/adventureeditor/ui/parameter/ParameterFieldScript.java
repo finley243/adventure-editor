@@ -13,8 +13,8 @@ public class ParameterFieldScript extends ParameterField {
 
     private final JTextPane textPane;
 
-    public ParameterFieldScript(EditorFrame editorFrame, boolean optional, String name) {
-        super(editorFrame, optional, name);
+    public ParameterFieldScript(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField) {
+        super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
@@ -36,17 +36,17 @@ public class ParameterFieldScript extends ParameterField {
         textPane.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                editorFrame.onEditorElementUpdated();
+                onFieldUpdated();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                editorFrame.onEditorElementUpdated();
+                onFieldUpdated();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                editorFrame.onEditorElementUpdated();
+                onFieldUpdated();
             }
         });
         GridBagConstraints labelConstraints = new GridBagConstraints();

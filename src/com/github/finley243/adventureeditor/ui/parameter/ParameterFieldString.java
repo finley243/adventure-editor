@@ -13,8 +13,8 @@ public class ParameterFieldString extends ParameterField {
 
     private final JTextField textField;
 
-    public ParameterFieldString(EditorFrame editorFrame, boolean optional, String name, boolean useWide) {
-        super(editorFrame, optional, name);
+    public ParameterFieldString(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, boolean useWide) {
+        super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
@@ -30,21 +30,21 @@ public class ParameterFieldString extends ParameterField {
         } else {
             textField.setPreferredSize(new Dimension(150, 20));
         }
-        textField.addActionListener(e -> editorFrame.onEditorElementUpdated());
+        textField.addActionListener(e -> onFieldUpdated());
         textField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                editorFrame.onEditorElementUpdated();
+                onFieldUpdated();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                editorFrame.onEditorElementUpdated();
+                onFieldUpdated();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                editorFrame.onEditorElementUpdated();
+                onFieldUpdated();
             }
         });
         GridBagConstraints labelConstraints = new GridBagConstraints();

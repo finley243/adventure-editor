@@ -25,8 +25,8 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
 
     private final String name;
 
-    public ParameterFieldReferenceSet(EditorFrame editorFrame, boolean optional, String name, Template template, Main main) {
-        super(editorFrame, optional, name);
+    public ParameterFieldReferenceSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, Main main) {
+        super(editorFrame, optional, name, parentField);
         this.main = main;
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.name = name;
@@ -47,7 +47,7 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
         referenceList.setDragEnabled(false);
         referenceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         // May not be the ideal listener to use
-        referenceList.addListSelectionListener(e -> editorFrame.onEditorElementUpdated());
+        referenceList.addListSelectionListener(e -> onFieldUpdated());
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
         GridBagConstraints addConstraints = new GridBagConstraints();

@@ -27,8 +27,8 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
     private final Template template;
     private final boolean requireUniqueValues;
 
-    public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, Template template, boolean requireUniqueValues, Main main) {
-        super(editorFrame, optional, name);
+    public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, boolean requireUniqueValues, Main main) {
+        super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.editorFrames = new ArrayList<>();
         this.unsavedEditorFrames = new ArrayList<>();
@@ -52,7 +52,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
         objectList.setDragEnabled(false);
         objectList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         // May not be the ideal listener to use
-        objectList.addListSelectionListener(e -> editorFrame.onEditorElementUpdated());
+        objectList.addListSelectionListener(e -> onFieldUpdated());
         objectList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -220,7 +220,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
         }
         ((DefaultListModel<Data>) objectList.getModel()).add(addIndex, data);
         editorFrames.add(addIndex, null);
-        parentFrame.onEditorElementUpdated();
+        onFieldUpdated();
     }
 
     @Override

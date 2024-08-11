@@ -11,8 +11,8 @@ public class ParameterFieldEnum extends ParameterField {
 
     private final JComboBox<String> dropdownMenu;
 
-    public ParameterFieldEnum(EditorFrame editorFrame, boolean optional, String name, String[] values) {
-        super(editorFrame, optional, name);
+    public ParameterFieldEnum(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, String[] values) {
+        super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
@@ -24,7 +24,7 @@ public class ParameterFieldEnum extends ParameterField {
         this.dropdownMenu = new JComboBox<>(values);
         dropdownMenu.setPreferredSize(new Dimension(150, 20));
         dropdownMenu.setEditable(false);
-        dropdownMenu.addActionListener(e -> editorFrame.onEditorElementUpdated());
+        dropdownMenu.addActionListener(e -> onFieldUpdated());
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
         labelConstraints.gridx = 0;

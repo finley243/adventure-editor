@@ -12,8 +12,8 @@ public class ParameterFieldFloat extends ParameterField {
 
     private final JSpinner spinner;
 
-    public ParameterFieldFloat(EditorFrame editorFrame, boolean optional, String name) {
-        super(editorFrame, optional, name);
+    public ParameterFieldFloat(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField) {
+        super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
@@ -25,7 +25,7 @@ public class ParameterFieldFloat extends ParameterField {
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.000d, null, null, 0.001d);
         this.spinner = new JSpinner(spinnerModel);
         spinner.setPreferredSize(new Dimension(150, 20));
-        spinner.addChangeListener(e -> editorFrame.onEditorElementUpdated());
+        spinner.addChangeListener(e -> onFieldUpdated());
         JSpinner.NumberEditor editor = (JSpinner.NumberEditor)spinner.getEditor();
         DecimalFormat format = editor.getFormat();
         format.setMinimumFractionDigits(3);

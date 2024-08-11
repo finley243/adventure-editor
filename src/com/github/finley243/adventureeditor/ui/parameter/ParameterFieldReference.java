@@ -16,8 +16,8 @@ public class ParameterFieldReference extends ParameterField {
     private final JComboBox<String> dropdownMenu;
     private final JButton openReferenceButton;
 
-    public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, Main main, String categoryID) {
-        super(editorFrame, optional, name);
+    public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Main main, String categoryID) {
+        super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
         JComponent label;
@@ -31,7 +31,7 @@ public class ParameterFieldReference extends ParameterField {
         this.dropdownMenu = new JComboBox<>(values);
         dropdownMenu.setPreferredSize(new Dimension(150, 20));
         dropdownMenu.setEditable(true);
-        dropdownMenu.addActionListener(e -> editorFrame.onEditorElementUpdated());
+        dropdownMenu.addActionListener(e -> onFieldUpdated());
         this.openReferenceButton = new JButton("...");
         openReferenceButton.setPreferredSize(new Dimension(20, 20));
         openReferenceButton.addActionListener(e -> {
@@ -43,15 +43,15 @@ public class ParameterFieldReference extends ParameterField {
         ((JTextField) dropdownMenu.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                editorFrame.onEditorElementUpdated();
+                onFieldUpdated();
             }
             @Override
             public void removeUpdate(DocumentEvent e) {
-                editorFrame.onEditorElementUpdated();
+                onFieldUpdated();
             }
             @Override
             public void changedUpdate(DocumentEvent e) {
-                editorFrame.onEditorElementUpdated();
+                onFieldUpdated();
             }
         });
         GridBagConstraints labelConstraints = new GridBagConstraints();

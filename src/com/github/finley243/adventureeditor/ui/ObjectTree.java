@@ -1,11 +1,5 @@
 package com.github.finley243.adventureeditor.ui;
 
-import com.github.finley243.adventureeditor.Main;
-import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.ui.browser.node.BrowserCategoryNode;
-import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
-import com.github.finley243.adventureeditor.ui.browser.node.BrowserObjectNode;
-import com.github.finley243.adventureeditor.ui.browser.node.BrowserRootNode;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldTree;
 
 import javax.swing.*;
@@ -20,24 +14,18 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ObjectTree extends JTree {
 
     private final ObjectTreeNode treeRoot;
     private final DefaultTreeModel treeModel;
-    private final Main main;
-    private final EditorFrame editorFrame;
+    private final ParameterFieldTree parameterFieldTree;
 
-    public ObjectTree(Main main, ParameterFieldTree parameterFieldTree, EditorFrame editorFrame) {
+    public ObjectTree(ParameterFieldTree parameterFieldTree) {
         this.treeRoot = new ObjectTreeNode("Root", null, null);
-        this.main = main;
-        this.editorFrame = editorFrame;
         this.treeModel = new DefaultTreeModel(treeRoot, false);
+        this.parameterFieldTree = parameterFieldTree;
         this.setModel(treeModel);
         this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         this.setDragEnabled(true);
@@ -46,22 +34,22 @@ public class ObjectTree extends JTree {
         treeModel.addTreeModelListener(new TreeModelListener() {
             @Override
             public void treeNodesChanged(TreeModelEvent e) {
-                editorFrame.onEditorElementUpdated();
+                //parameterFieldTree.onFieldUpdated();
             }
 
             @Override
             public void treeNodesInserted(TreeModelEvent e) {
-                editorFrame.onEditorElementUpdated();
+                //parameterFieldTree.onFieldUpdated();
             }
 
             @Override
             public void treeNodesRemoved(TreeModelEvent e) {
-                editorFrame.onEditorElementUpdated();
+                //parameterFieldTree.onFieldUpdated();
             }
 
             @Override
             public void treeStructureChanged(TreeModelEvent e) {
-                editorFrame.onEditorElementUpdated();
+                //parameterFieldTree.onFieldUpdated();
             }
         });
         this.addTreeSelectionListener(e -> {
@@ -148,10 +136,10 @@ public class ObjectTree extends JTree {
 
     @Override
     public void collapsePath(TreePath path) {
-        if (path.equals(new TreePath(getModel().getRoot()))) {
+        /*if (path.equals(new TreePath(getModel().getRoot()))) {
             return;
         }
-        super.collapsePath(path);
+        super.collapsePath(path);*/
     }
 
     public List<ObjectTreeNode> getTopNodes() {
@@ -168,24 +156,58 @@ public class ObjectTree extends JTree {
         this.scrollPathToVisible(new TreePath(treeModel.getPathToRoot(node)));
     }
 
+    public void deleteNode(ObjectTreeNode node) {
+        TreePath newSelectionPath = null;
+        DefaultMutableTreeNode siblingPrevious = node.getPreviousSibling();
+        DefaultMutableTreeNode siblingNext = node.getNextSibling();
+        if (siblingPrevious != null) {
+            newSelectionPath = new TreePath(treeModel.getPathToRoot(siblingPrevious));
+        } else if (siblingNext != null) {
+            newSelectionPath = new TreePath(treeModel.getPathToRoot(siblingNext));
+        }
+        treeModel.removeNodeFromParent(node);
+        treeModel.nodeStructureChanged(treeRoot);
+        if (newSelectionPath != null) {
+            this.setSelectionPath(newSelectionPath);
+        }
+    }
+
     public void clearNodes() {
         treeRoot.removeAllChildren();
         treeModel.nodeStructureChanged(treeRoot);
     }
 
-    public void setSelectedNode(ObjectTreeNode node) {
+    /*public void setSelectedNode(ObjectTreeNode node) {
         if (node != null) {
             this.setSelectionPath(new TreePath(treeModel.getPathToRoot(node)));
         }
-    }
+    }*/
 
     private void onRightClick(Point mousePos) {
         TreePath path = this.getPathForLocation(mousePos.x, mousePos.y);
-        if (path != null) {
-            ObjectTreeNode node = (ObjectTreeNode) path.getLastPathComponent();
-            this.setSelectionPath(path);
-            // TODO - Open right-click context menu for node
+        if (path == null) {
+            return;
         }
+        ObjectTreeNode node = (ObjectTreeNode) path.getLastPathComponent();
+        this.setSelectionPath(path);
+        JPopupMenu menu = new JPopupMenu();
+        if (node.getAllowsChildren()) {
+            JMenuItem menuNewChild = new JMenuItem("New Child");
+            menuNewChild.addActionListener(e -> parameterFieldTree.addNode(node, new ObjectTreeNode("New", null, null)));
+            menu.add(menuNewChild);
+        }
+        if (!node.isRoot()) {
+            JMenuItem menuNewSibling = new JMenuItem("New Sibling");
+            menuNewSibling.addActionListener(e -> parameterFieldTree.addNode((ObjectTreeNode) node.getParent(), new ObjectTreeNode("New", null, null)));
+            menu.add(menuNewSibling);
+            JMenuItem menuDuplicate = new JMenuItem("Duplicate");
+            menuDuplicate.addActionListener(e -> parameterFieldTree.duplicateNode(node));
+            menu.add(menuDuplicate);
+            JMenuItem menuDelete = new JMenuItem("Delete");
+            menuDelete.addActionListener(e -> parameterFieldTree.deleteNode(node));
+            menu.add(menuDelete);
+        }
+        menu.show(this, mousePos.x, mousePos.y);
     }
 
     private static class ObjectTreeTransferHandler extends TransferHandler {
