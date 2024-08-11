@@ -181,6 +181,7 @@ public class ParameterFieldTree extends ParameterField {
         if (selectedNode != null) {
             treePanel.setSelectionPath(new TreePath(selectedNode.getPath()));
         }
+        expandAllNodes();
         treePanel.revalidate();
         treePanel.repaint();
     }
