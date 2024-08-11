@@ -86,6 +86,7 @@ public class ParameterFieldTree extends ParameterField {
         treePanel.addNode(parentNode, node);
         addCardForNode(node);
         expandAllNodes();
+        onFieldUpdated();
     }
 
     public void duplicateNode(ObjectTreeNode node) {
@@ -94,6 +95,7 @@ public class ParameterFieldTree extends ParameterField {
         treePanel.addNode((ObjectTreeNode) node.getParent(), newNode);
         addCardForNode(newNode);
         expandAllNodes();
+        onFieldUpdated();
     }
 
     public void deleteNode(ObjectTreeNode node) {
@@ -103,6 +105,7 @@ public class ParameterFieldTree extends ParameterField {
             parentNode.remove(node);
         }
         removeCardForNode(node);
+        onFieldUpdated();
     }
 
     @Override
