@@ -98,8 +98,8 @@ public class ParameterFieldComponent extends ParameterField {
             return null;
         }
         Data currentObjectData = editorElements.get(activeOption).getData();
-        String nameOverride = useComponentTypeName ? componentOptionMap.get(activeOption).name() : null;
-        return new DataComponent(activeOption, currentObjectData, nameOverride);
+        //String nameOverride = useComponentTypeName ? componentOptionMap.get(activeOption).name() : null;
+        return new DataComponent(activeOption, currentObjectData, null);
     }
 
     @Override

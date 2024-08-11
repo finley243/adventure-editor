@@ -85,6 +85,7 @@ public class ParameterFieldTree extends ParameterField {
     public void addNode(ObjectTreeNode parentNode, ObjectTreeNode node) {
         treePanel.addNode(parentNode, node);
         addCardForNode(node);
+        expandAllNodes();
     }
 
     public void duplicateNode(ObjectTreeNode node) {
@@ -92,6 +93,7 @@ public class ParameterFieldTree extends ParameterField {
         ObjectTreeNode newNode = new ObjectTreeNode(dataCopy.toString(), dataCopy, null);
         treePanel.addNode((ObjectTreeNode) node.getParent(), newNode);
         addCardForNode(newNode);
+        expandAllNodes();
     }
 
     public void deleteNode(ObjectTreeNode node) {

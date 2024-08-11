@@ -48,9 +48,9 @@ public class DataObject extends Data {
         return ((DataString) value.get("id")).getValue();
     }
 
-    @Override
+    /*@Override
     public String toString() {
-        Data primaryParameterData = value.get(template.primaryParameter());
+        Data primaryParameterData = value.get(template.nameFormat());
         if (primaryParameterData != null) {
             return primaryParameterData.toString();
         }
@@ -59,6 +59,19 @@ public class DataObject extends Data {
             return id;
         }
         return template.id();
+    }*/
+
+    @Override
+    public String toString() {
+        String nameString = template.nameFormat() == null ? template.name() : template.nameFormat();
+        List<String> parameterKeys = new ArrayList<>(value.keySet());
+        parameterKeys.sort(Comparator.comparingInt(String::length));
+        for (String parameterKey : parameterKeys) {
+            Data parameterValue = value.get(parameterKey);
+            String parameterString = parameterValue == null ? "null" : parameterValue.toString();
+            nameString = nameString.replace("$" + parameterKey, parameterString);
+        }
+        return nameString;
     }
 
     @Override
@@ -93,7 +106,7 @@ public class DataObject extends Data {
         if (!Objects.equals(getTemplate(), dataObject.getTemplate())) {
             return false;
         }
-        String primaryParameter = template.primaryParameter();
+        String primaryParameter = template.nameFormat();
         if (primaryParameter == null) {
             return false;
         }
