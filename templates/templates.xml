@@ -147,7 +147,7 @@
         <parameter id="once" dataType="boolean" name="Show Once" format="attribute" x="0" y="1" default="false"/>
         <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" x="0" y="2"/>
         <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="1" y="0" default="all"/>
-        <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine" x="1" y="1" height="2"/>
+        <parameter id="line" dataType="tree" name="Lines" type="sceneLine" x="1" y="1" height="2"/>
         <parameter id="choice" dataType="objectSet" name="Choices" type="sceneChoice" topLevelOnly="true" x="2" y="0" height="3"/>
     </template>
     <template id="sceneLine" name="Scene Line" topLevel="false" primaryParameter="line">
@@ -160,12 +160,12 @@
             <component id="tags" name="Logic" object="sceneLineLogic"/>
         </parameter>
     </template>
-    <template id="sceneLineLogic" name="Logic" topLevel="false">
+    <template id="sceneLineLogic" name="Logic" topLevel="false" primaryParameter="type">
         <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" x="0" y="0" height="2"/>
         <parameter id="scriptPre" dataType="object" name="Pre Script" type="script" optional="true" x="1" y="0" height="4"/>
         <parameter id="scriptPost" dataType="object" name="Post Script" type="script" optional="true" x="1" y="4" height="4"/>
         <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="0" y="2" default="all"/>
-        <parameter id="line" dataType="objectSet" name="Sub-Lines" type="sceneLine" x="0" y="3" height="3"/>
+        <parameter id="line" dataType="treeBranch" name="Sub-Lines" type="sceneLine" x="0" y="3" height="3"/>
     </template>
     <template id="sceneLineText" name="Text" topLevel="false" primaryParameter="text">
         <parameter id="text" dataType="string" name="Text" format="current_tag" x="0" y="0"/>
@@ -523,16 +523,19 @@
         <parameter id="scene" dataType="reference" type="scene" name="Scene" format="attribute"/>
     </template>
     <template id="nodeGroup" name="Group Node" topLevel="false">
-        <parameter id="node" dataType="objectSet" type="nodeInner" name="Group"/>
+        <parameter id="node" dataType="tree" type="nodeInner" name="Group"/>
     </template>
     <template id="nodeInner" name="Network Node" topLevel="false" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
         <parameter id="name" dataType="string" name="Name" format="child_tag" y="1"/>
         <parameter id="component" dataType="component" name="Type" format="current_tag" componentFormat="typeAttribute" default="group" y="2">
-            <component id="group" name="Group" object="nodeGroup"/>
+            <component id="group" name="Group" object="nodeGroupInner"/>
             <component id="control" name="Control" object="nodeControl"/>
             <component id="data" name="Data" object="nodeData"/>
         </parameter>
+    </template>
+    <template id="nodeGroupInner" name="Group Node" topLevel="false">
+        <parameter id="node" dataType="treeBranch" type="nodeInner" name="Group"/>
     </template>
     <template id="object" name="Object" topLevel="true" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
