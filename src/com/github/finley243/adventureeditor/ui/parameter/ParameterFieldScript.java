@@ -11,7 +11,7 @@ import java.awt.*;
 
 public class ParameterFieldScript extends ParameterField {
 
-    private final JTextPane textPane;
+    private final JTextArea textPane;
 
     public ParameterFieldScript(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField) {
         super(editorFrame, optional, name, parentField);
@@ -23,7 +23,10 @@ public class ParameterFieldScript extends ParameterField {
         } else {
             label = new JLabel(name);
         }
-        this.textPane = new JTextPane();
+        this.textPane = new JTextArea();
+        textPane.setFont(UIManager.getFont("TextField.font"));
+        //textPane.setLineWrap(true);
+        //textPane.setWrapStyleWord(true);
         JPanel sizeLimiterPanel = new JPanel(new BorderLayout());
         sizeLimiterPanel.add(textPane);
         JScrollPane scrollPane = new JScrollPane(sizeLimiterPanel);
