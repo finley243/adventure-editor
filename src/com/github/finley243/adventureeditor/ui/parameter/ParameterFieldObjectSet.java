@@ -195,7 +195,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
             objectList.setSelectedIndex(-1);
             objectList.setBackground(UIManager.getColor("Label.disabledBackground"));
         } else {
-            objectList.setBackground(UIManager.getColor("Label.background"));
+            objectList.setBackground(UIManager.getColor("List.background"));
         }
         objectList.setEnabled(enabled);
         if (enabled) {

@@ -138,7 +138,7 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
             referenceList.setSelectedIndex(-1);
             referenceList.setBackground(UIManager.getColor("Label.disabledBackground"));
         } else {
-            referenceList.setBackground(UIManager.getColor("Label.background"));
+            referenceList.setBackground(UIManager.getColor("List.background"));
         }
         referenceList.setEnabled(enabled);
         if (enabled) {

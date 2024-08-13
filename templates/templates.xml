@@ -495,8 +495,7 @@
         <parameter id="count" dataType="integer" name="Count" format="attribute" optional="true" y="2" default="1"/>
         <parameter id="countMin" dataType="integer" name="Min Count" format="attribute" optional="true" y="3" default="0"/>
         <parameter id="countMax" dataType="integer" name="Max Count" format="attribute" optional="true" y="4" default="0"/>
-        <parameter id="modItem" dataType="reference" name="Mod Item" type="item" format="attribute" optional="true" y="5"/>
-        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true" y="6"/>
+        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true" y="5"/>
     </template>
     <template id="lootTableRefTable" name="Table Entry" nameFormat="$id">
         <parameter id="id" dataType="reference" name="Loot Table" type="lootTable" format="current_tag" y="0"/>
@@ -504,8 +503,7 @@
         <parameter id="count" dataType="integer" name="Count" format="attribute" optional="true" y="2" default="1"/>
         <parameter id="countMin" dataType="integer" name="Min Count" format="attribute" optional="true" y="3" default="0"/>
         <parameter id="countMax" dataType="integer" name="Max Count" format="attribute" optional="true" y="4" default="0"/>
-        <parameter id="modItem" dataType="reference" name="Mod Item" type="item" format="attribute" optional="true" y="5"/>
-        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true" y="6"/>
+        <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true" y="5"/>
     </template>
     <template id="node" name="Network Node" topLevel="true" nameFormat="$id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
