@@ -123,8 +123,15 @@ public class DataManager {
     }
 
     public boolean deleteObject(String categoryID, String objectID) {
-        Object[] confirmOptions = {"Delete", "Cancel"};
-        int confirmResult = JOptionPane.showOptionDialog(main.getBrowserFrame(), "Are you sure you want to delete " + objectID + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        int objectReferenceCount = findReferences(categoryID, objectID).size();
+        int confirmResult;
+        if (objectReferenceCount > 0) {
+            Object[] confirmOptions = {"Delete", "View References", "Cancel"};
+            confirmResult = JOptionPane.showOptionDialog(main.getBrowserFrame(), "Are you sure you want to delete " + objectID + "?\nReferences: " + objectReferenceCount, "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        } else {
+            Object[] confirmOptions = {"Delete", "Cancel"};
+            confirmResult = JOptionPane.showOptionDialog(main.getBrowserFrame(), "Are you sure you want to delete " + objectID + "?\nReferences: " + 0, "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        }
         if (confirmResult == 0) {
             data.get(categoryID).remove(objectID);
             main.getEditorManager().closeEditorFrameIfActive(categoryID, objectID);
@@ -132,20 +139,14 @@ public class DataManager {
                 main.getBrowserFrame().removeGameObject(categoryID, objectID);
             }
             return true;
+        } else if (confirmResult == 1 && objectReferenceCount > 0) {
+            displayReferences(categoryID, objectID);
         }
         return false;
     }
 
-    public void findReferences(String referenceCategoryID, String referenceObjectID) {
-        Set<Reference> references = new HashSet<>();
-        for (String category : data.keySet()) {
-            for (String object : data.get(category).keySet()) {
-                Data currentObject = data.get(category).get(object);
-                if (dataContainsReference(currentObject, referenceCategoryID, referenceObjectID)) {
-                    references.add(new Reference(category, object));
-                }
-            }
-        }
+    public void displayReferences(String referenceCategoryID, String referenceObjectID) {
+        Set<Reference> references = findReferences(referenceCategoryID, referenceObjectID);
         main.getReferenceListManager().openReferenceList(references);
     }
 
@@ -172,6 +173,19 @@ public class DataManager {
 
     public boolean hasChangesFrom(Map<String, Map<String, Data>> comparisonData) {
         return !Objects.equals(data, comparisonData);
+    }
+
+    private Set<Reference> findReferences(String referenceCategoryID, String referenceObjectID) {
+        Set<Reference> references = new HashSet<>();
+        for (String category : data.keySet()) {
+            for (String object : data.get(category).keySet()) {
+                Data currentObject = data.get(category).get(object);
+                if (dataContainsReference(currentObject, referenceCategoryID, referenceObjectID)) {
+                    references.add(new Reference(category, object));
+                }
+            }
+        }
+        return references;
     }
 
     private String generateDuplicateObjectID(String categoryID, String objectID) {
