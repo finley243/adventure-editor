@@ -47,7 +47,7 @@ public class ReferenceListFrame extends JDialog {
                     int row = referenceTable.convertRowIndexToModel(viewRow);
                     String category = (String) tableModel.getValueAt(row, 0);
                     String object = (String) tableModel.getValueAt(row, 1);
-                    main.getDataManager().editObject(category, object);
+                    openReference(category, object);
                 }
             }
         });
@@ -72,7 +72,7 @@ public class ReferenceListFrame extends JDialog {
                 if (selectedRow != -1) {
                     String category = (String) tableModel.getValueAt(referenceTable.convertRowIndexToModel(selectedRow), 0);
                     String object = (String) tableModel.getValueAt(referenceTable.convertRowIndexToModel(selectedRow), 0);
-                    main.getDataManager().editObject(category, object);
+                    openReference(category, object);
                 }
             }
         };
@@ -123,6 +123,14 @@ public class ReferenceListFrame extends JDialog {
         boolean didClose = main.getReferenceListManager().onCloseReferenceList();
         if (didClose) {
             this.dispose();
+        }
+    }
+
+    private void openReference(String categoryID, String objectID) {
+        if (categoryID.isEmpty() && objectID.equals("config")) {
+            main.getConfigMenuManager().openConfigMenu();
+        } else {
+            main.getDataManager().editObject(categoryID, objectID);
         }
     }
 

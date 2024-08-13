@@ -151,6 +151,7 @@ public class DataManager {
     }
 
     public void renameReferences(String referenceCategoryID, String referenceObjectID, String newObjectID) {
+        renameReferencesInData(main.getConfigMenuManager().getConfigData(), referenceCategoryID, referenceObjectID, newObjectID);
         for (String category : data.keySet()) {
             for (String object : data.get(category).keySet()) {
                 Data currentObject = data.get(category).get(object);
@@ -177,6 +178,9 @@ public class DataManager {
 
     private Set<Reference> findReferences(String referenceCategoryID, String referenceObjectID) {
         Set<Reference> references = new HashSet<>();
+        if (dataContainsReference(main.getConfigMenuManager().getConfigData(), referenceCategoryID, referenceObjectID)) {
+            references.add(new Reference("", "config"));
+        }
         for (String category : data.keySet()) {
             for (String object : data.get(category).keySet()) {
                 Data currentObject = data.get(category).get(object);
