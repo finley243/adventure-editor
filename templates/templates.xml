@@ -211,6 +211,7 @@
         <group id="level" name="Leveling" tabGroup="tabs"/>
         <group id="inventory" name="Inventory" tabGroup="tabs"/>
         <group id="actions" name="Actions" tabGroup="tabs"/>
+        <group id="scripts" name="Scripts" tabGroup="tabs"/>
         <group id="limbs" name="Limbs" tabGroup="tabs"/>
         <group id="damage" name="Resistances" tabGroup="tabs"/>
         <group id="senses" name="Senses" tabGroup="tabs"/>
@@ -232,6 +233,7 @@
         <parameter id="damageResistance" dataType="objectSetUnique" name="Damage Resistances" type="actorDamageResistance" optional="true" group="damage"/>
         <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" group="inventory"/>
         <parameter id="action" dataType="objectSet" name="Actions" type="customActionReference" y="0" group="actions"/>
+        <parameter id="script" dataType="objectSet" name="Scripts" type="scriptWithTriggerActor" group="scripts"/>
         <parameter id="itemAction" dataType="objectSet" name="Item Actions" type="customActionReference" y="1" group="actions"/>
         <parameter id="startLevel" dataType="integer" name="Starting Level" optional="true" format="attribute" y="0" group="level"/>
         <parameter id="levelUpThreshold" dataType="string" name="Level-Up Threshold Expression" optional="true" format="child_tag" y="1" group="level"/>
