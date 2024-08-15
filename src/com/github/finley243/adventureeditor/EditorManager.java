@@ -6,6 +6,7 @@ import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.EditorFrame;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class EditorManager {
@@ -38,9 +39,8 @@ public class EditorManager {
     }
 
     public void closeAllActiveEditorFrames() {
-        for (String categoryID : topLevelEditorWindows.keySet()) {
-            for (String objectID : topLevelEditorWindows.get(categoryID).keySet()) {
-                // TODO - Check if user wants to save changes in each window if applicable
+        for (String categoryID : new HashSet<>(topLevelEditorWindows.keySet())) {
+            for (String objectID : new HashSet<>(topLevelEditorWindows.get(categoryID).keySet())) {
                 topLevelEditorWindows.get(categoryID).get(objectID).requestClose(false, false);
             }
         }

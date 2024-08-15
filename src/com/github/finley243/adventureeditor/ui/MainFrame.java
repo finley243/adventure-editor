@@ -68,10 +68,14 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         JMenuItem toolsPhraseEditor = new JMenuItem("Phrase Editor");
         toolsPhraseEditor.addActionListener(e -> main.getPhraseEditorManager().openPhraseEditor());
         toolsMenu.add(toolsPhraseEditor);
+        JMenuItem toolsProjectConfig = new JMenuItem("Project Configuration");
+        toolsProjectConfig.addActionListener(e -> main.getConfigMenuManager().openConfigMenu());
+        toolsMenu.add(toolsProjectConfig);
         toolsMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
                 toolsPhraseEditor.setEnabled(main.getProjectManager().isProjectLoaded());
+                toolsProjectConfig.setEnabled(main.getProjectManager().isProjectLoaded());
             }
             @Override
             public void menuDeselected(MenuEvent e) {}
@@ -79,21 +83,11 @@ public class MainFrame extends JFrame implements DataSaveTarget {
             public void menuCanceled(MenuEvent e) {}
         });
 
-        JMenu settingsMenu = new JMenu("Settings");
-        menuBar.add(settingsMenu);
-        JMenuItem settingsProjectConfig = new JMenuItem("Project Configuration");
-        settingsProjectConfig.addActionListener(e -> main.getConfigMenuManager().openConfigMenu());
-        settingsMenu.add(settingsProjectConfig);
-        settingsMenu.addMenuListener(new MenuListener() {
-            @Override
-            public void menuSelected(MenuEvent e) {
-                settingsProjectConfig.setEnabled(main.getProjectManager().isProjectLoaded());
-            }
-            @Override
-            public void menuDeselected(MenuEvent e) {}
-            @Override
-            public void menuCanceled(MenuEvent e) {}
-        });
+        JMenu windowMenu = new JMenu("Window");
+        menuBar.add(windowMenu);
+        JMenuItem windowCloseAll = new JMenuItem("Close All Objects");
+        windowCloseAll.addActionListener(e -> main.getEditorManager().closeAllActiveEditorFrames());
+        windowMenu.add(windowCloseAll);
 
         JPanel primaryPanel = new JPanel();
         primaryPanel.setLayout(new BorderLayout());
