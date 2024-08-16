@@ -3,6 +3,7 @@ package com.github.finley243.adventureeditor.ui.parameter;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataScript;
 import com.github.finley243.adventureeditor.ui.EditorFrame;
+import com.github.finley243.adventureeditor.ui.ScriptPane;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -11,7 +12,7 @@ import java.awt.*;
 
 public class ParameterFieldScript extends ParameterField {
 
-    private final JTextArea textPane;
+    private final ScriptPane textPane;
 
     public ParameterFieldScript(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField) {
         super(editorFrame, optional, name, parentField);
@@ -23,8 +24,8 @@ public class ParameterFieldScript extends ParameterField {
         } else {
             label = new JLabel(name);
         }
-        this.textPane = new JTextArea();
-        textPane.setFont(UIManager.getFont("TextField.font"));
+        this.textPane = new ScriptPane();
+        //textPane.setFont(UIManager.getFont("TextField.font"));
         //textPane.setLineWrap(true);
         //textPane.setWrapStyleWord(true);
         JPanel sizeLimiterPanel = new JPanel(new BorderLayout());
@@ -49,7 +50,7 @@ public class ParameterFieldScript extends ParameterField {
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                onFieldUpdated();
+                //onFieldUpdated();
             }
         });
         GridBagConstraints labelConstraints = new GridBagConstraints();
