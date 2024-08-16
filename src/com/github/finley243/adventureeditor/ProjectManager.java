@@ -27,6 +27,7 @@ public class ProjectManager {
     private Map<String, Map<String, Data>> lastSavedData;
     private Data lastSavedConfigData;
     private Map<String, String> lastSavedPhrases;
+    private Map<String, String> lastSavedScripts;
 
     public ProjectManager(Main main) {
         this.main = main;
@@ -51,6 +52,9 @@ public class ProjectManager {
             return true;
         }
         if (main.getPhraseEditorManager().hasChangesFrom(lastSavedPhrases)) {
+            return true;
+        }
+        if (main.getScriptEditorManager().hasChangesFrom(lastSavedScripts)) {
             return true;
         }
         if (main.getConfigMenuManager().hasChangesFrom(lastSavedConfigData)) {
@@ -125,7 +129,7 @@ public class ProjectManager {
         main.getDataManager().clearData();
         main.getConfigMenuManager().clearConfigData();
         try {
-            DataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), new HashMap<>(), main.getPhraseEditorManager().getPhrases());
+            DataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getScriptEditorManager().getScripts(), main.getPhraseEditorManager().getPhrases());
             main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
@@ -162,7 +166,7 @@ public class ProjectManager {
         main.getDataManager().clearData();
         main.getConfigMenuManager().clearConfigData();
         try {
-            DataLoader.loadFromDir(file, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), new HashMap<>(), main.getPhraseEditorManager().getPhrases());
+            DataLoader.loadFromDir(file, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getScriptEditorManager().getScripts(), main.getPhraseEditorManager().getPhrases());
             main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
             ProjectData project = new ProjectData(file.getName(), file.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
@@ -189,7 +193,7 @@ public class ProjectManager {
         } else {
             File loadedDirectory = new File(loadedProjectPath);
             try {
-                DataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getPhraseEditorManager().getPhrases());
+                DataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getScriptEditorManager().getScripts(), main.getPhraseEditorManager().getPhrases());
                 ProjectData project = new ProjectData(loadedDirectory.getName(), loadedDirectory.getAbsolutePath());
                 addOrMoveRecentProjectToTop(project);
                 updateLastSavedData();
@@ -215,7 +219,7 @@ public class ProjectManager {
         }
         File selectedDirectory = fileChooser.getSelectedFile();
         try {
-            DataLoader.saveToDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getPhraseEditorManager().getPhrases());
+            DataLoader.saveToDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getScriptEditorManager().getScripts(), main.getPhraseEditorManager().getPhrases());
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             loadedProjectPath = selectedDirectory.getAbsolutePath();
@@ -258,6 +262,7 @@ public class ProjectManager {
         lastSavedData = main.getDataManager().getAllDataCopy();
         lastSavedConfigData = main.getConfigMenuManager().getConfigData().createCopy();
         lastSavedPhrases = new HashMap<>(main.getPhraseEditorManager().getPhrases());
+        lastSavedScripts = new HashMap<>(main.getScriptEditorManager().getScripts());
     }
 
 }

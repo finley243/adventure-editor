@@ -21,6 +21,7 @@ public class Main {
     private final ProjectManager projectManager;
     private final DataManager dataManager;
     private final PhraseEditorManager phraseEditorManager;
+    private final ScriptEditorManager scriptEditorManager;
     private final ReferenceListManager referenceListManager;
     private final EditorManager editorManager;
 
@@ -48,6 +49,7 @@ public class Main {
         this.mainFrame = new MainFrame(this);
         this.browserFrame = new BrowserFrame(this, mainFrame);
         this.phraseEditorManager = new PhraseEditorManager(this);
+        this.scriptEditorManager = new ScriptEditorManager(this);
         this.referenceListManager = new ReferenceListManager(this);
         initialLoad();
     }
@@ -85,6 +87,10 @@ public class Main {
 
     public PhraseEditorManager getPhraseEditorManager() {
         return phraseEditorManager;
+    }
+
+    public ScriptEditorManager getScriptEditorManager() {
+        return scriptEditorManager;
     }
 
     public ReferenceListManager getReferenceListManager() {

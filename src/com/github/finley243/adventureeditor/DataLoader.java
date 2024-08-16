@@ -221,8 +221,9 @@ public class DataLoader {
                     }
                 } else if (file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("ascr")) {
                     String scriptName = file.getName().substring(0, file.getName().lastIndexOf("."));
-                    String scriptPath = file.getAbsolutePath();
-                    scripts.put(scriptName, scriptPath);
+                    //String scriptPath = file.getAbsolutePath();
+                    String scriptBody = Files.readString(file.toPath());
+                    scripts.put(scriptName, scriptBody);
                 } else if (file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("aphr")) {
                     Scanner scanner = new Scanner(file);
                     while (scanner.hasNextLine()) {
@@ -237,7 +238,7 @@ public class DataLoader {
         }
     }
 
-    public static void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> phrases) throws IOException, TransformerException, ParserConfigurationException {
+    public static void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> scripts, Map<String, String> phrases) throws IOException, TransformerException, ParserConfigurationException {
         if (dir.isDirectory()) {
             saveConfigData(dir, templates.get(ConfigMenuManager.CONFIG_TEMPLATE), configMenuManager, dataMap);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
@@ -250,11 +251,11 @@ public class DataLoader {
                     Files.delete(path);
                 }
             }
-            /*try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*.ascr")) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*.ascr")) {
                 for (Path path : stream) {
                     Files.delete(path);
                 }
-            }*/
+            }
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*.aphr")) {
                 for (Path path : stream) {
                     Files.delete(path);
@@ -282,6 +283,16 @@ public class DataLoader {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+
+            for (Map.Entry<String, String> script : scripts.entrySet()) {
+                File scriptFile = new File(dataDirectory, script.getKey() + ".ascr");
+                scriptFile.createNewFile();
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(scriptFile))) {
+                    writer.write(script.getValue());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

@@ -65,17 +65,22 @@ public class MainFrame extends JFrame implements DataSaveTarget {
 
         JMenu toolsMenu = new JMenu("Tools");
         menuBar.add(toolsMenu);
-        JMenuItem toolsPhraseEditor = new JMenuItem("Phrase Editor");
-        toolsPhraseEditor.addActionListener(e -> main.getPhraseEditorManager().openPhraseEditor());
-        toolsMenu.add(toolsPhraseEditor);
         JMenuItem toolsProjectConfig = new JMenuItem("Project Configuration");
         toolsProjectConfig.addActionListener(e -> main.getConfigMenuManager().openConfigMenu());
         toolsMenu.add(toolsProjectConfig);
+        JMenuItem toolsPhraseEditor = new JMenuItem("Phrase Editor");
+        toolsPhraseEditor.addActionListener(e -> main.getPhraseEditorManager().openPhraseEditor());
+        toolsMenu.add(toolsPhraseEditor);
+        JMenuItem toolsScriptEditor = new JMenuItem("Script Editor");
+        toolsScriptEditor.addActionListener(e -> main.getScriptEditorManager().openScriptEditor());
+        toolsMenu.add(toolsScriptEditor);
         toolsMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
-                toolsPhraseEditor.setEnabled(main.getProjectManager().isProjectLoaded());
-                toolsProjectConfig.setEnabled(main.getProjectManager().isProjectLoaded());
+                boolean isProjectLoaded = main.getProjectManager().isProjectLoaded();
+                toolsProjectConfig.setEnabled(isProjectLoaded);
+                toolsPhraseEditor.setEnabled(isProjectLoaded);
+                toolsScriptEditor.setEnabled(isProjectLoaded);
             }
             @Override
             public void menuDeselected(MenuEvent e) {}
