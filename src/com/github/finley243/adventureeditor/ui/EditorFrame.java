@@ -14,13 +14,14 @@ import java.awt.event.*;
 public class EditorFrame extends JDialog {
 
     private final Main main;
+    private final String editorID;
     private final ParameterField parameterField;
     private final Template template;
     private final Data initialData;
     private final DataSaveTarget saveTarget;
     private final JButton saveButton;
 
-    public EditorFrame(Main main, Window parentWindow, Template template, Data objectData, DataSaveTarget saveTarget, boolean isTopLevel) {
+    public EditorFrame(Main main, String editorID, Window parentWindow, Template template, Data objectData, DataSaveTarget saveTarget, boolean isTopLevel) {
         //super(template.name());
         super(parentWindow);
         //this.setAutoRequestFocus(false);
@@ -30,6 +31,7 @@ public class EditorFrame extends JDialog {
             throw new IllegalArgumentException("Save target cannot be null");
         }
         this.main = main;
+        this.editorID = editorID;
         this.template = template;
         this.initialData = objectData;
         this.saveTarget = saveTarget;
@@ -83,7 +85,7 @@ public class EditorFrame extends JDialog {
                 return false;
             }
             if (isDataValidOrShowDialog()) {
-                saveTarget.saveObjectData(parameterField.getData(), initialData);
+                saveTarget.saveObjectData(editorID, parameterField.getData(), initialData);
                 saveTarget.onEditorFrameClose(this);
                 this.dispose();
                 return true;
@@ -118,7 +120,7 @@ public class EditorFrame extends JDialog {
                 return false;
             }
             if (isDataValidOrShowDialog()) {
-                saveTarget.saveObjectData(parameterField.getData(), initialData);
+                saveTarget.saveObjectData(editorID, parameterField.getData(), initialData);
                 saveTarget.onEditorFrameClose(this);
                 this.dispose();
                 return true;

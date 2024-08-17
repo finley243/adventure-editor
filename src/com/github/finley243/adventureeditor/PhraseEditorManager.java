@@ -57,7 +57,7 @@ public class PhraseEditorManager implements DataSaveTarget {
     }
 
     public void newPhrase() {
-        EditorFrame editorFrame = new EditorFrame(main, phraseEditorFrame, PHRASE_TEMPLATE, null, this, true);
+        EditorFrame editorFrame = new EditorFrame(main, null, phraseEditorFrame, PHRASE_TEMPLATE, null, this, true);
         childFrameHandler.add(null, editorFrame);
     }
 
@@ -65,7 +65,7 @@ public class PhraseEditorManager implements DataSaveTarget {
         boolean isAlreadyOpen = childFrameHandler.requestFocusIfOpen(phraseKey);
         if (!isAlreadyOpen) {
             Data initialData = generateDataForPhrase(phraseKey);
-            EditorFrame editorFrame = new EditorFrame(main, phraseEditorFrame, PHRASE_TEMPLATE, initialData, this, true);
+            EditorFrame editorFrame = new EditorFrame(main, null, phraseEditorFrame, PHRASE_TEMPLATE, initialData, this, true);
             childFrameHandler.add(phraseKey, editorFrame);
         }
     }
@@ -87,7 +87,7 @@ public class PhraseEditorManager implements DataSaveTarget {
     }
 
     @Override
-    public void saveObjectData(Data data, Data initialData) {
+    public void saveObjectData(String editorID, Data data, Data initialData) {
         if (initialData != null) {
             String initialKey = ((DataString) ((DataObject) initialData).getValue().get("key")).getValue();
             phrases.remove(initialKey);

@@ -11,13 +11,13 @@ import com.github.finley243.adventureeditor.ui.EditorFrame;
 import com.github.finley243.adventureeditor.ui.ScriptEditorFrame;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.*;
 
 public class ScriptEditorManager implements DataSaveTarget {
 
     private static final Template SCRIPT_TEMPLATE = new Template("script", "Script", false, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>() {{
-        add(new TemplateParameter("name", TemplateParameter.ParameterDataType.STRING, "Name", null, false, false, null, null, new ArrayList<>(), false, null, 0, 0, 1, 1, null));
-        add(new TemplateParameter("script", TemplateParameter.ParameterDataType.SCRIPT, "Script", null, false, false, null, null, new ArrayList<>(), false, null, 0, 1, 1, 1, null));
+        add(new TemplateParameter("script", TemplateParameter.ParameterDataType.SCRIPT, null, null, false, false, null, null, new ArrayList<>(), false, null, 0, 1, 1, 1, null));
     }}, null);
 
     private final Main main;
@@ -58,27 +58,34 @@ public class ScriptEditorManager implements DataSaveTarget {
     }
 
     public void newScript() {
-        EditorFrame editorFrame = new EditorFrame(main, scriptEditorFrame, SCRIPT_TEMPLATE, null, this, true);
+        String scriptName = JOptionPane.showInputDialog(scriptEditorFrame, "Enter a name for the new script:");
+        if (scriptName == null) {
+            return;
+        } else if (scriptName.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(scriptEditorFrame, "Script name cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        } else if (scripts.containsKey(scriptName)) {
+            JOptionPane.showMessageDialog(scriptEditorFrame, "A script with the name " + scriptName + " already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        EditorFrame editorFrame = new EditorFrame(main, scriptName, scriptEditorFrame, SCRIPT_TEMPLATE, null, this, true);
         editorFrame.setResizable(true);
+        editorFrame.setSize(new Dimension(800, 800));
+        editorFrame.setLocationRelativeTo(null);
         childFrameHandler.add(null, editorFrame);
     }
 
-    public void editScript(String phraseKey) {
-        boolean isAlreadyOpen = childFrameHandler.requestFocusIfOpen(phraseKey);
+    public void editScript(String scriptName) {
+        boolean isAlreadyOpen = childFrameHandler.requestFocusIfOpen(scriptName);
         if (!isAlreadyOpen) {
-            Data initialData = generateDataForScript(phraseKey);
-            EditorFrame editorFrame = new EditorFrame(main, scriptEditorFrame, SCRIPT_TEMPLATE, initialData, this, true);
+            Data initialData = generateDataForScript(scriptName);
+            EditorFrame editorFrame = new EditorFrame(main, scriptName, scriptEditorFrame, SCRIPT_TEMPLATE, initialData, this, true);
             editorFrame.setResizable(true);
-            childFrameHandler.add(phraseKey, editorFrame);
+            editorFrame.setSize(new Dimension(800, 800));
+            editorFrame.setLocationRelativeTo(null);
+            childFrameHandler.add(scriptName, editorFrame);
         }
     }
-
-    /*public void duplicateScript(String phraseKey) {
-        String newKey = generateDuplicatePhraseKey(phraseKey);
-        String phrase = phrases.get(phraseKey);
-        phrases.put(newKey, phrase);
-        onUpdatePhrases();
-    }*/
 
     public void deleteScript(String scriptName) {
         Object[] confirmOptions = {"Delete", "Cancel"};
@@ -90,16 +97,11 @@ public class ScriptEditorManager implements DataSaveTarget {
     }
 
     @Override
-    public void saveObjectData(Data data, Data initialData) {
-        if (initialData != null) {
-            String initialName = ((DataString) ((DataObject) initialData).getValue().get("name")).getValue();
-            scripts.remove(initialName);
-        }
-        String scriptName = ((DataString) ((DataObject) data).getValue().get("name")).getValue();
+    public void saveObjectData(String editorID, Data data, Data initialData) {
         String scriptBody = ((DataScript) ((DataObject) data).getValue().get("script")).getValue();
-        scripts.put(scriptName, scriptBody);
+        scripts.put(editorID, scriptBody);
         onUpdateScripts();
-        scriptEditorFrame.selectScript(scriptName);
+        scriptEditorFrame.selectScript(editorID);
     }
 
     @Override
@@ -109,18 +111,6 @@ public class ScriptEditorManager implements DataSaveTarget {
 
     @Override
     public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
-        String scriptName = ((DataString) ((DataObject) currentData).getValue().get("name")).getValue();
-        if (scriptName.trim().isEmpty()) {
-            return new ErrorData(true, "Script name cannot be empty.");
-        }
-        /*String scriptBody = ((DataString) ((DataObject) currentData).getValue().get("script")).getValue();
-        if (scriptBody.trim().isEmpty()) {
-            return new ErrorData(true, "Script body cannot be empty.");
-        }*/
-        String initialKey = initialData == null ? null : ((DataString) ((DataObject) initialData).getValue().get("name")).getValue();
-        if (scripts.containsKey(scriptName) && !Objects.equals(scriptName, initialKey)) {
-            return new ErrorData(true, "A phrase with the key " + scriptName + " already exists.");
-        }
         return new ErrorData(false, null);
     }
 

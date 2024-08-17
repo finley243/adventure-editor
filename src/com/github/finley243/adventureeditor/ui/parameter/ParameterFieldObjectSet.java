@@ -65,7 +65,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
                                 editorFrames.get(index).toFront();
                                 editorFrames.get(index).requestFocus();
                             } else {
-                                EditorFrame objectFrame = new EditorFrame(main, editorFrame, template, selectedItem, ParameterFieldObjectSet.this, false);
+                                EditorFrame objectFrame = new EditorFrame(main, null, editorFrame, template, selectedItem, ParameterFieldObjectSet.this, false);
                                 editorFrames.set(index, objectFrame);
                             }
                         }
@@ -106,7 +106,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
             buttonRemove.setEnabled(enableSelectionButtons);
         });
         buttonAdd.addActionListener(e -> {
-            EditorFrame objectFrame = new EditorFrame(main, editorFrame, template, null, this, false);
+            EditorFrame objectFrame = new EditorFrame(main, null, editorFrame, template, null, this, false);
             unsavedEditorFrames.add(objectFrame);
         });
         buttonEdit.addActionListener(e -> {
@@ -117,7 +117,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
                     editorFrames.get(objectIndex).toFront();
                     editorFrames.get(objectIndex).requestFocus();
                 } else {
-                    EditorFrame objectFrame = new EditorFrame(main, editorFrame, template, objectData, this, false);
+                    EditorFrame objectFrame = new EditorFrame(main, null, editorFrame, template, objectData, this, false);
                     editorFrames.set(objectIndex, objectFrame);
                 }
             }
@@ -211,7 +211,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
     }
 
     @Override
-    public void saveObjectData(Data data, Data initialData) {
+    public void saveObjectData(String editorID, Data data, Data initialData) {
         int addIndex = objectList.getSelectedIndex() + 1;
         if (addIndex == 0) {
             addIndex = objectList.getModel().getSize();

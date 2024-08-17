@@ -5,6 +5,10 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,11 +19,14 @@ public class ScriptPane extends JTextPane {
             "if", "else", "while", "for", "return", "break", "continue", "func", "var"
     );
 
+    private boolean isAddingIndentation;
+
     public ScriptPane() {
         super();
         this.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
+                queueIndentation(e);
                 queueHighlightUpdate();
             }
 
@@ -31,6 +38,90 @@ public class ScriptPane extends JTextPane {
             @Override
             public void changedUpdate(DocumentEvent e) {}
         });
+        this.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "tabInsert");
+        this.getActionMap().put("tabInsert", new AbstractAction("tabInsert"){
+            public void actionPerformed(ActionEvent e){
+                try {
+                    ScriptPane.this.getDocument().insertString(ScriptPane.this.getCaretPosition(), "    ", null);
+                } catch (BadLocationException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        this.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_DOWN_MASK), "tabDelete");
+        this.getActionMap().put("tabDelete", new AbstractAction("tabDelete"){
+            public void actionPerformed(ActionEvent e){
+                try {
+                    int caretPos = getCaretPosition();
+                    int lineStart = Utilities.getRowStart(ScriptPane.this, caretPos);
+
+                    // Calculate the number of spaces to the left of the caret position
+                    int spaceCount = 0;
+                    for (int i = caretPos - 1; i >= lineStart; i--) {
+                        if (getDocument().getText(i, 1).charAt(0) == ' ') {
+                            spaceCount++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // Determine the number of spaces to delete
+                    int spacesToDelete;
+                    if (spaceCount == 0) {
+                        spacesToDelete = 0;
+                    } else if (spaceCount % 4 == 0) {
+                        spacesToDelete = 4;
+                    } else {
+                        spacesToDelete = spaceCount % 4;
+                    }
+
+                    // Delete the spaces
+                    if (spacesToDelete > 0) {
+                        getDocument().remove(caretPos - spacesToDelete, spacesToDelete);
+                    }
+                } catch (BadLocationException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public void queueIndentation(DocumentEvent e) {
+        SwingUtilities.invokeLater(() -> handleIndentation(e));
+    }
+
+    private void handleIndentation(DocumentEvent e) {
+        if (isAddingIndentation) return;
+        try {
+            isAddingIndentation = true;
+            int offset = e.getOffset();
+            if (offset == 0 || getDocument().getText(offset, 1).charAt(0) != '\n') {
+                return;
+            }
+
+            int lineStart = Utilities.getRowStart(this, offset - 1);
+            String previousLine = getDocument().getText(lineStart, offset - lineStart);
+
+            String indent = getLeadingWhitespace(previousLine);
+            if (getDocument().getText(offset - 1, 1).equals("{")) {
+                indent += "    ";
+            }
+
+            getDocument().insertString(offset + 1, indent, null);
+        } catch (BadLocationException ex) {
+            ex.printStackTrace();
+        } finally {
+            SwingUtilities.invokeLater(() -> isAddingIndentation = false);
+        }
+    }
+
+    private String getLeadingWhitespace(String str) {
+        int len = str.length();
+        int whiteSpaceCount = 0;
+        while (whiteSpaceCount < len && Character.isWhitespace(str.charAt(whiteSpaceCount)) && str.charAt(whiteSpaceCount) != '\n') {
+            whiteSpaceCount++;
+        }
+        return str.substring(0, whiteSpaceCount);
     }
 
     private void queueHighlightUpdate() {

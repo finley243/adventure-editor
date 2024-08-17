@@ -30,7 +30,7 @@ public class ConfigMenuManager implements DataSaveTarget {
             configFrame.toFront();
             configFrame.requestFocus();
         } else {
-            configFrame = new EditorFrame(main, main.getBrowserFrame(), main.getTemplate(CONFIG_TEMPLATE), configData, this, true);
+            configFrame = new EditorFrame(main, null, main.getBrowserFrame(), main.getTemplate(CONFIG_TEMPLATE), configData, this, true);
         }
     }
 
@@ -63,7 +63,7 @@ public class ConfigMenuManager implements DataSaveTarget {
     }
 
     @Override
-    public void saveObjectData(Data data, Data initialData) {
+    public void saveObjectData(String editorID, Data data, Data initialData) {
         configData = data;
         main.getProjectManager().updateProjectName();
     }

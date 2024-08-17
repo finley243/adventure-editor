@@ -186,7 +186,7 @@ public class MainFrame extends JFrame implements DataSaveTarget {
     }
 
     @Override
-    public void saveObjectData(Data data, Data initialData) {
+    public void saveObjectData(String editorID, Data data, Data initialData) {
         main.getDataManager().saveObjectData(data, initialData);
     }
 

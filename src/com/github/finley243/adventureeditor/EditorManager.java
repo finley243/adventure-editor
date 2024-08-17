@@ -25,7 +25,7 @@ public class EditorManager {
             activeFrame.toFront();
             activeFrame.requestFocus();
         } else {
-            EditorFrame editorFrame = new EditorFrame(main, main.getMainFrame(), template, objectData, saveTargetOverride != null ? saveTargetOverride : main.getMainFrame(), true);
+            EditorFrame editorFrame = new EditorFrame(main, null, main.getMainFrame(), template, objectData, saveTargetOverride != null ? saveTargetOverride : main.getMainFrame(), true);
             addActiveTopLevelFrame(categoryID, objectID, editorFrame);
         }
     }
