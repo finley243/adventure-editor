@@ -216,7 +216,7 @@ public class ScriptPane extends JTextPane {
         String literalPattern = "\\btrue\\b|\\bfalse\\b|\\bnull\\b";
         String stringPattern = "\"[^\"]*\"|'[^']*'";
         String numberPattern = "\\b\\d+\\.\\d+f?\\b|\\b\\d+\\b";
-        String operatorPattern = "\\+|-|\\*|/|%|==|!=|<|>|<=|>=|&&|\\|\\||!|\\?|:|\\+=|-=|\\*=|/=|%=|=|&|\\||\\^";
+        String operatorPattern = "\\+|-|\\*|/|%|==|!=|<|>|<=|>=|&&|\\|\\||!|\\?|:|\\+=|-=|\\*=|/=|%=|=|\\^";
         String errorPattern = "\\berror\\b";
         String commentPattern = "//[^\n]*|/\\*(?:.|\\R)*?(?:\\*/|$)";
 
