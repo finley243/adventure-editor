@@ -42,7 +42,31 @@ public class ScriptPane extends JTextPane {
         this.getActionMap().put("tabInsert", new AbstractAction("tabInsert"){
             public void actionPerformed(ActionEvent e){
                 try {
-                    ScriptPane.this.getDocument().insertString(ScriptPane.this.getCaretPosition(), "    ", null);
+                    int caretPos = ScriptPane.this.getCaretPosition();
+                    int lineStart = Utilities.getRowStart(ScriptPane.this, caretPos);
+
+                    // Calculate the number of spaces to the left of the caret position
+                    int spaceCount = 0;
+                    for (int i = lineStart; i < caretPos; i++) {
+                        if (getDocument().getText(i, 1).charAt(0) == ' ') {
+                            spaceCount++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // Determine the number of spaces to add to reach the next multiple of 4
+                    int spacesToAdd;
+                    if (spaceCount % 4 == 0) {
+                        spacesToAdd = 4;
+                    } else {
+                        spacesToAdd = 4 - (spaceCount % 4);
+                    }
+
+                    // Insert the spaces
+                    if (spacesToAdd > 0) {
+                        ScriptPane.this.getDocument().insertString(caretPos, " ".repeat(spacesToAdd), null);
+                    }
                 } catch (BadLocationException ex) {
                     ex.printStackTrace();
                 }
