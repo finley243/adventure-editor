@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public class ScriptPane extends JTextPane {
 
     private static final Set<String> KEYWORDS = Set.of(
-            "if", "else", "while", "for", "return", "break", "continue", "func", "var"
+            "if", "else", "while", "for", "return", "break", "continue", "func", "var", "stat", "statHolder"
     );
 
     private boolean isAddingIndentation;
@@ -161,19 +161,19 @@ public class ScriptPane extends JTextPane {
         StyleConstants.setForeground(keywordStyle, Color.decode("#000080"));
         StyleConstants.setBold(keywordStyle, true);
         Style literalStyle = doc.addStyle("literal", defaultStyle);
-        StyleConstants.setForeground(literalStyle, Color.decode("#800080"));
+        StyleConstants.setForeground(literalStyle, Color.decode("#C000C0"));
         StyleConstants.setBold(literalStyle, true);
         Style stringStyle = doc.addStyle("string", defaultStyle);
-        StyleConstants.setForeground(stringStyle, Color.decode("#008000"));
+        StyleConstants.setForeground(stringStyle, Color.decode("#00A000"));
         Style numberStyle = doc.addStyle("number", defaultStyle);
         StyleConstants.setForeground(numberStyle, Color.decode("#008080"));
         Style operatorStyle = doc.addStyle("operator", defaultStyle);
-        StyleConstants.setForeground(operatorStyle, Color.decode("#FF8C00"));
+        StyleConstants.setForeground(operatorStyle, Color.decode("#CF5C00"));
         Style errorStyle = doc.addStyle("error", defaultStyle);
         StyleConstants.setForeground(errorStyle, Color.decode("#DC143C"));
         StyleConstants.setBold(errorStyle, true);
         Style commentStyle = doc.addStyle("comment", defaultStyle);
-        StyleConstants.setForeground(commentStyle, Color.decode("#808080"));
+        StyleConstants.setForeground(commentStyle, Color.decode("#909090"));
 
         doc.setCharacterAttributes(0, doc.getLength(), defaultStyle, true);
 
@@ -191,19 +191,19 @@ public class ScriptPane extends JTextPane {
         while (matcher.find()) {
             Style matchStyle;
             if (matcher.group(1) != null) {
-                matchStyle = keywordStyle;
-            } else if (matcher.group(2) != null) {
-                matchStyle = literalStyle;
-            } else if (matcher.group(3) != null) {
-                matchStyle = stringStyle;
-            } else if (matcher.group(4) != null) {
-                matchStyle = numberStyle;
-            } else if (matcher.group(5) != null) {
-                matchStyle = operatorStyle;
-            } else if (matcher.group(6) != null) {
-                matchStyle = errorStyle;
-            } else if (matcher.group(7) != null) {
                 matchStyle = commentStyle;
+            } else if (matcher.group(2) != null) {
+                matchStyle = keywordStyle;
+            } else if (matcher.group(3) != null) {
+                matchStyle = literalStyle;
+            } else if (matcher.group(4) != null) {
+                matchStyle = stringStyle;
+            } else if (matcher.group(5) != null) {
+                matchStyle = numberStyle;
+            } else if (matcher.group(6) != null) {
+                matchStyle = operatorStyle;
+            } else if (matcher.group(7) != null) {
+                matchStyle = errorStyle;
             } else {
                 matchStyle = defaultStyle;
             }
@@ -212,15 +212,15 @@ public class ScriptPane extends JTextPane {
     }
 
     private static String getString() {
+        String commentPattern = "//[^\n]*|/\\*(?:.|\\R)*?(?:\\*/|$)";
         String keywordPattern = "\\b(?:" + String.join("|", KEYWORDS) + ")\\b";
         String literalPattern = "\\btrue\\b|\\bfalse\\b|\\bnull\\b";
         String stringPattern = "\"[^\"]*\"|'[^']*'";
-        String numberPattern = "\\b\\d+\\.\\d+f?\\b|\\b\\d+\\b";
+        String numberPattern = "\\b\\d+\\.\\d+f\\b|\\b\\d+\\b";
         String operatorPattern = "\\+|-|\\*|/|%|==|!=|<|>|<=|>=|&&|\\|\\||!|\\?|:|\\+=|-=|\\*=|/=|%=|=|\\^";
         String errorPattern = "\\berror\\b";
-        String commentPattern = "//[^\n]*|/\\*(?:.|\\R)*?(?:\\*/|$)";
 
-        return String.format("(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)", keywordPattern, literalPattern, stringPattern, numberPattern, operatorPattern, errorPattern, commentPattern);
+        return String.format("(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)", commentPattern, keywordPattern, literalPattern, stringPattern, numberPattern, operatorPattern, errorPattern);
     }
 
 }
