@@ -211,6 +211,26 @@ public class ScriptPane extends JTextPane {
         }
     }
 
+    private void highlightStringInstances(String targetString) {
+        StyledDocument doc = this.getStyledDocument();
+        Style defaultStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
+        Style highlightStyle = doc.addStyle("highlight", defaultStyle);
+        StyleConstants.setBackground(highlightStyle, Color.decode("#EEEE22"));
+
+        String text;
+        try {
+            text = doc.getText(0, doc.getLength());
+        } catch (BadLocationException e) {
+            throw new RuntimeException(e);
+        }
+
+        int index = text.indexOf(targetString);
+        while (index >= 0) {
+            doc.setCharacterAttributes(index, targetString.length(), highlightStyle, true);
+            index = text.indexOf(targetString, index + targetString.length());
+        }
+    }
+
     private static String getString() {
         String commentPattern = "//[^\n]*|/\\*(?:.|\\R)*?(?:\\*/|$)";
         String keywordPattern = "\\b(?:" + String.join("|", KEYWORDS) + ")\\b";
