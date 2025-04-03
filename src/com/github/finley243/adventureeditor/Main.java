@@ -55,9 +55,13 @@ public class Main {
     }
 
     private void initialLoad() throws ParserConfigurationException, IOException, SAXException {
-        DataLoader.loadTemplates(templates, enumTypes);
-        List<ProjectData> recentProjects = new ArrayList<>();
-        DataLoader.loadRecentProjects(recentProjects);
+        Map<String, List<String>> loadedEnumTypes = DataLoader.loadEnumTypes();
+        if (loadedEnumTypes == null) throw new RuntimeException("Failed to load enum types");
+        Map<String, Template> loadedTemplates = DataLoader.loadTemplates();
+        if (loadedTemplates == null) throw new RuntimeException("Failed to load templates");
+        templates.putAll(loadedTemplates);
+        enumTypes.putAll(loadedEnumTypes);
+        List<ProjectData> recentProjects = DataLoader.loadRecentProjects();
         projectManager.setRecentProjects(recentProjects);
     }
 
@@ -102,7 +106,7 @@ public class Main {
     }
 
     public Map<String, Template> getAllTemplates() {
-        return templates;
+        return new HashMap<> (templates);
     }
 
     public List<String> getEnumValues(String enumID) {

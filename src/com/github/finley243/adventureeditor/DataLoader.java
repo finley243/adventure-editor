@@ -33,126 +33,141 @@ public class DataLoader {
 
     private static final String COMPONENT_TYPE_ATTRIBUTE_ID = "type";
 
-    public static void loadTemplates(Map<String, Template> templates, Map<String, List<String>> enumTypes) throws ParserConfigurationException, IOException, SAXException {
+    public static Map<String, Template> loadTemplates() throws ParserConfigurationException, IOException, SAXException {
+        Map<String, Template> templates = new HashMap<>();
         File dir = new File(TEMPLATE_DIRECTORY);
-        if (dir.isDirectory()) {
-            File[] files = dir.listFiles();
-            if (files == null) {
-                return;
-            }
-            for (File file : files) {
-                if (file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("xml")) {
-                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                    DocumentBuilder builder = factory.newDocumentBuilder();
-                    Document document = builder.parse(file);
-                    Element rootElement = document.getDocumentElement();
-                    for (Element enumTypeElement : LoadUtils.directChildrenWithName(rootElement, "enumType")) {
-                        String id = LoadUtils.attribute(enumTypeElement, "id", null);
-                        List<String> values = LoadUtils.listOfTags(enumTypeElement, "value");
-                        enumTypes.put(id, values);
-                    }
-                    for (Element templateElement : LoadUtils.directChildrenWithName(rootElement, "template")) {
-                        String id = LoadUtils.attribute(templateElement, "id", null);
-                        String name = LoadUtils.attribute(templateElement, "name", null);
-                        boolean topLevel = LoadUtils.attributeBool(templateElement, "topLevel", false);
-                        boolean isUnique = LoadUtils.attributeBool(templateElement, "unique", topLevel);
-                        List<TabGroup> tabGroups = new ArrayList<>();
-                        for (Element tabGroupElement : LoadUtils.directChildrenWithName(templateElement, "tabGroup")) {
-                            String groupID = LoadUtils.attribute(tabGroupElement, "id", null);
-                            String groupName = LoadUtils.attribute(tabGroupElement, "name", null);
-                            int x = LoadUtils.attributeInt(tabGroupElement, "x", 0);
-                            int y = LoadUtils.attributeInt(tabGroupElement, "y", 0);
-                            int width = LoadUtils.attributeInt(tabGroupElement, "width", 1);
-                            int height = LoadUtils.attributeInt(tabGroupElement, "height", 1);
-                            tabGroups.add(new TabGroup(groupID, groupName, x, y, width, height));
-                        }
-                        List<Group> groups = new ArrayList<>();
-                        for (Element groupElement : LoadUtils.directChildrenWithName(templateElement, "group")) {
-                            String groupID = LoadUtils.attribute(groupElement, "id", null);
-                            String groupName = LoadUtils.attribute(groupElement, "name", null);
-                            String tabGroup = LoadUtils.attribute(groupElement, "tabGroup", null);
-                            int x = LoadUtils.attributeInt(groupElement, "x", 0);
-                            int y = LoadUtils.attributeInt(groupElement, "y", 0);
-                            int width = LoadUtils.attributeInt(groupElement, "width", 1);
-                            int height = LoadUtils.attributeInt(groupElement, "height", 1);
-                            groups.add(new Group(groupID, groupName, tabGroup, x, y, width, height));
-                        }
-                        List<TemplateParameter> parameters = new ArrayList<>();
-                        for (Element parameterElement : LoadUtils.directChildrenWithName(templateElement, "parameter")) {
-                            String dataTypeString = LoadUtils.attribute(parameterElement, "dataType", null);
-                            TemplateParameter.ParameterDataType dataType = switch (dataTypeString) {
-                                case "boolean" -> TemplateParameter.ParameterDataType.BOOLEAN;
-                                case "integer" -> TemplateParameter.ParameterDataType.INTEGER;
-                                case "float" -> TemplateParameter.ParameterDataType.FLOAT;
-                                case "string" -> TemplateParameter.ParameterDataType.STRING;
-                                case "stringLong" -> TemplateParameter.ParameterDataType.STRING_LONG;
-                                case "object" -> TemplateParameter.ParameterDataType.OBJECT;
-                                case "objectSet" -> TemplateParameter.ParameterDataType.OBJECT_SET;
-                                case "objectSetUnique" -> TemplateParameter.ParameterDataType.OBJECT_SET_UNIQUE;
-                                case "reference" -> TemplateParameter.ParameterDataType.REFERENCE;
-                                case "referenceSet" -> TemplateParameter.ParameterDataType.REFERENCE_SET;
-                                case "enum" -> TemplateParameter.ParameterDataType.ENUM;
-                                case "script" -> TemplateParameter.ParameterDataType.SCRIPT;
-                                case "component" -> TemplateParameter.ParameterDataType.COMPONENT;
-                                case "tree" -> TemplateParameter.ParameterDataType.TREE;
-                                case "treeBranch" -> TemplateParameter.ParameterDataType.TREE_BRANCH;
-                                case null, default -> throw new IllegalArgumentException("Invalid parameter data type in template " + id + ": " + dataTypeString);
-                            };
-                            String parameterID = LoadUtils.attribute(parameterElement, "id", null);
-                            String parameterName = LoadUtils.attribute(parameterElement, "name", null);
-                            String type = LoadUtils.attribute(parameterElement, "type", null);
-                            boolean topLevelOnly = LoadUtils.attributeBool(parameterElement, "topLevelOnly", false);
-                            boolean optional = LoadUtils.attributeBool(parameterElement, "optional", false);
-                            TemplateParameter.ParameterFormat format = LoadUtils.attributeEnum(parameterElement, "format", TemplateParameter.ParameterFormat.class, TemplateParameter.ParameterFormat.CHILD_TAG);
-                            String componentFormatString = LoadUtils.attribute(parameterElement, "componentFormat", null);
-                            TemplateParameter.ComponentFormat componentFormat = switch (componentFormatString) {
-                                case "typeAttribute" -> TemplateParameter.ComponentFormat.TYPE_ATTRIBUTE;
-                                case "textOrTags" -> TemplateParameter.ComponentFormat.TEXT_OR_TAGS;
-                                case null, default -> null;
-                            };
-                            List<ComponentOption> componentOptions = new ArrayList<>();
-                            for (Element componentOptionElement : LoadUtils.directChildrenWithName(parameterElement, "component")) {
-                                String optionID = LoadUtils.attribute(componentOptionElement, "id", null);
-                                String optionName = LoadUtils.attribute(componentOptionElement, "name", null);
-                                String optionObject = LoadUtils.attribute(componentOptionElement, "object", null);
-                                componentOptions.add(new ComponentOption(optionID, optionName, optionObject));
-                            }
-                            boolean useComponentTypeName = LoadUtils.attributeBool(parameterElement, "useComponentTypeName", false);
-                            String group = LoadUtils.attribute(parameterElement, "group", null);
-                            int x = LoadUtils.attributeInt(parameterElement, "x", 0);
-                            int y = LoadUtils.attributeInt(parameterElement, "y", 0);
-                            int width = LoadUtils.attributeInt(parameterElement, "width", 1);
-                            int height = LoadUtils.attributeInt(parameterElement, "height", 1);
-                            Data defaultValue = null;
-                            String defaultValueString = LoadUtils.attribute(parameterElement, "default", null);
-                            if (defaultValueString != null) {
-                                defaultValue = switch (dataType) {
-                                    case BOOLEAN -> new DataBoolean(Boolean.parseBoolean(defaultValueString));
-                                    case INTEGER -> new DataInteger(Integer.parseInt(defaultValueString));
-                                    case FLOAT -> new DataFloat(Float.parseFloat(defaultValueString));
-                                    case STRING, STRING_LONG -> new DataString(defaultValueString);
-                                    case REFERENCE -> new DataReference(defaultValueString);
-                                    case ENUM -> new DataEnum(defaultValueString);
-                                    case SCRIPT -> new DataScript(defaultValueString);
-                                    case COMPONENT -> new DataComponent(defaultValueString, null, null);
-                                    case OBJECT, OBJECT_SET_UNIQUE, OBJECT_SET, REFERENCE_SET, TREE, TREE_BRANCH -> null;
-                                };
-                            }
-                            parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height, defaultValue));
-                        }
-                        String nameFormat = LoadUtils.attribute(templateElement, "nameFormat", null);
-                        Template template = new Template(id, name, topLevel, isUnique, groups, tabGroups, parameters, nameFormat);
-                        templates.put(id, template);
-                    }
+        if (!dir.isDirectory()) return null;
+        File[] files = dir.listFiles();
+        if (files == null) return null;
+        for (File file : files) {
+            if (!file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("xml")) continue;
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(file);
+            Element rootElement = document.getDocumentElement();
+            for (Element templateElement : LoadUtils.directChildrenWithName(rootElement, "template")) {
+                String id = LoadUtils.attribute(templateElement, "id", null);
+                String name = LoadUtils.attribute(templateElement, "name", null);
+                boolean topLevel = LoadUtils.attributeBool(templateElement, "topLevel", false);
+                boolean isUnique = LoadUtils.attributeBool(templateElement, "unique", topLevel);
+                List<TabGroup> tabGroups = new ArrayList<>();
+                for (Element tabGroupElement : LoadUtils.directChildrenWithName(templateElement, "tabGroup")) {
+                    String groupID = LoadUtils.attribute(tabGroupElement, "id", null);
+                    String groupName = LoadUtils.attribute(tabGroupElement, "name", null);
+                    int x = LoadUtils.attributeInt(tabGroupElement, "x", 0);
+                    int y = LoadUtils.attributeInt(tabGroupElement, "y", 0);
+                    int width = LoadUtils.attributeInt(tabGroupElement, "width", 1);
+                    int height = LoadUtils.attributeInt(tabGroupElement, "height", 1);
+                    tabGroups.add(new TabGroup(groupID, groupName, x, y, width, height));
                 }
+                List<Group> groups = new ArrayList<>();
+                for (Element groupElement : LoadUtils.directChildrenWithName(templateElement, "group")) {
+                    String groupID = LoadUtils.attribute(groupElement, "id", null);
+                    String groupName = LoadUtils.attribute(groupElement, "name", null);
+                    String tabGroup = LoadUtils.attribute(groupElement, "tabGroup", null);
+                    int x = LoadUtils.attributeInt(groupElement, "x", 0);
+                    int y = LoadUtils.attributeInt(groupElement, "y", 0);
+                    int width = LoadUtils.attributeInt(groupElement, "width", 1);
+                    int height = LoadUtils.attributeInt(groupElement, "height", 1);
+                    groups.add(new Group(groupID, groupName, tabGroup, x, y, width, height));
+                }
+                List<TemplateParameter> parameters = new ArrayList<>();
+                for (Element parameterElement : LoadUtils.directChildrenWithName(templateElement, "parameter")) {
+                    String dataTypeString = LoadUtils.attribute(parameterElement, "dataType", null);
+                    TemplateParameter.ParameterDataType dataType = switch (dataTypeString) {
+                        case "boolean" -> TemplateParameter.ParameterDataType.BOOLEAN;
+                        case "integer" -> TemplateParameter.ParameterDataType.INTEGER;
+                        case "float" -> TemplateParameter.ParameterDataType.FLOAT;
+                        case "string" -> TemplateParameter.ParameterDataType.STRING;
+                        case "stringLong" -> TemplateParameter.ParameterDataType.STRING_LONG;
+                        case "object" -> TemplateParameter.ParameterDataType.OBJECT;
+                        case "objectSet" -> TemplateParameter.ParameterDataType.OBJECT_SET;
+                        case "objectSetUnique" -> TemplateParameter.ParameterDataType.OBJECT_SET_UNIQUE;
+                        case "reference" -> TemplateParameter.ParameterDataType.REFERENCE;
+                        case "referenceSet" -> TemplateParameter.ParameterDataType.REFERENCE_SET;
+                        case "enum" -> TemplateParameter.ParameterDataType.ENUM;
+                        case "script" -> TemplateParameter.ParameterDataType.SCRIPT;
+                        case "component" -> TemplateParameter.ParameterDataType.COMPONENT;
+                        case "tree" -> TemplateParameter.ParameterDataType.TREE;
+                        case "treeBranch" -> TemplateParameter.ParameterDataType.TREE_BRANCH;
+                        case null, default -> throw new IllegalArgumentException("Invalid parameter data type in template " + id + ": " + dataTypeString);
+                    };
+                    String parameterID = LoadUtils.attribute(parameterElement, "id", null);
+                    String parameterName = LoadUtils.attribute(parameterElement, "name", null);
+                    String type = LoadUtils.attribute(parameterElement, "type", null);
+                    boolean topLevelOnly = LoadUtils.attributeBool(parameterElement, "topLevelOnly", false);
+                    boolean optional = LoadUtils.attributeBool(parameterElement, "optional", false);
+                    TemplateParameter.ParameterFormat format = LoadUtils.attributeEnum(parameterElement, "format", TemplateParameter.ParameterFormat.class, TemplateParameter.ParameterFormat.CHILD_TAG);
+                    String componentFormatString = LoadUtils.attribute(parameterElement, "componentFormat", null);
+                    TemplateParameter.ComponentFormat componentFormat = switch (componentFormatString) {
+                        case "typeAttribute" -> TemplateParameter.ComponentFormat.TYPE_ATTRIBUTE;
+                        case "textOrTags" -> TemplateParameter.ComponentFormat.TEXT_OR_TAGS;
+                        case null, default -> null;
+                    };
+                    List<ComponentOption> componentOptions = new ArrayList<>();
+                    for (Element componentOptionElement : LoadUtils.directChildrenWithName(parameterElement, "component")) {
+                        String optionID = LoadUtils.attribute(componentOptionElement, "id", null);
+                        String optionName = LoadUtils.attribute(componentOptionElement, "name", null);
+                        String optionObject = LoadUtils.attribute(componentOptionElement, "object", null);
+                        componentOptions.add(new ComponentOption(optionID, optionName, optionObject));
+                    }
+                    boolean useComponentTypeName = LoadUtils.attributeBool(parameterElement, "useComponentTypeName", false);
+                    String group = LoadUtils.attribute(parameterElement, "group", null);
+                    int x = LoadUtils.attributeInt(parameterElement, "x", 0);
+                    int y = LoadUtils.attributeInt(parameterElement, "y", 0);
+                    int width = LoadUtils.attributeInt(parameterElement, "width", 1);
+                    int height = LoadUtils.attributeInt(parameterElement, "height", 1);
+                    Data defaultValue = null;
+                    String defaultValueString = LoadUtils.attribute(parameterElement, "default", null);
+                    if (defaultValueString != null) {
+                        defaultValue = switch (dataType) {
+                            case BOOLEAN -> new DataBoolean(Boolean.parseBoolean(defaultValueString));
+                            case INTEGER -> new DataInteger(Integer.parseInt(defaultValueString));
+                            case FLOAT -> new DataFloat(Float.parseFloat(defaultValueString));
+                            case STRING, STRING_LONG -> new DataString(defaultValueString);
+                            case REFERENCE -> new DataReference(defaultValueString);
+                            case ENUM -> new DataEnum(defaultValueString);
+                            case SCRIPT -> new DataScript(defaultValueString);
+                            case COMPONENT -> new DataComponent(defaultValueString, null, null);
+                            case OBJECT, OBJECT_SET_UNIQUE, OBJECT_SET, REFERENCE_SET, TREE, TREE_BRANCH -> null;
+                        };
+                    }
+                    parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height, defaultValue));
+                }
+                String nameFormat = LoadUtils.attribute(templateElement, "nameFormat", null);
+                Template template = new Template(id, name, topLevel, isUnique, groups, tabGroups, parameters, nameFormat);
+                templates.put(id, template);
             }
         }
+        return templates;
     }
 
-    public static void loadRecentProjects(List<ProjectData> recentProjects) {
+    public static Map<String, List<String>> loadEnumTypes() throws ParserConfigurationException, IOException, SAXException {
+        Map<String, List<String>> enumTypes = new HashMap<>();
+        File dir = new File(TEMPLATE_DIRECTORY);
+        if (!dir.isDirectory()) return null;
+        File[] files = dir.listFiles();
+        if (files == null) return null;
+        for (File file : files) {
+            if (!file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("xml")) continue;
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(file);
+            Element rootElement = document.getDocumentElement();
+            for (Element enumTypeElement : LoadUtils.directChildrenWithName(rootElement, "enumType")) {
+                String id = LoadUtils.attribute(enumTypeElement, "id", null);
+                List<String> values = LoadUtils.listOfTags(enumTypeElement, "value");
+                enumTypes.put(id, values);
+            }
+        }
+        return enumTypes;
+    }
+
+    public static List<ProjectData> loadRecentProjects() {
+        List<ProjectData> recentProjects = new ArrayList<>();
         File file = new File(RECENT_PROJECTS_FILE);
         if (!file.exists()) {
-            return;
+            return recentProjects;
         }
         try {
             Scanner scanner = new Scanner(file);
@@ -166,6 +181,7 @@ public class DataLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return recentProjects;
     }
 
     public static void saveRecentProjects(List<ProjectData> recentProjects) {
