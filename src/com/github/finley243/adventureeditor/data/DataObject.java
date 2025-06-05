@@ -64,6 +64,12 @@ public class DataObject extends Data {
     @Override
     public String toString() {
         String nameString = template.nameFormat() == null ? template.name() : template.nameFormat();
+
+        // Handle binary flag patterns: {flag:param:trueStr:falseStr} or {flag:param:trueStr}
+        nameString = processFlagPatterns(nameString);
+        // Handle non-null value injection: {value:param:default} or {value:param}
+        nameString = processValuePatterns(nameString);
+
         List<String> parameterKeys = new ArrayList<>(value.keySet());
         parameterKeys.sort(Comparator.comparingInt(String::length));
         for (String parameterKey : parameterKeys) {
@@ -72,6 +78,58 @@ public class DataObject extends Data {
             nameString = nameString.replace("$" + parameterKey, parameterString);
         }
         return nameString;
+    }
+
+    /**
+     * Replaces all {flag:param:trueStr:falseStr} or {flag:param:trueStr} patterns in the input string.
+     * Supports both parenthesized and non-parenthesized true/false strings.
+     */
+    private String processFlagPatterns(String input) {
+        // Match {flag:param:trueStr:falseStr} or {flag:param:trueStr}
+        String pattern = "\\{flag:([a-zA-Z0-9_]+):([^:{}]+)(?::([^:{}]+))?}";
+        java.util.regex.Pattern regex = java.util.regex.Pattern.compile(pattern);
+        java.util.regex.Matcher matcher = regex.matcher(input);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            String param = matcher.group(1);
+            String trueStr = matcher.group(2);
+            String falseStr = matcher.group(3); // may be null
+            Data paramData = value.get(param);
+            boolean isTrue = paramData instanceof DataBoolean && ((DataBoolean) paramData).getValue();
+            String replacement = isTrue ? trueStr : (falseStr != null ? falseStr : "");
+            matcher.appendReplacement(sb, java.util.regex.Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
+    /**
+     * Replaces all {value:param:prefix:suffix:default}, {value:param:prefix:suffix}, {value:param:prefix}, {value:param:default}, or {value:param} patterns in the input string.
+     * If the parameter is non-null, injects prefix + toString value + suffix. If null, injects the default if provided, else nothing.
+     */
+    private String processValuePatterns(String input) {
+        // Regex: {value:param:prefix:suffix:default} (all optional except param)
+        String pattern = "\\{value:([a-zA-Z0-9_]+)(?::([^:{}]*))?(?::([^:{}]*))?(?::([^:{}]*))?}";
+        java.util.regex.Pattern regex = java.util.regex.Pattern.compile(pattern);
+        java.util.regex.Matcher matcher = regex.matcher(input);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            String param = matcher.group(1);
+            String prefix = matcher.group(2);
+            String suffix = matcher.group(3);
+            String defaultStr = matcher.group(4);
+            Data paramData = value.get(param);
+            String replacement;
+            if (paramData != null) {
+                String valueStr = paramData.toString();
+                replacement = (prefix != null ? prefix : "") + valueStr + (suffix != null ? suffix : "");
+            } else {
+                replacement = (defaultStr != null ? defaultStr : "");
+            }
+            matcher.appendReplacement(sb, java.util.regex.Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 
     @Override

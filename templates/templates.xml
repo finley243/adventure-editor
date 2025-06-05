@@ -150,7 +150,7 @@
         <parameter id="line" dataType="tree" name="Lines" type="sceneLine" x="1" y="1" height="2"/>
         <parameter id="choice" dataType="objectSet" name="Choices" type="sceneChoice" topLevelOnly="true" x="2" y="0" height="3"/>
     </template>
-    <template id="sceneLine" name="Scene Line" topLevel="false" nameFormat="$line">
+    <template id="sceneLine" name="Scene Line" topLevel="false" nameFormat="{flag:once:o }{flag:exit:x }$line">
         <parameter id="once" dataType="boolean" name="Show Once" format="attribute" x="0" y="0" default="false"/>
         <parameter id="exit" dataType="boolean" name="Exit After" format="attribute" x="1" y="0" default="false"/>
         <parameter id="from" dataType="reference" name="Show Only From" type="scene" format="attribute" optional="true" x="0" y="1" width="2"/>
@@ -491,7 +491,7 @@
         <parameter id="item" dataType="objectSet" name="Items" type="lootTableRefItem" y="2"/>
         <parameter id="table" dataType="objectSet" name="Tables" type="lootTableRefTable" y="3"/>
     </template>
-    <template id="lootTableRefItem" name="Item Entry" nameFormat="$id">
+    <template id="lootTableRefItem" name="Item Entry" nameFormat="$id{value:count: (:)}{value:countMin: (:}{value:countMax:-:)}">
         <parameter id="id" dataType="reference" name="Item" type="item" format="current_tag" y="0"/>
         <parameter id="chance" dataType="float" name="Chance" format="attribute" y="1" default="1.0"/>
         <parameter id="count" dataType="integer" name="Count" format="attribute" optional="true" y="2" default="1"/>
@@ -499,7 +499,7 @@
         <parameter id="countMax" dataType="integer" name="Max Count" format="attribute" optional="true" y="4" default="0"/>
         <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true" y="5"/>
     </template>
-    <template id="lootTableRefTable" name="Table Entry" nameFormat="$id">
+    <template id="lootTableRefTable" name="Table Entry" nameFormat="$id{value:count: (:)}{value:countMin: (:}{value:countMax:-:)}">
         <parameter id="id" dataType="reference" name="Loot Table" type="lootTable" format="current_tag" y="0"/>
         <parameter id="chance" dataType="float" name="Chance" format="attribute" y="1" default="1.0"/>
         <parameter id="count" dataType="integer" name="Count" format="attribute" optional="true" y="2" default="1"/>
