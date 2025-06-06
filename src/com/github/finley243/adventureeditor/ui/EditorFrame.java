@@ -37,7 +37,7 @@ public class EditorFrame extends JDialog {
         this.saveTarget = saveTarget;
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
-        this.parameterField = new ParameterFieldObject(this, false, template.name(), null, template, main, isTopLevel, true);
+        this.parameterField = new ParameterFieldObject(this, false, template.name(), null, template, main, isTopLevel);
         if (objectData != null) {
             parameterField.setData(objectData);
         }

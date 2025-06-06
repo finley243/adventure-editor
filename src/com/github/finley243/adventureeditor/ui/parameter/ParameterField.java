@@ -23,10 +23,8 @@ public abstract class ParameterField extends JPanel {
         setLayout(new BorderLayout());
         add(innerPanel, BorderLayout.CENTER);
         if (isOptional) {
-            //setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-            this.optionalCheckbox = new JCheckBox(/*"Enable " +*/ name);
+            this.optionalCheckbox = new JCheckBox(name);
             optionalCheckbox.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-            //optionalCheckbox.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             optionalCheckbox.addActionListener(e -> {
                 boolean isEnabled = optionalCheckbox.isSelected();
                 this.isOptionalEnabled = isEnabled;
@@ -34,7 +32,6 @@ public abstract class ParameterField extends JPanel {
                 parentFrame.onEditorElementUpdated();
             });
             optionalCheckbox.setVerticalTextPosition(SwingConstants.TOP);
-            //add(optionalCheckbox, BorderLayout.PAGE_START);
             this.isOptionalEnabled = false;
         } else {
             this.optionalCheckbox = null;

@@ -38,10 +38,7 @@ public class ParameterFieldText extends ParameterField {
         JScrollPane scrollPane = new JScrollPane(sizeLimiterPanel);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-        //textPane.setPreferredSize(new Dimension(200, 150));
-        //sizeLimiterPanel.setPreferredSize(new Dimension(200, 150));
         scrollPane.setPreferredSize(new Dimension(200, 150));
-        //textPane.addActionListener(e -> editorFrame.onEditorElementUpdated());
         textPane.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -70,7 +67,6 @@ public class ParameterFieldText extends ParameterField {
         valueConstraints.weighty = 1;
         valueConstraints.fill = GridBagConstraints.BOTH;
         getInnerPanel().add(label, labelConstraints);
-        //getInnerPanel().add(textPane, valueConstraints);
         getInnerPanel().add(scrollPane, valueConstraints);
         if (optional) {
             setEnabledState(false);

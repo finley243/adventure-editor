@@ -161,7 +161,7 @@
             <component id="tags" name="Logic" object="sceneLineLogic"/>
         </parameter>
     </template>
-    <template id="sceneLineLogic" name="Logic" topLevel="false" nameFormat="$type">
+    <template id="sceneLineLogic" name="Logic" topLevel="false" nameFormat="($type){value:condition: (:)}">
         <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" x="0" y="0" height="2"/>
         <parameter id="scriptPre" dataType="object" name="Pre Script" type="script" optional="true" x="1" y="0" height="4"/>
         <parameter id="scriptPost" dataType="object" name="Post Script" type="script" optional="true" x="1" y="4" height="4"/>
@@ -174,7 +174,7 @@
     <template id="script" name="Script" topLevel="false">
         <parameter id="script" dataType="script" name="Script" format="current_tag"/>
     </template>
-    <template id="condition" name="Condition" topLevel="false">
+    <template id="condition" name="Condition" topLevel="false" primaryParameter="condition">
         <parameter id="condition" dataType="string" name="Condition" format="current_tag"/>
     </template>
     <template id="sceneChoice" name="Scene Choice" topLevel="false" nameFormat="$text">
@@ -628,10 +628,10 @@
         <parameter id="isLoud" dataType="boolean" name="Is Loud" format="attribute" y="2" default="false"/>
         <parameter id="skill" dataType="reference" name="Skill" type="skill" format="attribute" y="3"/>
         <parameter id="name" dataType="string" name="Name" format="child_tag" y="4"/>
-        <parameter id="slotGroup" dataType="objectSetUnique" name="Slot Groups" type="equipSlotGroup" y="5"/>
-        <parameter id="ammo" dataType="objectSetUnique" name="Ammo Types" type="weaponClassAmmoType" y="6"/>
-        <parameter id="range" dataType="objectSetUnique" name="Ranges" type="weaponClassRange" y="7"/>
-        <parameter id="attackType" dataType="objectSetUnique" name="Attack Types" type="weaponClassAttackType" y="8"/>
+        <parameter id="slotGroup" dataType="objectSetUnique" name="Slot Groups" type="equipSlotGroup" x="1" y="0" height="3"/>
+        <parameter id="ammo" dataType="objectSetUnique" name="Ammo Types" type="weaponClassAmmoType" x="1" y="3" height="2"/>
+        <parameter id="range" dataType="objectSetUnique" name="Ranges" type="weaponClassRange" x="2" y="0" height="3"/>
+        <parameter id="attackType" dataType="objectSetUnique" name="Attack Types" type="weaponClassAttackType" x="2" y="3" height="2"/>
     </template>
     <template id="equipSlotGroup" name="Slot Group" topLevel="false" nameFormat="$slot" primaryParameter="slot">
         <parameter id="slot" dataType="objectSetUnique" name="Slots" type="weaponClassSlot"/>
@@ -639,13 +639,13 @@
     <template id="weaponClassSlot" name="Slot" topLevel="false" nameFormat="$slot" primaryParameter="slot">
         <parameter id="slot" dataType="string" name="Slot" format="current_tag"/>
     </template>
-    <template id="weaponClassAmmoType" name="Ammo Type" topLevel="false" nameFormat="$ammo">
+    <template id="weaponClassAmmoType" name="Ammo Type" topLevel="false" nameFormat="$ammo" primaryParameter="ammo">
         <parameter id="ammo" dataType="reference" name="Ammo Item" type="item" format="current_tag"/>
     </template>
-    <template id="weaponClassRange" name="Range" topLevel="false" nameFormat="$range">
+    <template id="weaponClassRange" name="Range" topLevel="false" nameFormat="$range" primaryParameter="range">
         <parameter id="range" dataType="enum" type="distance" name="Range" format="current_tag"/>
     </template>
-    <template id="weaponClassAttackType" name="AttackType" topLevel="false" nameFormat="$attackType">
+    <template id="weaponClassAttackType" name="AttackType" topLevel="false" nameFormat="$attackType" primaryParameter="attackType">
         <parameter id="attackType" dataType="reference" name="Attack Type" type="attackType" format="current_tag"/>
     </template>
     <template id="scriptWithTriggerRoom" name="Script Trigger" topLevel="false" nameFormat="$trigger">

@@ -151,7 +151,7 @@ public class ParameterFieldTree extends ParameterField {
     }
 
     private void addBlankPanel() {
-        ParameterFieldObject blankObjectField = new ParameterFieldObject(editorFrame, false, null, this, template, main, false, false);
+        ParameterFieldObject blankObjectField = new ParameterFieldObject(editorFrame, false, null, this, template, main, false);
         blankObjectField.setEnabledFromParent(false);
         objectPanel.add(blankObjectField, BLANK_PANEL_KEY);
     }
@@ -213,7 +213,7 @@ public class ParameterFieldTree extends ParameterField {
     }
 
     private void addCardForNode(ObjectTreeNode node) {
-        ParameterFieldObject objectField = new ParameterFieldObject(editorFrame, false, null, this, template, main, false, false);
+        ParameterFieldObject objectField = new ParameterFieldObject(editorFrame, false, null, this, template, main, false);
         Data nodeData = node.getData();
         objectField.setData(nodeData);
         node.setData(objectField.getData());

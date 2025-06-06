@@ -13,7 +13,7 @@ public class ParameterFieldString extends ParameterField {
 
     private final JTextField textField;
 
-    public ParameterFieldString(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, boolean useWide) {
+    public ParameterFieldString(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
@@ -24,12 +24,7 @@ public class ParameterFieldString extends ParameterField {
             label = new JLabel(name);
         }
         this.textField = new JTextField();
-        if (useWide) {
-            textField.setPreferredSize(new Dimension(300, 20));
-            textField.setFont(textField.getFont().deriveFont(12.0f));
-        } else {
-            textField.setPreferredSize(new Dimension(150, 20));
-        }
+        textField.setPreferredSize(new Dimension(150, 20));
         textField.addActionListener(e -> onFieldUpdated());
         textField.getDocument().addDocumentListener(new DocumentListener() {
             @Override

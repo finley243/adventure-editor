@@ -25,13 +25,10 @@ public class ParameterFieldObject extends ParameterField {
     private final Map<String, EditorTabGroup> tabGroups;
     private final Template template;
 
-    public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, Main main, boolean isTopLevelEditor, boolean isSeparateWindow) {
+    public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, Main main, boolean isTopLevelEditor) {
         super(editorFrame, optional, name, parentField);
         this.template = template;
         JPanel objectPanel = new JPanel();
-        /*if (!isSeparateWindow) {
-            objectPanel.setBorder(BorderFactory.createTitledBorder(name));
-        }*/
         getInnerPanel().setLayout(new BorderLayout());
         objectPanel.setLayout(new GridBagLayout());
         this.editorElements = new HashMap<>();
@@ -48,7 +45,6 @@ public class ParameterFieldObject extends ParameterField {
             tabGroupConstraints.weighty = 1;
             tabGroupConstraints.fill = GridBagConstraints.BOTH;
             tabGroupConstraints.anchor = GridBagConstraints.NORTHWEST;
-            //tabGroupConstraints.insets = new Insets(2, 2, 2, 2);
             objectPanel.add(editorTabGroup, tabGroupConstraints);
         }
         Map<String, EditorGroup> groups = new HashMap<>();
@@ -71,7 +67,6 @@ public class ParameterFieldObject extends ParameterField {
                 groupConstraints.weighty = 1;
                 groupConstraints.fill = GridBagConstraints.BOTH;
                 groupConstraints.anchor = GridBagConstraints.NORTHWEST;
-                //groupConstraints.insets = new Insets(2, 2, 2, 2);
                 objectPanel.add(editorGroup, groupConstraints);
             }
         }
@@ -90,26 +85,18 @@ public class ParameterFieldObject extends ParameterField {
                 parameterConstraints.weighty = 1;
                 parameterConstraints.fill = GridBagConstraints.BOTH;
                 parameterConstraints.anchor = GridBagConstraints.NORTHWEST;
-                //parameterConstraints.insets = new Insets(2, 2, 2, 2);
                 editorElements.put(parameter.id(), parameterElement);
-                /*if (parameterElement instanceof ParameterFieldObject) {
-                    parameterElement.setBorder(BorderFactory.createDashedBorder(Color.RED));
-                    parameterElement.getInnerPanel().setBorder(BorderFactory.createDashedBorder(Color.BLUE));
-                }*/
                 if (parameter.group() != null) {
                     EditorGroup group = groups.get(parameter.group());
                     if (group == null) {
                         throw new IllegalArgumentException("Group " + parameter.group() + " not found in template " + template.id());
                     }
-                    //parameterConstraints.anchor = GridBagConstraints.NORTHWEST;
-                    //parameterConstraints.fill = GridBagConstraints.HORIZONTAL;
                     group.add(parameterElement, parameterConstraints);
                 } else {
                     objectPanel.add(parameterElement, parameterConstraints);
                 }
             }
         }
-        //getInnerPanel().add(objectPanel);
         if (optional) {
             getInnerPanel().add(new OptionalBorderedPanel(name, objectPanel, getOptionalCheckbox()), BorderLayout.CENTER);
         } else {

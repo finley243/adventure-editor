@@ -16,28 +16,22 @@ import java.util.Map;
 public class ParameterFieldComponent extends ParameterField {
 
     private final Map<String, ParameterField> editorElements;
-    private final Main main;
-    private final TemplateParameter.ComponentFormat componentFormat;
     private final JPanel objectPanel;
     private final JComboBox<ComponentOption> dropdownMenu;
     private final Map<String, ComponentOption> componentOptionMap;
-    private final boolean useComponentTypeName;
 
     private String activeOption;
 
-    public ParameterFieldComponent(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, TemplateParameter.ComponentFormat componentFormat, List<ComponentOption> componentOptions, boolean useComponentTypeName, Main main) {
+    public ParameterFieldComponent(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, List<ComponentOption> componentOptions, Main main) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.editorElements = new HashMap<>();
-        this.main = main;
-        this.componentFormat = componentFormat;
         this.objectPanel = new JPanel();
         this.componentOptionMap = new HashMap<>();
-        this.useComponentTypeName = useComponentTypeName;
         objectPanel.setLayout(new CardLayout());
         objectPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         for (ComponentOption option : componentOptions) {
-            ParameterField element = new ParameterFieldObject(editorFrame, false, option.name(), this, main.getTemplate(option.object()), main, false, false);
+            ParameterField element = new ParameterFieldObject(editorFrame, false, option.name(), this, main.getTemplate(option.object()), main, false);
             objectPanel.add(element, option.id());
             editorElements.put(option.id(), element);
             componentOptionMap.put(option.id(), option);
