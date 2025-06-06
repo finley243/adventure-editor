@@ -168,7 +168,7 @@
         <parameter id="line" dataType="treeBranch" name="Sub-Lines" type="sceneLine" x="0" y="3" height="3"/>
     </template>
     <template id="sceneLineText" name="Text" topLevel="false" nameFormat="$text">
-        <parameter id="text" dataType="string" name="Text" format="current_tag" x="0" y="0"/>
+        <parameter id="text" dataType="stringLong" name="Text" format="current_tag" x="0" y="0"/>
     </template>
     <template id="script" name="Script" topLevel="false">
         <parameter id="script" dataType="script" name="Script" format="current_tag"/>
