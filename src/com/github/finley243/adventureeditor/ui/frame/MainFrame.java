@@ -1,10 +1,10 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.frame;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.ProjectData;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
-import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -14,9 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class MainFrame extends JFrame implements DataSaveTarget {

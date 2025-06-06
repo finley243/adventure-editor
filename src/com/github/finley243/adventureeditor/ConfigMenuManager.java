@@ -4,7 +4,7 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataString;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-import com.github.finley243.adventureeditor.ui.EditorFrame;
+import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import java.util.Objects;
 

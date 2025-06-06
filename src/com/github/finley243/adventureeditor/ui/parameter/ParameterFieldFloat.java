@@ -2,7 +2,7 @@ package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataFloat;
-import com.github.finley243.adventureeditor.ui.EditorFrame;
+import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
 import java.awt.*;

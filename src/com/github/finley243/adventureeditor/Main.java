@@ -2,7 +2,7 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
-import com.github.finley243.adventureeditor.ui.MainFrame;
+import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;

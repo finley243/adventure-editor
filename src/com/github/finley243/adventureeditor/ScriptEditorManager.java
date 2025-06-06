@@ -7,8 +7,8 @@ import com.github.finley243.adventureeditor.data.DataString;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-import com.github.finley243.adventureeditor.ui.EditorFrame;
-import com.github.finley243.adventureeditor.ui.ScriptEditorFrame;
+import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
+import com.github.finley243.adventureeditor.ui.frame.ScriptEditorFrame;
 
 import javax.swing.*;
 import java.awt.*;

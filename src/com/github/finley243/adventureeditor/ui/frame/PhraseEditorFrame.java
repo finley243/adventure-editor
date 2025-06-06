@@ -1,6 +1,7 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.frame;
 
 import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.ui.table.PhraseTableModel;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;

@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor;
 
-import com.github.finley243.adventureeditor.ui.ReferenceListFrame;
+import com.github.finley243.adventureeditor.ui.frame.ReferenceListFrame;
 
 import java.util.*;
 

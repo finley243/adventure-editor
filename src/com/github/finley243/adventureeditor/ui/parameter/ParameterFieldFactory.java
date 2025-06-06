@@ -2,7 +2,7 @@ package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
-import com.github.finley243.adventureeditor.ui.EditorFrame;
+import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 public class ParameterFieldFactory {
 

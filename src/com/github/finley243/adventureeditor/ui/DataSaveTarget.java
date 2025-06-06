@@ -1,6 +1,7 @@
 package com.github.finley243.adventureeditor.ui;
 
 import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 public interface DataSaveTarget {
 
