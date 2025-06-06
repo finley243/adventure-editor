@@ -18,7 +18,7 @@ public class ScriptEditorManager implements DataSaveTarget {
 
     private static final Template SCRIPT_TEMPLATE = new Template("script", "Script", false, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>() {{
         add(new TemplateParameter("script", TemplateParameter.ParameterDataType.SCRIPT, null, null, false, false, null, null, new ArrayList<>(), false, null, 0, 1, 1, 1, null));
-    }}, null);
+    }}, null, null);
 
     private final Main main;
     private final Map<String, String> scripts;

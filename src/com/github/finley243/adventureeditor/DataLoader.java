@@ -135,7 +135,8 @@ public class DataLoader {
                     parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height, defaultValue));
                 }
                 String nameFormat = LoadUtils.attribute(templateElement, "nameFormat", null);
-                Template template = new Template(id, name, topLevel, isUnique, groups, tabGroups, parameters, nameFormat);
+                String primaryParameter = LoadUtils.attribute(templateElement, "primaryParameter", null);
+                Template template = new Template(id, name, topLevel, isUnique, groups, tabGroups, parameters, nameFormat, primaryParameter);
                 templates.put(id, template);
             }
         }

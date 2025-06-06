@@ -164,7 +164,7 @@ public class DataObject extends Data {
         if (!Objects.equals(getTemplate(), dataObject.getTemplate())) {
             return false;
         }
-        String primaryParameter = template.nameFormat();
+        String primaryParameter = template.primaryParameter();
         if (primaryParameter == null) {
             return false;
         }
