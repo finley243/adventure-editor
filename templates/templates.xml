@@ -628,10 +628,8 @@
         <parameter id="isLoud" dataType="boolean" name="Is Loud" format="attribute" y="2" default="false"/>
         <parameter id="skill" dataType="reference" name="Skill" type="skill" format="attribute" y="3"/>
         <parameter id="name" dataType="string" name="Name" format="child_tag" y="4"/>
-        <parameter id="slotGroup" dataType="objectSetUnique" name="Slot Groups" type="equipSlotGroup" x="1" y="0" height="3"/>
-        <parameter id="ammo" dataType="objectSetUnique" name="Ammo Types" type="weaponClassAmmoType" x="1" y="3" height="2"/>
-        <parameter id="range" dataType="objectSetUnique" name="Ranges" type="weaponClassRange" x="2" y="0" height="3"/>
-        <parameter id="attackType" dataType="objectSetUnique" name="Attack Types" type="weaponClassAttackType" x="2" y="3" height="2"/>
+        <parameter id="range" dataType="objectSetUnique" name="Ranges" type="weaponClassRange" x="1" y="0" height="3"/>
+        <parameter id="attackType" dataType="objectSetUnique" name="Attack Types" type="weaponClassAttackType" x="1" y="3" height="2"/>
     </template>
     <template id="equipSlotGroup" name="Slot Group" topLevel="false" nameFormat="$slot" primaryParameter="slot">
         <parameter id="slot" dataType="objectSetUnique" name="Slots" type="weaponClassSlot"/>
