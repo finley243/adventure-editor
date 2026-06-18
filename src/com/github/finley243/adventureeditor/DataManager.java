@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.*;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 
@@ -10,11 +11,18 @@ import java.util.*;
 
 public class DataManager {
 
-    private final Main main;
+    private final EditorManager editorManager;
+    private final TemplateRegistry templateRegistry;
+    private final ReferenceListManager referenceListManager;
+    private final ConfigMenuManager configMenuManager;
+
     private final Map<String, Map<String, Data>> data;
 
-    public DataManager(Main main) {
-        this.main = main;
+    public DataManager(EditorManager editorManager, TemplateRegistry templateRegistry, ReferenceListManager referenceListManager, ConfigMenuManager configMenuManager) {
+        this.editorManager = editorManager;
+        this.templateRegistry = templateRegistry;
+        this.referenceListManager = referenceListManager;
+        this.configMenuManager = configMenuManager;
         this.data = new HashMap<>();
     }
 
@@ -92,19 +100,19 @@ public class DataManager {
     }
 
     public void newObject(String categoryID) {
-        main.getEditorManager().openEditorFrame(categoryID, null, main.getTemplate(categoryID), null, null);
+        editorManager.openEditorFrame(categoryID, null, templateRegistry.getTemplate(categoryID), null, null);
     }
 
     public void newObject(String categoryID, DataSaveTarget saveTargetOverride) {
-        main.getEditorManager().openEditorFrame(categoryID, null, main.getTemplate(categoryID), null, saveTargetOverride);
+        editorManager.openEditorFrame(categoryID, null, templateRegistry.getTemplate(categoryID), null, saveTargetOverride);
     }
 
     public void editObject(String categoryID, String objectID) {
-        main.getEditorManager().openEditorFrame(categoryID, objectID, main.getTemplate(categoryID), getData(categoryID, objectID), null);
+        editorManager.openEditorFrame(categoryID, objectID, templateRegistry.getTemplate(categoryID), getData(categoryID, objectID), null);
     }
 
     public void editObject(String categoryID, String objectID, DataSaveTarget saveTargetOverride) {
-        main.getEditorManager().openEditorFrame(categoryID, objectID, main.getTemplate(categoryID), getData(categoryID, objectID), saveTargetOverride);
+        editorManager.openEditorFrame(categoryID, objectID, templateRegistry.getTemplate(categoryID), getData(categoryID, objectID), saveTargetOverride);
     }
 
     public String duplicateObject(String categoryID, String objectID) {
@@ -115,7 +123,7 @@ public class DataManager {
             dataObject.replaceID(newObjectID);
         }
         data.get(categoryID).put(newObjectID, objectDataCopy);
-        if (main.getTemplate(categoryID).topLevel()) {
+        if (templateRegistry.getTemplate(categoryID).topLevel()) {
             main.getBrowserFrame().addGameObject(categoryID, newObjectID, false);
             main.getBrowserFrame().setSelectedNode(categoryID, objectID);
         }
@@ -134,8 +142,8 @@ public class DataManager {
         }
         if (confirmResult == 0) {
             data.get(categoryID).remove(objectID);
-            main.getEditorManager().closeEditorFrameIfActive(categoryID, objectID);
-            if (main.getTemplate(categoryID).topLevel()) {
+            editorManager.closeEditorFrameIfActive(categoryID, objectID);
+            if (templateRegistry.getTemplate(categoryID).topLevel()) {
                 main.getBrowserFrame().removeGameObject(categoryID, objectID);
             }
             return true;
@@ -147,11 +155,11 @@ public class DataManager {
 
     public void displayReferences(String referenceCategoryID, String referenceObjectID) {
         Set<Reference> references = findReferences(referenceCategoryID, referenceObjectID);
-        main.getReferenceListManager().openReferenceList(references);
+        referenceListManager.openReferenceList(references);
     }
 
     public void renameReferences(String referenceCategoryID, String referenceObjectID, String newObjectID) {
-        renameReferencesInData(main.getConfigMenuManager().getConfigData(), referenceCategoryID, referenceObjectID, newObjectID);
+        renameReferencesInData(configMenuManager.getConfigData(), referenceCategoryID, referenceObjectID, newObjectID);
         for (String category : data.keySet()) {
             for (String object : data.get(category).keySet()) {
                 Data currentObject = data.get(category).get(object);
@@ -178,7 +186,7 @@ public class DataManager {
 
     private Set<Reference> findReferences(String referenceCategoryID, String referenceObjectID) {
         Set<Reference> references = new HashSet<>();
-        if (dataContainsReference(main.getConfigMenuManager().getConfigData(), referenceCategoryID, referenceObjectID)) {
+        if (dataContainsReference(configMenuManager.getConfigData(), referenceCategoryID, referenceObjectID)) {
             references.add(new Reference("", "config"));
         }
         for (String category : data.keySet()) {

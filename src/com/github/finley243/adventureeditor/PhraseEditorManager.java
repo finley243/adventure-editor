@@ -19,14 +19,12 @@ public class PhraseEditorManager implements DataSaveTarget {
         add(new TemplateParameter("text", TemplateParameter.ParameterDataType.STRING_LONG, "Phrase", null, false, false, null, null, new ArrayList<>(), false, null, 0, 1, 1, 1, null));
     }}, null, null);
 
-    private final Main main;
     private final Map<String, String> phrases;
     private final ChildFrameHandler<String> childFrameHandler;
 
     private PhraseEditorFrame phraseEditorFrame;
 
-    public PhraseEditorManager(Main main) {
-        this.main = main;
+    public PhraseEditorManager() {
         this.phrases = new HashMap<>();
         this.childFrameHandler = new ChildFrameHandler<>();
     }

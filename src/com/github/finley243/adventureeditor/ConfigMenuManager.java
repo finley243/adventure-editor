@@ -13,14 +13,10 @@ public class ConfigMenuManager implements DataSaveTarget {
     public static final String CONFIG_TEMPLATE = "config";
     private static final String PROJECT_NAME_KEY = "gameName";
 
-    private final Main main;
-
     private Data configData;
     private EditorFrame configFrame;
 
-    public ConfigMenuManager(Main main) {
-        this.main = main;
-    }
+    public ConfigMenuManager() {}
 
     public void openConfigMenu() {
         if (!main.getProjectManager().isProjectLoaded()) {

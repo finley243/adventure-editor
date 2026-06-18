@@ -1,6 +1,5 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.ProjectData;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
@@ -19,12 +18,12 @@ import java.util.Set;
 
 public class MainFrame extends JFrame implements DataSaveTarget {
 
-    private final Main main;
+    private static final String EDITOR_NAME = "AdventureEditor";
+
     private final JMenu fileOpenRecent;
 
-    public MainFrame(Main main) {
-        super("AdventureEditor");
-        this.main = main;
+    public MainFrame() {
+        super(EDITOR_NAME);
 
         this.setSize(800, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -111,13 +110,13 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         Action saveProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getProjectManager().saveProjectToMenu();
+                main.getProjectManager().saveProjectToCurrentPath();
             }
         };
         Action saveProjectAsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getProjectManager().saveProjectToCurrentPath();
+                main.getProjectManager().saveProjectToMenu();
             }
         };
         Action openConfigAction = new AbstractAction() {

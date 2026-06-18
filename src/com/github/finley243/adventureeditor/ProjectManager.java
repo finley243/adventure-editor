@@ -19,7 +19,12 @@ public class ProjectManager {
     private static final int RECENT_PROJECTS_MAXIMUM = 5;
     private static final String UNNAMED_PROJECT_NAME = "Unnamed Project";
 
-    private final Main main;
+    private final DataLoader dataLoader;
+    private final PhraseEditorManager phraseEditorManager;
+    private final ScriptEditorManager scriptEditorManager;
+    private final ConfigMenuManager configMenuManager;
+    private final DataManager dataManager;
+
     private final List<ProjectData> recentProjects;
 
     private boolean isProjectLoaded;
@@ -29,8 +34,12 @@ public class ProjectManager {
     private Map<String, String> lastSavedPhrases;
     private Map<String, String> lastSavedScripts;
 
-    public ProjectManager(Main main) {
-        this.main = main;
+    public ProjectManager(DataLoader dataLoader, PhraseEditorManager phraseEditorManager, ScriptEditorManager scriptEditorManager, ConfigMenuManager configMenuManager, DataManager dataManager) {
+        this.dataLoader = dataLoader;
+        this.phraseEditorManager = phraseEditorManager;
+        this.scriptEditorManager = scriptEditorManager;
+        this.configMenuManager = configMenuManager;
+        this.dataManager = dataManager;
         this.recentProjects = new ArrayList<>();
         this.isProjectLoaded = false;
         this.loadedProjectPath = null;
@@ -51,16 +60,16 @@ public class ProjectManager {
         if (!isProjectSaved()) {
             return true;
         }
-        if (main.getPhraseEditorManager().hasChangesFrom(lastSavedPhrases)) {
+        if (phraseEditorManager.hasChangesFrom(lastSavedPhrases)) {
             return true;
         }
-        if (main.getScriptEditorManager().hasChangesFrom(lastSavedScripts)) {
+        if (scriptEditorManager.hasChangesFrom(lastSavedScripts)) {
             return true;
         }
-        if (main.getConfigMenuManager().hasChangesFrom(lastSavedConfigData)) {
+        if (configMenuManager.hasChangesFrom(lastSavedConfigData)) {
             return true;
         }
-        return main.getDataManager().hasChangesFrom(lastSavedData);
+        return dataManager.hasChangesFrom(lastSavedData);
     }
 
     public List<ProjectData> getRecentProjects() {
@@ -73,24 +82,24 @@ public class ProjectManager {
         while (recentProjects.size() > RECENT_PROJECTS_MAXIMUM) {
             recentProjects.removeLast();
         }
-        DataLoader.saveRecentProjects(recentProjects);
+        dataLoader.saveRecentProjects(recentProjects);
         main.getMainFrame().updateRecentProjects();
     }
 
     public void removeRecentProject(ProjectData project) {
         recentProjects.remove(project);
-        DataLoader.saveRecentProjects(recentProjects);
+        dataLoader.saveRecentProjects(recentProjects);
         main.getMainFrame().updateRecentProjects();
     }
 
     public void clearRecentProjects() {
         recentProjects.clear();
-        DataLoader.saveRecentProjects(recentProjects);
+        dataLoader.saveRecentProjects(recentProjects);
         main.getMainFrame().updateRecentProjects();
     }
 
     public void updateProjectName() {
-        String configProjectName = main.getConfigMenuManager().getProjectName();
+        String configProjectName = configMenuManager.getProjectName();
         if (configProjectName == null && isProjectLoaded()) {
             main.getMainFrame().setProjectName(UNNAMED_PROJECT_NAME);
         } else {
@@ -103,14 +112,14 @@ public class ProjectManager {
         if (!continueCheck) {
             return;
         }
-        main.getDataManager().clearData();
-        main.getConfigMenuManager().clearConfigData();
-        main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
+        dataManager.clearData();
+        configMenuManager.clearConfigData();
+        main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), dataManager.getAllData());
         isProjectLoaded = true;
         loadedProjectPath = null;
         updateProjectName();
         if (OPEN_CONFIG_MENU_ON_NEW_PROJECT) {
-            main.getConfigMenuManager().openConfigMenu();
+            configMenuManager.openConfigMenu();
         }
     }
 
@@ -126,11 +135,11 @@ public class ProjectManager {
             return;
         }
         File selectedDirectory = fileChooser.getSelectedFile();
-        main.getDataManager().clearData();
-        main.getConfigMenuManager().clearConfigData();
+        dataManager.clearData();
+        configMenuManager.clearConfigData();
         try {
-            DataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getScriptEditorManager().getScripts(), main.getPhraseEditorManager().getPhrases());
-            main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
+            dataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
+            main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), dataManager.getAllData());
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
@@ -139,13 +148,13 @@ public class ProjectManager {
             updateProjectName();
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
-            main.getDataManager().clearData();
-            main.getConfigMenuManager().clearConfigData();
+            dataManager.clearData();
+            configMenuManager.clearConfigData();
             JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             //throw new RuntimeException(e);
-            main.getDataManager().clearData();
-            main.getConfigMenuManager().clearConfigData();
+            dataManager.clearData();
+            configMenuManager.clearConfigData();
             JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -163,11 +172,11 @@ public class ProjectManager {
         if (!continueCheck) {
             return;
         }
-        main.getDataManager().clearData();
-        main.getConfigMenuManager().clearConfigData();
+        dataManager.clearData();
+        configMenuManager.clearConfigData();
         try {
-            DataLoader.loadFromDir(file, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getScriptEditorManager().getScripts(), main.getPhraseEditorManager().getPhrases());
-            main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), main.getDataManager().getAllData());
+            dataLoader.loadFromDir(file, main.getAllTemplates(), dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
+            main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), dataManager.getAllData());
             ProjectData project = new ProjectData(file.getName(), file.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
@@ -176,13 +185,13 @@ public class ProjectManager {
             updateProjectName();
         } catch (ParserConfigurationException | SAXException e) {
             //throw new RuntimeException(e);
-            main.getDataManager().clearData();
-            main.getConfigMenuManager().clearConfigData();
+            dataManager.clearData();
+            configMenuManager.clearConfigData();
             JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             //throw new RuntimeException(e);
-            main.getDataManager().clearData();
-            main.getConfigMenuManager().clearConfigData();
+            dataManager.clearData();
+            configMenuManager.clearConfigData();
             JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -193,7 +202,7 @@ public class ProjectManager {
         } else {
             File loadedDirectory = new File(loadedProjectPath);
             try {
-                DataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getScriptEditorManager().getScripts(), main.getPhraseEditorManager().getPhrases());
+                dataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
                 ProjectData project = new ProjectData(loadedDirectory.getName(), loadedDirectory.getAbsolutePath());
                 addOrMoveRecentProjectToTop(project);
                 updateLastSavedData();
@@ -219,7 +228,7 @@ public class ProjectManager {
         }
         File selectedDirectory = fileChooser.getSelectedFile();
         try {
-            DataLoader.saveToDir(selectedDirectory, main.getAllTemplates(), main.getDataManager().getAllData(), main.getConfigMenuManager(), main.getScriptEditorManager().getScripts(), main.getPhraseEditorManager().getPhrases());
+            dataLoader.saveToDir(selectedDirectory, main.getAllTemplates(), dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
             ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             loadedProjectPath = selectedDirectory.getAbsolutePath();
@@ -254,15 +263,15 @@ public class ProjectManager {
         while (recentProjects.size() > RECENT_PROJECTS_MAXIMUM) {
             recentProjects.removeLast();
         }
-        DataLoader.saveRecentProjects(recentProjects);
+        dataLoader.saveRecentProjects(recentProjects);
         main.getMainFrame().updateRecentProjects();
     }
 
     private void updateLastSavedData() {
-        lastSavedData = main.getDataManager().getAllDataCopy();
-        lastSavedConfigData = main.getConfigMenuManager().getConfigData().createCopy();
-        lastSavedPhrases = new HashMap<>(main.getPhraseEditorManager().getPhrases());
-        lastSavedScripts = new HashMap<>(main.getScriptEditorManager().getScripts());
+        lastSavedData = dataManager.getAllDataCopy();
+        lastSavedConfigData = configMenuManager.getConfigData().createCopy();
+        lastSavedPhrases = new HashMap<>(phraseEditorManager.getPhrases());
+        lastSavedScripts = new HashMap<>(scriptEditorManager.getScripts());
     }
 
 }

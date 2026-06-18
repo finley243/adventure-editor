@@ -1,17 +1,18 @@
 package com.github.finley243.adventureeditor;
 
+import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.frame.ReferenceListFrame;
 
 import java.util.*;
 
 public class ReferenceListManager {
 
-    private final Main main;
+    private final BrowserFrame browserFrame;
 
     private ReferenceListFrame referenceListFrame;
 
-    public ReferenceListManager(Main main) {
-        this.main = main;
+    public ReferenceListManager(BrowserFrame browserFrame) {
+        this.browserFrame = browserFrame;
     }
 
     public void openReferenceList(Set<Reference> references) {
@@ -22,7 +23,7 @@ public class ReferenceListManager {
             referenceListFrame.toFront();
             referenceListFrame.requestFocus();
         } else {
-            referenceListFrame = new ReferenceListFrame(main);
+            referenceListFrame = new ReferenceListFrame(browserFrame);
         }
         referenceListFrame.loadReferences(references);
     }

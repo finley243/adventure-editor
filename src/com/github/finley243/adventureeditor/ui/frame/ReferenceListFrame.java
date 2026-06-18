@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor.ui.frame;
 
 import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.Reference;
+import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.table.PhraseTableModel;
 
 import javax.swing.*;
@@ -16,13 +17,11 @@ public class ReferenceListFrame extends JDialog {
 
     private static final String REFERENCE_LIST_TITLE = "References";
 
-    private final Main main;
     private final PhraseTableModel tableModel;
     private final JTable referenceTable;
 
-    public ReferenceListFrame(Main main) {
-        super(main.getBrowserFrame());
-        this.main = main;
+    public ReferenceListFrame(BrowserFrame browserFrame) {
+        super(browserFrame);
         this.setTitle(REFERENCE_LIST_TITLE);
         this.setModalityType(ModalityType.MODELESS);
         JPanel mainPanel = new JPanel();

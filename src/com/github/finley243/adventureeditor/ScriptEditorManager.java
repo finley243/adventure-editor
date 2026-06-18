@@ -20,14 +20,12 @@ public class ScriptEditorManager implements DataSaveTarget {
         add(new TemplateParameter("script", TemplateParameter.ParameterDataType.SCRIPT, null, null, false, false, null, null, new ArrayList<>(), false, null, 0, 1, 1, 1, null));
     }}, null, null);
 
-    private final Main main;
     private final Map<String, String> scripts;
     private final ChildFrameHandler<String> childFrameHandler;
 
     private ScriptEditorFrame scriptEditorFrame;
 
-    public ScriptEditorManager(Main main) {
-        this.main = main;
+    public ScriptEditorManager() {
         this.scripts = new HashMap<>();
         this.childFrameHandler = new ChildFrameHandler<>();
     }

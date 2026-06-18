@@ -11,11 +11,9 @@ import java.util.Map;
 
 public class EditorManager {
 
-    private final Main main;
     private final Map<String, Map<String, EditorFrame>> topLevelEditorWindows;
 
-    public EditorManager(Main main) {
-        this.main = main;
+    public EditorManager() {
         this.topLevelEditorWindows = new HashMap<>();
     }
 

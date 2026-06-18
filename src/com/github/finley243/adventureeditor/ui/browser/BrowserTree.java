@@ -1,6 +1,5 @@
 package com.github.finley243.adventureeditor.ui.browser;
 
-import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserCategoryNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserObjectNode;
@@ -21,12 +20,10 @@ public class BrowserTree extends JTree {
     private final DefaultMutableTreeNode treeRoot;
     private final DefaultTreeModel treeModel;
     private final Map<String, BrowserCategoryNode> categoryNodes;
-    private final Main main;
 
-    public BrowserTree(Main main) {
+    public BrowserTree() {
         this.treeRoot = new BrowserRootNode();
         this.categoryNodes = new HashMap<>();
-        this.main = main;
         this.treeModel = new DefaultTreeModel(treeRoot, false);
         this.setModel(treeModel);
         this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);

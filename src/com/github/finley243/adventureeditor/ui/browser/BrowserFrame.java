@@ -1,6 +1,5 @@
 package com.github.finley243.adventureeditor.ui.browser;
 
-import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
 
@@ -11,17 +10,15 @@ import java.util.Map;
 
 public class BrowserFrame extends JDialog {
 
-    private final Main main;
     private final BrowserTree browserTree;
 
-    public BrowserFrame(Main main, Window mainFrame) {
+    public BrowserFrame(Window mainFrame) {
         super(mainFrame);
-        this.main = main;
 
         this.setTitle("Browser");
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-        this.browserTree = new BrowserTree(main);
+        this.browserTree = new BrowserTree();
 
         JMenuBar menuBar = new JMenuBar();
         this.setJMenuBar(menuBar);
