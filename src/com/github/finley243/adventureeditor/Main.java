@@ -24,7 +24,7 @@ public class Main {
         Map<String, Template> templateMap = dataLoader.loadTemplates();
         Map<String, List<String>> enumTypeMap = dataLoader.loadEnumTypes();
         TemplateRegistry templateRegistry = new TemplateRegistry(templateMap, enumTypeMap);
-        List<ProjectData> recentProjects = dataLoader.loadRecentProjects();
+        List<ProjectFile> recentProjects = dataLoader.loadRecentProjects();
         PhraseEditorManager phraseEditorManager = new PhraseEditorManager();
         ScriptEditorManager scriptEditorManager = new ScriptEditorManager();
         ConfigMenuManager configMenuManager = new ConfigMenuManager();

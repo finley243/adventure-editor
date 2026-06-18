@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.ProjectData;
+import com.github.finley243.adventureeditor.ProjectFile;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
@@ -155,10 +155,10 @@ public class MainFrame extends JFrame implements DataSaveTarget {
     }
 
     public void updateRecentProjects() {
-        List<ProjectData> recentProjects = main.getProjectManager().getRecentProjects();
+        List<ProjectFile> recentProjects = main.getProjectManager().getRecentProjects();
         fileOpenRecent.setEnabled(!recentProjects.isEmpty());
         fileOpenRecent.removeAll();
-        for (ProjectData recentProject : recentProjects) {
+        for (ProjectFile recentProject : recentProjects) {
             JMenuItem recentProjectItem = new JMenuItem(recentProject.name());
             recentProjectItem.addActionListener(e -> main.getProjectManager().openRecentProject(recentProject));
             fileOpenRecent.add(recentProjectItem);

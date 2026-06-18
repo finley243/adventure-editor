@@ -31,6 +31,7 @@ public class DataLoader {
     private static final String SCRIPT_EXTENSION = "ascr";
     private static final String CONFIG_FILE = "config.xml";
     private static final String PHRASE_FILE = "phrases.aphr";
+    private static final String PHRASE_DIRECTORY = "data";
     private static final String PHRASE_EXTENSION = "aphr";
 
     private static final String TOP_LEVEL_ELEMENT_NAME = "data";
@@ -180,8 +181,8 @@ public class DataLoader {
         return enumTypes;
     }
 
-    public List<ProjectData> loadRecentProjects() {
-        List<ProjectData> recentProjects = new ArrayList<>();
+    public List<ProjectFile> loadRecentProjects() {
+        List<ProjectFile> recentProjects = new ArrayList<>();
         File file = new File(RECENT_PROJECTS_FILE);
         if (!file.exists()) {
             return recentProjects;
@@ -191,7 +192,7 @@ public class DataLoader {
                 String line = scanner.nextLine();
                 String[] parts = line.split("\\|");
                 if (parts.length == 2) {
-                    recentProjects.add(new ProjectData(parts[0], parts[1]));
+                    recentProjects.add(new ProjectFile(parts[0], parts[1]));
                 }
             }
         } catch (IOException e) {
@@ -200,11 +201,11 @@ public class DataLoader {
         return recentProjects;
     }
 
-    public void saveRecentProjects(List<ProjectData> recentProjects) {
+    public void saveRecentProjects(List<ProjectFile> recentProjects) {
         File file = new File(RECENT_PROJECTS_FILE);
         try (FileWriter writer = new FileWriter(file); BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
             StringBuilder builder = new StringBuilder();
-            for (ProjectData project : recentProjects) {
+            for (ProjectFile project : recentProjects) {
                 builder.append(project.name()).append("|").append(project.absolutePath()).append("\n");
             }
             String content = builder.toString();
@@ -214,63 +215,107 @@ public class DataLoader {
         }
     }
 
-    public void loadFromDir(File dir, TemplateRegistry templateRegistry, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> scripts, Map<String, String> phrases) {
-        if (dir.isDirectory()) {
-            loadConfigData(dir, templateRegistry.getTemplate(ConfigMenuManager.CONFIG_TEMPLATE), templateRegistry, configMenuManager);
-            File dataDirectory = new File(dir, DATA_DIRECTORY);
-            if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
-                return;
-            }
-            File[] files = dataDirectory.listFiles();
-            if (files == null) {
-                return;
-            }
-            for (File file : files) {
-                String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
-                if (fileExtension.equalsIgnoreCase(DATA_EXTENSION)) {
-                    Element rootElement = getRootElementFromFile(file);
-                    Node currentChild = rootElement.getFirstChild();
-                    while (currentChild != null) {
-                        if (currentChild.getNodeType() == Node.ELEMENT_NODE) {
-                            Element currentElement = (Element) currentChild;
-                            String elementType = currentChild.getNodeName();
-                            Template template = templateRegistry.getTemplate(elementType);
-                            if (template != null && template.topLevel()) {
-                                DataObject data = loadDataFromElement(currentElement, template, templateRegistry, true, dataMap);
-                                if (!dataMap.containsKey(elementType)) {
-                                    dataMap.put(elementType, new HashMap<>());
-                                }
-                                String dataID = data.getID();
-                                if (dataID != null) {
-                                    dataMap.get(elementType).put(data.getID(), data);
-                                }
+    public ProjectLoadData loadFromDir(File projectDir, TemplateRegistry templateRegistry) {
+        if (!projectDir.isDirectory()) {
+            throw new IllegalArgumentException("Selected file is not a directory");
+        }
+        Data configData = loadConfigDataFromDir(projectDir, templateRegistry.getTemplate(ConfigMenuManager.CONFIG_TEMPLATE), templateRegistry);
+        Map<String, Map<String, Data>> gameData = loadDataFromDir(projectDir, templateRegistry);
+        Map<String, String> phrases = loadPhrasesFromDir(projectDir);
+        Map<String, String> scripts = loadScriptsFromDir(projectDir);
+        return new ProjectLoadData(configData, gameData, phrases, scripts);
+    }
+
+    private Map<String, Map<String, Data>> loadDataFromDir(File projectDir, TemplateRegistry templateRegistry) {
+        Map<String, Map<String, Data>> dataMap = new HashMap<>();
+        File dataDirectory = new File(projectDir, DATA_DIRECTORY);
+        if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
+            return dataMap;
+        }
+        File[] files = dataDirectory.listFiles();
+        if (files == null) {
+            return dataMap;
+        }
+        for (File file : files) {
+            String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+            if (fileExtension.equalsIgnoreCase(DATA_EXTENSION)) {
+                Element rootElement = getRootElementFromFile(file);
+                Node currentChild = rootElement.getFirstChild();
+                while (currentChild != null) {
+                    if (currentChild.getNodeType() == Node.ELEMENT_NODE) {
+                        Element currentElement = (Element) currentChild;
+                        String elementType = currentChild.getNodeName();
+                        Template template = templateRegistry.getTemplate(elementType);
+                        if (template != null && template.topLevel()) {
+                            DataObject data = loadDataFromElement(currentElement, template, templateRegistry, true, dataMap);
+                            if (!dataMap.containsKey(elementType)) {
+                                dataMap.put(elementType, new HashMap<>());
+                            }
+                            String dataID = data.getID();
+                            if (dataID != null) {
+                                dataMap.get(elementType).put(data.getID(), data);
                             }
                         }
-                        currentChild = currentChild.getNextSibling();
                     }
-                } else if (fileExtension.equalsIgnoreCase(SCRIPT_EXTENSION)) {
-                    String scriptName = file.getName().substring(0, file.getName().lastIndexOf("."));
-                    String scriptBody;
-                    try {
-                        scriptBody = Files.readString(file.toPath());
-                    } catch (IOException e) {
-                        throw new DataIOException("Failed to read script file: " + file.getAbsolutePath());
-                    }
-                    scripts.put(scriptName, scriptBody);
-                } else if (fileExtension.equalsIgnoreCase(PHRASE_EXTENSION)) {
-                    try (Scanner scanner = new Scanner(file)) {
-                        while (scanner.hasNextLine()) {
-                            String line = scanner.nextLine();
-                            String[] split = line.split(":", 2);
-                            if (split.length != 2) throw new DataIOException("Invalid phrase file format - line: " + line);
-                            phrases.put(split[0].trim(), split[1].trim());
-                        }
-                    } catch (FileNotFoundException e) {
-                        throw new DataIOException("Scanner could not find file while loading phrase file: " + file.getAbsolutePath());
-                    }
+                    currentChild = currentChild.getNextSibling();
                 }
             }
         }
+        return dataMap;
+    }
+
+    private Map<String, String> loadPhrasesFromDir(File projectDir) {
+        Map<String, String> phrases = new HashMap<>();
+        File phraseDirectory = new File(projectDir, PHRASE_DIRECTORY);
+        if (!phraseDirectory.exists() || !phraseDirectory.isDirectory()) {
+            return phrases;
+        }
+        File[] files = phraseDirectory.listFiles();
+        if (files == null) {
+            return phrases;
+        }
+        for (File file : files) {
+            String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+            if (fileExtension.equalsIgnoreCase(PHRASE_EXTENSION)) {
+                try (Scanner scanner = new Scanner(file)) {
+                    while (scanner.hasNextLine()) {
+                        String line = scanner.nextLine();
+                        String[] split = line.split(":", 2);
+                        if (split.length != 2) throw new DataIOException("Invalid phrase file format - line: " + line);
+                        phrases.put(split[0].trim(), split[1].trim());
+                    }
+                } catch (FileNotFoundException e) {
+                    throw new DataIOException("Scanner could not find file while loading phrase file: " + file.getAbsolutePath());
+                }
+            }
+        }
+        return phrases;
+    }
+
+    private Map<String, String> loadScriptsFromDir(File projectDir) {
+        Map<String, String> scripts = new HashMap<>();
+        File scriptDirectory = new File(projectDir, SCRIPT_DIRECTORY);
+        if (!scriptDirectory.exists() || !scriptDirectory.isDirectory()) {
+            return scripts;
+        }
+        File[] files = scriptDirectory.listFiles();
+        if (files == null) {
+            return scripts;
+        }
+        for (File file : files) {
+            String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+            if (fileExtension.equalsIgnoreCase(SCRIPT_EXTENSION)) {
+                String scriptName = file.getName().substring(0, file.getName().lastIndexOf("."));
+                String scriptBody;
+                try {
+                    scriptBody = Files.readString(file.toPath());
+                } catch (IOException e) {
+                    throw new DataIOException("Failed to read script file: " + file.getAbsolutePath());
+                }
+                scripts.put(scriptName, scriptBody);
+            }
+        }
+        return scripts;
     }
 
     public void saveToDir(File dir, TemplateRegistry templateRegistry, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> scripts, Map<String, String> phrases) {
@@ -354,17 +399,16 @@ public class DataLoader {
         }
     }
 
-    private void loadConfigData(File dir, Template configTemplate, TemplateRegistry templateRegistry, ConfigMenuManager configMenuManager) {
+    private Data loadConfigDataFromDir(File dir, Template configTemplate, TemplateRegistry templateRegistry) {
         File configFile = new File(dir, CONFIG_FILE);
         if (!configFile.exists()) {
-            return;
+            return null;
         }
         Element rootElement = getRootElementFromFile(configFile);
         if (rootElement == null) {
-            return;
+            return null;
         }
-        Data configData = loadDataFromElement(rootElement, configTemplate, templateRegistry, true, new HashMap<>());
-        configMenuManager.setConfigData(configData);
+        return loadDataFromElement(rootElement, configTemplate, templateRegistry, true, new HashMap<>());
     }
 
     private void saveConfigData(File dir, Template configTemplate, ConfigMenuManager configMenuManager, Map<String, Map<String, Data>> globalDataMap) {

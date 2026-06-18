@@ -25,7 +25,7 @@ public class ProjectManager {
     private final ConfigMenuManager configMenuManager;
     private final DataManager dataManager;
 
-    private final List<ProjectData> recentProjects;
+    private final List<ProjectFile> recentProjects;
 
     private boolean isProjectLoaded;
     private String loadedProjectPath;
@@ -72,11 +72,11 @@ public class ProjectManager {
         return dataManager.hasChangesFrom(lastSavedData);
     }
 
-    public List<ProjectData> getRecentProjects() {
+    public List<ProjectFile> getRecentProjects() {
         return new ArrayList<>(recentProjects);
     }
 
-    public void setRecentProjects(List<ProjectData> projects) {
+    public void setRecentProjects(List<ProjectFile> projects) {
         this.recentProjects.clear();
         this.recentProjects.addAll(projects);
         while (recentProjects.size() > RECENT_PROJECTS_MAXIMUM) {
@@ -86,7 +86,7 @@ public class ProjectManager {
         main.getMainFrame().updateRecentProjects();
     }
 
-    public void removeRecentProject(ProjectData project) {
+    public void removeRecentProject(ProjectFile project) {
         recentProjects.remove(project);
         dataLoader.saveRecentProjects(recentProjects);
         main.getMainFrame().updateRecentProjects();
@@ -138,9 +138,9 @@ public class ProjectManager {
         dataManager.clearData();
         configMenuManager.clearConfigData();
         try {
-            dataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
+            dataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
             main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), dataManager.getAllData());
-            ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
+            ProjectFile project = new ProjectFile(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
             loadedProjectPath = selectedDirectory.getAbsolutePath();
@@ -159,12 +159,12 @@ public class ProjectManager {
         }
     }
 
-    public void openRecentProject(ProjectData projectData) {
-        File file = new File(projectData.absolutePath());
+    public void openRecentProject(ProjectFile projectFile) {
+        File file = new File(projectFile.absolutePath());
         if (!file.exists()) {
             int choice = JOptionPane.showOptionDialog(main.getMainFrame(), "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
             if (choice == JOptionPane.YES_OPTION) {
-                removeRecentProject(projectData);
+                removeRecentProject(projectFile);
             }
             return;
         }
@@ -175,9 +175,9 @@ public class ProjectManager {
         dataManager.clearData();
         configMenuManager.clearConfigData();
         try {
-            dataLoader.loadFromDir(file, main.getAllTemplates(), dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
+            dataLoader.loadFromDir(file, main.getAllTemplates(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
             main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), dataManager.getAllData());
-            ProjectData project = new ProjectData(file.getName(), file.getAbsolutePath());
+            ProjectFile project = new ProjectFile(file.getName(), file.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
             loadedProjectPath = file.getAbsolutePath();
@@ -203,7 +203,7 @@ public class ProjectManager {
             File loadedDirectory = new File(loadedProjectPath);
             try {
                 dataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
-                ProjectData project = new ProjectData(loadedDirectory.getName(), loadedDirectory.getAbsolutePath());
+                ProjectFile project = new ProjectFile(loadedDirectory.getName(), loadedDirectory.getAbsolutePath());
                 addOrMoveRecentProjectToTop(project);
                 updateLastSavedData();
                 return true;
@@ -229,7 +229,7 @@ public class ProjectManager {
         File selectedDirectory = fileChooser.getSelectedFile();
         try {
             dataLoader.saveToDir(selectedDirectory, main.getAllTemplates(), dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
-            ProjectData project = new ProjectData(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
+            ProjectFile project = new ProjectFile(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             loadedProjectPath = selectedDirectory.getAbsolutePath();
             updateLastSavedData();
@@ -257,7 +257,7 @@ public class ProjectManager {
         }
     }
 
-    private void addOrMoveRecentProjectToTop(ProjectData project) {
+    private void addOrMoveRecentProjectToTop(ProjectFile project) {
         recentProjects.remove(project);
         recentProjects.addFirst(project);
         while (recentProjects.size() > RECENT_PROJECTS_MAXIMUM) {
