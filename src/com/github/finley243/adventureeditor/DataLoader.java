@@ -186,8 +186,7 @@ public class DataLoader {
         if (!file.exists()) {
             return recentProjects;
         }
-        try {
-            Scanner scanner = new Scanner(file);
+        try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 String[] parts = line.split("\\|");
@@ -195,7 +194,6 @@ public class DataLoader {
                     recentProjects.add(new ProjectData(parts[0], parts[1]));
                 }
             }
-            scanner.close();
         } catch (IOException e) {
             throw new DataIOException("Failed to load recent projects file");
         }
@@ -260,19 +258,16 @@ public class DataLoader {
                     }
                     scripts.put(scriptName, scriptBody);
                 } else if (fileExtension.equalsIgnoreCase(PHRASE_EXTENSION)) {
-                    Scanner scanner;
-                    try {
-                        scanner = new Scanner(file);
+                    try (Scanner scanner = new Scanner(file)) {
+                        while (scanner.hasNextLine()) {
+                            String line = scanner.nextLine();
+                            String[] split = line.split(":", 2);
+                            if (split.length != 2) throw new DataIOException("Invalid phrase file format - line: " + line);
+                            phrases.put(split[0].trim(), split[1].trim());
+                        }
                     } catch (FileNotFoundException e) {
                         throw new DataIOException("Scanner could not find file while loading phrase file: " + file.getAbsolutePath());
                     }
-                    while (scanner.hasNextLine()) {
-                        String line = scanner.nextLine();
-                        String[] split = line.split(":", 2);
-                        if (split.length != 2) throw new DataIOException("Invalid phrase file format - line: " + line);
-                        phrases.put(split[0].trim(), split[1].trim());
-                    }
-                    scanner.close();
                 }
             }
         }
