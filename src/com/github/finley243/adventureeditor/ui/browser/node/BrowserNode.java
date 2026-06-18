@@ -1,5 +1,7 @@
 package com.github.finley243.adventureeditor.ui.browser.node;
 
+import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
+
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -9,6 +11,6 @@ public abstract class BrowserNode extends DefaultMutableTreeNode {
         super(name);
     }
 
-    public abstract JPopupMenu getContextMenu();
+    public abstract JPopupMenu getContextMenu(BrowserFrame browserFrame);
 
 }

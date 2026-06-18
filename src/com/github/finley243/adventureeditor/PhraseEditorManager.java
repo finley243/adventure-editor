@@ -103,7 +103,7 @@ public class PhraseEditorManager implements DataSaveTarget {
     }
 
     @Override
-    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
+    public ErrorData checkForSaveDataErrors(Data currentData, Data initialData) {
         String newKey = ((DataString) ((DataObject) currentData).getValue().get("key")).getValue();
         if (newKey.trim().isEmpty()) {
             return new ErrorData(true, "Key cannot be empty.");

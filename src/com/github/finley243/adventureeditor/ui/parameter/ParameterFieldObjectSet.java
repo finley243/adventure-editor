@@ -1,6 +1,5 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
-import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObjectSet;
 import com.github.finley243.adventureeditor.template.Template;
@@ -27,7 +26,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
     private final Template template;
     private final boolean requireUniqueValues;
 
-    public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, boolean requireUniqueValues, Main main) {
+    public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, boolean requireUniqueValues, ParameterFieldFactory parameterFactory) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.editorFrames = new ArrayList<>();
@@ -65,7 +64,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
                                 editorFrames.get(index).toFront();
                                 editorFrames.get(index).requestFocus();
                             } else {
-                                EditorFrame objectFrame = new EditorFrame(main, null, editorFrame, template, selectedItem, ParameterFieldObjectSet.this, false);
+                                EditorFrame objectFrame = new EditorFrame(null, editorFrame, template, selectedItem, ParameterFieldObjectSet.this, false, parameterFactory);
                                 editorFrames.set(index, objectFrame);
                             }
                         }
@@ -106,7 +105,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
             buttonRemove.setEnabled(enableSelectionButtons);
         });
         buttonAdd.addActionListener(e -> {
-            EditorFrame objectFrame = new EditorFrame(main, null, editorFrame, template, null, this, false);
+            EditorFrame objectFrame = new EditorFrame(null, editorFrame, template, null, this, false, parameterFactory);
             unsavedEditorFrames.add(objectFrame);
         });
         buttonEdit.addActionListener(e -> {
@@ -117,7 +116,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
                     editorFrames.get(objectIndex).toFront();
                     editorFrames.get(objectIndex).requestFocus();
                 } else {
-                    EditorFrame objectFrame = new EditorFrame(main, null, editorFrame, template, objectData, this, false);
+                    EditorFrame objectFrame = new EditorFrame(null, editorFrame, template, objectData, this, false, parameterFactory);
                     editorFrames.set(objectIndex, objectFrame);
                 }
             }
@@ -171,9 +170,9 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
 
     @Override
     public boolean requestClose(boolean forceClose, boolean forceSave) {
-        for (int i = 0; i < editorFrames.size(); i++) {
-            if (editorFrames.get(i) != null) {
-                boolean didClose = editorFrames.get(i).requestClose(forceClose, forceSave);
+        for (EditorFrame editorFrame : editorFrames) {
+            if (editorFrame != null) {
+                boolean didClose = editorFrame.requestClose(forceClose, forceSave);
                 if (!didClose) {
                     return false;
                 }
@@ -237,7 +236,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
     }
 
     @Override
-    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
+    public ErrorData checkForSaveDataErrors(Data currentData, Data initialData) {
         if (requireUniqueValues && !isDataUnique(currentData, initialData)) {
             String value = currentData.toString();
             return new ErrorData(true, name + " already contains the value " + value + ".");

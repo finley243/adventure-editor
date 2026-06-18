@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.table.ScriptTableModel;
 
 import javax.swing.*;
@@ -15,13 +15,11 @@ public class ScriptEditorFrame extends JDialog {
 
     private static final String SCRIPT_EDITOR_TITLE = "Scripts";
 
-    private final Main main;
     private final ScriptTableModel tableModel;
     private final JTable scriptTable;
 
-    public ScriptEditorFrame(Main main) {
-        super(main.getBrowserFrame());
-        this.main = main;
+    public ScriptEditorFrame(BrowserFrame browserFrame) {
+        super(browserFrame);
         this.setTitle(SCRIPT_EDITOR_TITLE);
         this.setModalityType(ModalityType.MODELESS);
         JPanel mainPanel = new JPanel();

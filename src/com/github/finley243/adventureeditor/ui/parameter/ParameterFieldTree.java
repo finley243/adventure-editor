@@ -1,6 +1,5 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
-import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.*;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
@@ -21,7 +20,6 @@ public class ParameterFieldTree extends ParameterField {
 
     private static final String BLANK_PANEL_KEY = "EMPTY";
 
-    private final Main main;
     private final Template template;
     private final EditorFrame editorFrame;
     private final String treeID;
@@ -31,10 +29,9 @@ public class ParameterFieldTree extends ParameterField {
     private final Map<String, ObjectTreeNode> nodes;
     private final JPanel objectPanel;
 
-    public ParameterFieldTree(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, String treeID, Main main) {
+    public ParameterFieldTree(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, String treeID) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-        this.main = main;
         this.template = template;
         this.editorFrame = editorFrame;
         this.treeID = treeID;

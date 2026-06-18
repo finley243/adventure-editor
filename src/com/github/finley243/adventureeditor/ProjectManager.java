@@ -1,6 +1,7 @@
 package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import org.xml.sax.SAXException;
 
 import javax.swing.*;
@@ -20,6 +21,7 @@ public class ProjectManager {
     private static final String UNNAMED_PROJECT_NAME = "Unnamed Project";
 
     private final DataLoader dataLoader;
+    private final TemplateRegistry templateRegistry;
     private final PhraseEditorManager phraseEditorManager;
     private final ScriptEditorManager scriptEditorManager;
     private final ConfigMenuManager configMenuManager;
@@ -34,8 +36,9 @@ public class ProjectManager {
     private Map<String, String> lastSavedPhrases;
     private Map<String, String> lastSavedScripts;
 
-    public ProjectManager(DataLoader dataLoader, PhraseEditorManager phraseEditorManager, ScriptEditorManager scriptEditorManager, ConfigMenuManager configMenuManager, DataManager dataManager) {
+    public ProjectManager(DataLoader dataLoader, TemplateRegistry templateRegistry, PhraseEditorManager phraseEditorManager, ScriptEditorManager scriptEditorManager, ConfigMenuManager configMenuManager, DataManager dataManager) {
         this.dataLoader = dataLoader;
+        this.templateRegistry = templateRegistry;
         this.phraseEditorManager = phraseEditorManager;
         this.scriptEditorManager = scriptEditorManager;
         this.configMenuManager = configMenuManager;
@@ -99,11 +102,11 @@ public class ProjectManager {
     }
 
     public void updateProjectName() {
-        String configProjectName = configMenuManager.getProjectName();
-        if (configProjectName == null && isProjectLoaded()) {
+        String name = configMenuManager.getProjectName();
+        if (name == null && isProjectLoaded()) {
             main.getMainFrame().setProjectName(UNNAMED_PROJECT_NAME);
         } else {
-            main.getMainFrame().setProjectName(configProjectName);
+            main.getMainFrame().setProjectName(name);
         }
     }
 
@@ -175,7 +178,8 @@ public class ProjectManager {
         dataManager.clearData();
         configMenuManager.clearConfigData();
         try {
-            dataLoader.loadFromDir(file, main.getAllTemplates(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
+            ProjectLoadData projectData = dataLoader.loadFromDir(file, templateRegistry);
+            configMenuManager.setConfigData(projectData.configData());
             main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), dataManager.getAllData());
             ProjectFile project = new ProjectFile(file.getName(), file.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);

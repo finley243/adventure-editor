@@ -1,24 +1,41 @@
 package com.github.finley243.adventureeditor.ui.browser;
 
+import com.github.finley243.adventureeditor.DataManager;
+import com.github.finley243.adventureeditor.EditorManager;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.ui.CategoryUpdateListener;
+import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+import com.github.finley243.adventureeditor.ui.ObjectUpdateListener;
+import com.github.finley243.adventureeditor.ui.browser.node.BrowserCategoryNode;
+import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
+import com.github.finley243.adventureeditor.ui.browser.node.BrowserObjectNode;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.util.Map;
 
-public class BrowserFrame extends JDialog {
+public class BrowserFrame extends JDialog implements ObjectUpdateListener, CategoryUpdateListener {
 
+    private final EditorManager editorManager;
+    private final DataManager dataManager;
     private final BrowserTree browserTree;
+    private final DataSaveTarget topLevelSaveTarget;
+    private final ParameterFieldFactory parameterFactory;
 
-    public BrowserFrame(Window mainFrame) {
+    public BrowserFrame(Window mainFrame, EditorManager editorManager, DataManager dataManager, DataSaveTarget topLevelSaveTarget, ParameterFieldFactory parameterFactory) {
         super(mainFrame);
+        this.editorManager = editorManager;
+        this.dataManager = dataManager;
+        this.topLevelSaveTarget = topLevelSaveTarget;
+        this.parameterFactory = parameterFactory;
 
         this.setTitle("Browser");
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-        this.browserTree = new BrowserTree();
+        this.browserTree = new BrowserTree(this);
 
         JMenuBar menuBar = new JMenuBar();
         this.setJMenuBar(menuBar);
@@ -56,12 +73,8 @@ public class BrowserFrame extends JDialog {
         browserTree.setSelectedNode(categoryID, objectID);
     }
 
-    public void updateCategory(String categoryID) {
-        browserTree.updateCategory(categoryID);
-    }
-
     public void reloadBrowserData(Map<String, Template> templates, Map<String, Map<String, Data>> data) {
-        main.getEditorManager().closeAllActiveEditorFrames();
+        editorManager.closeAllActiveEditorFrames();
         browserTree.clearData();
         browserTree.expandRow(0);
         for (String category : templates.keySet()) {
@@ -78,6 +91,37 @@ public class BrowserFrame extends JDialog {
         }
     }
 
+    public void openContextMenu(BrowserNode node, int posX, int posY) {
+        JPopupMenu contextMenu = node.getContextMenu(this);
+        if (contextMenu != null) {
+            contextMenu.show(this, posX, posY);
+        }
+    }
+
+    public void openReferenceList(BrowserObjectNode node) {
+        dataManager.displayReferences(node.getCategoryID(), node.getObjectID());
+    }
+
+    public void newObject(BrowserNode node) {
+        if (node instanceof BrowserCategoryNode categoryNode) {
+            dataManager.newObject(categoryNode.getCategoryID(), topLevelSaveTarget, parameterFactory);
+        } else if (node instanceof BrowserObjectNode objectNode) {
+            dataManager.newObject(objectNode.getCategoryID(), topLevelSaveTarget, parameterFactory);
+        }
+    }
+
+    public void editObject(BrowserObjectNode node) {
+        dataManager.editObject(node.getCategoryID(), node.getObjectID(), topLevelSaveTarget, parameterFactory);
+    }
+
+    public void duplicateObject(BrowserObjectNode node) {
+        dataManager.duplicateObject(node.getCategoryID(), node.getObjectID());
+    }
+
+    public void deleteObject(BrowserObjectNode node) {
+        dataManager.deleteObject(node.getCategoryID(), node.getObjectID());
+    }
+
     @Override
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
@@ -86,6 +130,22 @@ public class BrowserFrame extends JDialog {
         } else {
             super.processWindowEvent(e);
         }
+    }
+
+    @Override
+    public void onCreateNewObject(String categoryID, String objectID) {
+        addGameObject(categoryID, objectID, true);
+    }
+
+    @Override
+    public void onObjectIDChange(String categoryID, String objectIDPrevious, String objectIDNew) {
+        removeGameObject(categoryID, objectIDPrevious);
+        addGameObject(categoryID, objectIDNew, true);
+    }
+
+    @Override
+    public void onCategoryUpdate(String categoryID) {
+        browserTree.updateCategory(categoryID);
     }
 
 }

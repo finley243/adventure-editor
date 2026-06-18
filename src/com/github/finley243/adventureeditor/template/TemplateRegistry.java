@@ -7,6 +7,8 @@ import java.util.Map;
 
 public class TemplateRegistry {
 
+    private static final String CONFIG_TEMPLATE_ID = "config";
+
     private final Map<String, Template> templateMap;
     private final Map<String, List<String>> enumMap;
 
@@ -23,8 +25,25 @@ public class TemplateRegistry {
         return new HashMap<>(templateMap);
     }
 
+    public Template getConfigTemplate() {
+        return templateMap.get(CONFIG_TEMPLATE_ID);
+    }
+
     public List<String> getEnumValues(String ID) {
         return new ArrayList<>(enumMap.get(ID));
+    }
+
+    public String[] getEnumValuesArray(String ID) {
+        return enumMap.get(ID).toArray(new String[0]);
+    }
+
+    public Map<String, Template> getTemplatesForComponents(List<ComponentOption> componentOptions) {
+        Map<String, Template> templatesForIDs = new HashMap<>();
+        for (ComponentOption option : componentOptions) {
+            String templateID = option.object();
+            templatesForIDs.put(templateID, getTemplate(templateID));
+        }
+        return templatesForIDs;
     }
 
 }

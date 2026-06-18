@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
-import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.DataManager;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataReferenceSet;
@@ -17,7 +17,8 @@ import java.util.List;
 
 public class ParameterFieldReferenceSet extends ParameterField implements DataSaveTarget {
 
-    private final Main main;
+    private final DataSaveTarget objectSaveTarget;
+
     private final JList<String> referenceList;
     private final JButton buttonAdd;
     private final JButton buttonEdit;
@@ -25,9 +26,9 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
 
     private final String name;
 
-    public ParameterFieldReferenceSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, Main main) {
+    public ParameterFieldReferenceSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, DataManager dataManager, DataSaveTarget objectSaveTarget) {
         super(editorFrame, optional, name, parentField);
-        this.main = main;
+        this.objectSaveTarget = objectSaveTarget;
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.name = name;
         getInnerPanel().setLayout(new GridBagLayout());
@@ -88,21 +89,21 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
                     if (index >= 0) {
                         String selectedItem = referenceList.getModel().getElementAt(index);
                         if (selectedItem != null) {
-                            main.getDataManager().editObject(template.id(), selectedItem, ParameterFieldReferenceSet.this);
+                            dataManager.editObject(template.id(), selectedItem, ParameterFieldReferenceSet.this);
                         }
                     }
                 }
             }
         });
         buttonAdd.addActionListener(e -> {
-            main.getDataManager().newObject(template.id(), this);
+            dataManager.newObject(template.id(), this);
         });
         buttonEdit.addActionListener(e -> {
-            main.getDataManager().editObject(template.id(), referenceList.getSelectedValue(), this);
+            dataManager.editObject(template.id(), referenceList.getSelectedValue(), this);
         });
         buttonRemove.addActionListener(e -> {
             int selectedIndex = referenceList.getSelectedIndex();
-            boolean didDelete = main.getDataManager().deleteObject(template.id(), referenceList.getSelectedValue());
+            boolean didDelete = dataManager.deleteObject(template.id(), referenceList.getSelectedValue());
             if (didDelete) {
                 ((DefaultListModel<String>) referenceList.getModel()).remove(selectedIndex);
             }
@@ -155,7 +156,7 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
 
     @Override
     public void saveObjectData(String editorID, Data data, Data initialData) {
-        main.getMainFrame().saveObjectData(editorID, data, initialData);
+        objectSaveTarget.saveObjectData(editorID, data, initialData);
         int addIndex = referenceList.getSelectedIndex() + 1;
         if (addIndex == 0) {
             addIndex = referenceList.getModel().getSize();
@@ -172,12 +173,12 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
 
     @Override
     public void onEditorFrameClose(EditorFrame frame) {
-        main.getMainFrame().onEditorFrameClose(frame);
+        objectSaveTarget.onEditorFrameClose(frame);
     }
 
     @Override
-    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
-        return main.getMainFrame().isDataValidOrShowDialog(currentData, initialData);
+    public ErrorData checkForSaveDataErrors(Data currentData, Data initialData) {
+        return objectSaveTarget.checkForSaveDataErrors(currentData, initialData);
     }
 
     @Override

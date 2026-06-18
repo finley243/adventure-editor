@@ -17,11 +17,14 @@ import java.util.Map;
 
 public class BrowserTree extends JTree {
 
+    private final BrowserFrame browserFrame;
+
     private final DefaultMutableTreeNode treeRoot;
     private final DefaultTreeModel treeModel;
     private final Map<String, BrowserCategoryNode> categoryNodes;
 
-    public BrowserTree() {
+    public BrowserTree(BrowserFrame browserFrame) {
+        this.browserFrame = browserFrame;
         this.treeRoot = new BrowserRootNode();
         this.categoryNodes = new HashMap<>();
         this.treeModel = new DefaultTreeModel(treeRoot, false);
@@ -60,10 +63,8 @@ public class BrowserTree extends JTree {
                     return;
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-                if (node instanceof BrowserCategoryNode categoryNode) {
-                    main.getDataManager().newObject(categoryNode.getCategoryID());
-                } else if (node instanceof BrowserObjectNode objectNode) {
-                    main.getDataManager().newObject(objectNode.getCategoryID());
+                if (node instanceof BrowserNode browserNode) {
+                    browserFrame.newObject(browserNode);
                 }
             }
         };
@@ -76,7 +77,7 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    main.getDataManager().editObject(objectNode.getCategoryID(), objectNode.getObjectID());
+                    browserFrame.editObject(objectNode);
                 }
             }
         };
@@ -89,7 +90,7 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    main.getDataManager().duplicateObject(objectNode.getCategoryID(), objectNode.getObjectID());
+                    browserFrame.duplicateObject(objectNode);
                 }
             }
         };
@@ -102,7 +103,7 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    main.getDataManager().deleteObject(objectNode.getCategoryID(), objectNode.getObjectID());
+                    browserFrame.deleteObject(objectNode);
                 }
             }
         };
@@ -129,7 +130,7 @@ public class BrowserTree extends JTree {
     }
 
     public void addCategory(String categoryID, String name) {
-        BrowserCategoryNode node = new BrowserCategoryNode(main, categoryID, name);
+        BrowserCategoryNode node = new BrowserCategoryNode(categoryID, name);
         categoryNodes.put(categoryID, node);
         treeRoot.add(node);
         treeModel.nodeStructureChanged(treeRoot);
@@ -195,7 +196,7 @@ public class BrowserTree extends JTree {
 
     private void onDoubleClick(DefaultMutableTreeNode node) {
         if (node instanceof BrowserObjectNode objectNode) {
-            main.getDataManager().editObject(objectNode.getCategoryID(), objectNode.getObjectID());
+            browserFrame.editObject(objectNode);
         }
     }
 
@@ -206,10 +207,7 @@ public class BrowserTree extends JTree {
         }
         BrowserNode node = (BrowserNode) path.getLastPathComponent();
         this.setSelectionPath(path);
-        JPopupMenu contextMenu = node.getContextMenu();
-        if (contextMenu != null) {
-            contextMenu.show(this, mousePos.x, mousePos.y);
-        }
+        browserFrame.openContextMenu(node, mousePos.x, mousePos.y);
     }
 
 }

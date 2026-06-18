@@ -4,7 +4,10 @@ import com.github.finley243.adventureeditor.data.*;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
+import com.github.finley243.adventureeditor.ui.CategoryUpdateListener;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+import com.github.finley243.adventureeditor.ui.ObjectUpdateListener;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldFactory;
 
 import javax.swing.*;
 import java.util.*;
@@ -18,12 +21,30 @@ public class DataManager {
 
     private final Map<String, Map<String, Data>> data;
 
+    private final List<CategoryUpdateListener> categoryUpdateListeners;
+    private final List<ObjectUpdateListener> objectUpdateListeners;
+
     public DataManager(EditorManager editorManager, TemplateRegistry templateRegistry, ReferenceListManager referenceListManager, ConfigMenuManager configMenuManager) {
         this.editorManager = editorManager;
         this.templateRegistry = templateRegistry;
         this.referenceListManager = referenceListManager;
         this.configMenuManager = configMenuManager;
         this.data = new HashMap<>();
+        this.categoryUpdateListeners = new ArrayList<>();
+        this.objectUpdateListeners = new ArrayList<>();
+    }
+
+    public void addCategoryUpdateListener(CategoryUpdateListener categoryUpdateListener) {
+        this.categoryUpdateListeners.add(categoryUpdateListener);
+    }
+
+    public void addObjectUpdateListener(ObjectUpdateListener objectUpdateListener) {
+        this.objectUpdateListeners.add(objectUpdateListener);
+    }
+
+    public boolean categoryContainsID(String categoryID, String objectID) {
+        if (!data.containsKey(categoryID)) return false;
+        return data.get(categoryID).containsKey(objectID);
     }
 
     public Set<String> getIDsForCategory(String categoryID) {
@@ -99,20 +120,12 @@ public class DataManager {
         }
     }
 
-    public void newObject(String categoryID) {
-        editorManager.openEditorFrame(categoryID, null, templateRegistry.getTemplate(categoryID), null, null);
+    public void newObject(String categoryID, DataSaveTarget saveTarget, ParameterFieldFactory parameterFactory) {
+        editorManager.openEditorFrame(categoryID, null, templateRegistry.getTemplate(categoryID), null, saveTarget, parameterFactory);
     }
 
-    public void newObject(String categoryID, DataSaveTarget saveTargetOverride) {
-        editorManager.openEditorFrame(categoryID, null, templateRegistry.getTemplate(categoryID), null, saveTargetOverride);
-    }
-
-    public void editObject(String categoryID, String objectID) {
-        editorManager.openEditorFrame(categoryID, objectID, templateRegistry.getTemplate(categoryID), getData(categoryID, objectID), null);
-    }
-
-    public void editObject(String categoryID, String objectID, DataSaveTarget saveTargetOverride) {
-        editorManager.openEditorFrame(categoryID, objectID, templateRegistry.getTemplate(categoryID), getData(categoryID, objectID), saveTargetOverride);
+    public void editObject(String categoryID, String objectID, DataSaveTarget saveTarget, ParameterFieldFactory parameterFactory) {
+        editorManager.openEditorFrame(categoryID, objectID, templateRegistry.getTemplate(categoryID), getData(categoryID, objectID), saveTarget, parameterFactory);
     }
 
     public String duplicateObject(String categoryID, String objectID) {
@@ -271,6 +284,24 @@ public class DataManager {
             } else if (innerData instanceof DataComponent innerComponent) {
                 renameReferencesInData(innerComponent.getObjectData(), categoryID, objectID, newObjectID);
             }
+        }
+    }
+
+    private void onCategoryUpdate(String categoryID) {
+        for (CategoryUpdateListener listener : categoryUpdateListeners) {
+            listener.onCategoryUpdate(categoryID);
+        }
+    }
+
+    private void onObjectCreation(String categoryID, String objectID) {
+        for (ObjectUpdateListener listener : objectUpdateListeners) {
+            listener.onCreateNewObject(categoryID, objectID);
+        }
+    }
+
+    private void onObjectIDChange(String categoryID, String objectIDPrevious, String objectIDNew) {
+        for (ObjectUpdateListener listener : objectUpdateListeners) {
+            listener.onObjectIDChange(categoryID, objectIDPrevious, objectIDNew);
         }
     }
 

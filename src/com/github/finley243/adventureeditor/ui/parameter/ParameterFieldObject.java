@@ -1,6 +1,5 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
-import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataTreeBranch;
@@ -25,7 +24,7 @@ public class ParameterFieldObject extends ParameterField {
     private final Map<String, EditorTabGroup> tabGroups;
     private final Template template;
 
-    public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, Main main, boolean isTopLevelEditor) {
+    public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, boolean isTopLevelEditor, ParameterFieldFactory parameterFactory) {
         super(editorFrame, optional, name, parentField);
         this.template = template;
         JPanel objectPanel = new JPanel();
@@ -72,7 +71,7 @@ public class ParameterFieldObject extends ParameterField {
         }
         for (TemplateParameter parameter : template.parameters()) {
             if (isTopLevelEditor || !parameter.topLevelOnly()) {
-                ParameterField parameterElement = ParameterFieldFactory.create(parameter, main, editorFrame, parentField);
+                ParameterField parameterElement = parameterFactory.create(parameter, editorFrame, parentField);
                 if (parameterElement == null) {
                     continue;
                 }

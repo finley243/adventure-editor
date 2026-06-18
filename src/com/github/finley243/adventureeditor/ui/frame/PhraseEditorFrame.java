@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.table.PhraseTableModel;
 
 import javax.swing.*;
@@ -15,13 +15,11 @@ public class PhraseEditorFrame extends JDialog {
 
     private static final String PHRASE_EDITOR_TITLE = "Phrases";
 
-    private final Main main;
     private final PhraseTableModel tableModel;
     private final JTable phraseTable;
 
-    public PhraseEditorFrame(Main main) {
-        super(main.getBrowserFrame());
-        this.main = main;
+    public PhraseEditorFrame(BrowserFrame browserFrame) {
+        super(browserFrame);
         this.setTitle(PHRASE_EDITOR_TITLE);
         this.setModalityType(ModalityType.MODELESS);
         JPanel mainPanel = new JPanel();

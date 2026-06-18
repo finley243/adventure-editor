@@ -4,6 +4,8 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
+import com.github.finley243.adventureeditor.ui.frame.MainFrame;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,19 +13,22 @@ import java.util.Map;
 
 public class EditorManager {
 
+    private final MainFrame mainFrame;
+
     private final Map<String, Map<String, EditorFrame>> topLevelEditorWindows;
 
-    public EditorManager() {
+    public EditorManager(MainFrame mainFrame) {
+        this.mainFrame = mainFrame;
         this.topLevelEditorWindows = new HashMap<>();
     }
 
-    public void openEditorFrame(String categoryID, String objectID, Template template, Data objectData, DataSaveTarget saveTargetOverride) {
+    public void openEditorFrame(String categoryID, String objectID, Template template, Data objectData, DataSaveTarget saveTarget, ParameterFieldFactory parameterFactory) {
         EditorFrame activeFrame = getActiveTopLevelFrame(categoryID, objectID);
         if (activeFrame != null) {
             activeFrame.toFront();
             activeFrame.requestFocus();
         } else {
-            EditorFrame editorFrame = new EditorFrame(main, null, main.getMainFrame(), template, objectData, saveTargetOverride != null ? saveTargetOverride : main.getMainFrame(), true);
+            EditorFrame editorFrame = new EditorFrame(null, mainFrame, template, objectData, saveTarget, true, parameterFactory);
             addActiveTopLevelFrame(categoryID, objectID, editorFrame);
         }
     }

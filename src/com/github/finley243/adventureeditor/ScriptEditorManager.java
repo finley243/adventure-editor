@@ -108,7 +108,7 @@ public class ScriptEditorManager implements DataSaveTarget {
     }
 
     @Override
-    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
+    public ErrorData checkForSaveDataErrors(Data currentData, Data initialData) {
         return new ErrorData(false, null);
     }
 

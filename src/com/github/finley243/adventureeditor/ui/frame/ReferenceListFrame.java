@@ -1,6 +1,5 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.Reference;
 import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.table.PhraseTableModel;

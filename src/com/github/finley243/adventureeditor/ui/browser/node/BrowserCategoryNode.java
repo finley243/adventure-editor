@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.browser.node;
 
-import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 
 import javax.swing.*;
 import java.util.Comparator;
@@ -9,14 +9,12 @@ import java.util.Map;
 
 public class BrowserCategoryNode extends BrowserNode {
 
-    private final Main main;
     private final String categoryID;
     private final String name;
     private final Map<String, BrowserObjectNode> objectNodes;
 
-    public BrowserCategoryNode(Main main, String categoryID, String name) {
+    public BrowserCategoryNode(String categoryID, String name) {
         super(name);
-        this.main = main;
         this.categoryID = categoryID;
         this.name = name;
         this.objectNodes = new HashMap<>();
@@ -31,7 +29,7 @@ public class BrowserCategoryNode extends BrowserNode {
     }
 
     public void addGameObject(String objectID) {
-        BrowserObjectNode objectNode = new BrowserObjectNode(main, objectID, categoryID);
+        BrowserObjectNode objectNode = new BrowserObjectNode(objectID, categoryID);
         objectNodes.put(objectID, objectNode);
         this.add(objectNode);
         this.children.sort(Comparator.comparing(o -> ((BrowserObjectNode) o).getObjectID()));
@@ -46,10 +44,10 @@ public class BrowserCategoryNode extends BrowserNode {
     }
 
     @Override
-    public JPopupMenu getContextMenu() {
+    public JPopupMenu getContextMenu(BrowserFrame browserFrame) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuNew = new JMenuItem("New " + name);
-        menuNew.addActionListener(e -> main.getDataManager().newObject(categoryID));
+        menuNew.addActionListener(e -> browserFrame.newObject(this));
         menu.add(menuNew);
         return menu;
     }

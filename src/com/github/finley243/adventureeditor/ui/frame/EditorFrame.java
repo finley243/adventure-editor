@@ -1,11 +1,11 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.Main;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterField;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldFactory;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldObject;
 
 import javax.swing.*;
@@ -14,7 +14,6 @@ import java.awt.event.*;
 
 public class EditorFrame extends JDialog {
 
-    private final Main main;
     private final String editorID;
     private final ParameterField parameterField;
     private final Template template;
@@ -22,7 +21,7 @@ public class EditorFrame extends JDialog {
     private final DataSaveTarget saveTarget;
     private final JButton saveButton;
 
-    public EditorFrame(Main main, String editorID, Window parentWindow, Template template, Data objectData, DataSaveTarget saveTarget, boolean isTopLevel) {
+    public EditorFrame(String editorID, Window parentWindow, Template template, Data objectData, DataSaveTarget saveTarget, boolean isTopLevel, ParameterFieldFactory parameterFactory) {
         //super(template.name());
         super(parentWindow);
         //this.setAutoRequestFocus(false);
@@ -31,14 +30,13 @@ public class EditorFrame extends JDialog {
         if (saveTarget == null) {
             throw new IllegalArgumentException("Save target cannot be null");
         }
-        this.main = main;
         this.editorID = editorID;
         this.template = template;
         this.initialData = objectData;
         this.saveTarget = saveTarget;
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
-        this.parameterField = new ParameterFieldObject(this, false, template.name(), null, template, main, isTopLevel);
+        this.parameterField = new ParameterFieldObject(this, false, template.name(), null, template, isTopLevel, parameterFactory);
         if (objectData != null) {
             parameterField.setData(objectData);
         }
@@ -182,7 +180,7 @@ public class EditorFrame extends JDialog {
 
     // Returns true if data is valid, shows error dialog and returns false if not
     private boolean isDataValidOrShowDialog() {
-        DataSaveTarget.ErrorData errorData = saveTarget.isDataValidOrShowDialog(parameterField.getData(), initialData);
+        DataSaveTarget.ErrorData errorData = saveTarget.checkForSaveDataErrors(parameterField.getData(), initialData);
         if (!errorData.hasError()) {
             return true;
         }

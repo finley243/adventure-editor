@@ -9,7 +9,7 @@ public interface DataSaveTarget {
 
     void onEditorFrameClose(EditorFrame frame);
 
-    ErrorData isDataValidOrShowDialog(Data currentData, Data initialData);
+    ErrorData checkForSaveDataErrors(Data currentData, Data initialData);
 
     record ErrorData(boolean hasError, String message) {}
 

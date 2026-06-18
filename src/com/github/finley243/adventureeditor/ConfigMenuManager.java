@@ -3,30 +3,43 @@ package com.github.finley243.adventureeditor;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataString;
+import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
+import com.github.finley243.adventureeditor.ui.frame.MainFrame;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldFactory;
 
 import java.util.Objects;
 
 public class ConfigMenuManager implements DataSaveTarget {
 
-    public static final String CONFIG_TEMPLATE = "config";
     private static final String PROJECT_NAME_KEY = "gameName";
+
+    private final TemplateRegistry templateRegistry;
+    private final ProjectManager projectManager;
+    private final ParameterFieldFactory parameterFactory;
+    private final MainFrame mainFrame;
 
     private Data configData;
     private EditorFrame configFrame;
 
-    public ConfigMenuManager() {}
+    public ConfigMenuManager(TemplateRegistry templateRegistry, ProjectManager projectManager, ParameterFieldFactory parameterFactory, MainFrame mainFrame) {
+        this.templateRegistry = templateRegistry;
+        this.projectManager = projectManager;
+        this.parameterFactory = parameterFactory;
+        this.mainFrame = mainFrame;
+    }
 
     public void openConfigMenu() {
-        if (!main.getProjectManager().isProjectLoaded()) {
+        if (!projectManager.isProjectLoaded()) {
             return;
         }
         if (configFrame != null) {
             configFrame.toFront();
             configFrame.requestFocus();
         } else {
-            configFrame = new EditorFrame(main, null, main.getBrowserFrame(), main.getTemplate(CONFIG_TEMPLATE), configData, this, true);
+            configFrame = new EditorFrame(null, mainFrame, templateRegistry.getConfigTemplate(), configData, this, true, parameterFactory);
         }
     }
 
@@ -61,7 +74,7 @@ public class ConfigMenuManager implements DataSaveTarget {
     @Override
     public void saveObjectData(String editorID, Data data, Data initialData) {
         configData = data;
-        main.getProjectManager().updateProjectName();
+        projectManager.updateProjectName();
     }
 
     @Override
@@ -70,7 +83,7 @@ public class ConfigMenuManager implements DataSaveTarget {
     }
 
     @Override
-    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
+    public ErrorData checkForSaveDataErrors(Data currentData, Data initialData) {
         String currentProjectName = ((DataString) ((DataObject) currentData).getValue().get(PROJECT_NAME_KEY)).getValue();
         if (currentProjectName == null || currentProjectName.trim().isEmpty()) {
             return new ErrorData(true, "Game name cannot be empty.");

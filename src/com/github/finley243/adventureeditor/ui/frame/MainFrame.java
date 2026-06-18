@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.ProjectFile;
+import com.github.finley243.adventureeditor.*;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
@@ -14,16 +14,28 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.util.List;
-import java.util.Set;
 
-public class MainFrame extends JFrame implements DataSaveTarget {
+public class MainFrame extends JFrame {
 
     private static final String EDITOR_NAME = "AdventureEditor";
 
+    private final DataManager dataManager;
+    private final ProjectManager projectManager;
+    private final ConfigMenuManager configMenuManager;
+    private final PhraseEditorManager phraseEditorManager;
+    private final ScriptEditorManager scriptEditorManager;
+    private final EditorManager editorManager;
+
     private final JMenu fileOpenRecent;
 
-    public MainFrame() {
+    public MainFrame(DataManager dataManager, ProjectManager projectManager, ConfigMenuManager configMenuManager, PhraseEditorManager phraseEditorManager, ScriptEditorManager scriptEditorManager, EditorManager editorManager) {
         super(EDITOR_NAME);
+        this.dataManager = dataManager;
+        this.projectManager = projectManager;
+        this.configMenuManager = configMenuManager;
+        this.phraseEditorManager = phraseEditorManager;
+        this.scriptEditorManager = scriptEditorManager;
+        this.editorManager = editorManager;
 
         this.setSize(800, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -34,19 +46,19 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
         JMenuItem fileNew = new JMenuItem("New");
-        fileNew.addActionListener(e -> main.getProjectManager().newProject());
+        fileNew.addActionListener(e -> projectManager.newProject());
         JMenuItem fileOpen = new JMenuItem("Open");
-        fileOpen.addActionListener(e -> main.getProjectManager().openProjectFromMenu());
+        fileOpen.addActionListener(e -> projectManager.openProjectFromMenu());
         this.fileOpenRecent = new JMenu("Open Recent");
         JMenuItem fileSave = new JMenuItem("Save");
-        fileSave.addActionListener(e -> main.getProjectManager().saveProjectToCurrentPath());
+        fileSave.addActionListener(e -> projectManager.saveProjectToCurrentPath());
         JMenuItem fileSaveAs = new JMenuItem("Save As");
-        fileSaveAs.addActionListener(e -> main.getProjectManager().saveProjectToMenu());
+        fileSaveAs.addActionListener(e -> projectManager.saveProjectToMenu());
         fileMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
-                fileSave.setEnabled(main.getProjectManager().hasUnsavedChanges());
-                fileSaveAs.setEnabled(main.getProjectManager().isProjectLoaded());
+                fileSave.setEnabled(projectManager.hasUnsavedChanges());
+                fileSaveAs.setEnabled(projectManager.isProjectLoaded());
             }
             @Override
             public void menuDeselected(MenuEvent e) {}
@@ -63,18 +75,18 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         JMenu toolsMenu = new JMenu("Tools");
         menuBar.add(toolsMenu);
         JMenuItem toolsProjectConfig = new JMenuItem("Project Configuration");
-        toolsProjectConfig.addActionListener(e -> main.getConfigMenuManager().openConfigMenu());
+        toolsProjectConfig.addActionListener(e -> configMenuManager.openConfigMenu());
         toolsMenu.add(toolsProjectConfig);
         JMenuItem toolsPhraseEditor = new JMenuItem("Phrase Editor");
-        toolsPhraseEditor.addActionListener(e -> main.getPhraseEditorManager().openPhraseEditor());
+        toolsPhraseEditor.addActionListener(e -> phraseEditorManager.openPhraseEditor());
         toolsMenu.add(toolsPhraseEditor);
         JMenuItem toolsScriptEditor = new JMenuItem("Script Editor");
-        toolsScriptEditor.addActionListener(e -> main.getScriptEditorManager().openScriptEditor());
+        toolsScriptEditor.addActionListener(e -> scriptEditorManager.openScriptEditor());
         toolsMenu.add(toolsScriptEditor);
         toolsMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
-                boolean isProjectLoaded = main.getProjectManager().isProjectLoaded();
+                boolean isProjectLoaded = projectManager.isProjectLoaded();
                 toolsProjectConfig.setEnabled(isProjectLoaded);
                 toolsPhraseEditor.setEnabled(isProjectLoaded);
                 toolsScriptEditor.setEnabled(isProjectLoaded);
@@ -88,7 +100,7 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         JMenu windowMenu = new JMenu("Window");
         menuBar.add(windowMenu);
         JMenuItem windowCloseAll = new JMenuItem("Close All Objects");
-        windowCloseAll.addActionListener(e -> main.getEditorManager().closeAllActiveEditorFrames());
+        windowCloseAll.addActionListener(e -> editorManager.closeAllActiveEditorFrames());
         windowMenu.add(windowCloseAll);
 
         JPanel primaryPanel = new JPanel();
@@ -98,31 +110,31 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         Action newProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getProjectManager().newProject();
+                projectManager.newProject();
             }
         };
         Action openProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getProjectManager().openProjectFromMenu();
+                projectManager.openProjectFromMenu();
             }
         };
         Action saveProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getProjectManager().saveProjectToCurrentPath();
+                projectManager.saveProjectToCurrentPath();
             }
         };
         Action saveProjectAsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getProjectManager().saveProjectToMenu();
+                projectManager.saveProjectToMenu();
             }
         };
         Action openConfigAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getConfigMenuManager().openConfigMenu();
+                configMenuManager.openConfigMenu();
             }
         };
 
@@ -155,63 +167,31 @@ public class MainFrame extends JFrame implements DataSaveTarget {
     }
 
     public void updateRecentProjects() {
-        List<ProjectFile> recentProjects = main.getProjectManager().getRecentProjects();
+        List<ProjectFile> recentProjects = projectManager.getRecentProjects();
         fileOpenRecent.setEnabled(!recentProjects.isEmpty());
         fileOpenRecent.removeAll();
         for (ProjectFile recentProject : recentProjects) {
             JMenuItem recentProjectItem = new JMenuItem(recentProject.name());
-            recentProjectItem.addActionListener(e -> main.getProjectManager().openRecentProject(recentProject));
+            recentProjectItem.addActionListener(e -> projectManager.openRecentProject(recentProject));
             fileOpenRecent.add(recentProjectItem);
         }
         JSeparator separator = new JSeparator();
         fileOpenRecent.add(separator);
         JMenuItem clearRecentProjects = new JMenuItem("Clear Recent Projects");
-        clearRecentProjects.addActionListener(e -> main.getProjectManager().clearRecentProjects());
+        clearRecentProjects.addActionListener(e -> projectManager.clearRecentProjects());
         fileOpenRecent.add(clearRecentProjects);
     }
 
     @Override
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-            boolean shouldClose = main.getProjectManager().saveConfirmationIfHasUnsavedData();
+            boolean shouldClose = projectManager.saveConfirmationIfHasUnsavedData();
             if (shouldClose) {
                 super.processWindowEvent(e);
             }
         } else {
             super.processWindowEvent(e);
         }
-    }
-
-    @Override
-    public void saveObjectData(String editorID, Data data, Data initialData) {
-        main.getDataManager().saveObjectData(data, initialData);
-    }
-
-    @Override
-    public void onEditorFrameClose(EditorFrame frame) {
-        main.getEditorManager().closeEditorFrameIfActive(frame.getTemplate().id(), frame.getObjectID());
-    }
-
-    @Override
-    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
-        boolean isNewInstance = initialData == null;
-        String categoryID = ((DataObject) currentData).getTemplate().id();
-        String currentID = ((DataObject) currentData).getID();
-        if (currentID == null || currentID.trim().isEmpty()) {
-            return new ErrorData(true, "ID cannot be empty.");
-        }
-        Set<String> objectIDsInCategory = main.getDataManager().getIDsForCategory(categoryID);
-        if (isNewInstance) {
-            if (objectIDsInCategory != null && objectIDsInCategory.contains(currentID)) {
-                return new ErrorData(true, "An object with ID \"" + currentID + "\" already exists.");
-            }
-        } else {
-            String initialID = ((DataObject) initialData).getID();
-            if (!initialID.equals(currentID) && objectIDsInCategory != null && objectIDsInCategory.contains(currentID)) {
-                return new ErrorData(true, "An object with ID \"" + currentID + "\" already exists.");
-            }
-        }
-        return new ErrorData(false, null);
     }
 
 }
