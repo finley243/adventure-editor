@@ -25,11 +25,11 @@ public class DataLoader {
     private static final String TEMPLATE_DIRECTORY = "templates";
     private static final String RECENT_PROJECTS_FILE = "recents.txt";
 
-    private static final String DATA_DIRECTORY = "/data";
+    private static final String DATA_DIRECTORY = "data";
     private static final String DATA_EXTENSION = "xml";
-    private static final String SCRIPT_DIRECTORY = "/data/scripts";
+    private static final String SCRIPT_DIRECTORY = "data/scripts";
     private static final String SCRIPT_EXTENSION = "ascr";
-    private static final String CONFIG_FILE = "/config.xml";
+    private static final String CONFIG_FILE = "config.xml";
     private static final String PHRASE_FILE = "phrases.aphr";
     private static final String PHRASE_EXTENSION = "aphr";
 
@@ -195,6 +195,7 @@ public class DataLoader {
                     recentProjects.add(new ProjectData(parts[0], parts[1]));
                 }
             }
+            scanner.close();
         } catch (IOException e) {
             throw new DataIOException("Failed to load recent projects file");
         }
@@ -204,7 +205,6 @@ public class DataLoader {
     public void saveRecentProjects(List<ProjectData> recentProjects) {
         File file = new File(RECENT_PROJECTS_FILE);
         try (FileWriter writer = new FileWriter(file); BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
-            file.createNewFile();
             StringBuilder builder = new StringBuilder();
             for (ProjectData project : recentProjects) {
                 builder.append(project.name()).append("|").append(project.absolutePath()).append("\n");
@@ -268,7 +268,7 @@ public class DataLoader {
                     }
                     while (scanner.hasNextLine()) {
                         String line = scanner.nextLine();
-                        String[] split = line.split(":");
+                        String[] split = line.split(":", 2);
                         if (split.length != 2) throw new DataIOException("Invalid phrase file format - line: " + line);
                         phrases.put(split[0].trim(), split[1].trim());
                     }
@@ -278,9 +278,9 @@ public class DataLoader {
         }
     }
 
-    public void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> scripts, Map<String, String> phrases) {
+    public void saveToDir(File dir, TemplateRegistry templateRegistry, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> scripts, Map<String, String> phrases) {
         if (dir.isDirectory()) {
-            saveConfigData(dir, templates.get(ConfigMenuManager.CONFIG_TEMPLATE), configMenuManager, dataMap);
+            saveConfigData(dir, templateRegistry.getTemplate(ConfigMenuManager.CONFIG_TEMPLATE), configMenuManager, dataMap);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
             dataDirectory.mkdirs();
             File scriptDirectory = new File(dir, SCRIPT_DIRECTORY);
@@ -313,13 +313,13 @@ public class DataLoader {
 
             for (Map.Entry<String, Map<String, Data>> entry : dataMap.entrySet()) {
                 String categoryID = entry.getKey();
-                Template categoryTemplate = templates.get(categoryID);
+                Template categoryTemplate = templateRegistry.getTemplate(categoryID);
                 if (!categoryTemplate.topLevel()) {
                     continue;
                 }
                 Map<String, Data> categoryData = entry.getValue();
                 // TODO - Switch to dedicated file name stored in Data (loaded from templates)
-                File categoryFile = new File(dataDirectory, categoryID + ".xml");
+                File categoryFile = new File(dataDirectory, categoryID + "." + DATA_EXTENSION);
                 try {
                     categoryFile.createNewFile();
                 } catch (IOException e) {
@@ -344,7 +344,7 @@ public class DataLoader {
             }
 
             for (Map.Entry<String, String> script : scripts.entrySet()) {
-                File scriptFile = new File(scriptDirectory, script.getKey() + ".ascr");
+                File scriptFile = new File(scriptDirectory, script.getKey() + "." + SCRIPT_EXTENSION);
                 try {
                     scriptFile.createNewFile();
                 } catch (IOException e) {
@@ -353,7 +353,7 @@ public class DataLoader {
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(scriptFile))) {
                     writer.write(script.getValue());
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new DataIOException("Failed to write to script file: " + scriptFile.getAbsolutePath());
                 }
             }
         }
@@ -674,7 +674,9 @@ public class DataLoader {
                         childElement = document.createElement(parameter.id());
                     }
                     addObjectToElement((DataObject) parameterData, childElement, document, globalDataMap);
-                    objectElement.appendChild(childElement);
+                    if (parameter.format() != TemplateParameter.ParameterFormat.CURRENT_TAG) {
+                        objectElement.appendChild(childElement);
+                    }
                 }
                 case OBJECT_SET, OBJECT_SET_UNIQUE -> {
                     List<Data> values = ((DataObjectSet) parameterData).getValue();
