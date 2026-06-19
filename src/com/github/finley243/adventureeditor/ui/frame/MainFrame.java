@@ -3,6 +3,7 @@ package com.github.finley243.adventureeditor.ui.frame;
 import com.github.finley243.adventureeditor.*;
 import com.github.finley243.adventureeditor.ui.ProjectNameChangeListener;
 import com.github.finley243.adventureeditor.ui.RecentProjectListener;
+import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import javax.swing.*;
@@ -17,14 +18,6 @@ import java.io.File;
 import java.util.List;
 
 public class MainFrame extends JFrame implements ProjectNameChangeListener, RecentProjectListener {
-
-    public enum SaveConfirmationResult {
-        YES, NO, CANCEL
-    }
-
-    public enum DeleteObjectConfirmationResult {
-        DELETE, VIEW_REFERENCES, CANCEL
-    }
 
     private static final String EDITOR_NAME = "AdventureEditor";
 
@@ -184,24 +177,6 @@ public class MainFrame extends JFrame implements ProjectNameChangeListener, Rece
     public boolean recentProjectDeleteConfirmation() {
         int choice = JOptionPane.showOptionDialog(this, "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
         return choice == JOptionPane.YES_OPTION;
-    }
-
-    public DeleteObjectConfirmationResult deleteObjectConfirmation(String objectID, int referenceCount, Window parentWindow) {
-        int confirmResult;
-        if (referenceCount > 0) {
-            Object[] confirmOptions = {"Delete", "View References", "Cancel"};
-            confirmResult = JOptionPane.showOptionDialog(parentWindow, "Are you sure you want to delete " + objectID + "?\nReferences: " + referenceCount, "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
-        } else {
-            Object[] confirmOptions = {"Delete", "Cancel"};
-            confirmResult = JOptionPane.showOptionDialog(parentWindow, "Are you sure you want to delete " + objectID + "?\nReferences: " + 0, "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
-        }
-        if (confirmResult == 0) {
-            return DeleteObjectConfirmationResult.DELETE;
-        } else if (confirmResult == 1 && referenceCount > 0) {
-            return DeleteObjectConfirmationResult.VIEW_REFERENCES;
-        } else {
-            return DeleteObjectConfirmationResult.CANCEL;
-        }
     }
 
     public SaveConfirmationResult projectSaveConfirmation() {

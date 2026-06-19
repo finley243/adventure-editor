@@ -4,10 +4,7 @@ import com.github.finley243.adventureeditor.data.*;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
-import com.github.finley243.adventureeditor.ui.CategoryUpdateListener;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-import com.github.finley243.adventureeditor.ui.ObjectUpdateListener;
-import com.github.finley243.adventureeditor.ui.frame.MainFrame;
+import com.github.finley243.adventureeditor.ui.*;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import javax.swing.*;
@@ -148,17 +145,17 @@ public class DataManager {
         return newObjectID;
     }
 
-    public boolean deleteObject(String categoryID, String objectID, Window parentWindow, ParameterFactory parameterFactory, MainFrame mainFrame) {
+    public boolean deleteObject(String categoryID, String objectID, Window parentWindow, ParameterFactory parameterFactory) {
         int referenceCount = findReferences(categoryID, objectID).size();
-        MainFrame.DeleteObjectConfirmationResult result = mainFrame.deleteObjectConfirmation(objectID, referenceCount, parentWindow);
-        if (result == MainFrame.DeleteObjectConfirmationResult.CANCEL) {
+        DeleteObjectConfirmationResult result = UIUtils.deleteObjectConfirmation(objectID, referenceCount, parentWindow);
+        if (result == DeleteObjectConfirmationResult.DELETE) {
             data.get(categoryID).remove(objectID);
             editorManager.closeEditorFrameIfActive(categoryID, objectID);
             if (templateRegistry.getTemplate(categoryID).topLevel()) {
                 onObjectDelete(categoryID, objectID);
             }
             return true;
-        } else if (result == MainFrame.DeleteObjectConfirmationResult.VIEW_REFERENCES) {
+        } else if (result == DeleteObjectConfirmationResult.VIEW_REFERENCES) {
             displayReferences(categoryID, objectID, parentWindow, parameterFactory);
         }
         return false;

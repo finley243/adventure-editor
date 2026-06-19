@@ -219,7 +219,7 @@ public class DataLoader {
         if (!projectDir.isDirectory()) {
             throw new IllegalArgumentException("Selected file is not a directory");
         }
-        Data configData = loadConfigDataFromDir(projectDir, templateRegistry.getTemplate(ConfigMenuManager.CONFIG_TEMPLATE), templateRegistry);
+        Data configData = loadConfigDataFromDir(projectDir, templateRegistry.getConfigTemplate(), templateRegistry);
         Map<String, Map<String, Data>> gameData = loadDataFromDir(projectDir, templateRegistry);
         Map<String, String> phrases = loadPhrasesFromDir(projectDir);
         Map<String, String> scripts = loadScriptsFromDir(projectDir);
@@ -320,7 +320,7 @@ public class DataLoader {
 
     public void saveToDir(File dir, TemplateRegistry templateRegistry, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> scripts, Map<String, String> phrases) {
         if (dir.isDirectory()) {
-            saveConfigData(dir, templateRegistry.getTemplate(ConfigMenuManager.CONFIG_TEMPLATE), configMenuManager, dataMap);
+            saveConfigData(dir, templateRegistry.getConfigTemplate(), configMenuManager, dataMap);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
             dataDirectory.mkdirs();
             File scriptDirectory = new File(dir, SCRIPT_DIRECTORY);

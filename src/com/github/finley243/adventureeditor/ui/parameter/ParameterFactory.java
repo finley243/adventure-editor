@@ -33,7 +33,7 @@ public class ParameterFactory {
             case ENUM -> new ParameterFieldEnum(editorFrame, parameter.optional(), parameter.name(), parentField, templateRegistry.getEnumValuesArray(parameter.type()));
             case SCRIPT -> new ParameterFieldScript(editorFrame, parameter.optional(), parameter.name(), parentField);
             case COMPONENT -> new ParameterFieldComponent(editorFrame, parameter.optional(), parameter.name(), parentField, parameter.componentOptions(), templateRegistry.getTemplatesForComponents(parameter.componentOptions()), this);
-            case TREE -> new ParameterFieldTree(editorFrame, parameter.optional(), parameter.name(), parentField, templateRegistry.getTemplate(parameter.type()), parameter.id());
+            case TREE -> new ParameterFieldTree(editorFrame, parameter.optional(), parameter.name(), parentField, templateRegistry.getTemplate(parameter.type()), parameter.id(), this);
             case TREE_BRANCH -> null;
         };
         if (parameterElement == null) {

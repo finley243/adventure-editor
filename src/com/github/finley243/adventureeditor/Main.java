@@ -31,9 +31,9 @@ public class Main {
         ConfigMenuManager configMenuManager = new ConfigMenuManager(templateRegistry.getConfigTemplate());
         EditorManager editorManager = new EditorManager();
         MainFrame mainFrame = new MainFrame();
-        ReferenceListManager referenceListManager = new ReferenceListManager();
         DataManager dataManager = new DataManager(editorManager, templateRegistry, referenceListManager, configMenuManager);
         TopLevelSaveTarget topLevelSaveTarget = new TopLevelSaveTarget(dataManager, editorManager);
+        ReferenceListManager referenceListManager = new ReferenceListManager(configMenuManager, dataManager, topLevelSaveTarget);
         ParameterFactory parameterFactory = new ParameterFactory(templateRegistry, dataManager, topLevelSaveTarget);
         BrowserFrame browserFrame = new BrowserFrame(mainFrame, editorManager, dataManager, topLevelSaveTarget, parameterFactory);
         dataManager.registerObjectUpdateListener(browserFrame);

@@ -4,10 +4,7 @@ import com.github.finley243.adventureeditor.DataManager;
 import com.github.finley243.adventureeditor.EditorManager;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.CategoryUpdateListener;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-import com.github.finley243.adventureeditor.ui.ObjectUpdateListener;
-import com.github.finley243.adventureeditor.ui.ProjectLoadListener;
+import com.github.finley243.adventureeditor.ui.*;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserCategoryNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserObjectNode;
@@ -120,7 +117,7 @@ public class BrowserFrame extends JDialog implements ObjectUpdateListener, Categ
     }
 
     public void deleteObject(BrowserObjectNode node) {
-        dataManager.deleteObject(node.getCategoryID(), node.getObjectID(), this, parameterFactory, mainFrame);
+        dataManager.deleteObject(node.getCategoryID(), node.getObjectID(), this, parameterFactory);
     }
 
     @Override

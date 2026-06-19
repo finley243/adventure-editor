@@ -4,7 +4,6 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
-import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import java.awt.*;
@@ -14,12 +13,9 @@ import java.util.Map;
 
 public class EditorManager {
 
-    private final MainFrame mainFrame;
-
     private final Map<String, Map<String, EditorFrame>> topLevelEditorWindows;
 
-    public EditorManager(MainFrame mainFrame) {
-        this.mainFrame = mainFrame;
+    public EditorManager() {
         this.topLevelEditorWindows = new HashMap<>();
     }
 

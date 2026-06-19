@@ -5,6 +5,7 @@ import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.ProjectLoadListener;
 import com.github.finley243.adventureeditor.ui.RecentProjectListener;
+import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 import org.xml.sax.SAXException;
@@ -264,11 +265,11 @@ public class ProjectManager {
         if (!hasUnsavedChanges()) {
             return true;
         }
-        MainFrame.SaveConfirmationResult result = mainFrame.projectSaveConfirmation();
-        if (result == MainFrame.SaveConfirmationResult.YES) {
+        SaveConfirmationResult result = mainFrame.projectSaveConfirmation();
+        if (result == SaveConfirmationResult.YES) {
             return saveProjectToCurrentPath(mainFrame);
         } else {
-            return result == MainFrame.SaveConfirmationResult.NO;
+            return result == SaveConfirmationResult.NO;
         }
     }
 
