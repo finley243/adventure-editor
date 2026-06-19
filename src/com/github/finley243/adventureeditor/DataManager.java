@@ -16,22 +16,32 @@ public class DataManager {
 
     private final EditorManager editorManager;
     private final TemplateRegistry templateRegistry;
-    private final ReferenceListManager referenceListManager;
     private final ConfigMenuManager configMenuManager;
+
+    private ReferenceListManager referenceListManager;
 
     private Map<String, Map<String, Data>> data;
 
     private final List<CategoryUpdateListener> categoryUpdateListeners;
     private final List<ObjectUpdateListener> objectUpdateListeners;
 
-    public DataManager(EditorManager editorManager, TemplateRegistry templateRegistry, ReferenceListManager referenceListManager, ConfigMenuManager configMenuManager) {
+    public DataManager(EditorManager editorManager, TemplateRegistry templateRegistry, ConfigMenuManager configMenuManager) {
         this.editorManager = editorManager;
         this.templateRegistry = templateRegistry;
-        this.referenceListManager = referenceListManager;
         this.configMenuManager = configMenuManager;
         this.data = null;
         this.categoryUpdateListeners = new ArrayList<>();
         this.objectUpdateListeners = new ArrayList<>();
+    }
+
+    public void resolveReferenceListManager(ReferenceListManager referenceListManager) {
+        if (this.referenceListManager != null) throw new IllegalStateException("ReferenceListManager has already been resolved");
+        this.referenceListManager = referenceListManager;
+    }
+
+    private ReferenceListManager getReferenceListManager() {
+        if (this.referenceListManager == null) throw new IllegalStateException("ReferenceListManager has not been resolved");
+        return referenceListManager;
     }
 
     public void registerCategoryUpdateListener(CategoryUpdateListener categoryUpdateListener) {
