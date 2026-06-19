@@ -90,10 +90,6 @@ public class ProjectManager {
         return dataManager.hasChangesFrom(lastSavedData);
     }
 
-    public List<ProjectFile> getRecentProjects() {
-        return new ArrayList<>(recentProjects);
-    }
-
     public void setRecentProjects(List<ProjectFile> projects) {
         this.recentProjects.clear();
         this.recentProjects.addAll(projects);
@@ -137,6 +133,7 @@ public class ProjectManager {
         onLoadProject(templateRegistry.getAllTemplates(), dataManager.getAllData());
         isProjectLoaded = true;
         loadedProjectPath = null;
+        updateLastSavedData();
         updateProjectName();
         if (OPEN_CONFIG_MENU_ON_NEW_PROJECT) {
             configMenuManager.openConfigMenu(parentWindow, parameterFactory);
