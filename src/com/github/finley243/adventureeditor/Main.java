@@ -6,7 +6,6 @@ import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
-import javax.swing.*;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +35,7 @@ public class Main {
         ParameterFactory parameterFactory = new ParameterFactory(templateRegistry, dataManager, topLevelSaveTarget);
         ProjectManager projectManager = new ProjectManager(dataLoader, templateRegistry, phraseEditorManager, scriptEditorManager, configMenuManager, dataManager);
         MainFrame mainFrame = new MainFrame(parameterFactory, dataManager, projectManager, configMenuManager, phraseEditorManager, scriptEditorManager, editorManager);
+        configMenuManager.registerProjectNameChangeListener(mainFrame);
         BrowserFrame browserFrame = new BrowserFrame(mainFrame, editorManager, dataManager, topLevelSaveTarget, parameterFactory);
         dataManager.registerObjectUpdateListener(browserFrame);
         dataManager.registerCategoryUpdateListener(browserFrame);

@@ -31,7 +31,7 @@ public class ConfigMenuManager implements DataSaveTarget {
         this.projectNameChangeListeners = new ArrayList<>();
     }
 
-    public void addProjectNameChangeListener(ProjectNameChangeListener listener) {
+    public void registerProjectNameChangeListener(ProjectNameChangeListener listener) {
         projectNameChangeListeners.add(listener);
     }
 
@@ -61,6 +61,7 @@ public class ConfigMenuManager implements DataSaveTarget {
 
     public void setConfigData(Data data) {
         configData = data;
+        onProjectNameChange(getProjectName());
     }
 
     public Data getConfigData() {
@@ -74,6 +75,7 @@ public class ConfigMenuManager implements DataSaveTarget {
             configFrame = null;
         }
         configData = new DataObject(configTemplate, new HashMap<>());
+        onProjectNameChange(null);
     }
 
     public boolean hasChangesFrom(Data otherData) {
