@@ -1,0 +1,106 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="data">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="template" type="TemplateType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="TemplateType">
+        <xs:sequence>
+            <xs:element name="tabGroup" type="TabGroupType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="group" type="GroupType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="parameter" type="ParameterType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="topLevel" type="xs:boolean" default="false"/>
+        <xs:attribute name="unique" type="xs:boolean"/>
+        <xs:attribute name="nameFormat" type="xs:string"/>
+        <xs:attribute name="primaryParameter" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="TabGroupType">
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="x" type="xs:integer" default="0"/>
+        <xs:attribute name="y" type="xs:integer" default="0"/>
+        <xs:attribute name="width" type="xs:integer" default="1"/>
+        <xs:attribute name="height" type="xs:integer" default="1"/>
+    </xs:complexType>
+
+    <xs:complexType name="GroupType">
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="tabGroup" type="xs:string"/>
+        <xs:attribute name="x" type="xs:integer" default="0"/>
+        <xs:attribute name="y" type="xs:integer" default="0"/>
+        <xs:attribute name="width" type="xs:integer" default="1"/>
+        <xs:attribute name="height" type="xs:integer" default="1"/>
+    </xs:complexType>
+
+    <xs:complexType name="ParameterType">
+        <xs:sequence>
+            <xs:element name="component" type="ComponentOptionType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="dataType" type="ParameterDataType" use="required"/>
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="type" type="xs:string"/>
+        <xs:attribute name="topLevelOnly" type="xs:boolean" default="false"/>
+        <xs:attribute name="optional" type="xs:boolean" default="false"/>
+        <xs:attribute name="format" type="ParameterFormat"/>
+        <xs:attribute name="componentFormat" type="ComponentFormat"/>
+        <xs:attribute name="useComponentTypeName" type="xs:boolean" default="false"/>
+        <xs:attribute name="group" type="xs:string"/>
+        <xs:attribute name="x" type="xs:integer" default="0"/>
+        <xs:attribute name="y" type="xs:integer" default="0"/>
+        <xs:attribute name="width" type="xs:integer" default="1"/>
+        <xs:attribute name="height" type="xs:integer" default="1"/>
+        <xs:attribute name="default" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="ComponentOptionType">
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="object" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:simpleType name="ParameterDataType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="boolean"/>
+            <xs:enumeration value="integer"/>
+            <xs:enumeration value="float"/>
+            <xs:enumeration value="string"/>
+            <xs:enumeration value="stringLong"/>
+            <xs:enumeration value="object"/>
+            <xs:enumeration value="objectSet"/>
+            <xs:enumeration value="objectSetUnique"/>
+            <xs:enumeration value="reference"/>
+            <xs:enumeration value="referenceSet"/>
+            <xs:enumeration value="enum"/>
+            <xs:enumeration value="script"/>
+            <xs:enumeration value="component"/>
+            <xs:enumeration value="tree"/>
+            <xs:enumeration value="treeBranch"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ParameterFormat">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="attribute"/>
+            <xs:enumeration value="child_tag"/>
+            <xs:enumeration value="current_tag"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ComponentFormat">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="typeAttribute"/>
+            <xs:enumeration value="textOrTags"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

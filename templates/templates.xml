@@ -1,4 +1,4 @@
-<data>
+<data xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../schemas/templates.xsd">
     <template id="config" name="Project Configuration" topLevel="false">
         <group id="startTime" name="Start Time" y="5" width="2"/>
         <group id="startDate" name="Start Date" y="4" width="2"/>
@@ -393,7 +393,7 @@
             <component id="ammo" name="Ammo" object="itemComponentAmmo"/>
             <component id="armor" name="Armor" object="itemComponentArmor"/>
             <component id="consumable" name="Consumable" object="itemComponentConsumable"/>
-            <component id="effectible" name="Effectible" object="itemComponentEffectible"/>
+            <component id="effectable" name="Effectable" object="itemComponentEffectable"/>
             <component id="equippable" name="Equippable" object="itemComponentEquippable"/>
             <component id="magazine" name="Magazine" object="itemComponentMagazine"/>
             <component id="mod" name="Mod" object="itemComponentMod"/>
@@ -423,7 +423,7 @@
         <parameter id="consumePhrase" dataType="string" name="Consume Phrase" format="child_tag" y="1"/>
         <parameter id="effect" dataType="objectSet" type="effectReference" name="Effects" y="2"/>
     </template>
-    <template id="itemComponentEffectible" name="Effectible" topLevel="false"/>
+    <template id="itemComponentEffectable" name="Effectable" topLevel="false"/>
     <template id="itemComponentEquippable" name="Equippable" topLevel="false">
         <parameter id="slotGroup" dataType="objectSetUnique" type="itemComponentEquippableSlotData" name="Equip Slot Groups"/>
     </template>
