@@ -4,13 +4,16 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterField;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterField;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldObject;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 
 public class EditorFrame extends JDialog {
 

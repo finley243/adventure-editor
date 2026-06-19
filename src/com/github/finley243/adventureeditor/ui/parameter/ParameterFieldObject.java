@@ -7,10 +7,10 @@ import com.github.finley243.adventureeditor.template.Group;
 import com.github.finley243.adventureeditor.template.TabGroup;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
-import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 import com.github.finley243.adventureeditor.ui.EditorGroup;
 import com.github.finley243.adventureeditor.ui.EditorTabGroup;
 import com.github.finley243.adventureeditor.ui.OptionalBorderedPanel;
+import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
 import java.awt.*;

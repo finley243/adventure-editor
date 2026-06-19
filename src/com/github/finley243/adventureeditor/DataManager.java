@@ -2,12 +2,11 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.*;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
+import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.*;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -88,7 +87,11 @@ public class DataManager {
     }
 
     public void clearData() {
-        data.clear();
+        data = null;
+    }
+
+    public void addEmptyData() {
+        data = new HashMap<>();
     }
 
     public void saveObjectData(Data objectData, Data initialData) {

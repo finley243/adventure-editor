@@ -8,14 +8,9 @@ import com.github.finley243.adventureeditor.ui.RecentProjectListener;
 import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
-import org.xml.sax.SAXException;
 
-import javax.swing.*;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -136,6 +131,7 @@ public class ProjectManager {
             return;
         }
         dataManager.clearData();
+        dataManager.addEmptyData();
         configMenuManager.clearConfigData();
         onLoadProject(templateRegistry.getAllTemplates(), dataManager.getAllData());
         isProjectLoaded = true;

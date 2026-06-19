@@ -6,10 +6,9 @@ import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
-import java.util.*;
-import java.util.List;
-
 import javax.swing.*;
+import java.util.List;
+import java.util.Map;
 
 public class Main {
 

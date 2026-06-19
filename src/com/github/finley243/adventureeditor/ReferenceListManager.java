@@ -5,9 +5,11 @@ import com.github.finley243.adventureeditor.ui.frame.ReferenceListFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import java.awt.*;
-import java.util.*;
+import java.util.Set;
 
 public class ReferenceListManager {
+
+    private static final String CONFIG_OBJECT_NAME = "config";
 
     private final ConfigMenuManager configMenuManager;
     private final DataManager dataManager;
@@ -35,7 +37,7 @@ public class ReferenceListManager {
     }
 
     public void openReference(String categoryID, String objectID, Window parentWindow, ParameterFactory parameterFactory) {
-        if (categoryID.isEmpty() && objectID.equals("config")) {
+        if (categoryID.isEmpty() && objectID.equals(CONFIG_OBJECT_NAME)) {
             configMenuManager.openConfigMenu(parentWindow, parameterFactory);
         } else {
             dataManager.editObject(categoryID, objectID, topLevelSaveTarget, parentWindow, parameterFactory);
