@@ -13,12 +13,12 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
-        try {
+        /*try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | UnsupportedLookAndFeelException | InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
-        }
+        }*/
 
         DataLoader dataLoader = new DataLoader();
         Map<String, Template> templateMap = dataLoader.loadTemplates();
