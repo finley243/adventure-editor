@@ -131,7 +131,6 @@ public class ProjectManager {
             return;
         }
         dataManager.clearData();
-        dataManager.addEmptyData();
         configMenuManager.clearConfigData();
         onLoadProject(templateRegistry.getAllTemplates(), dataManager.getAllData());
         isProjectLoaded = true;
@@ -197,6 +196,9 @@ public class ProjectManager {
         //try {
             ProjectLoadData projectData = dataLoader.loadFromDir(file, templateRegistry);
             configMenuManager.setConfigData(projectData.configData());
+            dataManager.setData(projectData.gameData());
+            phraseEditorManager.setPhrases(projectData.phrases());
+            scriptEditorManager.setScripts(projectData.scripts());
             onLoadProject(templateRegistry.getAllTemplates(), dataManager.getAllData());
             ProjectFile project = new ProjectFile(file.getName(), file.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
