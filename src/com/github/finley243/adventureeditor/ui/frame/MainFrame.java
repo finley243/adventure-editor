@@ -1,9 +1,13 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
 import com.github.finley243.adventureeditor.*;
+import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.ProjectNameChangeListener;
 import com.github.finley243.adventureeditor.ui.RecentProjectListener;
 import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
+import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import javax.swing.*;
@@ -16,30 +20,35 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-public class MainFrame extends JFrame implements ProjectNameChangeListener, RecentProjectListener {
+public class MainFrame extends JFrame implements ViewActions, ProjectNameChangeListener, RecentProjectListener {
 
     private static final String EDITOR_NAME = "AdventureEditor";
 
+    private PresenterActions presenter;
+    private boolean hasUnsavedChanges;
+    private boolean isProjectLoaded;
+
     private final ParameterFactory parameterFactory;
-    private final DataManager dataManager;
-    private final ProjectManager projectManager;
-    private final ConfigMenuManager configMenuManager;
-    private final PhraseEditorManager phraseEditorManager;
-    private final ScriptEditorManager scriptEditorManager;
     private final EditorManager editorManager;
+
+    private PhraseEditorFrame phraseEditorFrame;
+    private ScriptEditorFrame scriptEditorFrame;
+    private ReferenceListFrame referenceListFrame;
+
+    private final BrowserFrame browserFrame;
 
     private final JMenu fileOpenRecent;
 
-    public MainFrame(ParameterFactory parameterFactory, DataManager dataManager, ProjectManager projectManager, ConfigMenuManager configMenuManager, PhraseEditorManager phraseEditorManager, ScriptEditorManager scriptEditorManager, EditorManager editorManager) {
+    public MainFrame(ParameterFactory parameterFactory) {
         super(EDITOR_NAME);
         this.parameterFactory = parameterFactory;
-        this.dataManager = dataManager;
-        this.projectManager = projectManager;
-        this.configMenuManager = configMenuManager;
-        this.phraseEditorManager = phraseEditorManager;
-        this.scriptEditorManager = scriptEditorManager;
-        this.editorManager = editorManager;
+        this.editorManager = new EditorManager();
+        this.browserFrame = new BrowserFrame(this, editorManager, parameterFactory);
 
         this.setSize(800, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -50,19 +59,19 @@ public class MainFrame extends JFrame implements ProjectNameChangeListener, Rece
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
         JMenuItem fileNew = new JMenuItem("New");
-        fileNew.addActionListener(e -> projectManager.newProject(this, parameterFactory, this));
+        fileNew.addActionListener(e -> getPresenter().onNewProject());
         JMenuItem fileOpen = new JMenuItem("Open");
-        fileOpen.addActionListener(e -> projectManager.openProjectFromMenu(this));
+        fileOpen.addActionListener(e -> getPresenter().onOpenProject(selectProjectLoadDirectory()));
         this.fileOpenRecent = new JMenu("Open Recent");
         JMenuItem fileSave = new JMenuItem("Save");
-        fileSave.addActionListener(e -> projectManager.saveProjectToCurrentPath(this));
+        fileSave.addActionListener(e -> getPresenter().onSaveProject());
         JMenuItem fileSaveAs = new JMenuItem("Save As");
-        fileSaveAs.addActionListener(e -> projectManager.saveProjectToMenu(this));
+        fileSaveAs.addActionListener(e -> getPresenter().onSaveProjectAs(selectProjectSaveDirectory()));
         fileMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
-                fileSave.setEnabled(projectManager.hasUnsavedChanges());
-                fileSaveAs.setEnabled(projectManager.isProjectLoaded());
+                fileSave.setEnabled(hasUnsavedChanges);
+                fileSaveAs.setEnabled(isProjectLoaded);
             }
             @Override
             public void menuDeselected(MenuEvent e) {}
@@ -79,18 +88,17 @@ public class MainFrame extends JFrame implements ProjectNameChangeListener, Rece
         JMenu toolsMenu = new JMenu("Tools");
         menuBar.add(toolsMenu);
         JMenuItem toolsProjectConfig = new JMenuItem("Project Configuration");
-        toolsProjectConfig.addActionListener(e -> configMenuManager.openConfigMenu(this, parameterFactory));
+        toolsProjectConfig.addActionListener(e -> getPresenter().onOpenConfigEditor());
         toolsMenu.add(toolsProjectConfig);
         JMenuItem toolsPhraseEditor = new JMenuItem("Phrase Editor");
-        toolsPhraseEditor.addActionListener(e -> phraseEditorManager.openPhraseEditor(this, parameterFactory));
+        toolsPhraseEditor.addActionListener(e -> getPresenter().onOpenPhraseEditor());
         toolsMenu.add(toolsPhraseEditor);
         JMenuItem toolsScriptEditor = new JMenuItem("Script Editor");
-        toolsScriptEditor.addActionListener(e -> scriptEditorManager.openScriptEditor(this, parameterFactory));
+        toolsScriptEditor.addActionListener(e -> getPresenter().onOpenScriptEditor());
         toolsMenu.add(toolsScriptEditor);
         toolsMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
-                boolean isProjectLoaded = projectManager.isProjectLoaded();
                 toolsProjectConfig.setEnabled(isProjectLoaded);
                 toolsPhraseEditor.setEnabled(isProjectLoaded);
                 toolsScriptEditor.setEnabled(isProjectLoaded);
@@ -114,31 +122,31 @@ public class MainFrame extends JFrame implements ProjectNameChangeListener, Rece
         Action newProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                projectManager.newProject(MainFrame.this, parameterFactory, MainFrame.this);
+                getPresenter().onNewProject();
             }
         };
         Action openProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                projectManager.openProjectFromMenu(MainFrame.this);
+                getPresenter().onOpenProject(selectProjectLoadDirectory());
             }
         };
         Action saveProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                projectManager.saveProjectToCurrentPath(MainFrame.this);
+                getPresenter().onSaveProject();
             }
         };
         Action saveProjectAsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                projectManager.saveProjectToMenu(MainFrame.this);
+                getPresenter().onSaveProjectAs(selectProjectSaveDirectory());
             }
         };
         Action openConfigAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                configMenuManager.openConfigMenu(MainFrame.this, parameterFactory);
+                getPresenter().onOpenConfigEditor();
             }
         };
 
@@ -162,11 +170,22 @@ public class MainFrame extends JFrame implements ProjectNameChangeListener, Rece
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
+    public void registerPresenter(PresenterActions presenter) {
+        if (this.presenter != null) throw new IllegalStateException("Presenter is already registered");
+        this.presenter = presenter;
+        browserFrame.registerPresenter(presenter);
+    }
+
+    private PresenterActions getPresenter() {
+        if (presenter == null) throw new IllegalStateException("Presenter has not been registered");
+        return presenter;
+    }
+
     public void setProjectName(String name) {
         if (name == null) {
-            this.setTitle("AdventureEditor");
+            this.setTitle(EDITOR_NAME);
         } else {
-            this.setTitle("AdventureEditor - " + name);
+            this.setTitle(EDITOR_NAME + " - " + (hasUnsavedChanges ? "*" : "") + name);
         }
     }
 
@@ -213,9 +232,14 @@ public class MainFrame extends JFrame implements ProjectNameChangeListener, Rece
     @Override
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-            boolean shouldClose = projectManager.saveConfirmationIfHasUnsavedData(this);
-            if (shouldClose) {
-                super.processWindowEvent(e);
+            if (isProjectLoaded && hasUnsavedChanges) {
+                SaveConfirmationResult result = projectSaveConfirmation();
+                if (result == SaveConfirmationResult.YES) {
+                    getPresenter().onSaveProject();
+                    super.processWindowEvent(e);
+                } else if (result == SaveConfirmationResult.NO) {
+                    super.processWindowEvent(e);
+                }
             }
         } else {
             super.processWindowEvent(e);
@@ -233,14 +257,85 @@ public class MainFrame extends JFrame implements ProjectNameChangeListener, Rece
         fileOpenRecent.removeAll();
         for (ProjectFile recentProject : recentProjects) {
             JMenuItem recentProjectItem = new JMenuItem(recentProject.name());
-            recentProjectItem.addActionListener(e -> projectManager.openRecentProject(recentProject, this));
+            recentProjectItem.addActionListener(e -> attemptOpeningRecentProject(recentProject));
             fileOpenRecent.add(recentProjectItem);
         }
         JSeparator separator = new JSeparator();
         fileOpenRecent.add(separator);
         JMenuItem clearRecentProjects = new JMenuItem("Clear Recent Projects");
-        clearRecentProjects.addActionListener(e -> projectManager.clearRecentProjects());
+        clearRecentProjects.addActionListener(e -> getPresenter().onClearRecentProjects());
         fileOpenRecent.add(clearRecentProjects);
+    }
+
+    @Override
+    public void openEditorFrame(String editorID, Template template, Data data, BiConsumer<Data, Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate) {
+
+    }
+
+    @Override
+    public void openPhraseEditor(Map<String, String> phrases, Consumer<Map<String, String>> onSave) {
+
+    }
+
+    @Override
+    public void openScriptEditor(Map<String, String> scripts, Consumer<Map<String, String>> onSave) {
+
+    }
+
+    @Override
+    public void showError(String message) {
+        this.showErrorDialog(message);
+    }
+
+    @Override
+    public SaveConfirmationResult confirmProjectSave() {
+        return this.projectSaveConfirmation();
+    }
+
+    @Override
+    public File selectSaveDirectory() {
+        return selectProjectSaveDirectory();
+    }
+
+    @Override
+    public void setProjectIsLoaded(boolean isProjectLoaded) {
+        this.isProjectLoaded = isProjectLoaded;
+    }
+
+    @Override
+    public void updateProjectName(String name) {
+        setProjectName(name);
+    }
+
+    @Override
+    public void setUnsavedChanges(boolean hasUnsaved) {
+        this.hasUnsavedChanges = hasUnsaved;
+    }
+
+    @Override
+    public void updateRecentProjects(List<ProjectFile> recentProjects) {
+        fileOpenRecent.setEnabled(!recentProjects.isEmpty());
+        fileOpenRecent.removeAll();
+        for (ProjectFile recentProject : recentProjects) {
+            JMenuItem recentProjectItem = new JMenuItem(recentProject.name());
+            recentProjectItem.addActionListener(e -> attemptOpeningRecentProject(recentProject));
+            fileOpenRecent.add(recentProjectItem);
+        }
+        JSeparator separator = new JSeparator();
+        fileOpenRecent.add(separator);
+        JMenuItem clearRecentProjects = new JMenuItem("Clear Recent Projects");
+        clearRecentProjects.addActionListener(e -> getPresenter().onClearRecentProjects());
+        fileOpenRecent.add(clearRecentProjects);
+    }
+
+    private void attemptOpeningRecentProject(ProjectFile projectFile) {
+        File file = new File(projectFile.absolutePath());
+        if (!file.exists()) {
+            boolean deleteMissingProject = recentProjectDeleteConfirmation();
+            if (deleteMissingProject) {
+                getPresenter().onRemoveRecentProject(projectFile);
+            }
+        }
     }
 
 }

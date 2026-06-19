@@ -1,11 +1,10 @@
 package com.github.finley243.adventureeditor.ui.browser;
 
-import com.github.finley243.adventureeditor.DataManager;
 import com.github.finley243.adventureeditor.EditorManager;
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.CategoryUpdateListener;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.ObjectUpdateListener;
 import com.github.finley243.adventureeditor.ui.ProjectLoadListener;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserCategoryNode;
@@ -21,16 +20,18 @@ import java.util.Map;
 public class BrowserFrame extends JDialog implements ObjectUpdateListener, CategoryUpdateListener, ProjectLoadListener {
 
     private final EditorManager editorManager;
-    private final DataManager dataManager;
+    //private final DataManager dataManager;
     private final BrowserTree browserTree;
-    private final DataSaveTarget topLevelSaveTarget;
+    //private final DataSaveTarget topLevelSaveTarget;
     private final ParameterFactory parameterFactory;
 
-    public BrowserFrame(Window mainFrame, EditorManager editorManager, DataManager dataManager, DataSaveTarget topLevelSaveTarget, ParameterFactory parameterFactory) {
+    private PresenterActions presenter;
+
+    public BrowserFrame(Window mainFrame, EditorManager editorManager, ParameterFactory parameterFactory) {
         super(mainFrame);
         this.editorManager = editorManager;
-        this.dataManager = dataManager;
-        this.topLevelSaveTarget = topLevelSaveTarget;
+        //this.dataManager = dataManager;
+        //this.topLevelSaveTarget = topLevelSaveTarget;
         this.parameterFactory = parameterFactory;
 
         this.setTitle("Browser");
@@ -60,6 +61,16 @@ public class BrowserFrame extends JDialog implements ObjectUpdateListener, Categ
         int windowHeight = ((JFrame) getParent()).getContentPane().getHeight();
         this.setSize(windowWidth, windowHeight);
         this.setLocation(windowX, windowY);
+    }
+
+    public void registerPresenter(PresenterActions presenter) {
+        if (this.presenter != null) throw new IllegalStateException("Presenter is already registered");
+        this.presenter = presenter;
+    }
+
+    private PresenterActions getPresenter() {
+        if (presenter == null) throw new IllegalStateException("Presenter has not been registered");
+        return presenter;
     }
 
     public void addGameObject(String categoryID, String newObjectID, boolean selectedAfterLoading) {

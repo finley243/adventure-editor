@@ -34,9 +34,9 @@ public class Main {
         dataManager.resolveReferenceListManager(referenceListManager);
         ParameterFactory parameterFactory = new ParameterFactory(templateRegistry, dataManager, topLevelSaveTarget);
         ProjectManager projectManager = new ProjectManager(dataLoader, templateRegistry, phraseEditorManager, scriptEditorManager, configMenuManager, dataManager);
-        MainFrame mainFrame = new MainFrame(parameterFactory, dataManager, projectManager, configMenuManager, phraseEditorManager, scriptEditorManager, editorManager);
+        MainFrame mainFrame = new MainFrame(parameterFactory, projectManager, configMenuManager, phraseEditorManager, scriptEditorManager, editorManager);
         configMenuManager.registerProjectNameChangeListener(mainFrame);
-        BrowserFrame browserFrame = new BrowserFrame(mainFrame, editorManager, dataManager, topLevelSaveTarget, parameterFactory);
+        BrowserFrame browserFrame = new BrowserFrame(mainFrame, editorManager, parameterFactory);
         dataManager.registerObjectUpdateListener(browserFrame);
         dataManager.registerCategoryUpdateListener(browserFrame);
         projectManager.registerProjectLoadListener(browserFrame);
