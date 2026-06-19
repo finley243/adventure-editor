@@ -69,7 +69,11 @@ public class ConfigMenuManager implements DataSaveTarget {
     }
 
     public void clearConfigData() {
-        configData = null;
+        if (configFrame != null) {
+            configFrame.dispose();
+            configFrame = null;
+        }
+        configData = new DataObject(configTemplate, new HashMap<>());
     }
 
     public boolean hasChangesFrom(Data otherData) {
