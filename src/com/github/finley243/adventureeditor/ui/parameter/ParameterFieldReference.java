@@ -17,7 +17,7 @@ public class ParameterFieldReference extends ParameterField {
     private final JComboBox<String> dropdownMenu;
     private final JButton openReferenceButton;
 
-    public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, String categoryID, String[] referenceValues, DataManager dataManager, DataSaveTarget topLevelSaveTarget) {
+    public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, String categoryID, String[] referenceValues, DataManager dataManager, DataSaveTarget topLevelSaveTarget, ParameterFactory parameterFactory) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
@@ -37,7 +37,7 @@ public class ParameterFieldReference extends ParameterField {
         openReferenceButton.addActionListener(e -> {
             String value = (String) dropdownMenu.getSelectedItem();
             if (value != null && dataManager.categoryContainsID(categoryID, value)) {
-                dataManager.editObject(categoryID, value, topLevelSaveTarget);
+                dataManager.editObject(categoryID, value, topLevelSaveTarget, editorFrame, parameterFactory);
             }
         });
         ((JTextField) dropdownMenu.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {

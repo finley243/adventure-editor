@@ -3,43 +3,46 @@ package com.github.finley243.adventureeditor;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataString;
-import com.github.finley243.adventureeditor.template.TemplateRegistry;
+import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
+import com.github.finley243.adventureeditor.ui.ProjectNameChangeListener;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
-import com.github.finley243.adventureeditor.ui.frame.MainFrame;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldFactory;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class ConfigMenuManager implements DataSaveTarget {
 
     private static final String PROJECT_NAME_KEY = "gameName";
 
-    private final TemplateRegistry templateRegistry;
-    private final ProjectManager projectManager;
-    private final ParameterFieldFactory parameterFactory;
-    private final MainFrame mainFrame;
+    private final Template configTemplate;
 
     private Data configData;
     private EditorFrame configFrame;
 
-    public ConfigMenuManager(TemplateRegistry templateRegistry, ProjectManager projectManager, ParameterFieldFactory parameterFactory, MainFrame mainFrame) {
-        this.templateRegistry = templateRegistry;
-        this.projectManager = projectManager;
-        this.parameterFactory = parameterFactory;
-        this.mainFrame = mainFrame;
+    private final List<ProjectNameChangeListener> projectNameChangeListeners;
+
+    public ConfigMenuManager(Template configTemplate) {
+        this.configTemplate = configTemplate;
+        this.projectNameChangeListeners = new ArrayList<>();
     }
 
-    public void openConfigMenu() {
-        if (!projectManager.isProjectLoaded()) {
+    public void addProjectNameChangeListener(ProjectNameChangeListener listener) {
+        projectNameChangeListeners.add(listener);
+    }
+
+    public void openConfigMenu(Window parentWindow, ParameterFactory parameterFactory) {
+        if (configData == null) {
             return;
         }
         if (configFrame != null) {
             configFrame.toFront();
             configFrame.requestFocus();
         } else {
-            configFrame = new EditorFrame(null, mainFrame, templateRegistry.getConfigTemplate(), configData, this, true, parameterFactory);
+            configFrame = new EditorFrame(null, parentWindow, configTemplate, configData, this, true, parameterFactory);
         }
     }
 
@@ -74,7 +77,7 @@ public class ConfigMenuManager implements DataSaveTarget {
     @Override
     public void saveObjectData(String editorID, Data data, Data initialData) {
         configData = data;
-        projectManager.updateProjectName();
+        onProjectNameChange(getProjectName());
     }
 
     @Override
@@ -89,6 +92,12 @@ public class ConfigMenuManager implements DataSaveTarget {
             return new ErrorData(true, "Game name cannot be empty.");
         }
         return new ErrorData(false, null);
+    }
+
+    public void onProjectNameChange(String name) {
+        for (ProjectNameChangeListener listener : projectNameChangeListeners) {
+            listener.onProjectNameChange(name);
+        }
     }
 
 }

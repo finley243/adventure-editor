@@ -1,12 +1,18 @@
 package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
+import com.github.finley243.adventureeditor.ui.ProjectLoadListener;
+import com.github.finley243.adventureeditor.ui.RecentProjectListener;
+import com.github.finley243.adventureeditor.ui.frame.MainFrame;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 import org.xml.sax.SAXException;
 
 import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,6 +42,9 @@ public class ProjectManager {
     private Map<String, String> lastSavedPhrases;
     private Map<String, String> lastSavedScripts;
 
+    private final List<RecentProjectListener> recentProjectListeners;
+    private final List<ProjectLoadListener> projectLoadListeners;
+
     public ProjectManager(DataLoader dataLoader, TemplateRegistry templateRegistry, PhraseEditorManager phraseEditorManager, ScriptEditorManager scriptEditorManager, ConfigMenuManager configMenuManager, DataManager dataManager) {
         this.dataLoader = dataLoader;
         this.templateRegistry = templateRegistry;
@@ -46,6 +55,16 @@ public class ProjectManager {
         this.recentProjects = new ArrayList<>();
         this.isProjectLoaded = false;
         this.loadedProjectPath = null;
+        this.recentProjectListeners = new ArrayList<>();
+        this.projectLoadListeners = new ArrayList<>();
+    }
+
+    public void registerRecentProjectListener(RecentProjectListener recentProjectListener) {
+        this.recentProjectListeners.add(recentProjectListener);
+    }
+
+    public void registerProjectLoadListener(ProjectLoadListener projectLoadListener) {
+        this.projectLoadListeners.add(projectLoadListener);
     }
 
     public boolean isProjectLoaded() {
@@ -86,178 +105,170 @@ public class ProjectManager {
             recentProjects.removeLast();
         }
         dataLoader.saveRecentProjects(recentProjects);
-        main.getMainFrame().updateRecentProjects();
+        onUpdateRecentProjects(recentProjects);
     }
 
     public void removeRecentProject(ProjectFile project) {
         recentProjects.remove(project);
         dataLoader.saveRecentProjects(recentProjects);
-        main.getMainFrame().updateRecentProjects();
+        onUpdateRecentProjects(recentProjects);
     }
 
     public void clearRecentProjects() {
         recentProjects.clear();
         dataLoader.saveRecentProjects(recentProjects);
-        main.getMainFrame().updateRecentProjects();
+        onUpdateRecentProjects(recentProjects);
     }
 
     public void updateProjectName() {
         String name = configMenuManager.getProjectName();
         if (name == null && isProjectLoaded()) {
-            main.getMainFrame().setProjectName(UNNAMED_PROJECT_NAME);
+            configMenuManager.onProjectNameChange(UNNAMED_PROJECT_NAME);
         } else {
-            main.getMainFrame().setProjectName(name);
+            configMenuManager.onProjectNameChange(name);
         }
     }
 
-    public void newProject() {
-        boolean continueCheck = saveConfirmationIfHasUnsavedData();
+    public void newProject(Window parentWindow, ParameterFactory parameterFactory, MainFrame mainFrame) {
+        boolean continueCheck = saveConfirmationIfHasUnsavedData(mainFrame);
         if (!continueCheck) {
             return;
         }
         dataManager.clearData();
         configMenuManager.clearConfigData();
-        main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), dataManager.getAllData());
+        onLoadProject(templateRegistry.getAllTemplates(), dataManager.getAllData());
         isProjectLoaded = true;
         loadedProjectPath = null;
         updateProjectName();
         if (OPEN_CONFIG_MENU_ON_NEW_PROJECT) {
-            configMenuManager.openConfigMenu();
+            configMenuManager.openConfigMenu(parentWindow, parameterFactory);
         }
     }
 
-    public void openProjectFromMenu() {
-        boolean continueCheck = saveConfirmationIfHasUnsavedData();
+    public void openProjectFromMenu(MainFrame mainFrame) {
+        boolean continueCheck = saveConfirmationIfHasUnsavedData(mainFrame);
         if (!continueCheck) {
             return;
         }
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int result = fileChooser.showOpenDialog(main.getMainFrame());
-        if (result != JFileChooser.APPROVE_OPTION) {
-            return;
-        }
-        File selectedDirectory = fileChooser.getSelectedFile();
+        File selectedDirectory = mainFrame.selectProjectLoadDirectory();
+        if (selectedDirectory == null) return;
         dataManager.clearData();
         configMenuManager.clearConfigData();
-        try {
-            dataLoader.loadFromDir(selectedDirectory, main.getAllTemplates(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
-            main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), dataManager.getAllData());
+        phraseEditorManager.clearPhrases();
+        scriptEditorManager.clearScripts();
+        //try {
+            ProjectLoadData projectLoadData = dataLoader.loadFromDir(selectedDirectory, templateRegistry);
+            configMenuManager.setConfigData(projectLoadData.configData());
+            dataManager.setData(projectLoadData.gameData());
+            phraseEditorManager.setPhrases(projectLoadData.phrases());
+            scriptEditorManager.setScripts(projectLoadData.scripts());
+            onLoadProject(templateRegistry.getAllTemplates(), dataManager.getAllData());
             ProjectFile project = new ProjectFile(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
             loadedProjectPath = selectedDirectory.getAbsolutePath();
             updateLastSavedData();
             updateProjectName();
-        } catch (ParserConfigurationException | SAXException e) {
-            //throw new RuntimeException(e);
+        /*} catch (ParserConfigurationException | SAXException e) {
             dataManager.clearData();
             configMenuManager.clearConfigData();
-            JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
+            mainFrame.showErrorDialog("The selected project has data that is improperly formed.");
         } catch (IOException e) {
-            //throw new RuntimeException(e);
             dataManager.clearData();
             configMenuManager.clearConfigData();
-            JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            mainFrame.showErrorDialog("The selected project directory cannot be read.");
+        }*/
     }
 
-    public void openRecentProject(ProjectFile projectFile) {
+    public void openRecentProject(ProjectFile projectFile, MainFrame mainFrame) {
         File file = new File(projectFile.absolutePath());
         if (!file.exists()) {
-            int choice = JOptionPane.showOptionDialog(main.getMainFrame(), "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
-            if (choice == JOptionPane.YES_OPTION) {
+            boolean deleteMissingProject = mainFrame.recentProjectDeleteConfirmation();
+            if (deleteMissingProject) {
                 removeRecentProject(projectFile);
             }
             return;
         }
-        boolean continueCheck = saveConfirmationIfHasUnsavedData();
+        boolean continueCheck = saveConfirmationIfHasUnsavedData(mainFrame);
         if (!continueCheck) {
             return;
         }
         dataManager.clearData();
         configMenuManager.clearConfigData();
-        try {
+        phraseEditorManager.clearPhrases();
+        scriptEditorManager.clearScripts();
+        //try {
             ProjectLoadData projectData = dataLoader.loadFromDir(file, templateRegistry);
             configMenuManager.setConfigData(projectData.configData());
-            main.getBrowserFrame().reloadBrowserData(main.getAllTemplates(), dataManager.getAllData());
+            onLoadProject(templateRegistry.getAllTemplates(), dataManager.getAllData());
             ProjectFile project = new ProjectFile(file.getName(), file.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             isProjectLoaded = true;
             loadedProjectPath = file.getAbsolutePath();
             updateLastSavedData();
             updateProjectName();
-        } catch (ParserConfigurationException | SAXException e) {
-            //throw new RuntimeException(e);
+        /*} catch (ParserConfigurationException | SAXException e) {
             dataManager.clearData();
             configMenuManager.clearConfigData();
-            JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project has data that is improperly formed.", "Error", JOptionPane.ERROR_MESSAGE);
+            mainFrame.showErrorDialog("The selected project has data that is improperly formatted.");
         } catch (IOException e) {
-            //throw new RuntimeException(e);
             dataManager.clearData();
             configMenuManager.clearConfigData();
-            JOptionPane.showMessageDialog(main.getMainFrame(), "The selected project directory cannot be read.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            mainFrame.showErrorDialog("The selected project directory cannot be read.");
+        }*/
     }
 
-    public boolean saveProjectToCurrentPath() {
+    public boolean saveProjectToCurrentPath(MainFrame mainFrame) {
         if (loadedProjectPath == null) {
-            return saveProjectToMenu();
+            return saveProjectToMenu(mainFrame);
         } else {
             File loadedDirectory = new File(loadedProjectPath);
-            try {
-                dataLoader.saveToDir(loadedDirectory, main.getAllTemplates(), dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
+            //try {
+                dataLoader.saveToDir(loadedDirectory, templateRegistry, dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
                 ProjectFile project = new ProjectFile(loadedDirectory.getName(), loadedDirectory.getAbsolutePath());
                 addOrMoveRecentProjectToTop(project);
                 updateLastSavedData();
                 return true;
-            } catch (IOException e) {
-                //throw new RuntimeException(e);
-                JOptionPane.showMessageDialog(main.getMainFrame(), "Project could not be saved to the current directory.", "Error", JOptionPane.ERROR_MESSAGE);
+            /*} catch (IOException e) {
+                mainFrame.showErrorDialog("Project could not be saved to the current directory.");
                 return false;
             } catch (ParserConfigurationException | TransformerException e) {
-                //throw new RuntimeException(e);
-                JOptionPane.showMessageDialog(main.getMainFrame(), "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                mainFrame.showErrorDialog("Save system encountered an error. Please try again.");
                 return false;
-            }
+            }*/
         }
     }
 
-    public boolean saveProjectToMenu() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int result = fileChooser.showSaveDialog(main.getMainFrame());
-        if (result != JFileChooser.APPROVE_OPTION) {
+    public boolean saveProjectToMenu(MainFrame mainFrame) {
+        File selectedDirectory = mainFrame.selectProjectSaveDirectory();
+        if (selectedDirectory == null) {
             return false;
         }
-        File selectedDirectory = fileChooser.getSelectedFile();
-        try {
-            dataLoader.saveToDir(selectedDirectory, main.getAllTemplates(), dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
+        //try {
+            dataLoader.saveToDir(selectedDirectory, templateRegistry, dataManager.getAllData(), configMenuManager, scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
             ProjectFile project = new ProjectFile(selectedDirectory.getName(), selectedDirectory.getAbsolutePath());
             addOrMoveRecentProjectToTop(project);
             loadedProjectPath = selectedDirectory.getAbsolutePath();
             updateLastSavedData();
             return true;
-        } catch (IOException e) {
-            //throw new RuntimeException(e);
-            JOptionPane.showMessageDialog(main.getMainFrame(), "Project could not be saved to the selected directory.", "Error", JOptionPane.ERROR_MESSAGE);
+        /*} catch (IOException e) {
+            mainFrame.showErrorDialog("Project could not be saved to the selected directory.");
             return false;
         } catch (ParserConfigurationException | TransformerException e) {
-            //throw new RuntimeException(e);
-            JOptionPane.showMessageDialog(main.getMainFrame(), "Save system encountered an error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            mainFrame.showErrorDialog("Save system encountered an error. Please try again.");
             return false;
-        }
+        }*/
     }
 
-    public boolean saveConfirmationIfHasUnsavedData() {
+    public boolean saveConfirmationIfHasUnsavedData(MainFrame mainFrame) {
         if (!hasUnsavedChanges()) {
             return true;
         }
-        int result = JOptionPane.showConfirmDialog(main.getMainFrame(), "Save changes to the current project?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION);
-        if (result == JOptionPane.YES_OPTION) {
-            return saveProjectToCurrentPath();
+        MainFrame.SaveConfirmationResult result = mainFrame.projectSaveConfirmation();
+        if (result == MainFrame.SaveConfirmationResult.YES) {
+            return saveProjectToCurrentPath(mainFrame);
         } else {
-            return result == JOptionPane.NO_OPTION;
+            return result == MainFrame.SaveConfirmationResult.NO;
         }
     }
 
@@ -268,7 +279,7 @@ public class ProjectManager {
             recentProjects.removeLast();
         }
         dataLoader.saveRecentProjects(recentProjects);
-        main.getMainFrame().updateRecentProjects();
+        onUpdateRecentProjects(recentProjects);
     }
 
     private void updateLastSavedData() {
@@ -276,6 +287,18 @@ public class ProjectManager {
         lastSavedConfigData = configMenuManager.getConfigData().createCopy();
         lastSavedPhrases = new HashMap<>(phraseEditorManager.getPhrases());
         lastSavedScripts = new HashMap<>(scriptEditorManager.getScripts());
+    }
+
+    private void onUpdateRecentProjects(List<ProjectFile> recentProjects) {
+        for (RecentProjectListener listener : recentProjectListeners) {
+            listener.onUpdateRecentProjects(recentProjects);
+        }
+    }
+
+    private void onLoadProject(Map<String, Template> templates, Map<String, Map<String, Data>> loadedData) {
+        for (ProjectLoadListener listener : projectLoadListeners) {
+            listener.onLoadProject(templates, loadedData);
+        }
     }
 
 }

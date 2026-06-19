@@ -1,6 +1,7 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
+import com.github.finley243.adventureeditor.PhraseEditorManager;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 import com.github.finley243.adventureeditor.ui.table.PhraseTableModel;
 
 import javax.swing.*;
@@ -15,11 +16,16 @@ public class PhraseEditorFrame extends JDialog {
 
     private static final String PHRASE_EDITOR_TITLE = "Phrases";
 
+    private final PhraseEditorManager phraseEditorManager;
+    private final ParameterFactory parameterFactory;
+
     private final PhraseTableModel tableModel;
     private final JTable phraseTable;
 
-    public PhraseEditorFrame(BrowserFrame browserFrame) {
-        super(browserFrame);
+    public PhraseEditorFrame(Window parentWindow, PhraseEditorManager phraseEditorManager, ParameterFactory parameterFactory) {
+        super(parentWindow);
+        this.phraseEditorManager = phraseEditorManager;
+        this.parameterFactory = parameterFactory;
         this.setTitle(PHRASE_EDITOR_TITLE);
         this.setModalityType(ModalityType.MODELESS);
         JPanel mainPanel = new JPanel();
@@ -45,7 +51,7 @@ public class PhraseEditorFrame extends JDialog {
                     int viewRow = phraseTable.rowAtPoint(e.getPoint());
                     int row = phraseTable.convertRowIndexToModel(viewRow);
                     String phraseKey = (String) tableModel.getValueAt(row, 0);
-                    main.getPhraseEditorManager().editPhrase(phraseKey);
+                    phraseEditorManager.editPhrase(phraseKey, parameterFactory);
                 }
             }
             @Override
@@ -77,7 +83,7 @@ public class PhraseEditorFrame extends JDialog {
         Action newPhraseAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getPhraseEditorManager().newPhrase();
+                phraseEditorManager.newPhrase(parameterFactory);
             }
         };
         Action editPhraseAction = new AbstractAction() {
@@ -86,7 +92,7 @@ public class PhraseEditorFrame extends JDialog {
                 int selectedRow = phraseTable.getSelectedRow();
                 if (selectedRow != -1) {
                     String phraseKey = (String) tableModel.getValueAt(phraseTable.convertRowIndexToModel(selectedRow), 0);
-                    main.getPhraseEditorManager().editPhrase(phraseKey);
+                    phraseEditorManager.editPhrase(phraseKey, parameterFactory);
                 }
             }
         };
@@ -96,7 +102,7 @@ public class PhraseEditorFrame extends JDialog {
                 int selectedRow = phraseTable.getSelectedRow();
                 if (selectedRow != -1) {
                     String phraseKey = (String) tableModel.getValueAt(phraseTable.convertRowIndexToModel(selectedRow), 0);
-                    main.getPhraseEditorManager().duplicatePhrase(phraseKey);
+                    phraseEditorManager.duplicatePhrase(phraseKey);
                     selectPhrase(phraseKey);
                 }
             }
@@ -107,7 +113,7 @@ public class PhraseEditorFrame extends JDialog {
                 int selectedRow = phraseTable.getSelectedRow();
                 if (selectedRow != -1) {
                     String phraseKey = (String) tableModel.getValueAt(phraseTable.convertRowIndexToModel(selectedRow), 0);
-                    main.getPhraseEditorManager().deletePhrase(phraseKey);
+                    phraseEditorManager.deletePhrase(phraseKey);
                     selectRow(selectedRow);
                 }
             }
@@ -139,7 +145,7 @@ public class PhraseEditorFrame extends JDialog {
             selectedPhraseKey = (String) tableModel.getValueAt(phraseTable.convertRowIndexToModel(selectedRow), 0);
         }
         tableModel.setRowCount(0);
-        Map<String, String> phrases = main.getPhraseEditorManager().getPhrases();
+        Map<String, String> phrases = phraseEditorManager.getPhrases();
         for (String phraseKey : phrases.keySet()) {
             tableModel.addRow(new Object[]{phraseKey, phrases.get(phraseKey)});
         }
@@ -189,7 +195,7 @@ public class PhraseEditorFrame extends JDialog {
     }
 
     private void closeEditor() {
-        boolean didClose = main.getPhraseEditorManager().onClosePhraseEditor();
+        boolean didClose = phraseEditorManager.onClosePhraseEditor();
         if (didClose) {
             this.dispose();
         }
@@ -198,19 +204,19 @@ public class PhraseEditorFrame extends JDialog {
     private void openContextMenu(Component component, Point point, String selectedPhraseKey, int viewRowIndex) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuOpen = new JMenuItem("Open");
-        menuOpen.addActionListener(e -> main.getPhraseEditorManager().editPhrase(selectedPhraseKey));
+        menuOpen.addActionListener(e -> phraseEditorManager.editPhrase(selectedPhraseKey, parameterFactory));
         menu.add(menuOpen);
         JMenuItem menuNew = new JMenuItem("New");
         menuNew.addActionListener(e -> {
-            main.getPhraseEditorManager().newPhrase();
+            phraseEditorManager.newPhrase(parameterFactory);
         });
         menu.add(menuNew);
         JMenuItem menuDuplicate = new JMenuItem("Duplicate");
-        menuDuplicate.addActionListener(e -> main.getPhraseEditorManager().duplicatePhrase(selectedPhraseKey));
+        menuDuplicate.addActionListener(e -> phraseEditorManager.duplicatePhrase(selectedPhraseKey));
         menu.add(menuDuplicate);
         JMenuItem menuDelete = new JMenuItem("Delete");
         menuDelete.addActionListener(e -> {
-            main.getPhraseEditorManager().deletePhrase(selectedPhraseKey);
+            phraseEditorManager.deletePhrase(selectedPhraseKey);
             selectRow(viewRowIndex);
         });
         menu.add(menuDelete);

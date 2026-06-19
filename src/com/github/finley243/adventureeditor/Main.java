@@ -4,7 +4,7 @@ import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.frame.MainFrame;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldFactory;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import java.util.*;
 import java.util.List;
@@ -28,15 +28,19 @@ public class Main {
         List<ProjectFile> recentProjects = dataLoader.loadRecentProjects();
         PhraseEditorManager phraseEditorManager = new PhraseEditorManager();
         ScriptEditorManager scriptEditorManager = new ScriptEditorManager();
-        ConfigMenuManager configMenuManager = new ConfigMenuManager(templateRegistry);
+        ConfigMenuManager configMenuManager = new ConfigMenuManager(templateRegistry.getConfigTemplate());
         EditorManager editorManager = new EditorManager();
         MainFrame mainFrame = new MainFrame();
-        ReferenceListManager referenceListManager = new ReferenceListManager(browserFrame);
+        ReferenceListManager referenceListManager = new ReferenceListManager();
         DataManager dataManager = new DataManager(editorManager, templateRegistry, referenceListManager, configMenuManager);
         TopLevelSaveTarget topLevelSaveTarget = new TopLevelSaveTarget(dataManager, editorManager);
-        ParameterFieldFactory parameterFactory = new ParameterFieldFactory(templateRegistry, dataManager, topLevelSaveTarget);
+        ParameterFactory parameterFactory = new ParameterFactory(templateRegistry, dataManager, topLevelSaveTarget);
         BrowserFrame browserFrame = new BrowserFrame(mainFrame, editorManager, dataManager, topLevelSaveTarget, parameterFactory);
+        dataManager.registerObjectUpdateListener(browserFrame);
+        dataManager.registerCategoryUpdateListener(browserFrame);
         ProjectManager projectManager = new ProjectManager(dataLoader, templateRegistry, phraseEditorManager, scriptEditorManager, configMenuManager, dataManager);
+        projectManager.registerProjectLoadListener(browserFrame);
+        projectManager.registerRecentProjectListener(mainFrame);
         projectManager.setRecentProjects(recentProjects);
     }
 

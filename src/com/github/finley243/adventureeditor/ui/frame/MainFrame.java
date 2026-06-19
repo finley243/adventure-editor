@@ -1,9 +1,9 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
 import com.github.finley243.adventureeditor.*;
-import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.data.DataObject;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+import com.github.finley243.adventureeditor.ui.ProjectNameChangeListener;
+import com.github.finley243.adventureeditor.ui.RecentProjectListener;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -13,12 +13,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.List;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements ProjectNameChangeListener, RecentProjectListener {
+
+    public enum SaveConfirmationResult {
+        YES, NO, CANCEL
+    }
+
+    public enum DeleteObjectConfirmationResult {
+        DELETE, VIEW_REFERENCES, CANCEL
+    }
 
     private static final String EDITOR_NAME = "AdventureEditor";
 
+    private final ParameterFactory parameterFactory;
     private final DataManager dataManager;
     private final ProjectManager projectManager;
     private final ConfigMenuManager configMenuManager;
@@ -28,8 +38,9 @@ public class MainFrame extends JFrame {
 
     private final JMenu fileOpenRecent;
 
-    public MainFrame(DataManager dataManager, ProjectManager projectManager, ConfigMenuManager configMenuManager, PhraseEditorManager phraseEditorManager, ScriptEditorManager scriptEditorManager, EditorManager editorManager) {
+    public MainFrame(ParameterFactory parameterFactory, DataManager dataManager, ProjectManager projectManager, ConfigMenuManager configMenuManager, PhraseEditorManager phraseEditorManager, ScriptEditorManager scriptEditorManager, EditorManager editorManager) {
         super(EDITOR_NAME);
+        this.parameterFactory = parameterFactory;
         this.dataManager = dataManager;
         this.projectManager = projectManager;
         this.configMenuManager = configMenuManager;
@@ -46,14 +57,14 @@ public class MainFrame extends JFrame {
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
         JMenuItem fileNew = new JMenuItem("New");
-        fileNew.addActionListener(e -> projectManager.newProject());
+        fileNew.addActionListener(e -> projectManager.newProject(this, parameterFactory, this));
         JMenuItem fileOpen = new JMenuItem("Open");
-        fileOpen.addActionListener(e -> projectManager.openProjectFromMenu());
+        fileOpen.addActionListener(e -> projectManager.openProjectFromMenu(this));
         this.fileOpenRecent = new JMenu("Open Recent");
         JMenuItem fileSave = new JMenuItem("Save");
-        fileSave.addActionListener(e -> projectManager.saveProjectToCurrentPath());
+        fileSave.addActionListener(e -> projectManager.saveProjectToCurrentPath(this));
         JMenuItem fileSaveAs = new JMenuItem("Save As");
-        fileSaveAs.addActionListener(e -> projectManager.saveProjectToMenu());
+        fileSaveAs.addActionListener(e -> projectManager.saveProjectToMenu(this));
         fileMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
@@ -75,13 +86,13 @@ public class MainFrame extends JFrame {
         JMenu toolsMenu = new JMenu("Tools");
         menuBar.add(toolsMenu);
         JMenuItem toolsProjectConfig = new JMenuItem("Project Configuration");
-        toolsProjectConfig.addActionListener(e -> configMenuManager.openConfigMenu());
+        toolsProjectConfig.addActionListener(e -> configMenuManager.openConfigMenu(this, parameterFactory));
         toolsMenu.add(toolsProjectConfig);
         JMenuItem toolsPhraseEditor = new JMenuItem("Phrase Editor");
-        toolsPhraseEditor.addActionListener(e -> phraseEditorManager.openPhraseEditor());
+        toolsPhraseEditor.addActionListener(e -> phraseEditorManager.openPhraseEditor(this, parameterFactory));
         toolsMenu.add(toolsPhraseEditor);
         JMenuItem toolsScriptEditor = new JMenuItem("Script Editor");
-        toolsScriptEditor.addActionListener(e -> scriptEditorManager.openScriptEditor());
+        toolsScriptEditor.addActionListener(e -> scriptEditorManager.openScriptEditor(this, parameterFactory));
         toolsMenu.add(toolsScriptEditor);
         toolsMenu.addMenuListener(new MenuListener() {
             @Override
@@ -110,31 +121,31 @@ public class MainFrame extends JFrame {
         Action newProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                projectManager.newProject();
+                projectManager.newProject(MainFrame.this, parameterFactory, MainFrame.this);
             }
         };
         Action openProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                projectManager.openProjectFromMenu();
+                projectManager.openProjectFromMenu(MainFrame.this);
             }
         };
         Action saveProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                projectManager.saveProjectToCurrentPath();
+                projectManager.saveProjectToCurrentPath(MainFrame.this);
             }
         };
         Action saveProjectAsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                projectManager.saveProjectToMenu();
+                projectManager.saveProjectToMenu(MainFrame.this);
             }
         };
         Action openConfigAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                configMenuManager.openConfigMenu();
+                configMenuManager.openConfigMenu(MainFrame.this, parameterFactory);
             }
         };
 
@@ -166,13 +177,88 @@ public class MainFrame extends JFrame {
         }
     }
 
-    public void updateRecentProjects() {
-        List<ProjectFile> recentProjects = projectManager.getRecentProjects();
+    public void showErrorDialog(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public boolean recentProjectDeleteConfirmation() {
+        int choice = JOptionPane.showOptionDialog(this, "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
+        return choice == JOptionPane.YES_OPTION;
+    }
+
+    public DeleteObjectConfirmationResult deleteObjectConfirmation(String objectID, int referenceCount, Window parentWindow) {
+        int confirmResult;
+        if (referenceCount > 0) {
+            Object[] confirmOptions = {"Delete", "View References", "Cancel"};
+            confirmResult = JOptionPane.showOptionDialog(parentWindow, "Are you sure you want to delete " + objectID + "?\nReferences: " + referenceCount, "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        } else {
+            Object[] confirmOptions = {"Delete", "Cancel"};
+            confirmResult = JOptionPane.showOptionDialog(parentWindow, "Are you sure you want to delete " + objectID + "?\nReferences: " + 0, "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        }
+        if (confirmResult == 0) {
+            return DeleteObjectConfirmationResult.DELETE;
+        } else if (confirmResult == 1 && referenceCount > 0) {
+            return DeleteObjectConfirmationResult.VIEW_REFERENCES;
+        } else {
+            return DeleteObjectConfirmationResult.CANCEL;
+        }
+    }
+
+    public SaveConfirmationResult projectSaveConfirmation() {
+        int result = JOptionPane.showConfirmDialog(this, "Save changes to the current project?", "Save Changes?", JOptionPane.YES_NO_CANCEL_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+            return SaveConfirmationResult.YES;
+        } else if (result == JOptionPane.NO_OPTION) {
+            return SaveConfirmationResult.NO;
+        } else {
+            return SaveConfirmationResult.CANCEL;
+        }
+    }
+
+    public File selectProjectSaveDirectory() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = fileChooser.showSaveDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return null;
+        }
+        return fileChooser.getSelectedFile();
+    }
+
+    public File selectProjectLoadDirectory() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = fileChooser.showOpenDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return null;
+        }
+        return fileChooser.getSelectedFile();
+    }
+
+    @Override
+    protected void processWindowEvent(WindowEvent e) {
+        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+            boolean shouldClose = projectManager.saveConfirmationIfHasUnsavedData(this);
+            if (shouldClose) {
+                super.processWindowEvent(e);
+            }
+        } else {
+            super.processWindowEvent(e);
+        }
+    }
+
+    @Override
+    public void onProjectNameChange(String name) {
+        setProjectName(name);
+    }
+
+    @Override
+    public void onUpdateRecentProjects(List<ProjectFile> recentProjects) {
         fileOpenRecent.setEnabled(!recentProjects.isEmpty());
         fileOpenRecent.removeAll();
         for (ProjectFile recentProject : recentProjects) {
             JMenuItem recentProjectItem = new JMenuItem(recentProject.name());
-            recentProjectItem.addActionListener(e -> projectManager.openRecentProject(recentProject));
+            recentProjectItem.addActionListener(e -> projectManager.openRecentProject(recentProject, this));
             fileOpenRecent.add(recentProjectItem);
         }
         JSeparator separator = new JSeparator();
@@ -180,18 +266,6 @@ public class MainFrame extends JFrame {
         JMenuItem clearRecentProjects = new JMenuItem("Clear Recent Projects");
         clearRecentProjects.addActionListener(e -> projectManager.clearRecentProjects());
         fileOpenRecent.add(clearRecentProjects);
-    }
-
-    @Override
-    protected void processWindowEvent(WindowEvent e) {
-        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-            boolean shouldClose = projectManager.saveConfirmationIfHasUnsavedData();
-            if (shouldClose) {
-                super.processWindowEvent(e);
-            }
-        } else {
-            super.processWindowEvent(e);
-        }
     }
 
 }

@@ -8,8 +8,10 @@ import com.github.finley243.adventureeditor.template.TemplateParameter;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 import com.github.finley243.adventureeditor.ui.frame.PhraseEditorFrame;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.*;
 
 public class PhraseEditorManager implements DataSaveTarget {
@@ -19,29 +21,37 @@ public class PhraseEditorManager implements DataSaveTarget {
         add(new TemplateParameter("text", TemplateParameter.ParameterDataType.STRING_LONG, "Phrase", null, false, false, null, null, new ArrayList<>(), false, null, 0, 1, 1, 1, null));
     }}, null, null);
 
-    private final Map<String, String> phrases;
     private final ChildFrameHandler<String> childFrameHandler;
+    private Map<String, String> phrases;
 
     private PhraseEditorFrame phraseEditorFrame;
 
     public PhraseEditorManager() {
-        this.phrases = new HashMap<>();
         this.childFrameHandler = new ChildFrameHandler<>();
+        this.phrases = null;
     }
 
     public Map<String, String> getPhrases() {
-        return phrases;
+        return new HashMap<>(phrases);
     }
 
-    public void openPhraseEditor() {
-        if (!main.getProjectManager().isProjectLoaded()) {
+    public void setPhrases(Map<String, String> phrases) {
+        this.phrases = new HashMap<>(phrases);
+    }
+
+    public void clearPhrases() {
+        phrases = null;
+    }
+
+    public void openPhraseEditor(Window parentWindow, ParameterFactory parameterFactory) {
+        if (phrases == null) {
             return;
         }
         if (phraseEditorFrame != null) {
             phraseEditorFrame.toFront();
             phraseEditorFrame.requestFocus();
         } else {
-            phraseEditorFrame = new PhraseEditorFrame(main);
+            phraseEditorFrame = new PhraseEditorFrame(parentWindow, this, parameterFactory);
         }
     }
 
@@ -54,16 +64,16 @@ public class PhraseEditorManager implements DataSaveTarget {
         return false;
     }
 
-    public void newPhrase() {
-        EditorFrame editorFrame = new EditorFrame(main, null, phraseEditorFrame, PHRASE_TEMPLATE, null, this, true);
+    public void newPhrase(ParameterFactory parameterFactory) {
+        EditorFrame editorFrame = new EditorFrame(null, phraseEditorFrame, PHRASE_TEMPLATE, null, this, true, parameterFactory);
         childFrameHandler.add(null, editorFrame);
     }
 
-    public void editPhrase(String phraseKey) {
+    public void editPhrase(String phraseKey, ParameterFactory parameterFactory) {
         boolean isAlreadyOpen = childFrameHandler.requestFocusIfOpen(phraseKey);
         if (!isAlreadyOpen) {
             Data initialData = generateDataForPhrase(phraseKey);
-            EditorFrame editorFrame = new EditorFrame(main, null, phraseEditorFrame, PHRASE_TEMPLATE, initialData, this, true);
+            EditorFrame editorFrame = new EditorFrame(null, phraseEditorFrame, PHRASE_TEMPLATE, initialData, this, true, parameterFactory);
             childFrameHandler.add(phraseKey, editorFrame);
         }
     }
@@ -137,7 +147,7 @@ public class PhraseEditorManager implements DataSaveTarget {
     }
 
     private String generateDuplicatePhraseKey(String phraseKey) {
-        Set<String> existingIDs = main.getPhraseEditorManager().getPhrases().keySet();
+        Set<String> existingIDs = getPhrases().keySet();
         String baseCopyID = phraseKey + "_COPY_";
         int i = 1;
         while (existingIDs.contains(baseCopyID + i)) {

@@ -7,10 +7,13 @@ import com.github.finley243.adventureeditor.template.TemplateParameter;
 import com.github.finley243.adventureeditor.ui.CategoryUpdateListener;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.ObjectUpdateListener;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldFactory;
+import com.github.finley243.adventureeditor.ui.frame.MainFrame;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class DataManager {
 
@@ -19,7 +22,7 @@ public class DataManager {
     private final ReferenceListManager referenceListManager;
     private final ConfigMenuManager configMenuManager;
 
-    private final Map<String, Map<String, Data>> data;
+    private Map<String, Map<String, Data>> data;
 
     private final List<CategoryUpdateListener> categoryUpdateListeners;
     private final List<ObjectUpdateListener> objectUpdateListeners;
@@ -29,17 +32,21 @@ public class DataManager {
         this.templateRegistry = templateRegistry;
         this.referenceListManager = referenceListManager;
         this.configMenuManager = configMenuManager;
-        this.data = new HashMap<>();
+        this.data = null;
         this.categoryUpdateListeners = new ArrayList<>();
         this.objectUpdateListeners = new ArrayList<>();
     }
 
-    public void addCategoryUpdateListener(CategoryUpdateListener categoryUpdateListener) {
+    public void registerCategoryUpdateListener(CategoryUpdateListener categoryUpdateListener) {
         this.categoryUpdateListeners.add(categoryUpdateListener);
     }
 
-    public void addObjectUpdateListener(ObjectUpdateListener objectUpdateListener) {
+    public void registerObjectUpdateListener(ObjectUpdateListener objectUpdateListener) {
         this.objectUpdateListeners.add(objectUpdateListener);
+    }
+
+    public void setData(Map<String, Map<String, Data>> data) {
+        this.data = new HashMap<>(data);
     }
 
     public boolean categoryContainsID(String categoryID, String objectID) {
@@ -96,8 +103,7 @@ public class DataManager {
                 data.get(categoryID).remove(initialID);
                 data.get(categoryID).put(objectID, objectData);
                 if (objectDataCast.getTemplate().topLevel()) {
-                    main.getBrowserFrame().removeGameObject(categoryID, initialID);
-                    main.getBrowserFrame().addGameObject(categoryID, objectID, true);
+                    onObjectIDChange(categoryID, initialID, objectID);
                 }
                 renameReferences(categoryID, initialID, objectID);
             } else { // Edit with same ID
@@ -106,7 +112,7 @@ public class DataManager {
                 }
                 data.get(categoryID).put(objectID, objectData);
                 if (objectDataCast.getTemplate().topLevel()) {
-                    main.getBrowserFrame().updateCategory(categoryID);
+                    onCategoryUpdate(categoryID);
                 }
             }
         } else { // New object instance
@@ -115,17 +121,17 @@ public class DataManager {
             }
             data.get(categoryID).put(objectID, objectData);
             if (objectDataCast.getTemplate().topLevel()) {
-                main.getBrowserFrame().addGameObject(categoryID, objectID, true);
+                onObjectCreation(categoryID, objectID);
             }
         }
     }
 
-    public void newObject(String categoryID, DataSaveTarget saveTarget, ParameterFieldFactory parameterFactory) {
-        editorManager.openEditorFrame(categoryID, null, templateRegistry.getTemplate(categoryID), null, saveTarget, parameterFactory);
+    public void newObject(String categoryID, DataSaveTarget saveTarget, Window parentWindow, ParameterFactory parameterFactory) {
+        editorManager.openEditorFrame(categoryID, null, templateRegistry.getTemplate(categoryID), null, saveTarget, parentWindow, parameterFactory);
     }
 
-    public void editObject(String categoryID, String objectID, DataSaveTarget saveTarget, ParameterFieldFactory parameterFactory) {
-        editorManager.openEditorFrame(categoryID, objectID, templateRegistry.getTemplate(categoryID), getData(categoryID, objectID), saveTarget, parameterFactory);
+    public void editObject(String categoryID, String objectID, DataSaveTarget saveTarget, Window parentWindow, ParameterFactory parameterFactory) {
+        editorManager.openEditorFrame(categoryID, objectID, templateRegistry.getTemplate(categoryID), getData(categoryID, objectID), saveTarget, parentWindow, parameterFactory);
     }
 
     public String duplicateObject(String categoryID, String objectID) {
@@ -137,38 +143,30 @@ public class DataManager {
         }
         data.get(categoryID).put(newObjectID, objectDataCopy);
         if (templateRegistry.getTemplate(categoryID).topLevel()) {
-            main.getBrowserFrame().addGameObject(categoryID, newObjectID, false);
-            main.getBrowserFrame().setSelectedNode(categoryID, objectID);
+            onObjectDuplication(categoryID, objectID, newObjectID);
         }
         return newObjectID;
     }
 
-    public boolean deleteObject(String categoryID, String objectID) {
-        int objectReferenceCount = findReferences(categoryID, objectID).size();
-        int confirmResult;
-        if (objectReferenceCount > 0) {
-            Object[] confirmOptions = {"Delete", "View References", "Cancel"};
-            confirmResult = JOptionPane.showOptionDialog(main.getBrowserFrame(), "Are you sure you want to delete " + objectID + "?\nReferences: " + objectReferenceCount, "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
-        } else {
-            Object[] confirmOptions = {"Delete", "Cancel"};
-            confirmResult = JOptionPane.showOptionDialog(main.getBrowserFrame(), "Are you sure you want to delete " + objectID + "?\nReferences: " + 0, "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
-        }
-        if (confirmResult == 0) {
+    public boolean deleteObject(String categoryID, String objectID, Window parentWindow, ParameterFactory parameterFactory, MainFrame mainFrame) {
+        int referenceCount = findReferences(categoryID, objectID).size();
+        MainFrame.DeleteObjectConfirmationResult result = mainFrame.deleteObjectConfirmation(objectID, referenceCount, parentWindow);
+        if (result == MainFrame.DeleteObjectConfirmationResult.CANCEL) {
             data.get(categoryID).remove(objectID);
             editorManager.closeEditorFrameIfActive(categoryID, objectID);
             if (templateRegistry.getTemplate(categoryID).topLevel()) {
-                main.getBrowserFrame().removeGameObject(categoryID, objectID);
+                onObjectDelete(categoryID, objectID);
             }
             return true;
-        } else if (confirmResult == 1 && objectReferenceCount > 0) {
-            displayReferences(categoryID, objectID);
+        } else if (result == MainFrame.DeleteObjectConfirmationResult.VIEW_REFERENCES) {
+            displayReferences(categoryID, objectID, parentWindow, parameterFactory);
         }
         return false;
     }
 
-    public void displayReferences(String referenceCategoryID, String referenceObjectID) {
+    public void displayReferences(String referenceCategoryID, String referenceObjectID, Window parentWindow, ParameterFactory parameterFactory) {
         Set<Reference> references = findReferences(referenceCategoryID, referenceObjectID);
-        referenceListManager.openReferenceList(references);
+        referenceListManager.openReferenceList(references, parentWindow, parameterFactory);
     }
 
     public void renameReferences(String referenceCategoryID, String referenceObjectID, String newObjectID) {
@@ -302,6 +300,18 @@ public class DataManager {
     private void onObjectIDChange(String categoryID, String objectIDPrevious, String objectIDNew) {
         for (ObjectUpdateListener listener : objectUpdateListeners) {
             listener.onObjectIDChange(categoryID, objectIDPrevious, objectIDNew);
+        }
+    }
+
+    private void onObjectDuplication(String categoryID, String objectIDOriginal, String objectIDNew) {
+        for (ObjectUpdateListener listener : objectUpdateListeners) {
+            listener.onDuplicateObject(categoryID, objectIDOriginal, objectIDNew);
+        }
+    }
+
+    private void onObjectDelete(String categoryID, String objectID) {
+        for (ObjectUpdateListener listener : objectUpdateListeners) {
+            listener.onDeleteObject(categoryID, objectID);
         }
     }
 

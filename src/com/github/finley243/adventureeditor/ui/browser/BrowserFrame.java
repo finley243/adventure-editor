@@ -7,25 +7,26 @@ import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.CategoryUpdateListener;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.ObjectUpdateListener;
+import com.github.finley243.adventureeditor.ui.ProjectLoadListener;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserCategoryNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserObjectNode;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldFactory;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.util.Map;
 
-public class BrowserFrame extends JDialog implements ObjectUpdateListener, CategoryUpdateListener {
+public class BrowserFrame extends JDialog implements ObjectUpdateListener, CategoryUpdateListener, ProjectLoadListener {
 
     private final EditorManager editorManager;
     private final DataManager dataManager;
     private final BrowserTree browserTree;
     private final DataSaveTarget topLevelSaveTarget;
-    private final ParameterFieldFactory parameterFactory;
+    private final ParameterFactory parameterFactory;
 
-    public BrowserFrame(Window mainFrame, EditorManager editorManager, DataManager dataManager, DataSaveTarget topLevelSaveTarget, ParameterFieldFactory parameterFactory) {
+    public BrowserFrame(Window mainFrame, EditorManager editorManager, DataManager dataManager, DataSaveTarget topLevelSaveTarget, ParameterFactory parameterFactory) {
         super(mainFrame);
         this.editorManager = editorManager;
         this.dataManager = dataManager;
@@ -99,19 +100,19 @@ public class BrowserFrame extends JDialog implements ObjectUpdateListener, Categ
     }
 
     public void openReferenceList(BrowserObjectNode node) {
-        dataManager.displayReferences(node.getCategoryID(), node.getObjectID());
+        dataManager.displayReferences(node.getCategoryID(), node.getObjectID(), this, parameterFactory);
     }
 
     public void newObject(BrowserNode node) {
         if (node instanceof BrowserCategoryNode categoryNode) {
-            dataManager.newObject(categoryNode.getCategoryID(), topLevelSaveTarget, parameterFactory);
+            dataManager.newObject(categoryNode.getCategoryID(), topLevelSaveTarget, this, parameterFactory);
         } else if (node instanceof BrowserObjectNode objectNode) {
-            dataManager.newObject(objectNode.getCategoryID(), topLevelSaveTarget, parameterFactory);
+            dataManager.newObject(objectNode.getCategoryID(), topLevelSaveTarget, this, parameterFactory);
         }
     }
 
     public void editObject(BrowserObjectNode node) {
-        dataManager.editObject(node.getCategoryID(), node.getObjectID(), topLevelSaveTarget, parameterFactory);
+        dataManager.editObject(node.getCategoryID(), node.getObjectID(), topLevelSaveTarget, this, parameterFactory);
     }
 
     public void duplicateObject(BrowserObjectNode node) {
@@ -119,7 +120,7 @@ public class BrowserFrame extends JDialog implements ObjectUpdateListener, Categ
     }
 
     public void deleteObject(BrowserObjectNode node) {
-        dataManager.deleteObject(node.getCategoryID(), node.getObjectID());
+        dataManager.deleteObject(node.getCategoryID(), node.getObjectID(), this, parameterFactory, mainFrame);
     }
 
     @Override
@@ -144,8 +145,24 @@ public class BrowserFrame extends JDialog implements ObjectUpdateListener, Categ
     }
 
     @Override
+    public void onDuplicateObject(String categoryID, String objectIDOriginal, String objectIDNew) {
+        addGameObject(categoryID, objectIDNew, false);
+        setSelectedNode(categoryID, objectIDOriginal);
+    }
+
+    @Override
+    public void onDeleteObject(String categoryID, String objectID) {
+        removeGameObject(categoryID, objectID);
+    }
+
+    @Override
     public void onCategoryUpdate(String categoryID) {
         browserTree.updateCategory(categoryID);
+    }
+
+    @Override
+    public void onLoadProject(Map<String, Template> templates, Map<String, Map<String, Data>> loadedData) {
+        reloadBrowserData(templates, loadedData);
     }
 
 }

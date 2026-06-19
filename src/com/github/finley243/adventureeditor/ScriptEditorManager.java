@@ -9,6 +9,7 @@ import com.github.finley243.adventureeditor.template.TemplateParameter;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 import com.github.finley243.adventureeditor.ui.frame.ScriptEditorFrame;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,29 +21,37 @@ public class ScriptEditorManager implements DataSaveTarget {
         add(new TemplateParameter("script", TemplateParameter.ParameterDataType.SCRIPT, null, null, false, false, null, null, new ArrayList<>(), false, null, 0, 1, 1, 1, null));
     }}, null, null);
 
-    private final Map<String, String> scripts;
     private final ChildFrameHandler<String> childFrameHandler;
+    private Map<String, String> scripts;
 
     private ScriptEditorFrame scriptEditorFrame;
 
     public ScriptEditorManager() {
-        this.scripts = new HashMap<>();
         this.childFrameHandler = new ChildFrameHandler<>();
+        this.scripts = null;
+    }
+
+    public void setScripts(Map<String, String> scripts) {
+        this.scripts = new HashMap<>(scripts);
     }
 
     public Map<String, String> getScripts() {
-        return scripts;
+        return new HashMap<>(scripts);
     }
 
-    public void openScriptEditor() {
-        if (!main.getProjectManager().isProjectLoaded()) {
+    public void clearScripts() {
+        scripts = null;
+    }
+
+    public void openScriptEditor(Window parentWindow, ParameterFactory parameterFactory) {
+        if (scripts == null) {
             return;
         }
         if (scriptEditorFrame != null) {
             scriptEditorFrame.toFront();
             scriptEditorFrame.requestFocus();
         } else {
-            scriptEditorFrame = new ScriptEditorFrame(main);
+            scriptEditorFrame = new ScriptEditorFrame(parentWindow, this, parameterFactory);
         }
     }
 
@@ -55,7 +64,7 @@ public class ScriptEditorManager implements DataSaveTarget {
         return false;
     }
 
-    public void newScript() {
+    public void newScript(ParameterFactory parameterFactory) {
         String scriptName = JOptionPane.showInputDialog(scriptEditorFrame, "Enter a name for the new script:");
         if (scriptName == null) {
             return;
@@ -66,18 +75,18 @@ public class ScriptEditorManager implements DataSaveTarget {
             JOptionPane.showMessageDialog(scriptEditorFrame, "A script with the name " + scriptName + " already exists.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        EditorFrame editorFrame = new EditorFrame(main, scriptName, scriptEditorFrame, SCRIPT_TEMPLATE, null, this, true);
+        EditorFrame editorFrame = new EditorFrame(scriptName, scriptEditorFrame, SCRIPT_TEMPLATE, null, this, true, parameterFactory);
         editorFrame.setResizable(true);
         editorFrame.setSize(new Dimension(800, 800));
         editorFrame.setLocationRelativeTo(null);
         childFrameHandler.add(null, editorFrame);
     }
 
-    public void editScript(String scriptName) {
+    public void editScript(String scriptName, ParameterFactory parameterFactory) {
         boolean isAlreadyOpen = childFrameHandler.requestFocusIfOpen(scriptName);
         if (!isAlreadyOpen) {
             Data initialData = generateDataForScript(scriptName);
-            EditorFrame editorFrame = new EditorFrame(main, scriptName, scriptEditorFrame, SCRIPT_TEMPLATE, initialData, this, true);
+            EditorFrame editorFrame = new EditorFrame(scriptName, scriptEditorFrame, SCRIPT_TEMPLATE, initialData, this, true, parameterFactory);
             editorFrame.setResizable(true);
             editorFrame.setSize(new Dimension(800, 800));
             editorFrame.setLocationRelativeTo(null);

@@ -1,7 +1,8 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
 import com.github.finley243.adventureeditor.Reference;
-import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
+import com.github.finley243.adventureeditor.ReferenceListManager;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 import com.github.finley243.adventureeditor.ui.table.PhraseTableModel;
 
 import javax.swing.*;
@@ -16,11 +17,13 @@ public class ReferenceListFrame extends JDialog {
 
     private static final String REFERENCE_LIST_TITLE = "References";
 
+    private final ReferenceListManager referenceListManager;
     private final PhraseTableModel tableModel;
     private final JTable referenceTable;
 
-    public ReferenceListFrame(BrowserFrame browserFrame) {
-        super(browserFrame);
+    public ReferenceListFrame(Window parentWindow, ReferenceListManager referenceListManager, ParameterFactory parameterFactory) {
+        super(parentWindow);
+        this.referenceListManager = referenceListManager;
         this.setTitle(REFERENCE_LIST_TITLE);
         this.setModalityType(ModalityType.MODELESS);
         JPanel mainPanel = new JPanel();
@@ -45,7 +48,7 @@ public class ReferenceListFrame extends JDialog {
                     int row = referenceTable.convertRowIndexToModel(viewRow);
                     String category = (String) tableModel.getValueAt(row, 0);
                     String object = (String) tableModel.getValueAt(row, 1);
-                    openReference(category, object);
+                    referenceListManager.openReference(category, object, parentWindow, parameterFactory);
                 }
             }
         });
@@ -70,7 +73,7 @@ public class ReferenceListFrame extends JDialog {
                 if (selectedRow != -1) {
                     String category = (String) tableModel.getValueAt(referenceTable.convertRowIndexToModel(selectedRow), 0);
                     String object = (String) tableModel.getValueAt(referenceTable.convertRowIndexToModel(selectedRow), 0);
-                    openReference(category, object);
+                    referenceListManager.openReference(category, object, parentWindow, parameterFactory);
                 }
             }
         };
@@ -118,17 +121,9 @@ public class ReferenceListFrame extends JDialog {
     }
 
     private void closeEditor() {
-        boolean didClose = main.getReferenceListManager().onCloseReferenceList();
+        boolean didClose = referenceListManager.onCloseReferenceList();
         if (didClose) {
             this.dispose();
-        }
-    }
-
-    private void openReference(String categoryID, String objectID) {
-        if (categoryID.isEmpty() && objectID.equals("config")) {
-            main.getConfigMenuManager().openConfigMenu();
-        } else {
-            main.getDataManager().editObject(categoryID, objectID);
         }
     }
 

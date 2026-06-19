@@ -24,7 +24,7 @@ public class ParameterFieldObject extends ParameterField {
     private final Map<String, EditorTabGroup> tabGroups;
     private final Template template;
 
-    public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, boolean isTopLevelEditor, ParameterFieldFactory parameterFactory) {
+    public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, boolean isTopLevelEditor, ParameterFactory parameterFactory) {
         super(editorFrame, optional, name, parentField);
         this.template = template;
         JPanel objectPanel = new JPanel();

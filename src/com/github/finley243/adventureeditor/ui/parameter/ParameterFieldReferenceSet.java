@@ -26,7 +26,7 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
 
     private final String name;
 
-    public ParameterFieldReferenceSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, DataManager dataManager, DataSaveTarget objectSaveTarget) {
+    public ParameterFieldReferenceSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, DataManager dataManager, DataSaveTarget objectSaveTarget, ParameterFactory parameterFactory) {
         super(editorFrame, optional, name, parentField);
         this.objectSaveTarget = objectSaveTarget;
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -89,21 +89,21 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
                     if (index >= 0) {
                         String selectedItem = referenceList.getModel().getElementAt(index);
                         if (selectedItem != null) {
-                            dataManager.editObject(template.id(), selectedItem, ParameterFieldReferenceSet.this);
+                            dataManager.editObject(template.id(), selectedItem, ParameterFieldReferenceSet.this, editorFrame, parameterFactory);
                         }
                     }
                 }
             }
         });
         buttonAdd.addActionListener(e -> {
-            dataManager.newObject(template.id(), this);
+            dataManager.newObject(template.id(), this, editorFrame, parameterFactory);
         });
         buttonEdit.addActionListener(e -> {
-            dataManager.editObject(template.id(), referenceList.getSelectedValue(), this);
+            dataManager.editObject(template.id(), referenceList.getSelectedValue(), this, editorFrame, parameterFactory);
         });
         buttonRemove.addActionListener(e -> {
             int selectedIndex = referenceList.getSelectedIndex();
-            boolean didDelete = dataManager.deleteObject(template.id(), referenceList.getSelectedValue());
+            boolean didDelete = dataManager.deleteObject(template.id(), referenceList.getSelectedValue(), editorFrame, parameterFactory);
             if (didDelete) {
                 ((DefaultListModel<String>) referenceList.getModel()).remove(selectedIndex);
             }

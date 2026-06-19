@@ -6,4 +6,8 @@ public interface ObjectUpdateListener {
 
     void onObjectIDChange(String categoryID, String objectIDPrevious, String objectIDNew);
 
+    void onDuplicateObject(String categoryID, String objectIDOriginal, String objectIDNew);
+
+    void onDeleteObject(String categoryID, String objectID);
+
 }

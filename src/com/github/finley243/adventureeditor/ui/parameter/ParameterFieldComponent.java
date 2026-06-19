@@ -21,7 +21,7 @@ public class ParameterFieldComponent extends ParameterField {
 
     private String activeOption;
 
-    public ParameterFieldComponent(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, List<ComponentOption> componentOptions, Map<String, Template> componentOptionTemplates, ParameterFieldFactory parameterFactory) {
+    public ParameterFieldComponent(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, List<ComponentOption> componentOptions, Map<String, Template> componentOptionTemplates, ParameterFactory parameterFactory) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.editorElements = new HashMap<>();
