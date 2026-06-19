@@ -28,7 +28,7 @@ public class DataManager {
         this.editorManager = editorManager;
         this.templateRegistry = templateRegistry;
         this.configMenuManager = configMenuManager;
-        this.data = new HashMap<>();
+        this.data = null;
         this.categoryUpdateListeners = new ArrayList<>();
         this.objectUpdateListeners = new ArrayList<>();
     }
@@ -87,6 +87,10 @@ public class DataManager {
     }
 
     public void clearData() {
+        data = null;
+    }
+
+    public void addEmptyData() {
         data = new HashMap<>();
     }
 
