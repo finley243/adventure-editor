@@ -32,6 +32,7 @@ public class PhraseEditorManager implements DataSaveTarget {
     }
 
     public Map<String, String> getPhrases() {
+        if (phrases == null) return Map.of();
         return new HashMap<>(phrases);
     }
 

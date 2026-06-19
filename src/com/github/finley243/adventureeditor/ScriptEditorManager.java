@@ -39,6 +39,7 @@ public class ScriptEditorManager implements DataSaveTarget {
     }
 
     public Map<String, String> getScripts() {
+        if (scripts == null) return Map.of();
         return new HashMap<>(scripts);
     }
 

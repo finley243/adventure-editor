@@ -58,7 +58,8 @@
         <parameter id="id" dataType="string" name="ID" format="attribute" y="1"/>
         <parameter id="startDead" dataType="boolean" name="Start Dead" default="false" format="attribute" y="2"/>
         <parameter id="startDisabled" dataType="boolean" name="Start Disabled" default="false" format="attribute" y="3"/>
-        <parameter id="behaviors" dataType="object" type="actorBehaviorSet" name="Behaviors" y="4"/>
+        <parameter id="descriptor" dataType="string" name="Descriptor" optional="true" format="child_tag" y="4"/>
+        <parameter id="behaviors" dataType="object" type="actorBehaviorSet" name="Behaviors" y="5"/>
     </template>
     <template id="actorBehaviorSet" name="Behaviors" topLevel="false">
         <!--<parameter id="behavior" dataType="objectSet" type="actorBehavior" name="Behaviors"/>-->
@@ -213,13 +214,18 @@
         <group id="inventory" name="Inventory" tabGroup="tabs"/>
         <group id="actions" name="Actions" tabGroup="tabs"/>
         <group id="scripts" name="Scripts" tabGroup="tabs"/>
+        <group id="barks" name="Barks" tabGroup="tabs"/>
         <group id="limbs" name="Limbs" tabGroup="tabs"/>
         <group id="damage" name="Resistances" tabGroup="tabs"/>
         <group id="senses" name="Senses" tabGroup="tabs"/>
         <group id="equipSlots" name="Equip Slots" tabGroup="tabs"/>
+        <group id="startEffects" name="Effects" tabGroup="tabs"/>
+        <group id="attackTypes" name="Attack Types" tabGroup="tabs"/>
         <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
         <parameter id="parent" dataType="reference" name="Parent" type="actor" format="attribute" optional="true" x="1" y="0"/>
         <parameter id="name" dataType="object" name="Name" type="actorName" x="0" y="1" height="3"/>
+        <parameter id="levelUpThreshold" dataType="string" name="Level-Up Threshold Expression" optional="true" format="child_tag" y="1" group="level"/>
+        <parameter id="startLevel" dataType="integer" name="Starting Level" optional="true" format="attribute" y="0" group="level"/>
         <parameter id="dialogueStart" dataType="reference" name="Dialogue Start" type="scene" format="attribute" optional="true" x="2" y="0"/>
         <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" optional="true" x="0" y="4"/>
         <parameter id="isEnforcer" dataType="boolean" name="Is Enforcer" format="attribute" optional="true" x="0" y="5"/>
@@ -229,15 +235,25 @@
         <parameter id="attribute" dataType="objectSetUnique" name="Attributes" type="actorAttribute" y="0" group="stats"/>
         <parameter id="skill" dataType="objectSetUnique" name="Skills" type="actorSkill" y="1" group="stats"/>
         <parameter id="senseType" dataType="objectSetUnique" name="Sense Types" type="actorSenseType" optional="true" group="senses"/>
+        <parameter id="attackType" dataType="referenceSet" name="Unarmed Attack Types" type="attackType" optional="true" group="attackTypes"/>
+        <parameter id="startEffect" dataType="objectSet" name="Starting Effects" type="actorStartEffect" optional="true" group="startEffects"/>
+        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" group="inventory"/>
         <parameter id="limb" dataType="objectSetUnique" name="Limbs" type="actorLimb" optional="true" group="limbs"/>
         <parameter id="equipSlot" dataType="objectSetUnique" name="Equip Slots" type="actorEquipSlot" optional="true" group="equipSlots"/>
-        <parameter id="damageResistance" dataType="objectSetUnique" name="Damage Resistances" type="actorDamageResistance" optional="true" group="damage"/>
-        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" group="inventory"/>
+        <parameter id="damage" dataType="objectSetUnique" name="Damage Resistances" type="damageResistance" optional="true" group="damage"/>
         <parameter id="action" dataType="objectSet" name="Actions" type="customActionReference" y="0" group="actions"/>
-        <parameter id="script" dataType="objectSet" name="Scripts" type="scriptWithTriggerActor" group="scripts"/>
         <parameter id="itemAction" dataType="objectSet" name="Item Actions" type="customActionReference" y="1" group="actions"/>
-        <parameter id="startLevel" dataType="integer" name="Starting Level" optional="true" format="attribute" y="0" group="level"/>
-        <parameter id="levelUpThreshold" dataType="string" name="Level-Up Threshold Expression" optional="true" format="child_tag" y="1" group="level"/>
+        <parameter id="bark" dataType="objectSetUnique" name="Barks" type="actorBark" group="barks"/>
+        <parameter id="script" dataType="objectSet" name="Scripts" type="scriptWithTriggerActor" group="scripts"/>
+    </template>
+    <template id="actorBark" name="Bark" nameFormat="$trigger" primaryParameter="trigger">
+        <parameter id="trigger" name="Trigger" dataType="enum" type="barkTriggers" format="attribute"/>
+        <parameter id="response" name="Response Type" dataType="enum" type="barkResponseType" default="NONE" format="attribute" x="1"/>
+        <parameter id="visible" name="Visible Phrases" dataType="objectSet" type="barkPhrase" y="1"/>
+        <parameter id="nonVisible" name="Non-Visible Phrases" dataType="objectSet" type="barkPhrase" x="1" y="1"/>
+    </template>
+    <template id="barkPhrase" name="Phrase" nameFormat="$phrase" primaryParameter="phrase">
+        <parameter id="phrase" dataType="stringLong" format="current_tag"/>
     </template>
     <template id="actorName" name="Name">
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
@@ -267,9 +283,13 @@
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="1"/>
     </template>
-    <template id="actorDamageResistance" name="Damage Resistance" nameFormat="$type" primaryParameter="type">
+    <template id="actorStartEffect" name="Starting Effect" nameFormat="$id">
+        <parameter id="id" dataType="reference" name="Effect" format="current_tag"/>
+    </template>
+    <template id="damageResistance" name="Damage Resistance" nameFormat="$type" primaryParameter="type">
         <parameter id="type" dataType="reference" name="Damage Type" type="damageType" format="attribute" y="0"/>
-        <parameter id="value" dataType="integer" name="Value" format="attribute" y="1"/>
+        <parameter id="resistance" dataType="integer" name="Resistance" format="attribute" y="1" optional="true" default="0"/>
+        <parameter id="mult" dataType="float" name="Multiplier" format="attribute" y="2" optional="true" default="0.0"/>
     </template>
     <template id="attackType" name="Attack Type" topLevel="true" nameFormat="$id" primaryParameter="id">
         <group id="phrases" name="Phrases" x="0" y="2" width="1" height="3"/>
@@ -284,20 +304,20 @@
         <parameter id="rate" dataType="integer" name="Override Rate" format="attribute" optional="true" x="2" y="1"/>
         <parameter id="isLoudOverride" dataType="boolean" name="Override Is Loud" format="attribute" optional="true" x="1" y="1"/>
         <parameter id="nonIdealRange" dataType="boolean" name="Use Non-Ideal Ranges" format="attribute" default="false" x="4" y="1"/>
-        <parameter id="range" dataType="objectSetUnique" type="weaponClassRange" name="Ranges" x="4" y="2" height="2"/>
-        <parameter id="overrideEffects" dataType="boolean" name="Override Target Effects" default="false" x="3" y="1"/>
-        <parameter id="targetEffect" dataType="objectSet" type="effectReference" name="Target Effects" x="3" y="2" height="2"/>
         <parameter id="attackPhrase" dataType="string" name="Per-Target Phrase" format="child_tag" optional="true" y="0" group="phrases"/>
         <parameter id="attackOverallPhrase" dataType="string" name="Overall Phrase" format="child_tag" optional="true" y="1" group="phrases"/>
         <parameter id="attackPhraseAudible" dataType="string" name="Audible Per-Target Phrase" format="child_tag" optional="true" y="2" group="phrases"/>
         <parameter id="attackOverallPhraseAudible" dataType="string" name="Audible Overall Phrase" format="child_tag" optional="true" y="3" group="phrases"/>
-        <parameter id="hitChance" dataType="string" name="Hit Chance" format="child_tag" optional="true" group="hitChance" x="0" y="0"/>
-        <parameter id="hitChanceOverall" dataType="string" name="Hit Chance Overall" format="child_tag" optional="true" x="0" y="1" group="hitChance"/>
-        <parameter id="hitChanceMult" dataType="float" name="Hit Chance Mult" format="attribute" optional="true" x="1" y="0" group="hitChance"/>
-        <parameter id="damageMult" dataType="float" name="Damage Mult" format="attribute" optional="true" x="0" y="0" group="damage"/>
+        <parameter id="damageMult" dataType="float" name="Damage Mult" format="attribute" optional="true" default="0.0" x="0" y="0" group="damage"/>
         <parameter id="damage" dataType="string" name="Override Damage" format="child_tag" optional="true" x="1" y="0" group="damage"/>
         <parameter id="damageType" dataType="reference" type="damageType" name="Override Damage Type" format="attribute" optional="true" x="0" y="1" group="damage"/>
         <parameter id="armorMult" dataType="float" name="Override Armor Mult" format="attribute" optional="true" x="1" y="1" group="damage"/>
+        <parameter id="hitChance" dataType="string" name="Hit Chance" format="child_tag" optional="true" group="hitChance" x="0" y="0"/>
+        <parameter id="hitChanceOverall" dataType="string" name="Hit Chance Overall" format="child_tag" optional="true" x="0" y="1" group="hitChance"/>
+        <parameter id="hitChanceMult" dataType="float" name="Hit Chance Mult" format="attribute" optional="true" default="0.0" x="1" y="0" group="hitChance"/>
+        <parameter id="range" dataType="objectSetUnique" type="weaponClassRange" name="Ranges" x="4" y="2" height="2"/>
+        <parameter id="overrideEffects" dataType="boolean" name="Override Target Effects" default="false" x="3" y="1"/>
+        <parameter id="targetEffect" dataType="objectSet" type="effectReference" name="Target Effects" x="3" y="2" height="2"/>
     </template>
     <template id="effectReference" name="Effect" topLevel="false" nameFormat="$id" primaryParameter="id">
         <parameter id="id" dataType="reference" type="effect" name="Effect" format="current_tag"/>
@@ -322,6 +342,9 @@
         <parameter id="conditionAdd" dataType="string" name="Add Condition" format="child_tag" x="0" y="0" optional="true" group="conditions"/>
         <parameter id="conditionRemove" dataType="string" name="Remove Condition" format="child_tag" x="0" y="1" optional="true" group="conditions"/>
         <parameter id="conditionActive" dataType="string" name="Active Condition" format="child_tag" x="0" y="2" optional="true" group="conditions"/>
+        <parameter id="scriptAdd" dataType="script" name="Add Script" format="child_tag" optional="true" group="tabAdd"/>
+        <parameter id="scriptRemove" dataType="script" name="Remove Script" format="child_tag" optional="true" group="tabRemove"/>
+        <parameter id="scriptRound" dataType="script" name="Each Round Script" format="child_tag" optional="true" group="tabRound"/>
         <parameter id="component" dataType="component" name="Stat Modifier" componentFormat="typeAttribute" format="current_tag" useComponentTypeName="true" optional="true" x="2" y="0" width="1" height="6">
             <component id="add" name="Add" object="effectComponentAdd"/>
             <component id="mult" name="Multiply" object="effectComponentMult"/>
@@ -330,9 +353,6 @@
             <component id="stringSet" name="String Set" object="effectComponentStringSet"/>
             <component id="compound" name="Compound" object="effectComponentCompound"/>
         </parameter>
-        <parameter id="scriptAdd" dataType="script" name="Add Script" format="child_tag" optional="true" group="tabAdd"/>
-        <parameter id="scriptRemove" dataType="script" name="Remove Script" format="child_tag" optional="true" group="tabRemove"/>
-        <parameter id="scriptRound" dataType="script" name="Each Round Script" format="child_tag" optional="true" group="tabRound"/>
     </template>
     <template id="effectComponentAdd" name="Add" topLevel="false">
         <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
@@ -359,9 +379,9 @@
         <group id="valuesAdd" tabGroup="values" name="Add"/>
         <group id="valuesRemove" tabGroup="values" name="Remove"/>
         <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
+        <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
         <parameter id="add" dataType="objectSetUnique" type="stringValue" name="Add Values" group="valuesAdd"/>
         <parameter id="remove" dataType="objectSetUnique" type="stringValue" name="Remove Values" group="valuesRemove"/>
-        <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
     </template>
     <template id="stringValue" name="String Value" topLevel="false" nameFormat="$value">
         <parameter id="value" dataType="string" name="String Value" format="current_tag"/>
@@ -378,13 +398,12 @@
         <parameter id="name" dataType="object" type="itemName" name="Name" y="1" height="2"/>
         <parameter id="price" dataType="integer" name="Price" format="attribute" y="3" default="0"/>
         <parameter id="description" dataType="object" type="description" name="Description" optional="true" x="1" y="0" height="5"/>
-        <parameter id="component" dataType="objectSetUnique" type="itemComponent" name="Components" group="components"/>
-        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" group="actions"/>
         <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerItem" name="Script Triggers" group="scripts"/>
+        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" group="actions"/>
+        <parameter id="component" dataType="objectSetUnique" type="itemComponent" name="Components" group="components"/>
     </template>
     <template id="itemName" name="Name" topLevel="false" nameFormat="$name">
-        <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
-        <parameter id="proper" dataType="boolean" name="Is Proper" default="false" format="attribute" y="1"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
     </template>
     <template id="itemComponent" name="Item Component" topLevel="false" nameFormat="$component" primaryParameter="component">
         <parameter id="startEnabled" dataType="boolean" name="Start Enabled" format="attribute" x="0" y="0" default="true"/>
@@ -463,8 +482,8 @@
         <parameter id="rate" dataType="integer" name="Attack Rate" format="child_tag" default="1" y="1"/>
         <parameter id="damage" dataType="object" type="itemComponentWeaponDamage" name="Damage" y="2"/>
         <parameter id="critChance" dataType="float" name="Critical Chance" format="attribute" default="0.0" y="3"/>
-        <parameter id="armorMult" dataType="float" name="Armor Mult" format="attribute" optional="true" default="1.0" y="4"/>
-        <parameter id="silenced" dataType="boolean" name="Is Silenced" format="attribute" default="false" y="5"/>
+        <parameter id="armorMult" dataType="float" name="Armor Mult" format="child_tag" optional="true" default="1.0" y="4"/>
+        <parameter id="silenced" dataType="boolean" name="Is Silenced" format="child_tag" default="false" y="5"/>
         <parameter id="targetEffect" dataType="objectSet" type="effectReference" name="Target Effects" y="6"/>
     </template>
     <template id="itemComponentWeaponDamage" name="Damage" topLevel="false">
@@ -499,6 +518,7 @@
         <parameter id="countMin" dataType="integer" name="Min Count" format="attribute" optional="true" y="3" default="0"/>
         <parameter id="countMax" dataType="integer" name="Max Count" format="attribute" optional="true" y="4" default="0"/>
         <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true" y="5"/>
+        <parameter id="modChance" dataType="float" name="Mod Chance" default="1.0" format="attribute" optional="true" y="6"/>
     </template>
     <template id="lootTableRefTable" name="Table Entry" nameFormat="$id{value:count: (:)}{value:countMin: (:}{value:countMax:-:)}" primaryParameter="id">
         <parameter id="id" dataType="reference" name="Loot Table" type="lootTable" format="current_tag" y="0"/>
@@ -539,11 +559,15 @@
         <parameter id="node" dataType="treeBranch" type="nodeInner" name="Group"/>
     </template>
     <template id="object" name="Object" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="object" name="Name" type="objectName" y="1"/>
-        <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="2" height="3"/>
-        <parameter id="component" dataType="objectSetUnique" type="objectComponent" name="Components" x="1" y="0" height="3"/>
-        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" x="1" y="3" height="2"/>
+        <parameter id="maxHP" dataType="integer" name="Max HP" format="attribute" y="2"/>
+        <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="3" height="2"/>
+        <parameter id="damage" dataType="objectSetUnique" type="damageResistance" name="Damage Resistances" x="1" y="3"/>
+        <parameter id="script" dataType="objectSet" type="scriptWithTriggerObject" name="Scripts" x="2" y="3"/>
+        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" x="1" y="4"/>
+        <parameter id="networkAction" dataType="objectSet" type="customActionReference" name="Network Actions" x="2" y="4"/>
+        <parameter id="component" dataType="objectSetUnique" type="objectComponent" name="Components" x="2" height="3"/>
     </template>
     <template id="objectComponent" name="Object Component" topLevel="false" nameFormat="$component" primaryParameter="component">
         <parameter id="startEnabled" dataType="boolean" name="Start Enabled" format="attribute" x="0" y="0" default="true"/>
@@ -614,9 +638,14 @@
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
         <parameter id="proper" dataType="boolean" name="Proper" format="attribute" y="1" default="false"/>
     </template>
-    <template id="senseType" name="Sense Type" topLevel="true" nameFormat="$id" primaryParameter="id">
+    <template id="obstructionType" name="Obstruction Type" topLevel="true" nameFormat="$id" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="1"/>
+    </template>
+    <template id="senseType" name="Sense Type" topLevel="true" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="name" dataType="string" name="Name" format="child_tag" y="1"/>
+        <parameter id="bypassedObstructionType" dataType="referenceSet" type="obstructionType" name="Bypassed Obstruction Types" y="2"/>
     </template>
     <template id="skill" name="Skill" topLevel="true" nameFormat="$id" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>

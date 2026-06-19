@@ -11,6 +11,7 @@ import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -63,6 +64,7 @@ public class ConfigMenuManager implements DataSaveTarget {
     }
 
     public Data getConfigData() {
+        if (configData == null) return new DataObject(configTemplate, new HashMap<>());
         return configData;
     }
 
