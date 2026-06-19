@@ -41,7 +41,7 @@ public class PhraseEditorManager implements DataSaveTarget {
     }
 
     public void clearPhrases() {
-        phrases = null;
+        phrases = new HashMap<>();
     }
 
     public void openPhraseEditor(Window parentWindow, ParameterFactory parameterFactory) {

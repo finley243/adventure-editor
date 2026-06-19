@@ -44,7 +44,7 @@ public class ScriptEditorManager implements DataSaveTarget {
     }
 
     public void clearScripts() {
-        scripts = null;
+        scripts = new HashMap<>();
     }
 
     public void openScriptEditor(Window parentWindow, ParameterFactory parameterFactory) {
