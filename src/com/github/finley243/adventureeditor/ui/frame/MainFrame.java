@@ -33,8 +33,10 @@ public class MainFrame extends JFrame implements ViewActions {
     private boolean isProjectLoaded;
 
     private final ParameterFactory parameterFactory;
+    private final Template configTemplate;
     private final EditorManager editorManager;
 
+    private EditorFrame configFrame;
     private PhraseEditorFrame phraseEditorFrame;
     private final ChildFrameHandler<String> phraseFrameHandler;
     private ScriptEditorFrame scriptEditorFrame;
@@ -45,9 +47,10 @@ public class MainFrame extends JFrame implements ViewActions {
 
     private final JMenu fileOpenRecent;
 
-    public MainFrame(ParameterFactory parameterFactory) {
+    public MainFrame(ParameterFactory parameterFactory, Template configTemplate) {
         super(EDITOR_NAME);
         this.parameterFactory = parameterFactory;
+        this.configTemplate = configTemplate;
         this.editorManager = new EditorManager();
         this.phraseFrameHandler = new ChildFrameHandler<>();
         this.scriptFrameHandler = new ChildFrameHandler<>();
@@ -246,6 +249,17 @@ public class MainFrame extends JFrame implements ViewActions {
             }
         } else {
             super.processWindowEvent(e);
+        }
+    }
+
+    @Override
+    public void openConfigEditor(Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+        if (configFrame != null) {
+            configFrame.toFront();
+            configFrame.requestFocus();
+        } else {
+            Consumer<EditorFrame> onClose = _ -> configFrame = null;
+            configFrame = new EditorFrame(this, configTemplate, initialData, true, parameterFactory, onSave, onValidate, onClose);
         }
     }
 

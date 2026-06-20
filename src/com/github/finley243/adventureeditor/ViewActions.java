@@ -14,6 +14,8 @@ import java.util.function.Function;
 
 public interface ViewActions {
 
+    void openConfigEditor(Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
+
     void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
     void closeAllEditors();
