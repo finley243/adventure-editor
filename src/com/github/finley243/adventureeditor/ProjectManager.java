@@ -1,20 +1,12 @@
 package com.github.finley243.adventureeditor;
 
-import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.template.TemplateRegistry;
-import com.github.finley243.adventureeditor.ui.ProjectLoadListener;
-import com.github.finley243.adventureeditor.ui.RecentProjectListener;
-import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ProjectManager {
 
@@ -22,103 +14,62 @@ public class ProjectManager {
     private static final int RECENT_PROJECTS_MAXIMUM = 5;
     private static final String UNNAMED_PROJECT_NAME = "Unnamed Project";
 
-    private final DataLoader dataLoader;
-    private final TemplateRegistry templateRegistry;
-    private final PhraseEditorManager phraseEditorManager;
-    private final ScriptEditorManager scriptEditorManager;
-    private final ConfigMenuManager configMenuManager;
-    private final DataManager dataManager;
-
     private final List<ProjectFile> recentProjects;
 
     private boolean isProjectLoaded;
     private String loadedProjectPath;
-    private Map<String, Map<String, Data>> lastSavedData;
-    private Data lastSavedConfigData;
-    private Map<String, String> lastSavedPhrases;
-    private Map<String, String> lastSavedScripts;
 
-    private final List<RecentProjectListener> recentProjectListeners;
-    private final List<ProjectLoadListener> projectLoadListeners;
-
-    public ProjectManager(DataLoader dataLoader, TemplateRegistry templateRegistry, PhraseEditorManager phraseEditorManager, ScriptEditorManager scriptEditorManager, ConfigMenuManager configMenuManager, DataManager dataManager) {
-        this.dataLoader = dataLoader;
-        this.templateRegistry = templateRegistry;
-        this.phraseEditorManager = phraseEditorManager;
-        this.scriptEditorManager = scriptEditorManager;
-        this.configMenuManager = configMenuManager;
-        this.dataManager = dataManager;
+    public ProjectManager() {
         this.recentProjects = new ArrayList<>();
         this.isProjectLoaded = false;
         this.loadedProjectPath = null;
-        this.recentProjectListeners = new ArrayList<>();
-        this.projectLoadListeners = new ArrayList<>();
     }
 
-    public void registerRecentProjectListener(RecentProjectListener recentProjectListener) {
-        this.recentProjectListeners.add(recentProjectListener);
-    }
-
-    public void registerProjectLoadListener(ProjectLoadListener projectLoadListener) {
-        this.projectLoadListeners.add(projectLoadListener);
-    }
-
-    public boolean isProjectLoaded() {
-        return isProjectLoaded;
-    }
-
-    public boolean isProjectSaved() {
-        return isProjectLoaded && loadedProjectPath != null;
+    public void setProjectLoaded(boolean loaded) {
+        this.isProjectLoaded = loaded;
     }
 
     public boolean hasUnsavedChanges() {
-        if (!isProjectLoaded()) {
+        if (!isProjectLoaded) {
             return false;
         }
-        if (!isProjectSaved()) {
-            return true;
-        }
-        if (phraseEditorManager.hasChangesFrom(lastSavedPhrases)) {
-            return true;
-        }
-        if (scriptEditorManager.hasChangesFrom(lastSavedScripts)) {
-            return true;
-        }
-        if (configMenuManager.hasChangesFrom(lastSavedConfigData)) {
-            return true;
-        }
-        return dataManager.hasChangesFrom(lastSavedData);
+        return loadedProjectPath == null;
     }
 
-    public void setRecentProjects(List<ProjectFile> projects) {
-        this.recentProjects.clear();
-        this.recentProjects.addAll(projects);
+    public void addRecentProject(ProjectFile project) {
+        recentProjects.remove(project);
+        recentProjects.addFirst(project);
         while (recentProjects.size() > RECENT_PROJECTS_MAXIMUM) {
             recentProjects.removeLast();
         }
-        dataLoader.saveRecentProjects(recentProjects);
-        onUpdateRecentProjects(recentProjects);
+    }
+
+    public void loadRecentProjects(List<ProjectFile> projects) {
+        recentProjects.clear();
+        recentProjects.addAll(projects);
+        while (recentProjects.size() > RECENT_PROJECTS_MAXIMUM) {
+            recentProjects.removeLast();
+        }
+    }
+
+    public List<ProjectFile> getRecentProjects() {
+        return new ArrayList<>(recentProjects);
     }
 
     public void removeRecentProject(ProjectFile project) {
         recentProjects.remove(project);
-        dataLoader.saveRecentProjects(recentProjects);
-        onUpdateRecentProjects(recentProjects);
     }
 
     public void clearRecentProjects() {
         recentProjects.clear();
-        dataLoader.saveRecentProjects(recentProjects);
-        onUpdateRecentProjects(recentProjects);
     }
 
-    public void updateProjectName() {
-        String name = configMenuManager.getProjectName();
-        if (name == null && isProjectLoaded()) {
-            configMenuManager.onProjectNameChange(UNNAMED_PROJECT_NAME);
-        } else {
-            configMenuManager.onProjectNameChange(name);
-        }
+    public void setLoadedProjectPath(String path) {
+        this.loadedProjectPath = path;
+    }
+
+    public String getLoadedProjectPath() {
+        return loadedProjectPath;
     }
 
     public void newProject(Window parentWindow, ParameterFactory parameterFactory, MainFrame mainFrame) {
@@ -222,18 +173,6 @@ public class ProjectManager {
         return true;
     }
 
-    public boolean saveConfirmationIfHasUnsavedData(MainFrame mainFrame) {
-        if (!hasUnsavedChanges()) {
-            return true;
-        }
-        SaveConfirmationResult result = mainFrame.projectSaveConfirmation();
-        if (result == SaveConfirmationResult.YES) {
-            return saveProjectToCurrentPath(mainFrame);
-        } else {
-            return result == SaveConfirmationResult.NO;
-        }
-    }
-
     private void addOrMoveRecentProjectToTop(ProjectFile project) {
         recentProjects.remove(project);
         recentProjects.addFirst(project);
@@ -242,25 +181,6 @@ public class ProjectManager {
         }
         dataLoader.saveRecentProjects(recentProjects);
         onUpdateRecentProjects(recentProjects);
-    }
-
-    private void updateLastSavedData() {
-        lastSavedData = dataManager.getAllDataCopy();
-        lastSavedConfigData = configMenuManager.getConfigData().createCopy();
-        lastSavedPhrases = new HashMap<>(phraseEditorManager.getPhrases());
-        lastSavedScripts = new HashMap<>(scriptEditorManager.getScripts());
-    }
-
-    private void onUpdateRecentProjects(List<ProjectFile> recentProjects) {
-        for (RecentProjectListener listener : recentProjectListeners) {
-            listener.onUpdateRecentProjects(recentProjects);
-        }
-    }
-
-    private void onLoadProject(Map<String, Template> templates, Map<String, Map<String, Data>> loadedData) {
-        for (ProjectLoadListener listener : projectLoadListeners) {
-            listener.onLoadProject(templates, loadedData);
-        }
     }
 
 }

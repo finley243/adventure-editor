@@ -26,7 +26,9 @@ public interface PresenterActions {
 
     void onShowReferences(String categoryID, String objectID);
 
-    void onOpenPhraseEditor();
+    void onOpenReference(String categoryID, String objectID);
+
+    void onOpenPhraseMenu();
 
     void onOpenPhrase(String phraseKey);
 
@@ -36,7 +38,7 @@ public interface PresenterActions {
 
     void onDuplicatePhrase(String phraseKey);
 
-    void onOpenScriptEditor();
+    void onOpenScriptMenu();
 
     void onOpenScript(String scriptName);
 

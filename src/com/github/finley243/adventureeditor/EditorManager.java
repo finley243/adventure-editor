@@ -2,7 +2,6 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
-import java.awt.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

@@ -28,20 +28,15 @@ public class Main {
         ScriptEditorManager scriptEditorManager = new ScriptEditorManager();
         ConfigMenuManager configMenuManager = new ConfigMenuManager(templateRegistry.getConfigTemplate());
         EditorManager editorManager = new EditorManager();
-        DataManager dataManager = new DataManager(editorManager, templateRegistry, configMenuManager);
+        DataManager dataManager = new DataManager(editorManager, templateRegistry);
         TopLevelSaveTarget topLevelSaveTarget = new TopLevelSaveTarget(dataManager, editorManager);
         ReferenceListManager referenceListManager = new ReferenceListManager(configMenuManager, dataManager, topLevelSaveTarget);
         dataManager.resolveReferenceListManager(referenceListManager);
         ParameterFactory parameterFactory = new ParameterFactory(templateRegistry, dataManager, topLevelSaveTarget);
-        ProjectManager projectManager = new ProjectManager(dataLoader, templateRegistry, phraseEditorManager, scriptEditorManager, configMenuManager, dataManager);
+        ProjectManager projectManager = new ProjectManager();
         MainFrame mainFrame = new MainFrame(parameterFactory, projectManager, configMenuManager, phraseEditorManager, scriptEditorManager, editorManager);
-        configMenuManager.registerProjectNameChangeListener(mainFrame);
-        BrowserFrame browserFrame = new BrowserFrame(mainFrame, editorManager, parameterFactory);
-        dataManager.registerObjectUpdateListener(browserFrame);
-        dataManager.registerCategoryUpdateListener(browserFrame);
-        projectManager.registerProjectLoadListener(browserFrame);
-        projectManager.registerRecentProjectListener(mainFrame);
-        projectManager.setRecentProjects(recentProjects);
+        BrowserFrame browserFrame = new BrowserFrame(mainFrame, parameterFactory);
+        projectManager.loadRecentProjects(recentProjects);
     }
 
 }

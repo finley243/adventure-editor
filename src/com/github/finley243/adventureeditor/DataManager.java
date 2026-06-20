@@ -1,36 +1,29 @@
 package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.*;
-import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.template.TemplateParameter;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
-import com.github.finley243.adventureeditor.ui.*;
+import com.github.finley243.adventureeditor.ui.DeleteObjectConfirmationResult;
+import com.github.finley243.adventureeditor.ui.ReferenceUtils;
+import com.github.finley243.adventureeditor.ui.UIUtils;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 public class DataManager {
 
     private final EditorManager editorManager;
     private final TemplateRegistry templateRegistry;
-    private final ConfigMenuManager configMenuManager;
 
     private ReferenceListManager referenceListManager;
 
     private Map<String, Map<String, Data>> data;
+    private Map<String, Map<String, Data>> lastSavedData;
 
-    private final List<CategoryUpdateListener> categoryUpdateListeners;
-    private final List<ObjectUpdateListener> objectUpdateListeners;
-
-    public DataManager(EditorManager editorManager, TemplateRegistry templateRegistry, ConfigMenuManager configMenuManager) {
+    public DataManager(EditorManager editorManager, TemplateRegistry templateRegistry) {
         this.editorManager = editorManager;
         this.templateRegistry = templateRegistry;
-        this.configMenuManager = configMenuManager;
         this.data = new HashMap<>();
-        this.categoryUpdateListeners = new ArrayList<>();
-        this.objectUpdateListeners = new ArrayList<>();
     }
 
     public void resolveReferenceListManager(ReferenceListManager referenceListManager) {
@@ -43,16 +36,12 @@ public class DataManager {
         return referenceListManager;
     }
 
-    public void registerCategoryUpdateListener(CategoryUpdateListener categoryUpdateListener) {
-        this.categoryUpdateListeners.add(categoryUpdateListener);
-    }
-
-    public void registerObjectUpdateListener(ObjectUpdateListener objectUpdateListener) {
-        this.objectUpdateListeners.add(objectUpdateListener);
-    }
-
-    public void setData(Map<String, Map<String, Data>> data) {
+    public void loadData(Map<String, Map<String, Data>> data) {
         this.data = new HashMap<>(data);
+    }
+
+    public void setData(String categoryID, String objectID, Data objectData) {
+        data.computeIfAbsent(categoryID, k -> new HashMap<>()).put(objectID, objectData);
     }
 
     public boolean categoryContainsID(String categoryID, String objectID) {
@@ -62,16 +51,13 @@ public class DataManager {
 
     public Set<String> getIDsForCategory(String categoryID) {
         if (!data.containsKey(categoryID)) {
-            return null;
+            return Set.of();
         }
         return data.get(categoryID).keySet();
     }
 
     public String[] getIDsForCategoryArray(String categoryID) {
         Set<String> idSet = getIDsForCategory(categoryID);
-        if (idSet == null) {
-            return new String[0];
-        }
         return idSet.toArray(new String[0]);
     }
 
@@ -88,6 +74,10 @@ public class DataManager {
 
     public void clearData() {
         data = new HashMap<>();
+    }
+
+    public void removeData(String categoryID, String objectID) {
+        data.get(categoryID).remove(objectID);
     }
 
     public void saveObjectData(Data objectData, Data initialData) {
@@ -132,59 +122,6 @@ public class DataManager {
         }
     }
 
-    public void newObject(String categoryID, DataSaveTarget saveTarget, Window parentWindow, ParameterFactory parameterFactory) {
-        editorManager.openEditorFrame(categoryID, null, templateRegistry.getTemplate(categoryID), null, saveTarget, parentWindow, parameterFactory);
-    }
-
-    public void editObject(String categoryID, String objectID, DataSaveTarget saveTarget, Window parentWindow, ParameterFactory parameterFactory) {
-        editorManager.openEditorFrame(categoryID, objectID, templateRegistry.getTemplate(categoryID), getData(categoryID, objectID), saveTarget, parentWindow, parameterFactory);
-    }
-
-    public String duplicateObject(String categoryID, String objectID) {
-        Data objectData = getData(categoryID, objectID);
-        Data objectDataCopy = objectData.createCopy();
-        String newObjectID = generateDuplicateObjectID(categoryID, objectID);
-        if (objectDataCopy instanceof DataObject dataObject) {
-            dataObject.replaceID(newObjectID);
-        }
-        data.get(categoryID).put(newObjectID, objectDataCopy);
-        if (templateRegistry.getTemplate(categoryID).topLevel()) {
-            onObjectDuplication(categoryID, objectID, newObjectID);
-        }
-        return newObjectID;
-    }
-
-    public boolean deleteObject(String categoryID, String objectID, Window parentWindow, ParameterFactory parameterFactory) {
-        int referenceCount = findReferences(categoryID, objectID).size();
-        DeleteObjectConfirmationResult result = UIUtils.deleteObjectConfirmation(objectID, referenceCount, parentWindow);
-        if (result == DeleteObjectConfirmationResult.DELETE) {
-            data.get(categoryID).remove(objectID);
-            editorManager.closeEditorFrameIfActive(categoryID, objectID);
-            if (templateRegistry.getTemplate(categoryID).topLevel()) {
-                onObjectDelete(categoryID, objectID);
-            }
-            return true;
-        } else if (result == DeleteObjectConfirmationResult.VIEW_REFERENCES) {
-            displayReferences(categoryID, objectID, parentWindow, parameterFactory);
-        }
-        return false;
-    }
-
-    public void displayReferences(String referenceCategoryID, String referenceObjectID, Window parentWindow, ParameterFactory parameterFactory) {
-        Set<Reference> references = findReferences(referenceCategoryID, referenceObjectID);
-        referenceListManager.openReferenceList(references, parentWindow, parameterFactory);
-    }
-
-    public void renameReferences(String referenceCategoryID, String referenceObjectID, String newObjectID) {
-        renameReferencesInData(configMenuManager.getConfigData(), referenceCategoryID, referenceObjectID, newObjectID);
-        for (String category : data.keySet()) {
-            for (String object : data.get(category).keySet()) {
-                Data currentObject = data.get(category).get(object);
-                renameReferencesInData(currentObject, referenceCategoryID, referenceObjectID, newObjectID);
-            }
-        }
-    }
-
     public Map<String, Map<String, Data>> getAllDataCopy() {
         Map<String, Map<String, Data>> dataCopy = new HashMap<>();
         for (Map.Entry<String, Map<String, Data>> categoryEntry : data.entrySet()) {
@@ -197,19 +134,20 @@ public class DataManager {
         return dataCopy;
     }
 
-    public boolean hasChangesFrom(Map<String, Map<String, Data>> comparisonData) {
-        return !Objects.equals(data, comparisonData);
+    public boolean hasUnsavedChanges() {
+        return !Objects.equals(data, lastSavedData);
     }
 
-    private Set<Reference> findReferences(String referenceCategoryID, String referenceObjectID) {
+    public void setSavedChanges() {
+        this.lastSavedData = getAllDataCopy();
+    }
+
+    public Set<Reference> findReferences(String referenceCategoryID, String referenceObjectID) {
         Set<Reference> references = new HashSet<>();
-        if (dataContainsReference(configMenuManager.getConfigData(), referenceCategoryID, referenceObjectID)) {
-            references.add(new Reference("", "config"));
-        }
         for (String category : data.keySet()) {
             for (String object : data.get(category).keySet()) {
                 Data currentObject = data.get(category).get(object);
-                if (dataContainsReference(currentObject, referenceCategoryID, referenceObjectID)) {
+                if (ReferenceUtils.dataContainsReference(currentObject, referenceCategoryID, referenceObjectID)) {
                     references.add(new Reference(category, object));
                 }
             }
@@ -217,107 +155,12 @@ public class DataManager {
         return references;
     }
 
-    private String generateDuplicateObjectID(String categoryID, String objectID) {
-        Set<String> existingIDs = getIDsForCategory(categoryID);
-        String baseCopyID = objectID + "_COPY_";
-        int i = 1;
-        while (existingIDs.contains(baseCopyID + i)) {
-            i += 1;
-        }
-        return baseCopyID + i;
-    }
-
-    private boolean dataContainsReference(Data data, String categoryID, String objectID) {
-        if (!(data instanceof DataObject dataObject)) {
-            throw new IllegalArgumentException("Data must be an object");
-        }
-        Template template = dataObject.getTemplate();
-        for (TemplateParameter parameter : template.parameters()) {
-            Data innerData = dataObject.getValue().get(parameter.id());
-            if (innerData instanceof DataReference innerReference) {
-                if (parameter.type().equals(categoryID) && innerReference.getValue().equals(objectID)) {
-                    return true;
-                }
-            } else if (innerData instanceof DataReferenceSet innerReferenceSet) {
-                if (parameter.type().equals(categoryID) && innerReferenceSet.getValue().contains(objectID)) {
-                    return true;
-                }
-            } else if (innerData instanceof DataObject innerObject) {
-                if (dataContainsReference(innerObject, categoryID, objectID)) {
-                    return true;
-                }
-            } else if (innerData instanceof DataObjectSet innerObjectSet) {
-                for (Data innerObject : innerObjectSet.getValue()) {
-                    if (dataContainsReference(innerObject, categoryID, objectID)) {
-                        return true;
-                    }
-                }
-            } else if (innerData instanceof DataComponent innerComponent) {
-                if (dataContainsReference(innerComponent.getObjectData(), categoryID, objectID)) {
-                    return true;
-                }
+    public void renameReferences(String referenceCategoryID, String referenceObjectID, String newObjectID) {
+        for (String category : data.keySet()) {
+            for (String object : data.get(category).keySet()) {
+                Data currentObject = data.get(category).get(object);
+                ReferenceUtils.renameReferencesInData(currentObject, referenceCategoryID, referenceObjectID, newObjectID);
             }
-        }
-        return false;
-    }
-
-    private void renameReferencesInData(Data data, String categoryID, String objectID, String newObjectID) {
-        if (!(data instanceof DataObject dataObject)) {
-            throw new IllegalArgumentException("Data must be an object");
-        }
-        Template template = dataObject.getTemplate();
-        for (TemplateParameter parameter : template.parameters()) {
-            Data innerData = dataObject.getValue().get(parameter.id());
-            if (innerData instanceof DataReference innerReference) {
-                if (parameter.type().equals(categoryID) && innerReference.getValue().equals(objectID)) {
-                    dataObject.replaceValue(parameter.id(), new DataReference(newObjectID));
-                }
-            } else if (innerData instanceof DataReferenceSet innerReferenceSet) {
-                if (parameter.type().equals(categoryID)) {
-                    int indexOfReference = innerReferenceSet.getValue().indexOf(objectID);
-                    if (indexOfReference != -1) {
-                        innerReferenceSet.getValue().set(indexOfReference, newObjectID);
-                    }
-                }
-            } else if (innerData instanceof DataObject innerObject) {
-                renameReferencesInData(innerObject, categoryID, objectID, newObjectID);
-            } else if (innerData instanceof DataObjectSet innerObjectSet) {
-                for (Data innerObject : innerObjectSet.getValue()) {
-                    renameReferencesInData(innerObject, categoryID, objectID, newObjectID);
-                }
-            } else if (innerData instanceof DataComponent innerComponent) {
-                renameReferencesInData(innerComponent.getObjectData(), categoryID, objectID, newObjectID);
-            }
-        }
-    }
-
-    private void onCategoryUpdate(String categoryID) {
-        for (CategoryUpdateListener listener : categoryUpdateListeners) {
-            listener.onCategoryUpdate(categoryID);
-        }
-    }
-
-    private void onObjectCreation(String categoryID, String objectID) {
-        for (ObjectUpdateListener listener : objectUpdateListeners) {
-            listener.onCreateNewObject(categoryID, objectID);
-        }
-    }
-
-    private void onObjectIDChange(String categoryID, String objectIDPrevious, String objectIDNew) {
-        for (ObjectUpdateListener listener : objectUpdateListeners) {
-            listener.onObjectIDChange(categoryID, objectIDPrevious, objectIDNew);
-        }
-    }
-
-    private void onObjectDuplication(String categoryID, String objectIDOriginal, String objectIDNew) {
-        for (ObjectUpdateListener listener : objectUpdateListeners) {
-            listener.onDuplicateObject(categoryID, objectIDOriginal, objectIDNew);
-        }
-    }
-
-    private void onObjectDelete(String categoryID, String objectID) {
-        for (ObjectUpdateListener listener : objectUpdateListeners) {
-            listener.onDeleteObject(categoryID, objectID);
         }
     }
 

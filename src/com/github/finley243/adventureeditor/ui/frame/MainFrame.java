@@ -3,6 +3,9 @@ package com.github.finley243.adventureeditor.ui.frame;
 import com.github.finley243.adventureeditor.*;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.template.TemplateRegistry;
+import com.github.finley243.adventureeditor.ui.DeleteConfirmationResult;
+import com.github.finley243.adventureeditor.ui.DeleteObjectConfirmationResult;
 import com.github.finley243.adventureeditor.ui.ErrorData;
 import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
@@ -26,7 +29,6 @@ import java.util.function.Function;
 public class MainFrame extends JFrame implements ViewActions {
 
     private static final String EDITOR_NAME = "AdventureEditor";
-    private static final String CONFIG_OBJECT_NAME = "config";
 
     private PresenterActions presenter;
     private boolean hasUnsavedChanges;
@@ -47,14 +49,14 @@ public class MainFrame extends JFrame implements ViewActions {
 
     private final JMenu fileOpenRecent;
 
-    public MainFrame(ParameterFactory parameterFactory, Template configTemplate) {
+    public MainFrame(ParameterFactory parameterFactory, Template configTemplate, TemplateRegistry templateRegistry) {
         super(EDITOR_NAME);
         this.parameterFactory = parameterFactory;
         this.configTemplate = configTemplate;
         this.editorManager = new EditorManager();
         this.phraseFrameHandler = new ChildFrameHandler<>();
         this.scriptFrameHandler = new ChildFrameHandler<>();
-        this.browserFrame = new BrowserFrame(this, editorManager, parameterFactory);
+        this.browserFrame = new BrowserFrame(this, templateRegistry);
 
         this.setSize(800, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -97,10 +99,10 @@ public class MainFrame extends JFrame implements ViewActions {
         toolsProjectConfig.addActionListener(e -> getPresenter().onOpenConfigEditor());
         toolsMenu.add(toolsProjectConfig);
         JMenuItem toolsPhraseEditor = new JMenuItem("Phrase Editor");
-        toolsPhraseEditor.addActionListener(e -> getPresenter().onOpenPhraseEditor());
+        toolsPhraseEditor.addActionListener(e -> getPresenter().onOpenPhraseMenu());
         toolsMenu.add(toolsPhraseEditor);
         JMenuItem toolsScriptEditor = new JMenuItem("Script Editor");
-        toolsScriptEditor.addActionListener(e -> getPresenter().onOpenScriptEditor());
+        toolsScriptEditor.addActionListener(e -> getPresenter().onOpenScriptMenu());
         toolsMenu.add(toolsScriptEditor);
         toolsMenu.addMenuListener(new MenuListener() {
             @Override
@@ -253,6 +255,27 @@ public class MainFrame extends JFrame implements ViewActions {
     }
 
     @Override
+    public void browserAddObject(String categoryID, String objectID) {
+        browserFrame.addGameObject(categoryID, objectID);
+        browserFrame.setSelectedNode(categoryID, objectID);
+    }
+
+    @Override
+    public void browserRemoveObject(String categoryID, String objectID) {
+        browserFrame.removeGameObject(categoryID, objectID);
+    }
+
+    @Override
+    public void browserClear() {
+        browserFrame.clearCategories();
+    }
+
+    @Override
+    public void browserLoadObjects(Map<String, Set<String>> objects) {
+        browserFrame.reloadBrowserObjects(objects);
+    }
+
+    @Override
     public void openConfigEditor(Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
         if (configFrame != null) {
             configFrame.toFront();
@@ -363,19 +386,9 @@ public class MainFrame extends JFrame implements ViewActions {
             referenceListFrame.toFront();
             referenceListFrame.requestFocus();
         } else {
-            referenceListFrame = new ReferenceListFrame(this, (category, object) -> {
-                if (referenceIsConfig(category, object)) {
-                    getPresenter().onOpenConfigEditor();
-                } else {
-                    getPresenter().onEditObject(category, object);
-                }
-            }, () -> referenceListFrame = null);
+            referenceListFrame = new ReferenceListFrame(this, (category, object) -> getPresenter().onOpenReference(category, object), () -> referenceListFrame = null);
         }
         referenceListFrame.loadReferences(references);
-    }
-
-    private boolean referenceIsConfig(String categoryID, String objectID) {
-        return categoryID.isEmpty() && objectID.equals(CONFIG_OBJECT_NAME);
     }
 
     @Override
@@ -386,6 +399,35 @@ public class MainFrame extends JFrame implements ViewActions {
     @Override
     public SaveConfirmationResult confirmProjectSave() {
         return this.projectSaveConfirmation();
+    }
+
+    @Override
+    public DeleteConfirmationResult confirmDelete(String deleteName) {
+        Object[] confirmOptions = {"Delete", "Cancel"};
+        int confirmResult = JOptionPane.showOptionDialog(phraseEditorFrame, "Are you sure you want to delete " + deleteName + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        if (confirmResult == 0) {
+            return DeleteConfirmationResult.DELETE;
+        } else {
+            return  DeleteConfirmationResult.CANCEL;
+        }
+    }
+
+    @Override
+    public DeleteObjectConfirmationResult confirmDeleteObject(String objectID, int referenceCount) {
+        Object[] confirmOptions;
+        if (referenceCount > 0) {
+            confirmOptions = new Object[]{"Delete", "View References", "Cancel"};
+        } else {
+            confirmOptions = new Object[]{"Delete", "Cancel"};
+        }
+        int confirmResult = JOptionPane.showOptionDialog(browserFrame, "Are you sure you want to delete " + objectID + "?\nReferences: " + referenceCount, "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        if (confirmResult == 0) {
+            return DeleteObjectConfirmationResult.DELETE;
+        } else if (confirmResult == 1 && referenceCount > 0) {
+            return DeleteObjectConfirmationResult.VIEW_REFERENCES;
+        } else {
+            return DeleteObjectConfirmationResult.CANCEL;
+        }
     }
 
     @Override
@@ -422,6 +464,41 @@ public class MainFrame extends JFrame implements ViewActions {
         JMenuItem clearRecentProjects = new JMenuItem("Clear Recent Projects");
         clearRecentProjects.addActionListener(e -> getPresenter().onClearRecentProjects());
         fileOpenRecent.add(clearRecentProjects);
+    }
+
+    @Override
+    public void forceCloseObject(String categoryID, String objectID) {
+        EditorFrame frame = editorManager.getActiveTopLevelFrame(categoryID, objectID);
+        if (frame != null) {
+            frame.dispose();
+            editorManager.removeActiveTopLevelFrame(categoryID, objectID);
+        }
+    }
+
+    @Override
+    public void forceCloseConfig() {
+        if (configFrame != null) {
+            configFrame.dispose();
+            configFrame = null;
+        }
+    }
+
+    @Override
+    public void forceCloseScript(String name) {
+        EditorFrame frame = scriptFrameHandler.get(name);
+        if (frame != null) {
+            frame.dispose();
+            scriptFrameHandler.removeChildFrame(frame);
+        }
+    }
+
+    @Override
+    public void forceClosePhrase(String key) {
+        EditorFrame frame = phraseFrameHandler.get(key);
+        if (frame != null) {
+            frame.dispose();
+            phraseFrameHandler.removeChildFrame(frame);
+        }
     }
 
     private void attemptOpeningRecentProject(ProjectFile projectFile) {

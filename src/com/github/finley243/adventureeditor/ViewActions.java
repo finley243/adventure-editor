@@ -2,6 +2,8 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.ui.DeleteConfirmationResult;
+import com.github.finley243.adventureeditor.ui.DeleteObjectConfirmationResult;
 import com.github.finley243.adventureeditor.ui.ErrorData;
 import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 
@@ -13,6 +15,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface ViewActions {
+
+    void browserAddObject(String categoryID, String objectID);
+
+    void browserRemoveObject(String categoryID, String objectID);
+
+    void browserClear();
+
+    void browserLoadObjects(Map<String, Set<String>> objects);
 
     void openConfigEditor(Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
@@ -40,6 +50,10 @@ public interface ViewActions {
 
     SaveConfirmationResult confirmProjectSave();
 
+    DeleteConfirmationResult confirmDelete(String deleteName);
+
+    DeleteObjectConfirmationResult confirmDeleteObject(String objectID, int referenceCount);
+
     File selectSaveDirectory();
 
     void setProjectIsLoaded(boolean isProjectLoaded);
@@ -49,5 +63,13 @@ public interface ViewActions {
     void setHasUnsavedProjectChanges(boolean hasUnsaved);
 
     void updateRecentProjects(List<ProjectFile> recentProjects);
+
+    void forceCloseObject(String categoryID, String objectID);
+
+    void forceCloseConfig();
+
+    void forceCloseScript(String name);
+
+    void forceClosePhrase(String key);
 
 }

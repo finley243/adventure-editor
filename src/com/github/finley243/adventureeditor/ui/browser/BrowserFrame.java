@@ -1,38 +1,25 @@
 package com.github.finley243.adventureeditor.ui.browser;
 
-import com.github.finley243.adventureeditor.EditorManager;
 import com.github.finley243.adventureeditor.PresenterActions;
-import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.CategoryUpdateListener;
-import com.github.finley243.adventureeditor.ui.ObjectUpdateListener;
-import com.github.finley243.adventureeditor.ui.ProjectLoadListener;
-import com.github.finley243.adventureeditor.ui.browser.node.BrowserCategoryNode;
+import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
-import com.github.finley243.adventureeditor.ui.browser.node.BrowserObjectNode;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.util.Map;
+import java.util.Set;
 
-public class BrowserFrame extends JDialog implements ObjectUpdateListener, CategoryUpdateListener, ProjectLoadListener {
+public class BrowserFrame extends JDialog {
 
-    private final EditorManager editorManager;
     //private final DataManager dataManager;
     private final BrowserTree browserTree;
-    //private final DataSaveTarget topLevelSaveTarget;
-    private final ParameterFactory parameterFactory;
+    private final TemplateRegistry templateRegistry;
 
-    private PresenterActions presenter;
-
-    public BrowserFrame(Window mainFrame, EditorManager editorManager, ParameterFactory parameterFactory) {
+    public BrowserFrame(Window mainFrame, TemplateRegistry templateRegistry) {
         super(mainFrame);
-        this.editorManager = editorManager;
-        //this.dataManager = dataManager;
-        //this.topLevelSaveTarget = topLevelSaveTarget;
-        this.parameterFactory = parameterFactory;
+        this.templateRegistry = templateRegistry;
 
         this.setTitle("Browser");
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -64,17 +51,11 @@ public class BrowserFrame extends JDialog implements ObjectUpdateListener, Categ
     }
 
     public void registerPresenter(PresenterActions presenter) {
-        if (this.presenter != null) throw new IllegalStateException("Presenter is already registered");
-        this.presenter = presenter;
+        browserTree.registerPresenter(presenter);
     }
 
-    private PresenterActions getPresenter() {
-        if (presenter == null) throw new IllegalStateException("Presenter has not been registered");
-        return presenter;
-    }
-
-    public void addGameObject(String categoryID, String newObjectID, boolean selectedAfterLoading) {
-        browserTree.addGameObject(categoryID, newObjectID, selectedAfterLoading);
+    public void addGameObject(String categoryID, String newObjectID) {
+        browserTree.addGameObject(categoryID, newObjectID);
     }
 
     public void removeGameObject(String categoryID, String objectID) {
@@ -85,19 +66,27 @@ public class BrowserFrame extends JDialog implements ObjectUpdateListener, Categ
         browserTree.setSelectedNode(categoryID, objectID);
     }
 
-    public void reloadBrowserData(Map<String, Template> templates, Map<String, Map<String, Data>> data) {
-        editorManager.closeAllActiveEditorFrames();
+    public void setCategories() {
         browserTree.clearData();
         browserTree.expandRow(0);
-        for (String category : templates.keySet()) {
-            if (templates.get(category).topLevel()) {
-                browserTree.addCategory(category, templates.get(category).name());
+        for (Map.Entry<String, Template> entry : templateRegistry.getAllTemplates().entrySet()) {
+            if (entry.getValue().topLevel()) {
+                browserTree.addCategory(entry.getKey(), entry.getValue().name());
             }
         }
-        for (String category : data.keySet()) {
-            if (templates.get(category).topLevel()) {
-                for (String object : data.get(category).keySet()) {
-                    this.addGameObject(category, object, false);
+    }
+
+    public void clearCategories() {
+        browserTree.clearData();
+        browserTree.expandRow(0);
+    }
+
+    public void reloadBrowserObjects(Map<String, Set<String>> objects) {
+        setCategories();
+        for (String category : objects.keySet()) {
+            if (templateRegistry.getTemplate(category).topLevel()) {
+                for (String object : objects.get(category)) {
+                    this.addGameObject(category, object);
                 }
             }
         }
@@ -110,30 +99,6 @@ public class BrowserFrame extends JDialog implements ObjectUpdateListener, Categ
         }
     }
 
-    public void openReferenceList(BrowserObjectNode node) {
-        dataManager.displayReferences(node.getCategoryID(), node.getObjectID(), this, parameterFactory);
-    }
-
-    public void newObject(BrowserNode node) {
-        if (node instanceof BrowserCategoryNode categoryNode) {
-            dataManager.newObject(categoryNode.getCategoryID(), topLevelSaveTarget, this, parameterFactory);
-        } else if (node instanceof BrowserObjectNode objectNode) {
-            dataManager.newObject(objectNode.getCategoryID(), topLevelSaveTarget, this, parameterFactory);
-        }
-    }
-
-    public void editObject(BrowserObjectNode node) {
-        dataManager.editObject(node.getCategoryID(), node.getObjectID(), topLevelSaveTarget, this, parameterFactory);
-    }
-
-    public void duplicateObject(BrowserObjectNode node) {
-        dataManager.duplicateObject(node.getCategoryID(), node.getObjectID());
-    }
-
-    public void deleteObject(BrowserObjectNode node) {
-        dataManager.deleteObject(node.getCategoryID(), node.getObjectID(), this, parameterFactory);
-    }
-
     @Override
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
@@ -142,38 +107,6 @@ public class BrowserFrame extends JDialog implements ObjectUpdateListener, Categ
         } else {
             super.processWindowEvent(e);
         }
-    }
-
-    @Override
-    public void onCreateNewObject(String categoryID, String objectID) {
-        addGameObject(categoryID, objectID, true);
-    }
-
-    @Override
-    public void onObjectIDChange(String categoryID, String objectIDPrevious, String objectIDNew) {
-        removeGameObject(categoryID, objectIDPrevious);
-        addGameObject(categoryID, objectIDNew, true);
-    }
-
-    @Override
-    public void onDuplicateObject(String categoryID, String objectIDOriginal, String objectIDNew) {
-        addGameObject(categoryID, objectIDNew, false);
-        setSelectedNode(categoryID, objectIDOriginal);
-    }
-
-    @Override
-    public void onDeleteObject(String categoryID, String objectID) {
-        removeGameObject(categoryID, objectID);
-    }
-
-    @Override
-    public void onCategoryUpdate(String categoryID) {
-        browserTree.updateCategory(categoryID);
-    }
-
-    @Override
-    public void onLoadProject(Map<String, Template> templates, Map<String, Map<String, Data>> loadedData) {
-        reloadBrowserData(templates, loadedData);
     }
 
 }

@@ -4,48 +4,24 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataString;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-import com.github.finley243.adventureeditor.ui.ErrorData;
-import com.github.finley243.adventureeditor.ui.ProjectNameChangeListener;
+import com.github.finley243.adventureeditor.ui.ReferenceUtils;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 
-public class ConfigMenuManager implements DataSaveTarget {
+public class ConfigMenuManager {
 
     private static final String PROJECT_NAME_KEY = "gameName";
 
     private final Template configTemplate;
 
     private Data configData;
+    private Data lastSavedConfigData;
     private EditorFrame configFrame;
-
-    private final List<ProjectNameChangeListener> projectNameChangeListeners;
 
     public ConfigMenuManager(Template configTemplate) {
         this.configTemplate = configTemplate;
-        this.projectNameChangeListeners = new ArrayList<>();
-    }
-
-    public void registerProjectNameChangeListener(ProjectNameChangeListener listener) {
-        projectNameChangeListeners.add(listener);
-    }
-
-    public void openConfigMenu(Window parentWindow, ParameterFactory parameterFactory) {
-        if (configData == null) {
-            return;
-        }
-        if (configFrame != null) {
-            configFrame.toFront();
-            configFrame.requestFocus();
-        } else {
-            configFrame = new EditorFrame(parentWindow, configTemplate, configData, true, parameterFactory);
-        }
     }
 
     public String getProjectName() {
@@ -62,7 +38,6 @@ public class ConfigMenuManager implements DataSaveTarget {
 
     public void setConfigData(Data data) {
         configData = data;
-        onProjectNameChange(getProjectName());
     }
 
     public Data getConfigData() {
@@ -76,37 +51,30 @@ public class ConfigMenuManager implements DataSaveTarget {
             configFrame = null;
         }
         configData = new DataObject(configTemplate, new HashMap<>());
-        onProjectNameChange(null);
     }
 
-    public boolean hasChangesFrom(Data otherData) {
-        return !Objects.equals(configData, otherData);
+    public boolean hasUnsavedChanges() {
+        return !Objects.equals(configData, lastSavedConfigData);
     }
 
-    @Override
-    public void saveObjectData(String editorID, Data data, Data initialData) {
-        configData = data;
-        onProjectNameChange(getProjectName());
+    public void setSavedChanges() {
+        this.lastSavedConfigData = configData.createCopy();
     }
 
-    @Override
-    public void onEditorFrameClose(EditorFrame frame) {
-        configFrame = null;
+    public String getProjectNameFromData(Data data) {
+        return ((DataString) ((DataObject) data).getValue().get(PROJECT_NAME_KEY)).getValue();
     }
 
-    @Override
-    public ErrorData checkForSaveDataErrors(Data currentData, Data initialData) {
-        String currentProjectName = ((DataString) ((DataObject) currentData).getValue().get(PROJECT_NAME_KEY)).getValue();
-        if (currentProjectName == null || currentProjectName.trim().isEmpty()) {
-            return new ErrorData(true, "Game name cannot be empty.");
+    public Reference findReference(String referenceCategoryID, String referenceObjectID) {
+        if (ReferenceUtils.dataContainsReference(configData, referenceCategoryID, referenceObjectID)) {
+            return new Reference("", "config");
         }
-        return new ErrorData(false, null);
+        return null;
     }
 
-    public void onProjectNameChange(String name) {
-        for (ProjectNameChangeListener listener : projectNameChangeListeners) {
-            listener.onProjectNameChange(name);
-        }
+    public void renameReferences(String referenceCategoryID, String referenceObjectID, String newObjectID) {
+        ReferenceUtils.renameReferencesInData(configData, referenceCategoryID, referenceObjectID, newObjectID);
+        ReferenceUtils.renameReferencesInData(lastSavedConfigData, referenceCategoryID, referenceObjectID, newObjectID);
     }
 
 }

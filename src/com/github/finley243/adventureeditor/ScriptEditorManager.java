@@ -1,35 +1,25 @@
 package com.github.finley243.adventureeditor;
 
-import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.data.DataObject;
-import com.github.finley243.adventureeditor.data.DataScript;
-import com.github.finley243.adventureeditor.data.DataString;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-import com.github.finley243.adventureeditor.ui.ErrorData;
-import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
-import com.github.finley243.adventureeditor.ui.frame.ScriptEditorFrame;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
-
-import javax.swing.*;
-import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
-public class ScriptEditorManager implements DataSaveTarget {
+public class ScriptEditorManager {
 
-    private final ChildFrameHandler<String> childFrameHandler;
     private Map<String, String> scripts;
-
-    private ScriptEditorFrame scriptEditorFrame;
+    private Map<String, String> lastSavedScripts;
 
     public ScriptEditorManager() {
-        this.childFrameHandler = new ChildFrameHandler<>();
         this.scripts = null;
     }
 
-    public void setScripts(Map<String, String> scripts) {
+    public void loadScripts(Map<String, String> scripts) {
         this.scripts = new HashMap<>(scripts);
+    }
+
+    public void setScript(String name, String body) {
+        scripts.put(name, body);
     }
 
     public String getScript(String name) {
@@ -45,109 +35,24 @@ public class ScriptEditorManager implements DataSaveTarget {
         scripts = new HashMap<>();
     }
 
-    public void openScriptEditor(Window parentWindow, ParameterFactory parameterFactory) {
-        if (scripts == null) {
-            return;
-        }
-        if (scriptEditorFrame != null) {
-            scriptEditorFrame.toFront();
-            scriptEditorFrame.requestFocus();
-        } else {
-            scriptEditorFrame = new ScriptEditorFrame(parentWindow, parameterFactory);
-        }
+    public void removeScript(String name) {
+        scripts.remove(name);
     }
 
-    public boolean onCloseScriptEditor() {
-        boolean didCloseAll = childFrameHandler.closeAll();
-        if (didCloseAll) {
-            scriptEditorFrame = null;
-            return true;
-        }
-        return false;
+    public Set<String> getScriptIDs() {
+        return scripts.keySet();
     }
 
-    public void newScript(ParameterFactory parameterFactory) {
-        String scriptName = JOptionPane.showInputDialog(scriptEditorFrame, "Enter a name for the new script:");
-        if (scriptName == null) {
-            return;
-        } else if (scriptName.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(scriptEditorFrame, "Script name cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        } else if (scripts.containsKey(scriptName)) {
-            JOptionPane.showMessageDialog(scriptEditorFrame, "A script with the name " + scriptName + " already exists.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        EditorFrame editorFrame = new EditorFrame(scriptEditorFrame, SCRIPT_TEMPLATE, null, true, parameterFactory);
-        editorFrame.setResizable(true);
-        editorFrame.setSize(new Dimension(800, 800));
-        editorFrame.setLocationRelativeTo(null);
-        childFrameHandler.add(null, editorFrame);
+    public boolean hasScriptWithName(String name) {
+        return scripts.containsKey(name);
     }
 
-    public void editScript(String scriptName, ParameterFactory parameterFactory) {
-        boolean isAlreadyOpen = childFrameHandler.requestFocusIfOpen(scriptName);
-        if (!isAlreadyOpen) {
-            Data initialData = generateDataForScript(scriptName);
-            EditorFrame editorFrame = new EditorFrame(scriptEditorFrame, SCRIPT_TEMPLATE, initialData, true, parameterFactory);
-            editorFrame.setResizable(true);
-            editorFrame.setSize(new Dimension(800, 800));
-            editorFrame.setLocationRelativeTo(null);
-            childFrameHandler.add(scriptName, editorFrame);
-        }
-    }
-
-    public void deleteScript(String scriptName) {
-        Object[] confirmOptions = {"Delete", "Cancel"};
-        int confirmResult = JOptionPane.showOptionDialog(scriptEditorFrame, "Are you sure you want to delete " + scriptName + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
-        if (confirmResult == 0) {
-            scripts.remove(scriptName);
-            onUpdateScripts();
-        }
-    }
-
-    @Override
-    public void saveObjectData(String editorID, Data data, Data initialData) {
-        String scriptBody = ((DataScript) ((DataObject) data).getValue().get("script")).getValue();
-        scripts.put(editorID, scriptBody);
-        onUpdateScripts();
-        scriptEditorFrame.selectScript(editorID);
-    }
-
-    @Override
-    public void onEditorFrameClose(EditorFrame frame) {
-        childFrameHandler.removeChildFrame(frame);
-    }
-
-    @Override
-    public ErrorData checkForSaveDataErrors(Data currentData, Data initialData) {
-        return new ErrorData(false, null);
-    }
-
-    public boolean hasChangesFrom(Map<String, String> lastSavedScripts) {
+    public boolean hasUnsavedChanges() {
         return !Objects.equals(scripts, lastSavedScripts);
     }
 
-    private Data generateDataForScript(String phraseKey) {
-        Map<String, Data> dataMap = new HashMap<>();
-        dataMap.put("name", new DataString(phraseKey));
-        dataMap.put("script", new DataScript(scripts.get(phraseKey)));
-        return new DataObject(SCRIPT_TEMPLATE, dataMap);
+    public void setSavedChanges() {
+        this.lastSavedScripts = new HashMap<>(scripts);
     }
-
-    private void onUpdateScripts() {
-        if (scriptEditorFrame != null) {
-            scriptEditorFrame.reloadScripts();
-        }
-    }
-
-    /*private String generateDuplicateScriptKey(String phraseKey) {
-        Set<String> existingIDs = main.getPhraseEditorManager().getPhrases().keySet();
-        String baseCopyID = phraseKey + "_COPY_";
-        int i = 1;
-        while (existingIDs.contains(baseCopyID + i)) {
-            i += 1;
-        }
-        return baseCopyID + i;
-    }*/
 
 }

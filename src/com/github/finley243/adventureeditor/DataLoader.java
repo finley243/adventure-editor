@@ -318,9 +318,9 @@ public class DataLoader {
         return scripts;
     }
 
-    public void saveToDir(File dir, TemplateRegistry templateRegistry, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> scripts, Map<String, String> phrases) {
+    public void saveToDir(File dir, TemplateRegistry templateRegistry, Map<String, Map<String, Data>> dataMap, Data configData, Map<String, String> scripts, Map<String, String> phrases) {
         if (dir.isDirectory()) {
-            saveConfigData(dir, templateRegistry.getConfigTemplate(), configMenuManager, dataMap);
+            saveConfigData(dir, templateRegistry.getConfigTemplate(), configData, dataMap);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
             dataDirectory.mkdirs();
             File scriptDirectory = new File(dir, SCRIPT_DIRECTORY);
@@ -411,7 +411,7 @@ public class DataLoader {
         return loadDataFromElement(rootElement, configTemplate, templateRegistry, true, new HashMap<>());
     }
 
-    private void saveConfigData(File dir, Template configTemplate, ConfigMenuManager configMenuManager, Map<String, Map<String, Data>> globalDataMap) {
+    private void saveConfigData(File dir, Template configTemplate, Data configData, Map<String, Map<String, Data>> globalDataMap) {
         File configFile = new File(dir, CONFIG_FILE);
         if (!configFile.exists()) {
             try {
@@ -423,7 +423,7 @@ public class DataLoader {
         Document document = documentBuilder.newDocument();
         Element rootElement = document.createElement(TOP_LEVEL_ELEMENT_NAME);
         document.appendChild(rootElement);
-        DataObject objectData = (DataObject) configMenuManager.getConfigData();
+        DataObject objectData = (DataObject) configData;
         addObjectToElement(objectData, rootElement, document, globalDataMap);
         DOMSource source = new DOMSource(document);
         StreamResult result = new StreamResult(configFile);

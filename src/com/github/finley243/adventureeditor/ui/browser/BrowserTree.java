@@ -1,5 +1,6 @@
 package com.github.finley243.adventureeditor.ui.browser;
 
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserCategoryNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserObjectNode;
@@ -22,6 +23,8 @@ public class BrowserTree extends JTree {
     private final DefaultMutableTreeNode treeRoot;
     private final DefaultTreeModel treeModel;
     private final Map<String, BrowserCategoryNode> categoryNodes;
+
+    private PresenterActions presenter;
 
     public BrowserTree(BrowserFrame browserFrame) {
         this.browserFrame = browserFrame;
@@ -63,8 +66,10 @@ public class BrowserTree extends JTree {
                     return;
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-                if (node instanceof BrowserNode browserNode) {
-                    browserFrame.newObject(browserNode);
+                if (node instanceof BrowserCategoryNode categoryNode) {
+                    getPresenter().onCreateObject(categoryNode.getCategoryID());
+                } else if (node instanceof BrowserObjectNode objectNode) {
+                    getPresenter().onCreateObject(objectNode.getCategoryID());
                 }
             }
         };
@@ -77,7 +82,7 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    browserFrame.editObject(objectNode);
+                    getPresenter().onEditObject(objectNode.getCategoryID(), objectNode.getObjectID());
                 }
             }
         };
@@ -90,7 +95,7 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    browserFrame.duplicateObject(objectNode);
+                    getPresenter().onDuplicateObject(objectNode.getCategoryID(), objectNode.getObjectID());
                 }
             }
         };
@@ -103,7 +108,7 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    browserFrame.deleteObject(objectNode);
+                    getPresenter().onDeleteObject(objectNode.getCategoryID(), objectNode.getObjectID());
                 }
             }
         };
@@ -119,6 +124,16 @@ public class BrowserTree extends JTree {
         inputMapFocused.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "editGameObject");
         inputMapFocused.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK), "duplicateGameObject");
         inputMapFocused.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deleteGameObject");
+    }
+
+    public void registerPresenter(PresenterActions presenter) {
+        if (this.presenter != null) throw new IllegalStateException("Presenter is already registered");
+        this.presenter = presenter;
+    }
+
+    private PresenterActions getPresenter() {
+        if (presenter == null) throw new IllegalStateException("Presenter has not been registered");
+        return presenter;
     }
 
     @Override
@@ -141,13 +156,10 @@ public class BrowserTree extends JTree {
         treeModel.nodeStructureChanged(categoryNodes.get(categoryID));
     }
 
-    public void addGameObject(String categoryID, String objectID, boolean selectAfterAdding) {
+    public void addGameObject(String categoryID, String objectID) {
         if (categoryNodes.containsKey(categoryID)) {
             categoryNodes.get(categoryID).addGameObject(objectID);
             updateCategory(categoryID);
-            if (selectAfterAdding) {
-                this.setSelectionPath(new TreePath(treeModel.getPathToRoot(categoryNodes.get(categoryID).getObjectNode(objectID))));
-            }
         }
         this.expandRow(0);
     }
@@ -196,7 +208,7 @@ public class BrowserTree extends JTree {
 
     private void onDoubleClick(DefaultMutableTreeNode node) {
         if (node instanceof BrowserObjectNode objectNode) {
-            browserFrame.editObject(objectNode);
+            getPresenter().onEditObject(objectNode.getCategoryID(), objectNode.getObjectID());
         }
     }
 
