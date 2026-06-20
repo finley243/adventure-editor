@@ -417,6 +417,8 @@ public class MainFrame extends JFrame implements ViewActions {
             if (deleteMissingProject) {
                 getPresenter().onRemoveRecentProject(projectFile);
             }
+        } else {
+            getPresenter().onOpenProject(file);
         }
     }
 
