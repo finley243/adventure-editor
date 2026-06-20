@@ -31,7 +31,7 @@ public class ReferenceListManager {
             referenceListFrame.toFront();
             referenceListFrame.requestFocus();
         } else {
-            referenceListFrame = new ReferenceListFrame(parentWindow, this, parameterFactory);
+            referenceListFrame = new ReferenceListFrame(parentWindow, parameterFactory);
         }
         referenceListFrame.loadReferences(references);
     }

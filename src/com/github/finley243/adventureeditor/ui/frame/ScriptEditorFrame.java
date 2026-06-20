@@ -1,7 +1,6 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.ScriptEditorManager;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.ui.table.ScriptTableModel;
 
 import javax.swing.*;
@@ -11,20 +10,19 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class ScriptEditorFrame extends JDialog {
 
     private static final String SCRIPT_EDITOR_TITLE = "Scripts";
 
-    private final ParameterFactory parameterFactory;
-    private final ScriptEditorManager scriptEditorManager;
     private final ScriptTableModel tableModel;
     private final JTable scriptTable;
+    private final Supplier<Boolean> onClose;
 
-    public ScriptEditorFrame(Window parentWindow, ScriptEditorManager scriptEditorManager, ParameterFactory parameterFactory) {
+    public ScriptEditorFrame(Window parentWindow, PresenterActions presenter, Supplier<Boolean> onClose) {
         super(parentWindow);
-        this.parameterFactory = parameterFactory;
-        this.scriptEditorManager = scriptEditorManager;
+        this.onClose = onClose;
         this.setTitle(SCRIPT_EDITOR_TITLE);
         this.setModalityType(ModalityType.MODELESS);
         JPanel mainPanel = new JPanel();
@@ -40,8 +38,6 @@ public class ScriptEditorFrame extends JDialog {
         scriptTable.setRowSorter(sorter);
         sorter.setSortKeys(java.util.List.of(new RowSorter.SortKey(0, SortOrder.ASCENDING)));
 
-        reloadScripts();
-
         scriptTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -49,7 +45,7 @@ public class ScriptEditorFrame extends JDialog {
                     int viewRow = scriptTable.rowAtPoint(e.getPoint());
                     int row = scriptTable.convertRowIndexToModel(viewRow);
                     String scriptName = (String) tableModel.getValueAt(row, 0);
-                    scriptEditorManager.editScript(scriptName, parameterFactory);
+                    presenter.onOpenScript(scriptName);
                 }
             }
             @Override
@@ -59,7 +55,7 @@ public class ScriptEditorFrame extends JDialog {
                     int row = scriptTable.convertRowIndexToModel(viewRow);
                     if (row != -1) {
                         scriptTable.setRowSelectionInterval(viewRow, viewRow);
-                        openContextMenu(scriptTable, e.getPoint(), (String) tableModel.getValueAt(row, 0), viewRow);
+                        openContextMenu(scriptTable, e.getPoint(), (String) tableModel.getValueAt(row, 0), viewRow, presenter);
                     }
                 }
             }
@@ -81,7 +77,7 @@ public class ScriptEditorFrame extends JDialog {
         Action newPhraseAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                scriptEditorManager.newScript(parameterFactory);
+                presenter.onNewScript();
             }
         };
         Action editPhraseAction = new AbstractAction() {
@@ -90,7 +86,7 @@ public class ScriptEditorFrame extends JDialog {
                 int selectedRow = scriptTable.getSelectedRow();
                 if (selectedRow != -1) {
                     String scriptName = (String) tableModel.getValueAt(scriptTable.convertRowIndexToModel(selectedRow), 0);
-                    scriptEditorManager.editScript(scriptName, parameterFactory);
+                    presenter.onOpenScript(scriptName);
                 }
             }
         };
@@ -111,7 +107,7 @@ public class ScriptEditorFrame extends JDialog {
                 int selectedRow = scriptTable.getSelectedRow();
                 if (selectedRow != -1) {
                     String scriptName = (String) tableModel.getValueAt(scriptTable.convertRowIndexToModel(selectedRow), 0);
-                    scriptEditorManager.deleteScript(scriptName);
+                    presenter.onDeleteScript(scriptName);
                     selectRow(selectedRow);
                 }
             }
@@ -136,14 +132,13 @@ public class ScriptEditorFrame extends JDialog {
         this.setVisible(true);
     }
 
-    public void reloadScripts() {
+    public void reloadScripts(Map<String, String> scripts) {
         String selectedScriptName = null;
         int selectedRow = scriptTable.getSelectedRow();
         if (selectedRow != -1) {
             selectedScriptName = (String) tableModel.getValueAt(scriptTable.convertRowIndexToModel(selectedRow), 0);
         }
         tableModel.setRowCount(0);
-        Map<String, String> scripts = scriptEditorManager.getScripts();
         for (String scriptName : scripts.keySet()) {
             tableModel.addRow(new Object[]{scriptName});
         }
@@ -193,26 +188,26 @@ public class ScriptEditorFrame extends JDialog {
     }
 
     private void closeEditor() {
-        boolean didClose = scriptEditorManager.onCloseScriptEditor();
+        boolean didClose = onClose.get();
         if (didClose) {
             this.dispose();
         }
     }
 
-    private void openContextMenu(Component component, Point point, String selectedScriptName, int viewRowIndex) {
+    private void openContextMenu(Component component, Point point, String selectedScriptName, int viewRowIndex, PresenterActions presenter) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuOpen = new JMenuItem("Open");
-        menuOpen.addActionListener(e -> scriptEditorManager.editScript(selectedScriptName, parameterFactory));
+        menuOpen.addActionListener(e -> presenter.onOpenScript(selectedScriptName));
         menu.add(menuOpen);
         JMenuItem menuNew = new JMenuItem("New");
-        menuNew.addActionListener(e -> scriptEditorManager.newScript(parameterFactory));
+        menuNew.addActionListener(e -> presenter.onNewScript());
         menu.add(menuNew);
         /*JMenuItem menuDuplicate = new JMenuItem("Duplicate");
         menuDuplicate.addActionListener(e -> main.getPhraseEditorManager().duplicatePhrase(selectedScriptName));
         menu.add(menuDuplicate);*/
         JMenuItem menuDelete = new JMenuItem("Delete");
         menuDelete.addActionListener(e -> {
-            scriptEditorManager.deleteScript(selectedScriptName);
+            presenter.onDeleteScript(selectedScriptName);
             selectRow(viewRowIndex);
         });
         menu.add(menuDelete);

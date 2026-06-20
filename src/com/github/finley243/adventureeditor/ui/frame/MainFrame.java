@@ -21,13 +21,14 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class MainFrame extends JFrame implements ViewActions, ProjectNameChangeListener, RecentProjectListener {
 
     private static final String EDITOR_NAME = "AdventureEditor";
+    private static final String CONFIG_OBJECT_NAME = "config";
 
     private PresenterActions presenter;
     private boolean hasUnsavedChanges;
@@ -37,7 +38,9 @@ public class MainFrame extends JFrame implements ViewActions, ProjectNameChangeL
     private final EditorManager editorManager;
 
     private PhraseEditorFrame phraseEditorFrame;
+    private final ChildFrameHandler<String> phraseFrameHandler;
     private ScriptEditorFrame scriptEditorFrame;
+    private final ChildFrameHandler<String> scriptFrameHandler;
     private ReferenceListFrame referenceListFrame;
 
     private final BrowserFrame browserFrame;
@@ -48,6 +51,8 @@ public class MainFrame extends JFrame implements ViewActions, ProjectNameChangeL
         super(EDITOR_NAME);
         this.parameterFactory = parameterFactory;
         this.editorManager = new EditorManager();
+        this.phraseFrameHandler = new ChildFrameHandler<>();
+        this.scriptFrameHandler = new ChildFrameHandler<>();
         this.browserFrame = new BrowserFrame(this, editorManager, parameterFactory);
 
         this.setSize(800, 600);
@@ -268,18 +273,118 @@ public class MainFrame extends JFrame implements ViewActions, ProjectNameChangeL
     }
 
     @Override
-    public void openEditorFrame(String editorID, Template template, Data data, BiConsumer<Data, Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate) {
-
+    public void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate) {
+        EditorFrame activeFrame = editorManager.getActiveTopLevelFrame(template.id(), objectID);
+        if (activeFrame != null) {
+            activeFrame.toFront();
+            activeFrame.requestFocus();
+        } else {
+            Consumer<EditorFrame> onClose = _ -> editorManager.removeActiveTopLevelFrame(template.id(), objectID);
+            EditorFrame editorFrame = new EditorFrame(this, template, initialData, true, parameterFactory, onSave, onValidate, onClose);
+            editorManager.addActiveTopLevelFrame(template.id(), objectID, editorFrame);
+        }
     }
 
     @Override
-    public void openPhraseEditor(Map<String, String> phrases, Consumer<Map<String, String>> onSave) {
-
+    public void closeAllEditors() {
+        editorManager.closeAllActiveEditorFrames();
     }
 
     @Override
-    public void openScriptEditor(Map<String, String> scripts, Consumer<Map<String, String>> onSave) {
+    public void openPhraseMenu(Map<String, String> phrases) {
+        if (phraseEditorFrame != null) {
+            phraseEditorFrame.toFront();
+            phraseEditorFrame.requestFocus();
+        } else {
+            phraseEditorFrame = new PhraseEditorFrame(this, presenter, () -> {
+                boolean didCloseAllFrames = phraseFrameHandler.closeAll();
+                if (didCloseAllFrames) {
+                    phraseEditorFrame = null;
+                }
+                return didCloseAllFrames;
+            });
+        }
+        updatePhrases(phrases);
+    }
 
+    @Override
+    public void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate) {
+        boolean isOpen = phraseFrameHandler.requestFocusIfOpen(phraseKey);
+        if (!isOpen) {
+            Consumer<EditorFrame> onClose = phraseFrameHandler::removeChildFrame;
+            EditorFrame editorFrame = new EditorFrame(phraseEditorFrame, InternalTemplates.PHRASE_TEMPLATE, content, true, parameterFactory, onSave, onValidate, onClose);
+            phraseFrameHandler.add(phraseKey, editorFrame);
+        }
+    }
+
+    @Override
+    public void updatePhrases(Map<String, String> phrases) {
+        if (phraseEditorFrame != null) {
+            phraseEditorFrame.reloadPhrases(phrases);
+        }
+    }
+
+    @Override
+    public void openScriptMenu(Map<String, String> scripts) {
+        if (scriptEditorFrame != null) {
+            scriptEditorFrame.toFront();
+            scriptEditorFrame.requestFocus();
+        } else {
+            scriptEditorFrame = new ScriptEditorFrame(this, presenter, () -> {
+                boolean didCloseAllFrames = scriptFrameHandler.closeAll();
+                if (didCloseAllFrames) {
+                    scriptEditorFrame = null;
+                }
+                return didCloseAllFrames;
+            });
+        }
+        updateScripts(scripts);
+    }
+
+    @Override
+    public void openScriptEditor(String name, Data content, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate) {
+        boolean isOpen = scriptFrameHandler.requestFocusIfOpen(name);
+        if (!isOpen) {
+            Consumer<EditorFrame> onClose = scriptFrameHandler::removeChildFrame;
+            EditorFrame editorFrame = new EditorFrame(scriptEditorFrame, InternalTemplates.SCRIPT_TEMPLATE, content, true, parameterFactory, onSave, onValidate, onClose);
+            editorFrame.setResizable(true);
+            editorFrame.setSize(new Dimension(800, 800));
+            editorFrame.setLocationRelativeTo(null);
+            scriptFrameHandler.add(name, editorFrame);
+        }
+    }
+
+    @Override
+    public String promptScriptName() {
+        return JOptionPane.showInputDialog(scriptEditorFrame, "Enter a name for the script:");
+    }
+
+    @Override
+    public void updateScripts(Map<String, String> scripts) {
+        if (scriptEditorFrame != null) {
+            scriptEditorFrame.reloadScripts(scripts);
+        }
+    }
+
+    @Override
+    public void openReferenceList(Set<Reference> references) {
+        if (referenceListFrame != null) {
+            referenceListFrame.toFront();
+            referenceListFrame.requestFocus();
+        } else {
+            referenceListFrame = new ReferenceListFrame(this, (category, object) -> {
+                if (referenceIsConfig(category, object)) {
+                    presenter.onOpenConfigEditor();
+                } else {
+                    presenter.onEditObject(category, object);
+                }
+            }, () -> referenceListFrame = null);
+        }
+        referenceListFrame.loadReferences(references);
+    }
+
+    private boolean referenceIsConfig(String categoryID, String objectID) {
+        return categoryID.isEmpty() && objectID.equals(CONFIG_OBJECT_NAME);
     }
 
     @Override
@@ -308,7 +413,7 @@ public class MainFrame extends JFrame implements ViewActions, ProjectNameChangeL
     }
 
     @Override
-    public void setUnsavedChanges(boolean hasUnsaved) {
+    public void setHasUnsavedProjectChanges(boolean hasUnsaved) {
         this.hasUnsavedChanges = hasUnsaved;
     }
 

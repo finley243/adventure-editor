@@ -3,8 +3,6 @@ package com.github.finley243.adventureeditor;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataString;
-import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.template.TemplateParameter;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 import com.github.finley243.adventureeditor.ui.frame.PhraseEditorFrame;
@@ -16,11 +14,6 @@ import java.util.*;
 
 public class PhraseEditorManager implements DataSaveTarget {
 
-    private static final Template PHRASE_TEMPLATE = new Template("phrase", "Phrase", false, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>() {{
-        add(new TemplateParameter("key", TemplateParameter.ParameterDataType.STRING, "Key", null, false, false, null, null, new ArrayList<>(), false, null, 0, 0, 1, 1, null));
-        add(new TemplateParameter("text", TemplateParameter.ParameterDataType.STRING_LONG, "Phrase", null, false, false, null, null, new ArrayList<>(), false, null, 0, 1, 1, 1, null));
-    }}, null, null);
-
     private final ChildFrameHandler<String> childFrameHandler;
     private Map<String, String> phrases;
 
@@ -29,6 +22,10 @@ public class PhraseEditorManager implements DataSaveTarget {
     public PhraseEditorManager() {
         this.childFrameHandler = new ChildFrameHandler<>();
         this.phrases = null;
+    }
+
+    public String getPhrase(String key) {
+        return phrases.get(key);
     }
 
     public Map<String, String> getPhrases() {
@@ -52,7 +49,7 @@ public class PhraseEditorManager implements DataSaveTarget {
             phraseEditorFrame.toFront();
             phraseEditorFrame.requestFocus();
         } else {
-            phraseEditorFrame = new PhraseEditorFrame(parentWindow, this, parameterFactory);
+            phraseEditorFrame = new PhraseEditorFrame(parentWindow, parameterFactory);
         }
     }
 
@@ -66,7 +63,7 @@ public class PhraseEditorManager implements DataSaveTarget {
     }
 
     public void newPhrase(ParameterFactory parameterFactory) {
-        EditorFrame editorFrame = new EditorFrame(null, phraseEditorFrame, PHRASE_TEMPLATE, null, this, true, parameterFactory);
+        EditorFrame editorFrame = new EditorFrame(phraseEditorFrame, PHRASE_TEMPLATE, null, true, parameterFactory);
         childFrameHandler.add(null, editorFrame);
     }
 
@@ -74,7 +71,7 @@ public class PhraseEditorManager implements DataSaveTarget {
         boolean isAlreadyOpen = childFrameHandler.requestFocusIfOpen(phraseKey);
         if (!isAlreadyOpen) {
             Data initialData = generateDataForPhrase(phraseKey);
-            EditorFrame editorFrame = new EditorFrame(null, phraseEditorFrame, PHRASE_TEMPLATE, initialData, this, true, parameterFactory);
+            EditorFrame editorFrame = new EditorFrame(phraseEditorFrame, PHRASE_TEMPLATE, initialData, true, parameterFactory);
             childFrameHandler.add(phraseKey, editorFrame);
         }
     }

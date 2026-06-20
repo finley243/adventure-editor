@@ -1,10 +1,6 @@
 package com.github.finley243.adventureeditor;
 
-import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -17,17 +13,6 @@ public class EditorManager {
 
     public EditorManager() {
         this.topLevelEditorWindows = new HashMap<>();
-    }
-
-    public void openEditorFrame(String categoryID, String objectID, Template template, Data objectData, DataSaveTarget saveTarget, Window parentWindow, ParameterFactory parameterFactory) {
-        EditorFrame activeFrame = getActiveTopLevelFrame(categoryID, objectID);
-        if (activeFrame != null) {
-            activeFrame.toFront();
-            activeFrame.requestFocus();
-        } else {
-            EditorFrame editorFrame = new EditorFrame(null, parentWindow, template, objectData, saveTarget, true, parameterFactory);
-            addActiveTopLevelFrame(categoryID, objectID, editorFrame);
-        }
     }
 
     public void closeEditorFrameIfActive(String categoryID, String objectID) {
@@ -47,7 +32,7 @@ public class EditorManager {
         topLevelEditorWindows.clear();
     }
 
-    private EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
+    public EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
         if (categoryID == null | objectID == null) {
             return null;
         }
@@ -57,7 +42,7 @@ public class EditorManager {
         return topLevelEditorWindows.get(categoryID).get(objectID);
     }
 
-    private void addActiveTopLevelFrame(String categoryID, String objectID, EditorFrame frame) {
+    public void addActiveTopLevelFrame(String categoryID, String objectID, EditorFrame frame) {
         if (objectID == null) {
             return;
         }
@@ -67,7 +52,7 @@ public class EditorManager {
         topLevelEditorWindows.get(categoryID).put(objectID, frame);
     }
 
-    private void removeActiveTopLevelFrame(String categoryID, String objectID) {
+    public void removeActiveTopLevelFrame(String categoryID, String objectID) {
         if (objectID == null) {
             return;
         }

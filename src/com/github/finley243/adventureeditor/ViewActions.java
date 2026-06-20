@@ -8,17 +8,31 @@ import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface ViewActions {
 
-    void openEditorFrame(String editorID, Template template, Data data, BiConsumer<Data, Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate);
+    void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate);
 
-    void openPhraseEditor(Map<String, String> phrases, Consumer<Map<String, String>> onSave);
+    void closeAllEditors();
 
-    void openScriptEditor(Map<String, String> scripts, Consumer<Map<String, String>> onSave);
+    void openPhraseMenu(Map<String, String> phrases);
+
+    void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate);
+
+    void updatePhrases(Map<String, String> phrases);
+
+    void openScriptMenu(Map<String, String> scripts);
+
+    void openScriptEditor(String name, Data content, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate);
+
+    String promptScriptName();
+
+    void updateScripts(Map<String, String> scripts);
+
+    void openReferenceList(Set<Reference> references);
 
     void showError(String message);
 
@@ -30,7 +44,7 @@ public interface ViewActions {
 
     void updateProjectName(String name);
 
-    void setUnsavedChanges(boolean hasUnsaved);
+    void setHasUnsavedProjectChanges(boolean hasUnsaved);
 
     void updateRecentProjects(List<ProjectFile> recentProjects);
 

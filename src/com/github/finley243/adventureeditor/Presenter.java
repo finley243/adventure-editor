@@ -1,8 +1,14 @@
 package com.github.finley243.adventureeditor;
 
+import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.data.DataObject;
+import com.github.finley243.adventureeditor.data.DataScript;
+import com.github.finley243.adventureeditor.data.DataString;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Presenter implements PresenterActions {
 
@@ -79,7 +85,17 @@ public class Presenter implements PresenterActions {
     }
 
     @Override
+    public void onShowReferences(String categoryID, String objectID) {
+
+    }
+
+    @Override
     public void onOpenPhraseEditor() {
+
+    }
+
+    @Override
+    public void onOpenPhrase(String phraseKey) {
 
     }
 
@@ -89,8 +105,37 @@ public class Presenter implements PresenterActions {
     }
 
     @Override
+    public void onOpenScript(String scriptName) {
+
+    }
+
+    @Override
+    public void onNewScript() {
+
+    }
+
+    @Override
+    public void onDeleteScript(String scriptName) {
+
+    }
+
+    @Override
     public void onOpenConfigEditor() {
 
+    }
+
+    private Data generateDataForPhrase(String phraseKey) {
+        Map<String, Data> dataMap = new HashMap<>();
+        dataMap.put("key", new DataString(phraseKey));
+        dataMap.put("text", new DataString(phraseEditorManager.getPhrase(phraseKey)));
+        return new DataObject(InternalTemplates.PHRASE_TEMPLATE, dataMap);
+    }
+
+    private Data generateDataForScript(String phraseKey) {
+        Map<String, Data> dataMap = new HashMap<>();
+        dataMap.put("name", new DataString(phraseKey));
+        dataMap.put("script", new DataScript(scriptEditorManager.getScript(phraseKey)));
+        return new DataObject(InternalTemplates.SCRIPT_TEMPLATE, dataMap);
     }
 
 }

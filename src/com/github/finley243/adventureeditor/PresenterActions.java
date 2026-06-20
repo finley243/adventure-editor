@@ -1,5 +1,8 @@
 package com.github.finley243.adventureeditor;
 
+import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+
 import java.io.File;
 
 public interface PresenterActions {
@@ -24,9 +27,25 @@ public interface PresenterActions {
 
     void onDuplicateObject(String categoryID, String objectID);
 
+    void onShowReferences(String categoryID, String objectID);
+
     void onOpenPhraseEditor();
 
+    void onOpenPhrase(String phraseKey);
+
+    void onNewPhrase();
+
+    void onDeletePhrase(String phraseKey);
+
+    void onDuplicatePhrase(String phraseKey);
+
     void onOpenScriptEditor();
+
+    void onOpenScript(String scriptName);
+
+    void onNewScript();
+
+    void onDeleteScript(String scriptName);
 
     void onOpenConfigEditor();
 

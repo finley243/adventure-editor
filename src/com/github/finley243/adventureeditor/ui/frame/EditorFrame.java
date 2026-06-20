@@ -14,29 +14,30 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class EditorFrame extends JDialog {
 
-    private final String editorID;
     private final ParameterField parameterField;
     private final Template template;
     private final Data initialData;
-    private final DataSaveTarget saveTarget;
     private final JButton saveButton;
+    private final Consumer<Data> onSave;
+    private final Function<Data, DataSaveTarget.ErrorData> onValidate;
+    private final Consumer<EditorFrame> onClose;
 
-    public EditorFrame(String editorID, Window parentWindow, Template template, Data objectData, DataSaveTarget saveTarget, boolean isTopLevel, ParameterFactory parameterFactory) {
+    public EditorFrame(Window parentWindow, Template template, Data objectData, boolean isTopLevel, ParameterFactory parameterFactory, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate, Consumer<EditorFrame> onClose) {
         //super(template.name());
         super(parentWindow);
+        this.onSave = onSave;
+        this.onValidate = onValidate;
+        this.onClose = onClose;
         //this.setAutoRequestFocus(false);
         this.setTitle(template.name());
         this.setModalityType(ModalityType.MODELESS);
-        if (saveTarget == null) {
-            throw new IllegalArgumentException("Save target cannot be null");
-        }
-        this.editorID = editorID;
         this.template = template;
         this.initialData = objectData;
-        this.saveTarget = saveTarget;
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
         this.parameterField = new ParameterFieldObject(this, false, template.name(), null, template, isTopLevel, parameterFactory);
@@ -87,8 +88,8 @@ public class EditorFrame extends JDialog {
                 return false;
             }
             if (isDataValidOrShowDialog()) {
-                saveTarget.saveObjectData(editorID, parameterField.getData(), initialData);
-                saveTarget.onEditorFrameClose(this);
+                onSave.accept(parameterField.getData());
+                onClose.accept(this);
                 this.dispose();
                 return true;
             }
@@ -98,7 +99,7 @@ public class EditorFrame extends JDialog {
             if (!subElementsClosed) {
                 return false;
             }
-            saveTarget.onEditorFrameClose(this);
+            onClose.accept(this);
             this.dispose();
             return true;
         }
@@ -108,7 +109,7 @@ public class EditorFrame extends JDialog {
         }
         boolean hasUnsavedChanges = hasUnsavedChanges();
         if (!hasUnsavedChanges) {
-            saveTarget.onEditorFrameClose(this);
+            onClose.accept(this);
             this.dispose();
             return true;
         }
@@ -122,8 +123,8 @@ public class EditorFrame extends JDialog {
                 return false;
             }
             if (isDataValidOrShowDialog()) {
-                saveTarget.saveObjectData(editorID, parameterField.getData(), initialData);
-                saveTarget.onEditorFrameClose(this);
+                onSave.accept(parameterField.getData());
+                onClose.accept(this);
                 this.dispose();
                 return true;
             }
@@ -133,7 +134,7 @@ public class EditorFrame extends JDialog {
             if (!editorElementClosed) {
                 return false;
             }
-            saveTarget.onEditorFrameClose(this);
+            onClose.accept(this);
             this.dispose();
             return true;
         }
@@ -183,7 +184,7 @@ public class EditorFrame extends JDialog {
 
     // Returns true if data is valid, shows error dialog and returns false if not
     private boolean isDataValidOrShowDialog() {
-        DataSaveTarget.ErrorData errorData = saveTarget.checkForSaveDataErrors(parameterField.getData(), initialData);
+        DataSaveTarget.ErrorData errorData = onValidate.apply(parameterField.getData());
         if (!errorData.hasError()) {
             return true;
         }
