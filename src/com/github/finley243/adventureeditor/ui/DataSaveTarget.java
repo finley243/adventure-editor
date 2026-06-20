@@ -11,6 +11,4 @@ public interface DataSaveTarget {
 
     ErrorData checkForSaveDataErrors(Data currentData, Data initialData);
 
-    record ErrorData(boolean hasError, String message) {}
-
 }

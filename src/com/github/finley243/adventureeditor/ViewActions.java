@@ -2,7 +2,7 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+import com.github.finley243.adventureeditor.ui.ErrorData;
 import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 
 import java.io.File;
@@ -14,19 +14,19 @@ import java.util.function.Function;
 
 public interface ViewActions {
 
-    void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate);
+    void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
     void closeAllEditors();
 
     void openPhraseMenu(Map<String, String> phrases);
 
-    void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate);
+    void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
     void updatePhrases(Map<String, String> phrases);
 
     void openScriptMenu(Map<String, String> scripts);
 
-    void openScriptEditor(String name, Data content, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate);
+    void openScriptEditor(String name, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
     String promptScriptName();
 

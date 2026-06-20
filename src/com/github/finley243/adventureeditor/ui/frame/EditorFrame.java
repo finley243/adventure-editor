@@ -3,7 +3,7 @@ package com.github.finley243.adventureeditor.ui.frame;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+import com.github.finley243.adventureeditor.ui.ErrorData;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterField;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldObject;
@@ -24,10 +24,10 @@ public class EditorFrame extends JDialog {
     private final Data initialData;
     private final JButton saveButton;
     private final Consumer<Data> onSave;
-    private final Function<Data, DataSaveTarget.ErrorData> onValidate;
+    private final Function<Data, ErrorData> onValidate;
     private final Consumer<EditorFrame> onClose;
 
-    public EditorFrame(Window parentWindow, Template template, Data objectData, boolean isTopLevel, ParameterFactory parameterFactory, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate, Consumer<EditorFrame> onClose) {
+    public EditorFrame(Window parentWindow, Template template, Data objectData, boolean isTopLevel, ParameterFactory parameterFactory, Consumer<Data> onSave, Function<Data, ErrorData> onValidate, Consumer<EditorFrame> onClose) {
         //super(template.name());
         super(parentWindow);
         this.onSave = onSave;
@@ -184,7 +184,7 @@ public class EditorFrame extends JDialog {
 
     // Returns true if data is valid, shows error dialog and returns false if not
     private boolean isDataValidOrShowDialog() {
-        DataSaveTarget.ErrorData errorData = onValidate.apply(parameterField.getData());
+        ErrorData errorData = onValidate.apply(parameterField.getData());
         if (!errorData.hasError()) {
             return true;
         }

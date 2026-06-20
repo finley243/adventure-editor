@@ -3,7 +3,7 @@ package com.github.finley243.adventureeditor.ui.frame;
 import com.github.finley243.adventureeditor.*;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+import com.github.finley243.adventureeditor.ui.ErrorData;
 import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
@@ -250,7 +250,7 @@ public class MainFrame extends JFrame implements ViewActions {
     }
 
     @Override
-    public void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate) {
+    public void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
         EditorFrame activeFrame = editorManager.getActiveTopLevelFrame(template.id(), objectID);
         if (activeFrame != null) {
             activeFrame.toFront();
@@ -285,7 +285,7 @@ public class MainFrame extends JFrame implements ViewActions {
     }
 
     @Override
-    public void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate) {
+    public void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
         boolean isOpen = phraseFrameHandler.requestFocusIfOpen(phraseKey);
         if (!isOpen) {
             Consumer<EditorFrame> onClose = phraseFrameHandler::removeChildFrame;
@@ -319,7 +319,7 @@ public class MainFrame extends JFrame implements ViewActions {
     }
 
     @Override
-    public void openScriptEditor(String name, Data content, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate) {
+    public void openScriptEditor(String name, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
         boolean isOpen = scriptFrameHandler.requestFocusIfOpen(name);
         if (!isOpen) {
             Consumer<EditorFrame> onClose = scriptFrameHandler::removeChildFrame;

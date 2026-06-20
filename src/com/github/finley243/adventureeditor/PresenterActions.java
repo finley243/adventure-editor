@@ -1,8 +1,5 @@
 package com.github.finley243.adventureeditor;
 
-import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-
 import java.io.File;
 
 public interface PresenterActions {

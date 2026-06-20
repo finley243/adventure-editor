@@ -201,9 +201,7 @@ public class PhraseEditorFrame extends JDialog {
         menuOpen.addActionListener(e -> presenter.onOpenPhrase(selectedPhraseKey));
         menu.add(menuOpen);
         JMenuItem menuNew = new JMenuItem("New");
-        menuNew.addActionListener(e -> {
-            presenter.onNewPhrase();
-        });
+        menuNew.addActionListener(e -> presenter.onNewPhrase());
         menu.add(menuNew);
         JMenuItem menuDuplicate = new JMenuItem("Duplicate");
         menuDuplicate.addActionListener(e -> presenter.onDuplicatePhrase(selectedPhraseKey));
