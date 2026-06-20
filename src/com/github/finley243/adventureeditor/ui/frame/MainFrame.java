@@ -4,8 +4,6 @@ import com.github.finley243.adventureeditor.*;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-import com.github.finley243.adventureeditor.ui.ProjectNameChangeListener;
-import com.github.finley243.adventureeditor.ui.RecentProjectListener;
 import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
@@ -25,7 +23,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class MainFrame extends JFrame implements ViewActions, ProjectNameChangeListener, RecentProjectListener {
+public class MainFrame extends JFrame implements ViewActions {
 
     private static final String EDITOR_NAME = "AdventureEditor";
     private static final String CONFIG_OBJECT_NAME = "config";
@@ -252,27 +250,6 @@ public class MainFrame extends JFrame implements ViewActions, ProjectNameChangeL
     }
 
     @Override
-    public void onProjectNameChange(String name) {
-        setProjectName(name);
-    }
-
-    @Override
-    public void onUpdateRecentProjects(List<ProjectFile> recentProjects) {
-        fileOpenRecent.setEnabled(!recentProjects.isEmpty());
-        fileOpenRecent.removeAll();
-        for (ProjectFile recentProject : recentProjects) {
-            JMenuItem recentProjectItem = new JMenuItem(recentProject.name());
-            recentProjectItem.addActionListener(e -> attemptOpeningRecentProject(recentProject));
-            fileOpenRecent.add(recentProjectItem);
-        }
-        JSeparator separator = new JSeparator();
-        fileOpenRecent.add(separator);
-        JMenuItem clearRecentProjects = new JMenuItem("Clear Recent Projects");
-        clearRecentProjects.addActionListener(e -> getPresenter().onClearRecentProjects());
-        fileOpenRecent.add(clearRecentProjects);
-    }
-
-    @Override
     public void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, DataSaveTarget.ErrorData> onValidate) {
         EditorFrame activeFrame = editorManager.getActiveTopLevelFrame(template.id(), objectID);
         if (activeFrame != null) {
@@ -296,7 +273,7 @@ public class MainFrame extends JFrame implements ViewActions, ProjectNameChangeL
             phraseEditorFrame.toFront();
             phraseEditorFrame.requestFocus();
         } else {
-            phraseEditorFrame = new PhraseEditorFrame(this, presenter, () -> {
+            phraseEditorFrame = new PhraseEditorFrame(this, getPresenter(), () -> {
                 boolean didCloseAllFrames = phraseFrameHandler.closeAll();
                 if (didCloseAllFrames) {
                     phraseEditorFrame = null;
@@ -330,7 +307,7 @@ public class MainFrame extends JFrame implements ViewActions, ProjectNameChangeL
             scriptEditorFrame.toFront();
             scriptEditorFrame.requestFocus();
         } else {
-            scriptEditorFrame = new ScriptEditorFrame(this, presenter, () -> {
+            scriptEditorFrame = new ScriptEditorFrame(this, getPresenter(), () -> {
                 boolean didCloseAllFrames = scriptFrameHandler.closeAll();
                 if (didCloseAllFrames) {
                     scriptEditorFrame = null;
@@ -374,9 +351,9 @@ public class MainFrame extends JFrame implements ViewActions, ProjectNameChangeL
         } else {
             referenceListFrame = new ReferenceListFrame(this, (category, object) -> {
                 if (referenceIsConfig(category, object)) {
-                    presenter.onOpenConfigEditor();
+                    getPresenter().onOpenConfigEditor();
                 } else {
-                    presenter.onEditObject(category, object);
+                    getPresenter().onEditObject(category, object);
                 }
             }, () -> referenceListFrame = null);
         }
