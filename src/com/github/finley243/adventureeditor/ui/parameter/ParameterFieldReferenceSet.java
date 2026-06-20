@@ -1,12 +1,10 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
-import com.github.finley243.adventureeditor.DataManager;
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataReferenceSet;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
-import com.github.finley243.adventureeditor.ui.ErrorData;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -16,9 +14,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParameterFieldReferenceSet extends ParameterField implements DataSaveTarget {
-
-    private final DataSaveTarget objectSaveTarget;
+public class ParameterFieldReferenceSet extends ParameterField {
 
     private final JList<String> referenceList;
     private final JButton buttonAdd;
@@ -27,9 +23,8 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
 
     private final String name;
 
-    public ParameterFieldReferenceSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, DataManager dataManager, DataSaveTarget objectSaveTarget, ParameterFactory parameterFactory) {
+    public ParameterFieldReferenceSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, PresenterActions presenter) {
         super(editorFrame, optional, name, parentField);
-        this.objectSaveTarget = objectSaveTarget;
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.name = name;
         getInnerPanel().setLayout(new GridBagLayout());
@@ -90,21 +85,21 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
                     if (index >= 0) {
                         String selectedItem = referenceList.getModel().getElementAt(index);
                         if (selectedItem != null) {
-                            dataManager.editObject(template.id(), selectedItem, ParameterFieldReferenceSet.this, editorFrame, parameterFactory);
+                            presenter.onEditObject(template.id(), selectedItem, ParameterFieldReferenceSet.this::saveObjectData);
                         }
                     }
                 }
             }
         });
         buttonAdd.addActionListener(e -> {
-            dataManager.newObject(template.id(), this, editorFrame, parameterFactory);
+            presenter.onCreateObject(template.id());
         });
         buttonEdit.addActionListener(e -> {
-            dataManager.editObject(template.id(), referenceList.getSelectedValue(), this, editorFrame, parameterFactory);
+            presenter.onEditObject(template.id(), referenceList.getSelectedValue(), this::saveObjectData);
         });
         buttonRemove.addActionListener(e -> {
             int selectedIndex = referenceList.getSelectedIndex();
-            boolean didDelete = dataManager.deleteObject(template.id(), referenceList.getSelectedValue(), editorFrame, parameterFactory);
+            boolean didDelete = presenter.onDeleteObject(template.id(), referenceList.getSelectedValue());
             if (didDelete) {
                 ((DefaultListModel<String>) referenceList.getModel()).remove(selectedIndex);
             }
@@ -155,9 +150,7 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
         }
     }
 
-    @Override
-    public void saveObjectData(String editorID, Data data, Data initialData) {
-        objectSaveTarget.saveObjectData(editorID, data, initialData);
+    public void saveObjectData(Data data, Data initialData) {
         int addIndex = referenceList.getSelectedIndex() + 1;
         if (addIndex == 0) {
             addIndex = referenceList.getModel().getSize();
@@ -170,16 +163,6 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
         }
         ((DefaultListModel<String>) referenceList.getModel()).add(addIndex, objectID);
         parentFrame.onEditorElementUpdated();
-    }
-
-    @Override
-    public void onEditorFrameClose(EditorFrame frame) {
-        objectSaveTarget.onEditorFrameClose(frame);
-    }
-
-    @Override
-    public ErrorData checkForSaveDataErrors(Data currentData, Data initialData) {
-        return objectSaveTarget.checkForSaveDataErrors(currentData, initialData);
     }
 
     @Override

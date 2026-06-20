@@ -35,7 +35,7 @@ public class MainFrame extends JFrame implements ViewActions {
     private boolean isProjectLoaded;
 
     private final ParameterFactory parameterFactory;
-    private final Template configTemplate;
+    private final TemplateRegistry templateRegistry;
     private final EditorManager editorManager;
 
     private EditorFrame configFrame;
@@ -49,10 +49,10 @@ public class MainFrame extends JFrame implements ViewActions {
 
     private final JMenu fileOpenRecent;
 
-    public MainFrame(ParameterFactory parameterFactory, Template configTemplate, TemplateRegistry templateRegistry) {
+    public MainFrame(ParameterFactory parameterFactory, TemplateRegistry templateRegistry) {
         super(EDITOR_NAME);
         this.parameterFactory = parameterFactory;
-        this.configTemplate = configTemplate;
+        this.templateRegistry = templateRegistry;
         this.editorManager = new EditorManager();
         this.phraseFrameHandler = new ChildFrameHandler<>();
         this.scriptFrameHandler = new ChildFrameHandler<>();
@@ -282,7 +282,7 @@ public class MainFrame extends JFrame implements ViewActions {
             configFrame.requestFocus();
         } else {
             Consumer<EditorFrame> onClose = _ -> configFrame = null;
-            configFrame = new EditorFrame(this, configTemplate, initialData, true, parameterFactory, onSave, onValidate, onClose);
+            configFrame = new EditorFrame(this, templateRegistry.getConfigTemplate(), initialData, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
         }
     }
 
@@ -294,7 +294,7 @@ public class MainFrame extends JFrame implements ViewActions {
             activeFrame.requestFocus();
         } else {
             Consumer<EditorFrame> onClose = _ -> editorManager.removeActiveTopLevelFrame(template.id(), objectID);
-            EditorFrame editorFrame = new EditorFrame(this, template, initialData, true, parameterFactory, onSave, onValidate, onClose);
+            EditorFrame editorFrame = new EditorFrame(this, template, initialData, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
             editorManager.addActiveTopLevelFrame(template.id(), objectID, editorFrame);
         }
     }
@@ -326,7 +326,7 @@ public class MainFrame extends JFrame implements ViewActions {
         boolean isOpen = phraseFrameHandler.requestFocusIfOpen(phraseKey);
         if (!isOpen) {
             Consumer<EditorFrame> onClose = phraseFrameHandler::removeChildFrame;
-            EditorFrame editorFrame = new EditorFrame(phraseEditorFrame, InternalTemplates.PHRASE_TEMPLATE, content, true, parameterFactory, onSave, onValidate, onClose);
+            EditorFrame editorFrame = new EditorFrame(phraseEditorFrame, InternalTemplates.PHRASE_TEMPLATE, content, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
             phraseFrameHandler.add(phraseKey, editorFrame);
         }
     }
@@ -360,7 +360,7 @@ public class MainFrame extends JFrame implements ViewActions {
         boolean isOpen = scriptFrameHandler.requestFocusIfOpen(name);
         if (!isOpen) {
             Consumer<EditorFrame> onClose = scriptFrameHandler::removeChildFrame;
-            EditorFrame editorFrame = new EditorFrame(scriptEditorFrame, InternalTemplates.SCRIPT_TEMPLATE, content, true, parameterFactory, onSave, onValidate, onClose);
+            EditorFrame editorFrame = new EditorFrame(scriptEditorFrame, InternalTemplates.SCRIPT_TEMPLATE, content, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
             editorFrame.setResizable(true);
             editorFrame.setSize(new Dimension(800, 800));
             editorFrame.setLocationRelativeTo(null);
@@ -470,7 +470,7 @@ public class MainFrame extends JFrame implements ViewActions {
     public void forceCloseObject(String categoryID, String objectID) {
         EditorFrame frame = editorManager.getActiveTopLevelFrame(categoryID, objectID);
         if (frame != null) {
-            frame.dispose();
+            frame.requestClose(true, false);
             editorManager.removeActiveTopLevelFrame(categoryID, objectID);
         }
     }
@@ -478,7 +478,7 @@ public class MainFrame extends JFrame implements ViewActions {
     @Override
     public void forceCloseConfig() {
         if (configFrame != null) {
-            configFrame.dispose();
+            configFrame.requestClose(true, false);
             configFrame = null;
         }
     }
@@ -487,7 +487,7 @@ public class MainFrame extends JFrame implements ViewActions {
     public void forceCloseScript(String name) {
         EditorFrame frame = scriptFrameHandler.get(name);
         if (frame != null) {
-            frame.dispose();
+            frame.requestClose(true, false);
             scriptFrameHandler.removeChildFrame(frame);
         }
     }
@@ -496,9 +496,25 @@ public class MainFrame extends JFrame implements ViewActions {
     public void forceClosePhrase(String key) {
         EditorFrame frame = phraseFrameHandler.get(key);
         if (frame != null) {
-            frame.dispose();
+            frame.requestClose(true, false);
             phraseFrameHandler.removeChildFrame(frame);
         }
+    }
+
+    @Override
+    public boolean closeAllEditorsWithConfirmation() {
+        if (!configFrame.requestClose(false, false)) return false;
+        if (!scriptFrameHandler.closeAll()) return false;
+        if (scriptEditorFrame != null) {
+            scriptEditorFrame.dispose();
+            scriptEditorFrame = null;
+        }
+        if (!phraseFrameHandler.closeAll()) return false;
+        if (phraseEditorFrame != null) {
+            phraseEditorFrame.dispose();
+            phraseEditorFrame = null;
+        }
+        return editorManager.requestCloseAllEditorFrames();
     }
 
     private void attemptOpeningRecentProject(ProjectFile projectFile) {

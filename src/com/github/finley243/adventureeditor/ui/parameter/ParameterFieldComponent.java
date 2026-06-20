@@ -1,5 +1,6 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataComponent;
 import com.github.finley243.adventureeditor.template.ComponentOption;
@@ -22,7 +23,7 @@ public class ParameterFieldComponent extends ParameterField {
 
     private String activeOption;
 
-    public ParameterFieldComponent(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, List<ComponentOption> componentOptions, Map<String, Template> componentOptionTemplates, ParameterFactory parameterFactory) {
+    public ParameterFieldComponent(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, List<ComponentOption> componentOptions, Map<String, Template> componentOptionTemplates, ParameterFactory parameterFactory, PresenterActions presenter) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.editorElements = new HashMap<>();
@@ -32,7 +33,7 @@ public class ParameterFieldComponent extends ParameterField {
         objectPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         for (ComponentOption option : componentOptions) {
             Template componentTemplate = componentOptionTemplates.get(option.object());
-            ParameterField element = new ParameterFieldObject(editorFrame, false, option.name(), this, componentTemplate, false, parameterFactory);
+            ParameterField element = new ParameterFieldObject(editorFrame, false, option.name(), this, componentTemplate, false, parameterFactory, presenter);
             objectPanel.add(element, option.id());
             editorElements.put(option.id(), element);
             componentOptionMap.put(option.id(), option);

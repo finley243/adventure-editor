@@ -12,6 +12,7 @@ import com.github.finley243.adventureeditor.ui.ErrorData;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 public class Presenter implements PresenterActions {
 
@@ -42,6 +43,7 @@ public class Presenter implements PresenterActions {
     }
 
     public void start() {
+        projectManager.loadRecentProjects(dataLoader.loadRecentProjects());
         view.updateRecentProjects(projectManager.getRecentProjects());
     }
 
@@ -64,6 +66,8 @@ public class Presenter implements PresenterActions {
         String projectPath = file.getAbsolutePath();
         projectManager.setProjectLoaded(true);
         projectManager.setLoadedProjectPath(projectPath);
+        projectManager.addRecentProject(new ProjectFile(file.getName(), file.getAbsolutePath()));
+        dataLoader.saveRecentProjects(projectManager.getRecentProjects());
     }
 
     @Override
@@ -76,6 +80,7 @@ public class Presenter implements PresenterActions {
             if (file == null) return;
             projectManager.setLoadedProjectPath(file.getAbsolutePath());
             projectManager.addRecentProject(new ProjectFile(file.getName(), file.getAbsolutePath()));
+            dataLoader.saveRecentProjects(projectManager.getRecentProjects());
         }
         dataLoader.saveToDir(file, templateRegistry, dataManager.getAllData(), configMenuManager.getConfigData(), scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
         setProjectChangesSaved();
@@ -84,9 +89,10 @@ public class Presenter implements PresenterActions {
     @Override
     public void onSaveProjectAs(File file) {
         if (file == null) return;
-
+        dataLoader.saveToDir(file, templateRegistry, dataManager.getAllData(), configMenuManager.getConfigData(), scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
         projectManager.setLoadedProjectPath(file.getAbsolutePath());
         projectManager.addRecentProject(new ProjectFile(file.getName(), file.getAbsolutePath()));
+        dataLoader.saveRecentProjects(projectManager.getRecentProjects());
         setProjectChangesSaved();
     }
 
@@ -116,15 +122,28 @@ public class Presenter implements PresenterActions {
     }
 
     @Override
-    public void onDeleteObject(String categoryID, String objectID) {
+    public void onEditObject(String categoryID, String objectID, BiConsumer<Data, Data> onSave) {
+        Template template = templateRegistry.getTemplate(categoryID);
+        Data initialData = dataManager.getData(categoryID, objectID);
+        view.openEditorFrame(template, objectID, initialData, data -> {
+            saveObjectData(data, initialData);
+            onSave.accept(data, initialData);
+        }, data -> validateObject(data, initialData));
+    }
+
+    @Override
+    public boolean onDeleteObject(String categoryID, String objectID) {
         Set<Reference> references = getReferences(categoryID, objectID);
         DeleteObjectConfirmationResult result = view.confirmDeleteObject(objectID, references.size());
         if (result == DeleteObjectConfirmationResult.DELETE) {
             dataManager.removeData(categoryID, objectID);
             view.browserRemoveObject(categoryID, objectID);
+            return true;
         } else if (result == DeleteObjectConfirmationResult.VIEW_REFERENCES) {
             view.openReferenceList(references);
+            return false;
         }
+        return false;
     }
 
     @Override
@@ -179,7 +198,6 @@ public class Presenter implements PresenterActions {
             phraseEditorManager.setPhrase(getPhraseKeyFromData(data), getPhraseTextFromData(data));
             view.updatePhrases(phraseEditorManager.getPhrases());
         }, data -> validatePhrase(data, null));
-        view.updatePhrases(phraseEditorManager.getPhrases());
     }
 
     @Override
@@ -279,10 +297,10 @@ public class Presenter implements PresenterActions {
         return ((DataString) ((DataObject) data).getValue().get(PARAMETER_PHRASE_TEXT)).getValue();
     }
 
-    private Data generateDataForScript(String phraseKey) {
+    private Data generateDataForScript(String scriptName) {
         Map<String, Data> dataMap = new HashMap<>();
-        dataMap.put(PARAMETER_SCRIPT_NAME, new DataString(phraseKey));
-        dataMap.put(PARAMETER_SCRIPT_BODY, new DataScript(scriptEditorManager.getScript(phraseKey)));
+        dataMap.put(PARAMETER_SCRIPT_NAME, new DataString(scriptName));
+        dataMap.put(PARAMETER_SCRIPT_BODY, new DataScript(scriptEditorManager.getScript(scriptName)));
         return new DataObject(InternalTemplates.SCRIPT_TEMPLATE, dataMap);
     }
 
@@ -325,10 +343,24 @@ public class Presenter implements PresenterActions {
         }
     }
 
+    private String getObjectIDFromData(Data data) {
+        if (data == null) return null;
+        return ((DataObject) data).getID();
+    }
+
+    private String getObjectCategoryIDFromData(Data data) {
+        if (data == null) return null;
+        return ((DataObject) data).getTemplate().id();
+    }
+
     private ErrorData validateObject(Data currentData, Data initialData) {
-        String currentObjectID = ((DataObject) currentData).getID();
+        String currentObjectID = getObjectIDFromData(currentData);
+        String initialObjectID = getObjectIDFromData(initialData);
+        String categoryID = getObjectCategoryIDFromData(currentData);
         if (currentObjectID == null || currentObjectID.trim().isEmpty()) {
             return new ErrorData(true, "Object ID cannot be empty.");
+        } else if (!Objects.equals(currentObjectID, initialObjectID) && dataManager.categoryContainsID(categoryID, currentObjectID)) {
+            return new ErrorData(true, "An object with ID \"" + currentObjectID + "\" already exists.");
         }
         return new ErrorData(false, null);
     }

@@ -72,4 +72,6 @@ public interface ViewActions {
 
     void forceClosePhrase(String key);
 
+    boolean closeAllEditorsWithConfirmation();
+
 }

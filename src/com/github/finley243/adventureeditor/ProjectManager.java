@@ -72,7 +72,7 @@ public class ProjectManager {
         return loadedProjectPath;
     }
 
-    public void newProject(Window parentWindow, ParameterFactory parameterFactory, MainFrame mainFrame) {
+    /*public void newProject(Window parentWindow, ParameterFactory parameterFactory, MainFrame mainFrame) {
         boolean continueCheck = saveConfirmationIfHasUnsavedData(mainFrame);
         if (!continueCheck) {
             return;
@@ -171,16 +171,6 @@ public class ProjectManager {
         loadedProjectPath = selectedDirectory.getAbsolutePath();
         updateLastSavedData();
         return true;
-    }
-
-    private void addOrMoveRecentProjectToTop(ProjectFile project) {
-        recentProjects.remove(project);
-        recentProjects.addFirst(project);
-        while (recentProjects.size() > RECENT_PROJECTS_MAXIMUM) {
-            recentProjects.removeLast();
-        }
-        dataLoader.saveRecentProjects(recentProjects);
-        onUpdateRecentProjects(recentProjects);
-    }
+    }*/
 
 }

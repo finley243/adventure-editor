@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.browser.node;
 
-import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
+import com.github.finley243.adventureeditor.PresenterActions;
 
 import javax.swing.*;
 
@@ -24,22 +24,22 @@ public class BrowserObjectNode extends BrowserNode {
     }
 
     @Override
-    public JPopupMenu getContextMenu(BrowserFrame browserFrame) {
+    public JPopupMenu getContextMenu(PresenterActions presenter) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuOpen = new JMenuItem("Open");
-        menuOpen.addActionListener(e -> browserFrame.editObject(this));
+        menuOpen.addActionListener(e -> presenter.onEditObject(getCategoryID(), getObjectID()));
         menu.add(menuOpen);
         /*JMenuItem menuNew = new JMenuItem("New " + main.getTemplate(categoryID).name());
         menuNew.addActionListener(e -> main.newObject(categoryID));
         menu.add(menuNew);*/
         JMenuItem menuDuplicate = new JMenuItem("Duplicate");
-        menuDuplicate.addActionListener(e -> browserFrame.duplicateObject(this));
+        menuDuplicate.addActionListener(e -> presenter.onDuplicateObject(getCategoryID(), getObjectID()));
         menu.add(menuDuplicate);
         JMenuItem menuDelete = new JMenuItem("Delete");
-        menuDelete.addActionListener(e -> browserFrame.deleteObject(this));
+        menuDelete.addActionListener(e -> presenter.onDeleteObject(getCategoryID(), getObjectID()));
         menu.add(menuDelete);
         JMenuItem menuReferences = new JMenuItem("Find references");
-        menuReferences.addActionListener(e -> browserFrame.openReferenceList(this));
+        menuReferences.addActionListener(e -> presenter.onShowReferences(getCategoryID(), getObjectID()));
         menu.add(menuReferences);
         return menu;
     }

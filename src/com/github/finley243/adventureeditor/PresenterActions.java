@@ -1,6 +1,9 @@
 package com.github.finley243.adventureeditor;
 
+import com.github.finley243.adventureeditor.data.Data;
+
 import java.io.File;
+import java.util.function.BiConsumer;
 
 public interface PresenterActions {
 
@@ -20,7 +23,9 @@ public interface PresenterActions {
 
     void onEditObject(String categoryID, String objectID);
 
-    void onDeleteObject(String categoryID, String objectID);
+    void onEditObject(String categoryID, String objectID, BiConsumer<Data, Data> onSave);
+
+    boolean onDeleteObject(String categoryID, String objectID);
 
     void onDuplicateObject(String categoryID, String objectID);
 

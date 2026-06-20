@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.browser.node;
 
-import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
+import com.github.finley243.adventureeditor.PresenterActions;
 
 import javax.swing.*;
 import java.util.Comparator;
@@ -44,10 +44,10 @@ public class BrowserCategoryNode extends BrowserNode {
     }
 
     @Override
-    public JPopupMenu getContextMenu(BrowserFrame browserFrame) {
+    public JPopupMenu getContextMenu(PresenterActions presenter) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuNew = new JMenuItem("New " + name);
-        menuNew.addActionListener(e -> browserFrame.newObject(this));
+        menuNew.addActionListener(e -> presenter.onCreateObject(getCategoryID()));
         menu.add(menuNew);
         return menu;
     }

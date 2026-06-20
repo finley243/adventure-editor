@@ -190,9 +190,6 @@ public class BrowserTree extends JTree {
     }
 
     public void clearData() {
-        /*for (BrowserCategoryNode node : categoryNodes.values()) {
-            treeModel.removeNodeFromParent(node);
-        }*/
         treeRoot.removeAllChildren();
         treeModel.nodeStructureChanged(treeRoot);
         categoryNodes.clear();

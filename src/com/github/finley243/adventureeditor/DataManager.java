@@ -1,39 +1,17 @@
 package com.github.finley243.adventureeditor;
 
-import com.github.finley243.adventureeditor.data.*;
-import com.github.finley243.adventureeditor.template.TemplateRegistry;
-import com.github.finley243.adventureeditor.ui.DeleteObjectConfirmationResult;
+import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.ui.ReferenceUtils;
-import com.github.finley243.adventureeditor.ui.UIUtils;
-import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
-import java.awt.*;
 import java.util.*;
 
 public class DataManager {
 
-    private final EditorManager editorManager;
-    private final TemplateRegistry templateRegistry;
-
-    private ReferenceListManager referenceListManager;
-
     private Map<String, Map<String, Data>> data;
     private Map<String, Map<String, Data>> lastSavedData;
 
-    public DataManager(EditorManager editorManager, TemplateRegistry templateRegistry) {
-        this.editorManager = editorManager;
-        this.templateRegistry = templateRegistry;
+    public DataManager() {
         this.data = new HashMap<>();
-    }
-
-    public void resolveReferenceListManager(ReferenceListManager referenceListManager) {
-        if (this.referenceListManager != null) throw new IllegalStateException("ReferenceListManager has already been resolved");
-        this.referenceListManager = referenceListManager;
-    }
-
-    private ReferenceListManager getReferenceListManager() {
-        if (this.referenceListManager == null) throw new IllegalStateException("ReferenceListManager has not been resolved");
-        return referenceListManager;
     }
 
     public void loadData(Map<String, Map<String, Data>> data) {
@@ -78,48 +56,6 @@ public class DataManager {
 
     public void removeData(String categoryID, String objectID) {
         data.get(categoryID).remove(objectID);
-    }
-
-    public void saveObjectData(Data objectData, Data initialData) {
-        if (!(objectData instanceof DataObject objectDataCast)) {
-            throw new IllegalArgumentException("Top-level saved data must be an object");
-        }
-        String objectID = objectDataCast.getID();
-        if (objectID == null) {
-            throw new IllegalArgumentException("Top-level object must have an ID");
-        }
-        String categoryID = objectDataCast.getTemplate().id();
-        if (initialData != null) {
-            String initialID = ((DataObject) initialData).getID();
-            String newID = objectDataCast.getID();
-            if (!initialID.equals(newID)) { // Edit with new ID
-                if (!data.containsKey(categoryID)) {
-                    data.put(categoryID, new HashMap<>());
-                }
-                data.get(categoryID).remove(initialID);
-                data.get(categoryID).put(objectID, objectData);
-                if (objectDataCast.getTemplate().topLevel()) {
-                    onObjectIDChange(categoryID, initialID, objectID);
-                }
-                renameReferences(categoryID, initialID, objectID);
-            } else { // Edit with same ID
-                if (!data.containsKey(categoryID)) {
-                    data.put(categoryID, new HashMap<>());
-                }
-                data.get(categoryID).put(objectID, objectData);
-                if (objectDataCast.getTemplate().topLevel()) {
-                    onCategoryUpdate(categoryID);
-                }
-            }
-        } else { // New object instance
-            if (!data.containsKey(categoryID)) {
-                data.put(categoryID, new HashMap<>());
-            }
-            data.get(categoryID).put(objectID, objectData);
-            if (objectDataCast.getTemplate().topLevel()) {
-                onObjectCreation(categoryID, objectID);
-            }
-        }
     }
 
     public Map<String, Map<String, Data>> getAllDataCopy() {

@@ -16,6 +16,7 @@ public class BrowserFrame extends JDialog {
     //private final DataManager dataManager;
     private final BrowserTree browserTree;
     private final TemplateRegistry templateRegistry;
+    private PresenterActions presenter;
 
     public BrowserFrame(Window mainFrame, TemplateRegistry templateRegistry) {
         super(mainFrame);
@@ -51,7 +52,14 @@ public class BrowserFrame extends JDialog {
     }
 
     public void registerPresenter(PresenterActions presenter) {
+        if (this.presenter != null) throw new IllegalStateException("Presenter is already registered");
+        this.presenter = presenter;
         browserTree.registerPresenter(presenter);
+    }
+
+    private PresenterActions getPresenter() {
+        if (presenter == null) throw new IllegalStateException("Presenter has not been registered");
+        return presenter;
     }
 
     public void addGameObject(String categoryID, String newObjectID) {
@@ -93,7 +101,7 @@ public class BrowserFrame extends JDialog {
     }
 
     public void openContextMenu(BrowserNode node, int posX, int posY) {
-        JPopupMenu contextMenu = node.getContextMenu(this);
+        JPopupMenu contextMenu = node.getContextMenu(getPresenter());
         if (contextMenu != null) {
             contextMenu.show(this, posX, posY);
         }

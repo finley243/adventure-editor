@@ -31,6 +31,16 @@ public class EditorManager {
         topLevelEditorWindows.clear();
     }
 
+    public boolean requestCloseAllEditorFrames() {
+        for (Map<String, EditorFrame> categoryEditors : topLevelEditorWindows.values()) {
+            for (EditorFrame editorFrame : categoryEditors.values()) {
+                boolean didClose = editorFrame.requestClose(false, false);
+                if (!didClose) return false;
+            }
+        }
+        return true;
+    }
+
     public EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
         if (categoryID == null | objectID == null) {
             return null;

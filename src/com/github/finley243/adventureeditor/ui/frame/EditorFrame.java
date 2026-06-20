@@ -1,5 +1,6 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.Template;
@@ -27,7 +28,7 @@ public class EditorFrame extends JDialog {
     private final Function<Data, ErrorData> onValidate;
     private final Consumer<EditorFrame> onClose;
 
-    public EditorFrame(Window parentWindow, Template template, Data objectData, boolean isTopLevel, ParameterFactory parameterFactory, Consumer<Data> onSave, Function<Data, ErrorData> onValidate, Consumer<EditorFrame> onClose) {
+    public EditorFrame(Window parentWindow, Template template, Data objectData, boolean isTopLevel, ParameterFactory parameterFactory, PresenterActions presenter, Consumer<Data> onSave, Function<Data, ErrorData> onValidate, Consumer<EditorFrame> onClose) {
         //super(template.name());
         super(parentWindow);
         this.onSave = onSave;
@@ -40,7 +41,7 @@ public class EditorFrame extends JDialog {
         this.initialData = objectData;
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
-        this.parameterField = new ParameterFieldObject(this, false, template.name(), null, template, isTopLevel, parameterFactory);
+        this.parameterField = new ParameterFieldObject(this, false, template.name(), null, template, isTopLevel, parameterFactory, presenter);
         if (objectData != null) {
             parameterField.setData(objectData);
         }

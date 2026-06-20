@@ -1,9 +1,9 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.DataManager;
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataReference;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -17,7 +17,7 @@ public class ParameterFieldReference extends ParameterField {
     private final JComboBox<String> dropdownMenu;
     private final JButton openReferenceButton;
 
-    public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, String categoryID, String[] referenceValues, DataManager dataManager, DataSaveTarget topLevelSaveTarget, ParameterFactory parameterFactory) {
+    public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, String categoryID, String[] referenceValues, DataManager dataManager, PresenterActions presenter) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
@@ -37,7 +37,7 @@ public class ParameterFieldReference extends ParameterField {
         openReferenceButton.addActionListener(e -> {
             String value = (String) dropdownMenu.getSelectedItem();
             if (value != null && dataManager.categoryContainsID(categoryID, value)) {
-                dataManager.editObject(categoryID, value, topLevelSaveTarget, editorFrame, parameterFactory);
+                presenter.onEditObject(categoryID, value);
             }
         });
         ((JTextField) dropdownMenu.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {

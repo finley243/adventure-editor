@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.browser.node;
 
-import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
+import com.github.finley243.adventureeditor.PresenterActions;
 
 import javax.swing.*;
 import javax.swing.tree.MutableTreeNode;
@@ -24,7 +24,7 @@ public class BrowserRootNode extends BrowserNode {
     }
 
     @Override
-    public JPopupMenu getContextMenu(BrowserFrame browserFrame) {
+    public JPopupMenu getContextMenu(PresenterActions presenter) {
         return null;
     }
 

@@ -23,20 +23,17 @@ public class Main {
         Map<String, Template> templateMap = dataLoader.loadTemplates();
         Map<String, List<String>> enumTypeMap = dataLoader.loadEnumTypes();
         TemplateRegistry templateRegistry = new TemplateRegistry(templateMap, enumTypeMap);
-        List<ProjectFile> recentProjects = dataLoader.loadRecentProjects();
         PhraseEditorManager phraseEditorManager = new PhraseEditorManager();
         ScriptEditorManager scriptEditorManager = new ScriptEditorManager();
         ConfigMenuManager configMenuManager = new ConfigMenuManager(templateRegistry.getConfigTemplate());
-        EditorManager editorManager = new EditorManager();
-        DataManager dataManager = new DataManager(editorManager, templateRegistry);
-        TopLevelSaveTarget topLevelSaveTarget = new TopLevelSaveTarget(dataManager, editorManager);
-        ReferenceListManager referenceListManager = new ReferenceListManager(configMenuManager, dataManager, topLevelSaveTarget);
-        dataManager.resolveReferenceListManager(referenceListManager);
-        ParameterFactory parameterFactory = new ParameterFactory(templateRegistry, dataManager, topLevelSaveTarget);
+        DataManager dataManager = new DataManager();
+        ParameterFactory parameterFactory = new ParameterFactory(templateRegistry, dataManager);
         ProjectManager projectManager = new ProjectManager();
-        MainFrame mainFrame = new MainFrame(parameterFactory, projectManager, configMenuManager, phraseEditorManager, scriptEditorManager, editorManager);
-        BrowserFrame browserFrame = new BrowserFrame(mainFrame, parameterFactory);
-        projectManager.loadRecentProjects(recentProjects);
+        MainFrame mainFrame = new MainFrame(parameterFactory, templateRegistry);
+        mainFrame.setVisible(true);
+        Presenter presenter = new Presenter(dataManager, projectManager, configMenuManager, phraseEditorManager, scriptEditorManager, templateRegistry, dataLoader, mainFrame);
+        mainFrame.registerPresenter(presenter);
+        presenter.start();
     }
 
 }
