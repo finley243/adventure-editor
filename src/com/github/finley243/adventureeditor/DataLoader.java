@@ -376,9 +376,14 @@ public class DataLoader {
             } catch (IOException e) {
                 throw new DataIOException("Failed to create phrase file");
             }
+            List<String> phraseLines = new ArrayList<>();
+            for (Map.Entry<String, String> phrase : phrases.entrySet()) {
+                phraseLines.add(phrase.getKey() + ":" + phrase.getValue());
+            }
+            phraseLines.sort(Comparator.naturalOrder());
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(phraseFile))) {
-                for (Map.Entry<String, String> phrase : phrases.entrySet()) {
-                    writer.write(phrase.getKey() + ":" + phrase.getValue());
+                for (String phraseLine : phraseLines) {
+                    writer.write(phraseLine);
                     writer.newLine();
                 }
             } catch (IOException e) {
