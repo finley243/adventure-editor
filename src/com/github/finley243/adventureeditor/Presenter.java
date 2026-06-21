@@ -272,6 +272,7 @@ public class Presenter implements PresenterActions {
         view.openScriptEditor(scriptName, initialData, data -> {
             String scriptBody = getScriptBodyFromData(data);
             scriptEditorManager.setScript(scriptName, scriptBody);
+            view.updateScripts(scriptEditorManager.getScripts());
             updateProjectChanges();
         }, data -> new ErrorData(false, null));
     }
@@ -291,6 +292,7 @@ public class Presenter implements PresenterActions {
         view.openScriptEditor(scriptName, null, data -> {
             String scriptBody = getScriptBodyFromData(data);
             scriptEditorManager.setScript(scriptName, scriptBody);
+            view.updateScripts(scriptEditorManager.getScripts());
             updateProjectChanges();
         }, data -> new ErrorData(false, null));
     }
