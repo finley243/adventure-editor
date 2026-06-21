@@ -94,7 +94,7 @@ public class EditorFrame extends JDialog {
                 this.dispose();
                 return true;
             }
-            return true;
+            return false;
         } else if (forceClose) {
             boolean subElementsClosed = parameterField.requestClose(true, false);
             if (!subElementsClosed) {

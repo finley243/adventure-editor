@@ -14,6 +14,7 @@ import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 import java.io.File;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class Presenter implements PresenterActions {
 
@@ -130,12 +131,14 @@ public class Presenter implements PresenterActions {
     public void onRemoveRecentProject(ProjectFile projectFile) {
         projectManager.removeRecentProject(projectFile);
         dataLoader.saveRecentProjects(projectManager.getRecentProjects());
+        view.updateRecentProjects(projectManager.getRecentProjects());
     }
 
     @Override
     public void onClearRecentProjects() {
         projectManager.clearRecentProjects();
         dataLoader.saveRecentProjects(List.of());
+        view.updateRecentProjects(projectManager.getRecentProjects());
     }
 
     @Override
@@ -145,6 +148,16 @@ public class Presenter implements PresenterActions {
             saveObjectData(data, null);
             updateProjectChanges();
             }, data -> validateObject(data, null));
+    }
+
+    @Override
+    public void onCreateObject(String categoryID, Consumer<Data> onSave) {
+        Template template = templateRegistry.getTemplate(categoryID);
+        view.openEditorFrame(template, null, null, data -> {
+            saveObjectData(data, null);
+            onSave.accept(data);
+            updateProjectChanges();
+        }, data -> validateObject(data, null));
     }
 
     @Override

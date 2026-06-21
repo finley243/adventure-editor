@@ -74,11 +74,6 @@ public class DataManager {
             Map<String, Data> categoryDataCopy = new HashMap<>();
             for (Map.Entry<String, Data> objectEntry : categoryEntry.getValue().entrySet()) {
                 categoryDataCopy.put(objectEntry.getKey(), objectEntry.getValue() == null ? null : objectEntry.getValue().createCopy());
-                /*System.out.println("Added entry!");
-                System.out.println("Category: " + categoryEntry.getKey());
-                System.out.println("Object: " + objectEntry.getKey());
-                System.out.println("OriginalData: " + objectEntry.getValue());
-                System.out.println("NewData: " + (objectEntry.getValue() == null ? null : objectEntry.getValue().createCopy()));*/
             }
             dataCopy.put(categoryEntry.getKey(), categoryDataCopy);
         }

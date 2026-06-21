@@ -4,6 +4,7 @@ import com.github.finley243.adventureeditor.data.Data;
 
 import java.io.File;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public interface PresenterActions {
 
@@ -20,6 +21,8 @@ public interface PresenterActions {
     void onClearRecentProjects();
 
     void onCreateObject(String categoryID);
+
+    void onCreateObject(String categoryID, Consumer<Data> onSave);
 
     void onEditObject(String categoryID, String objectID);
 

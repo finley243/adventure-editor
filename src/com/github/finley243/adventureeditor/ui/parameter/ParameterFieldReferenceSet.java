@@ -92,7 +92,7 @@ public class ParameterFieldReferenceSet extends ParameterField {
             }
         });
         buttonAdd.addActionListener(e -> {
-            presenter.onCreateObject(template.id());
+            presenter.onCreateObject(template.id(), data -> saveObjectData(data, null));
         });
         buttonEdit.addActionListener(e -> {
             presenter.onEditObject(template.id(), referenceList.getSelectedValue(), this::saveObjectData);
