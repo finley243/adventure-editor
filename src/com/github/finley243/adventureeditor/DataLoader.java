@@ -154,9 +154,10 @@ public class DataLoader {
                     }
                     parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height, defaultValue));
                 }
+                String fileName = LoadUtils.attribute(templateElement, "fileName", null);
                 String nameFormat = LoadUtils.attribute(templateElement, "nameFormat", null);
                 String primaryParameter = LoadUtils.attribute(templateElement, "primaryParameter", null);
-                Template template = new Template(id, name, topLevel, isUnique, groups, tabGroups, parameters, nameFormat, primaryParameter);
+                Template template = new Template(id, name, topLevel, fileName, isUnique, groups, tabGroups, parameters, nameFormat, primaryParameter);
                 templates.put(id, template);
             }
         }
@@ -358,8 +359,9 @@ public class DataLoader {
                     continue;
                 }
                 Map<String, Data> categoryData = entry.getValue();
-                // TODO - Switch to dedicated file name stored in Data (loaded from templates)
-                File categoryFile = new File(dataDirectory, categoryID + "." + DATA_EXTENSION);
+                String fileName = categoryTemplate.fileName();
+                if (fileName == null) fileName = categoryTemplate.id();
+                File categoryFile = new File(dataDirectory, fileName + "." + DATA_EXTENSION);
                 try {
                     categoryFile.createNewFile();
                 } catch (IOException e) {
