@@ -36,6 +36,11 @@ public class ConfigMenuManager {
         return projectNameDataString.getValue();
     }
 
+    public void loadConfigData(Data data) {
+        configData = data;
+        setSavedChanges();
+    }
+
     public void setConfigData(Data data) {
         configData = data;
     }
@@ -45,12 +50,13 @@ public class ConfigMenuManager {
         return configData;
     }
 
-    public void clearConfigData() {
+    public void unloadConfigData() {
         if (configFrame != null) {
             configFrame.dispose();
             configFrame = null;
         }
         configData = new DataObject(configTemplate, new HashMap<>());
+        setSavedChanges();
     }
 
     public boolean hasUnsavedChanges() {
@@ -58,7 +64,7 @@ public class ConfigMenuManager {
     }
 
     public void setSavedChanges() {
-        this.lastSavedConfigData = configData.createCopy();
+        this.lastSavedConfigData = configData == null ? null : configData.createCopy();
     }
 
     public String getProjectNameFromData(Data data) {

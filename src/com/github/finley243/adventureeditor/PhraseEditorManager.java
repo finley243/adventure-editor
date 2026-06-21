@@ -25,10 +25,12 @@ public class PhraseEditorManager {
 
     public void loadPhrases(Map<String, String> phrases) {
         this.phrases = new HashMap<>(phrases);
+        setSavedChanges();
     }
 
-    public void clearPhrases() {
+    public void unloadPhrases() {
         phrases = new HashMap<>();
+        setSavedChanges();
     }
 
     public boolean hasPhraseWithKey(String key) {
@@ -52,7 +54,7 @@ public class PhraseEditorManager {
     }
 
     public void setSavedChanges() {
-        this.lastSavedPhrases = new HashMap<>(phrases);
+        this.lastSavedPhrases = phrases == null ? null : new HashMap<>(phrases);
     }
 
 }

@@ -16,6 +16,7 @@ public class DataManager {
 
     public void loadData(Map<String, Map<String, Data>> data) {
         this.data = new HashMap<>(data);
+        setSavedChanges();
     }
 
     public void setData(String categoryID, String objectID, Data objectData) {
@@ -58,8 +59,9 @@ public class DataManager {
         return objectIDs;
     }
 
-    public void clearData() {
+    public void unloadData() {
         data = new HashMap<>();
+        setSavedChanges();
     }
 
     public void removeData(String categoryID, String objectID) {
@@ -72,6 +74,11 @@ public class DataManager {
             Map<String, Data> categoryDataCopy = new HashMap<>();
             for (Map.Entry<String, Data> objectEntry : categoryEntry.getValue().entrySet()) {
                 categoryDataCopy.put(objectEntry.getKey(), objectEntry.getValue() == null ? null : objectEntry.getValue().createCopy());
+                /*System.out.println("Added entry!");
+                System.out.println("Category: " + categoryEntry.getKey());
+                System.out.println("Object: " + objectEntry.getKey());
+                System.out.println("OriginalData: " + objectEntry.getValue());
+                System.out.println("NewData: " + (objectEntry.getValue() == null ? null : objectEntry.getValue().createCopy()));*/
             }
             dataCopy.put(categoryEntry.getKey(), categoryDataCopy);
         }

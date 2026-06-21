@@ -46,6 +46,10 @@ public class Presenter implements PresenterActions {
     public void start() {
         projectManager.loadRecentProjects(dataLoader.loadRecentProjects());
         view.updateRecentProjects(projectManager.getRecentProjects());
+        dataManager.setSavedChanges();
+        configMenuManager.setSavedChanges();
+        phraseEditorManager.setSavedChanges();
+        scriptEditorManager.setSavedChanges();
     }
 
     @Override
@@ -57,10 +61,10 @@ public class Presenter implements PresenterActions {
             onSaveProject();
         }
 
-        dataManager.clearData();
-        configMenuManager.clearConfigData();
-        phraseEditorManager.clearPhrases();
-        scriptEditorManager.clearScripts();
+        dataManager.unloadData();
+        configMenuManager.unloadConfigData();
+        phraseEditorManager.unloadPhrases();
+        scriptEditorManager.unloadScripts();
         view.browserLoadObjects(dataManager.getAllObjectIDs());
 
         projectManager.setProjectLoaded(true);
@@ -80,7 +84,7 @@ public class Presenter implements PresenterActions {
         String projectPath = file.getAbsolutePath();
         ProjectLoadData projectData = dataLoader.loadFromDir(new File(projectPath), templateRegistry);
         dataManager.loadData(projectData.gameData());
-        configMenuManager.setConfigData(projectData.configData());
+        configMenuManager.loadConfigData(projectData.configData());
         phraseEditorManager.loadPhrases(projectData.phrases());
         scriptEditorManager.loadScripts(projectData.scripts());
         view.browserLoadObjects(dataManager.getAllObjectIDs());

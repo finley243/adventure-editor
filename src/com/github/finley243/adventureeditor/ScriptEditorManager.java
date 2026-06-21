@@ -16,6 +16,7 @@ public class ScriptEditorManager {
 
     public void loadScripts(Map<String, String> scripts) {
         this.scripts = new HashMap<>(scripts);
+        setSavedChanges();
     }
 
     public void setScript(String name, String body) {
@@ -31,8 +32,9 @@ public class ScriptEditorManager {
         return new HashMap<>(scripts);
     }
 
-    public void clearScripts() {
+    public void unloadScripts() {
         scripts = new HashMap<>();
+        setSavedChanges();
     }
 
     public void removeScript(String name) {
@@ -52,7 +54,7 @@ public class ScriptEditorManager {
     }
 
     public void setSavedChanges() {
-        this.lastSavedScripts = new HashMap<>(scripts);
+        this.lastSavedScripts = scripts == null ? null : new HashMap<>(scripts);
     }
 
 }
