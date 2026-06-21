@@ -14,6 +14,10 @@ public class EditorManager {
         this.topLevelEditorWindows = new HashMap<>();
     }
 
+    public boolean hasAnyOpenFrame() {
+        return topLevelEditorWindows.values().stream().anyMatch(m -> !m.isEmpty());
+    }
+
     public void closeEditorFrameIfActive(String categoryID, String objectID) {
         EditorFrame activeFrame = getActiveTopLevelFrame(categoryID, objectID);
         if (activeFrame != null) {
@@ -41,6 +45,15 @@ public class EditorManager {
         return true;
     }
 
+    public void forceCloseAllEditorFrames() {
+        for (Map<String, EditorFrame> categoryEditors : topLevelEditorWindows.values()) {
+            for (EditorFrame editorFrame : categoryEditors.values()) {
+                boolean didClose = editorFrame.requestClose(true, false);
+                if (!didClose) return;
+            }
+        }
+    }
+
     public EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
         if (categoryID == null | objectID == null) {
             return null;
@@ -55,10 +68,7 @@ public class EditorManager {
         if (objectID == null) {
             return;
         }
-        if (!topLevelEditorWindows.containsKey(categoryID)) {
-            topLevelEditorWindows.put(categoryID, new HashMap<>());
-        }
-        topLevelEditorWindows.get(categoryID).put(objectID, frame);
+        topLevelEditorWindows.computeIfAbsent(categoryID, k -> new HashMap<>()).put(objectID, frame);
     }
 
     public void removeActiveTopLevelFrame(String categoryID, String objectID) {

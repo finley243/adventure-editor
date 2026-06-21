@@ -28,8 +28,6 @@ public interface ViewActions {
 
     void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
-    void closeAllEditors();
-
     void openPhraseMenu(Map<String, String> phrases);
 
     void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
@@ -50,7 +48,9 @@ public interface ViewActions {
 
     SaveConfirmationResult confirmProjectSave();
 
-    DeleteConfirmationResult confirmDelete(String deleteName);
+    DeleteConfirmationResult confirmDeletePhrase(String deleteName);
+
+    DeleteConfirmationResult confirmDeleteScript(String deleteName);
 
     DeleteObjectConfirmationResult confirmDeleteObject(String objectID, int referenceCount);
 
@@ -71,6 +71,10 @@ public interface ViewActions {
     void forceCloseScript(String name);
 
     void forceClosePhrase(String key);
+
+    void forceCloseAllEditors();
+
+    boolean hasOpenEditors();
 
     boolean closeAllEditorsWithConfirmation();
 

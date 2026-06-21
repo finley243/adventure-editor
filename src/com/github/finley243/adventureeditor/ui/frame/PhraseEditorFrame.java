@@ -167,16 +167,6 @@ public class PhraseEditorFrame extends JDialog {
         }
     }
 
-    private int indexOfPhrase(String phraseKey) {
-        for (int i = 0; i < phraseTable.getRowCount(); i++) {
-            String rowKey = (String) tableModel.getValueAt(i, 0);
-            if (rowKey.equals(phraseKey)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     private void selectRow(int viewIndex) {
         if (phraseTable.getRowCount() == 0) return;
         if (viewIndex >= phraseTable.getRowCount()) {

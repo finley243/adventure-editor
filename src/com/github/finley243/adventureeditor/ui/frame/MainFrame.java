@@ -56,7 +56,6 @@ public class MainFrame extends JFrame implements ViewActions {
         this.editorManager = new EditorManager();
         this.phraseFrameHandler = new ChildFrameHandler<>();
         this.scriptFrameHandler = new ChildFrameHandler<>();
-        this.browserFrame = new BrowserFrame(this, templateRegistry);
 
         this.setSize(800, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -176,6 +175,8 @@ public class MainFrame extends JFrame implements ViewActions {
         this.setVisible(true);
         this.setLocationRelativeTo(null);
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        this.browserFrame = new BrowserFrame(this, templateRegistry);
     }
 
     public void registerPresenter(PresenterActions presenter) {
@@ -187,34 +188,6 @@ public class MainFrame extends JFrame implements ViewActions {
     private PresenterActions getPresenter() {
         if (presenter == null) throw new IllegalStateException("Presenter has not been registered");
         return presenter;
-    }
-
-    public void setProjectName(String name) {
-        if (name == null) {
-            this.setTitle(EDITOR_NAME);
-        } else {
-            this.setTitle(EDITOR_NAME + " - " + (hasUnsavedChanges ? "*" : "") + name);
-        }
-    }
-
-    public void showErrorDialog(String message) {
-        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    public boolean recentProjectDeleteConfirmation() {
-        int choice = JOptionPane.showOptionDialog(this, "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
-        return choice == JOptionPane.YES_OPTION;
-    }
-
-    public SaveConfirmationResult projectSaveConfirmation() {
-        int result = JOptionPane.showConfirmDialog(this, "Save changes to the current project?", "Save Changes?", JOptionPane.YES_NO_CANCEL_OPTION);
-        if (result == JOptionPane.YES_OPTION) {
-            return SaveConfirmationResult.YES;
-        } else if (result == JOptionPane.NO_OPTION) {
-            return SaveConfirmationResult.NO;
-        } else {
-            return SaveConfirmationResult.CANCEL;
-        }
     }
 
     public File selectProjectSaveDirectory() {
@@ -240,14 +213,9 @@ public class MainFrame extends JFrame implements ViewActions {
     @Override
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-            if (isProjectLoaded && hasUnsavedChanges) {
-                SaveConfirmationResult result = projectSaveConfirmation();
-                if (result == SaveConfirmationResult.YES) {
-                    getPresenter().onSaveProject();
-                    super.processWindowEvent(e);
-                } else if (result == SaveConfirmationResult.NO) {
-                    super.processWindowEvent(e);
-                }
+            boolean shouldClose = getPresenter().onCloseProgram();
+            if (shouldClose) {
+                super.processWindowEvent(e);
             }
         } else {
             super.processWindowEvent(e);
@@ -297,11 +265,6 @@ public class MainFrame extends JFrame implements ViewActions {
             EditorFrame editorFrame = new EditorFrame(this, template, initialData, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
             editorManager.addActiveTopLevelFrame(template.id(), objectID, editorFrame);
         }
-    }
-
-    @Override
-    public void closeAllEditors() {
-        editorManager.closeAllActiveEditorFrames();
     }
 
     @Override
@@ -393,18 +356,36 @@ public class MainFrame extends JFrame implements ViewActions {
 
     @Override
     public void showError(String message) {
-        this.showErrorDialog(message);
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     @Override
     public SaveConfirmationResult confirmProjectSave() {
-        return this.projectSaveConfirmation();
+        int result = JOptionPane.showConfirmDialog(this, "Save changes to the current project?", "Save Changes?", JOptionPane.YES_NO_CANCEL_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+            return SaveConfirmationResult.YES;
+        } else if (result == JOptionPane.NO_OPTION) {
+            return SaveConfirmationResult.NO;
+        } else {
+            return SaveConfirmationResult.CANCEL;
+        }
     }
 
     @Override
-    public DeleteConfirmationResult confirmDelete(String deleteName) {
+    public DeleteConfirmationResult confirmDeletePhrase(String deleteName) {
         Object[] confirmOptions = {"Delete", "Cancel"};
         int confirmResult = JOptionPane.showOptionDialog(phraseEditorFrame, "Are you sure you want to delete " + deleteName + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        if (confirmResult == 0) {
+            return DeleteConfirmationResult.DELETE;
+        } else {
+            return  DeleteConfirmationResult.CANCEL;
+        }
+    }
+
+    @Override
+    public DeleteConfirmationResult confirmDeleteScript(String deleteName) {
+        Object[] confirmOptions = {"Delete", "Cancel"};
+        int confirmResult = JOptionPane.showOptionDialog(scriptEditorFrame, "Are you sure you want to delete " + deleteName + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
         if (confirmResult == 0) {
             return DeleteConfirmationResult.DELETE;
         } else {
@@ -442,7 +423,11 @@ public class MainFrame extends JFrame implements ViewActions {
 
     @Override
     public void updateProjectName(String name) {
-        setProjectName(name);
+        if (name == null) {
+            this.setTitle(EDITOR_NAME);
+        } else {
+            this.setTitle(EDITOR_NAME + " - " + (hasUnsavedChanges ? "*" : "") + name);
+        }
     }
 
     @Override
@@ -502,8 +487,42 @@ public class MainFrame extends JFrame implements ViewActions {
     }
 
     @Override
+    public void forceCloseAllEditors() {
+        if (configFrame != null) {
+            configFrame.requestClose(true, false);
+            configFrame = null;
+        }
+        scriptFrameHandler.forceCloseAll();
+        if (scriptEditorFrame != null) {
+            scriptEditorFrame.dispose();
+            scriptEditorFrame = null;
+        }
+        phraseFrameHandler.forceCloseAll();
+        if (phraseEditorFrame != null) {
+            phraseEditorFrame.dispose();
+            phraseEditorFrame = null;
+        }
+        editorManager.forceCloseAllEditorFrames();
+    }
+
+    @Override
+    public boolean hasOpenEditors() {
+        if (configFrame != null) return true;
+        if (scriptFrameHandler.hasAnyOpenFrame()) return true;
+        if (phraseFrameHandler.hasAnyOpenFrame()) return true;
+        return editorManager.hasAnyOpenFrame();
+    }
+
+    @Override
     public boolean closeAllEditorsWithConfirmation() {
-        if (!configFrame.requestClose(false, false)) return false;
+        if (configFrame != null) {
+            boolean closedConfig = configFrame.requestClose(false, false);
+            if (closedConfig) {
+                configFrame = null;
+            } else {
+                return false;
+            }
+        }
         if (!scriptFrameHandler.closeAll()) return false;
         if (scriptEditorFrame != null) {
             scriptEditorFrame.dispose();
@@ -520,7 +539,8 @@ public class MainFrame extends JFrame implements ViewActions {
     private void attemptOpeningRecentProject(ProjectFile projectFile) {
         File file = new File(projectFile.absolutePath());
         if (!file.exists()) {
-            boolean deleteMissingProject = recentProjectDeleteConfirmation();
+            int choice = JOptionPane.showOptionDialog(this, "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
+            boolean deleteMissingProject = choice == JOptionPane.YES_OPTION;
             if (deleteMissingProject) {
                 getPresenter().onRemoveRecentProject(projectFile);
             }

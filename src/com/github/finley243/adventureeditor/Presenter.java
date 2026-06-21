@@ -9,6 +9,7 @@ import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.DeleteConfirmationResult;
 import com.github.finley243.adventureeditor.ui.DeleteObjectConfirmationResult;
 import com.github.finley243.adventureeditor.ui.ErrorData;
+import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 
 import java.io.File;
 import java.util.*;
@@ -47,24 +48,45 @@ public class Presenter implements PresenterActions {
         view.updateRecentProjects(projectManager.getRecentProjects());
     }
 
-    // TODO - For all project change operations, implement save confirmations for all open editors first
     @Override
     public void onNewProject() {
-        if (projectHasUnsavedChanges()) {
-
+        SaveConfirmationResult result = closeProjectWithSaveConfirmation();
+        if (result == SaveConfirmationResult.CANCEL) {
+            return;
+        } else if (result == SaveConfirmationResult.YES) {
+            onSaveProject();
         }
 
+        dataManager.clearData();
+        configMenuManager.clearConfigData();
+        phraseEditorManager.clearPhrases();
+        scriptEditorManager.clearScripts();
+        view.browserLoadObjects(dataManager.getAllObjectIDs());
+
         projectManager.setProjectLoaded(true);
+        view.setProjectIsLoaded(true);
+        onOpenConfigEditor();
     }
 
     @Override
     public void onOpenProject(File file) {
-        if (projectHasUnsavedChanges()) {
-
+        SaveConfirmationResult result = closeProjectWithSaveConfirmation();
+        if (result == SaveConfirmationResult.CANCEL) {
+            return;
+        } else if (result == SaveConfirmationResult.YES) {
+            onSaveProject();
         }
 
         String projectPath = file.getAbsolutePath();
+        ProjectLoadData projectData = dataLoader.loadFromDir(new File(projectPath), templateRegistry);
+        dataManager.loadData(projectData.gameData());
+        configMenuManager.setConfigData(projectData.configData());
+        phraseEditorManager.loadPhrases(projectData.phrases());
+        scriptEditorManager.loadScripts(projectData.scripts());
+        view.browserLoadObjects(dataManager.getAllObjectIDs());
+
         projectManager.setProjectLoaded(true);
+        view.setProjectIsLoaded(true);
         projectManager.setLoadedProjectPath(projectPath);
         projectManager.addRecentProject(new ProjectFile(file.getName(), file.getAbsolutePath()));
         dataLoader.saveRecentProjects(projectManager.getRecentProjects());
@@ -111,14 +133,20 @@ public class Presenter implements PresenterActions {
     @Override
     public void onCreateObject(String categoryID) {
         Template template = templateRegistry.getTemplate(categoryID);
-        view.openEditorFrame(template, null, null, data -> saveObjectData(data, null), data -> validateObject(data, null));
+        view.openEditorFrame(template, null, null, data -> {
+            saveObjectData(data, null);
+            updateProjectChanges();
+            }, data -> validateObject(data, null));
     }
 
     @Override
     public void onEditObject(String categoryID, String objectID) {
         Template template = templateRegistry.getTemplate(categoryID);
         Data initialData = dataManager.getData(categoryID, objectID);
-        view.openEditorFrame(template, objectID, initialData, data -> saveObjectData(data, initialData), data -> validateObject(data, initialData));
+        view.openEditorFrame(template, objectID, initialData, data -> {
+            saveObjectData(data, initialData);
+            updateProjectChanges();
+            }, data -> validateObject(data, initialData));
     }
 
     @Override
@@ -128,6 +156,7 @@ public class Presenter implements PresenterActions {
         view.openEditorFrame(template, objectID, initialData, data -> {
             saveObjectData(data, initialData);
             onSave.accept(data, initialData);
+            updateProjectChanges();
         }, data -> validateObject(data, initialData));
     }
 
@@ -138,6 +167,7 @@ public class Presenter implements PresenterActions {
         if (result == DeleteObjectConfirmationResult.DELETE) {
             dataManager.removeData(categoryID, objectID);
             view.browserRemoveObject(categoryID, objectID);
+            updateProjectChanges();
             return true;
         } else if (result == DeleteObjectConfirmationResult.VIEW_REFERENCES) {
             view.openReferenceList(references);
@@ -156,6 +186,7 @@ public class Presenter implements PresenterActions {
         }
         dataManager.setData(categoryID, newObjectID, objectDataCopy);
         view.browserAddObject(categoryID, newObjectID);
+        updateProjectChanges();
     }
 
     @Override
@@ -189,6 +220,7 @@ public class Presenter implements PresenterActions {
                 phraseEditorManager.removePhrase(phraseKey);
             }
             view.updatePhrases(phraseEditorManager.getPhrases());
+            updateProjectChanges();
         }, data -> validatePhrase(data, initialData));
     }
 
@@ -197,16 +229,18 @@ public class Presenter implements PresenterActions {
         view.openPhraseEditor(null, null, data -> {
             phraseEditorManager.setPhrase(getPhraseKeyFromData(data), getPhraseTextFromData(data));
             view.updatePhrases(phraseEditorManager.getPhrases());
+            updateProjectChanges();
         }, data -> validatePhrase(data, null));
     }
 
     @Override
     public void onDeletePhrase(String phraseKey) {
-        DeleteConfirmationResult result = view.confirmDelete(phraseKey);
+        DeleteConfirmationResult result = view.confirmDeletePhrase(phraseKey);
         if (result == DeleteConfirmationResult.DELETE) {
             view.forceClosePhrase(phraseKey);
             phraseEditorManager.removePhrase(phraseKey);
             view.updatePhrases(phraseEditorManager.getPhrases());
+            updateProjectChanges();
         }
     }
 
@@ -216,6 +250,7 @@ public class Presenter implements PresenterActions {
         String duplicateKey = generateDuplicateID(phraseKey, phraseEditorManager.getPhraseIDs());
         phraseEditorManager.setPhrase(duplicateKey, phraseText);
         view.updatePhrases(phraseEditorManager.getPhrases());
+        updateProjectChanges();
     }
 
     @Override
@@ -229,6 +264,7 @@ public class Presenter implements PresenterActions {
         view.openScriptEditor(scriptName, initialData, data -> {
             String scriptBody = getScriptBodyFromData(data);
             scriptEditorManager.setScript(scriptName, scriptBody);
+            updateProjectChanges();
         }, data -> new ErrorData(false, null));
     }
 
@@ -247,16 +283,18 @@ public class Presenter implements PresenterActions {
         view.openScriptEditor(scriptName, null, data -> {
             String scriptBody = getScriptBodyFromData(data);
             scriptEditorManager.setScript(scriptName, scriptBody);
+            updateProjectChanges();
         }, data -> new ErrorData(false, null));
     }
 
     @Override
     public void onDeleteScript(String scriptName) {
-        DeleteConfirmationResult result = view.confirmDelete(scriptName);
+        DeleteConfirmationResult result = view.confirmDeleteScript(scriptName);
         if (result == DeleteConfirmationResult.DELETE) {
             view.forceCloseScript(scriptName);
             scriptEditorManager.removeScript(scriptName);
             view.updateScripts(scriptEditorManager.getScripts());
+            updateProjectChanges();
         }
     }
 
@@ -269,6 +307,35 @@ public class Presenter implements PresenterActions {
         }, data -> validateConfig(data, initialData));
     }
 
+    @Override
+    public boolean onCloseProgram() {
+        SaveConfirmationResult result = closeProjectWithSaveConfirmation();
+        if (result == SaveConfirmationResult.YES) {
+            onSaveProject();
+            return true;
+        } else return result != SaveConfirmationResult.CANCEL;
+    }
+
+    private SaveConfirmationResult closeProjectWithSaveConfirmation() {
+        if (projectHasUnsavedChanges() || view.hasOpenEditors()) {
+            SaveConfirmationResult result = view.confirmProjectSave();
+            if (result == SaveConfirmationResult.CANCEL) return SaveConfirmationResult.CANCEL;
+            if (result == SaveConfirmationResult.YES) {
+                boolean continueClosing = view.closeAllEditorsWithConfirmation();
+                if (!continueClosing) return SaveConfirmationResult.CANCEL;
+                return SaveConfirmationResult.YES;
+            } else {
+                view.forceCloseAllEditors();
+                return SaveConfirmationResult.NO;
+            }
+        }
+        return SaveConfirmationResult.NO;
+    }
+
+    private void updateProjectChanges() {
+        view.setHasUnsavedProjectChanges(projectHasUnsavedChanges());
+    }
+
     private boolean projectHasUnsavedChanges() {
         return projectManager.hasUnsavedChanges() || phraseEditorManager.hasUnsavedChanges() || scriptEditorManager.hasUnsavedChanges() || configMenuManager.hasUnsavedChanges() || dataManager.hasUnsavedChanges();
     }
@@ -278,6 +345,7 @@ public class Presenter implements PresenterActions {
         scriptEditorManager.setSavedChanges();
         configMenuManager.setSavedChanges();
         dataManager.setSavedChanges();
+        view.setHasUnsavedProjectChanges(false);
     }
 
     private Data generateDataForPhrase(String phraseKey) {
@@ -306,7 +374,7 @@ public class Presenter implements PresenterActions {
 
     private String getScriptBodyFromData(Data data) {
         if (data == null) return null;
-        return ((DataString) ((DataObject) data).getValue().get(PARAMETER_SCRIPT_BODY)).getValue();
+        return ((DataScript) ((DataObject) data).getValue().get(PARAMETER_SCRIPT_BODY)).getValue();
     }
 
     private void saveObjectData(Data objectData, Data initialData) {

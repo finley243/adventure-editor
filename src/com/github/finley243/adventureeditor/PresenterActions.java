@@ -53,4 +53,6 @@ public interface PresenterActions {
 
     void onOpenConfigEditor();
 
+    boolean onCloseProgram();
+
 }

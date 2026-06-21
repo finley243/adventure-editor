@@ -50,6 +50,14 @@ public class DataManager {
         return data;
     }
 
+    public Map<String, Set<String>> getAllObjectIDs() {
+        Map<String, Set<String>> objectIDs = new HashMap<>();
+        for (Map.Entry<String, Map<String, Data>> entry : data.entrySet()) {
+            objectIDs.put(entry.getKey(), entry.getValue().keySet());
+        }
+        return objectIDs;
+    }
+
     public void clearData() {
         data = new HashMap<>();
     }

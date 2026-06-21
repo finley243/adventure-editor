@@ -166,16 +166,6 @@ public class ScriptEditorFrame extends JDialog {
         }
     }
 
-    private int indexOfScript(String scriptName) {
-        for (int i = 0; i < scriptTable.getRowCount(); i++) {
-            String rowKey = (String) tableModel.getValueAt(i, 0);
-            if (rowKey.equals(scriptName)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     private void selectRow(int viewIndex) {
         if (scriptTable.getRowCount() == 0) return;
         if (viewIndex >= scriptTable.getRowCount()) {

@@ -2,7 +2,6 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
-import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
