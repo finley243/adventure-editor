@@ -29,6 +29,7 @@ import java.util.function.Function;
 public class MainFrame extends JFrame implements ViewActions {
 
     private static final String EDITOR_NAME = "AdventureEditor";
+    private static final String UNNAMED_PROJECT_NAME = "UNNAMED PROJECT";
 
     private PresenterActions presenter;
     private boolean hasUnsavedChanges;
@@ -48,6 +49,8 @@ public class MainFrame extends JFrame implements ViewActions {
     private final BrowserFrame browserFrame;
 
     private final JMenu fileOpenRecent;
+
+    private String projectName;
 
     public MainFrame(ParameterFactory parameterFactory, TemplateRegistry templateRegistry) {
         super(EDITOR_NAME);
@@ -419,15 +422,13 @@ public class MainFrame extends JFrame implements ViewActions {
     @Override
     public void setProjectIsLoaded(boolean isProjectLoaded) {
         this.isProjectLoaded = isProjectLoaded;
+        updateTitleBar();
     }
 
     @Override
     public void updateProjectName(String name) {
-        if (name == null) {
-            this.setTitle(EDITOR_NAME);
-        } else {
-            this.setTitle(EDITOR_NAME + " - " + (hasUnsavedChanges ? "*" : "") + name);
-        }
+        this.projectName = name;
+        updateTitleBar();
     }
 
     @Override
@@ -546,6 +547,16 @@ public class MainFrame extends JFrame implements ViewActions {
             }
         } else {
             getPresenter().onOpenProject(file);
+        }
+    }
+
+    private void updateTitleBar() {
+        if (!isProjectLoaded) {
+            this.setTitle(EDITOR_NAME);
+        } else if (projectName == null) {
+            this.setTitle(EDITOR_NAME + " - " + (hasUnsavedChanges ? "*" : "") + UNNAMED_PROJECT_NAME);
+        } else {
+            this.setTitle(EDITOR_NAME + " - " + (hasUnsavedChanges ? "*" : "") + projectName);
         }
     }
 

@@ -67,8 +67,10 @@ public class Presenter implements PresenterActions {
         scriptEditorManager.unloadScripts();
         view.browserLoadObjects(dataManager.getAllObjectIDs());
 
+        projectManager.setLoadedProjectPath(null);
         projectManager.setProjectLoaded(true);
         view.setProjectIsLoaded(true);
+        updateProjectChanges();
         onOpenConfigEditor();
     }
 
@@ -94,6 +96,8 @@ public class Presenter implements PresenterActions {
         projectManager.setLoadedProjectPath(projectPath);
         projectManager.addRecentProject(new ProjectFile(file.getName(), file.getAbsolutePath()));
         dataLoader.saveRecentProjects(projectManager.getRecentProjects());
+        view.updateProjectName(configMenuManager.getProjectName());
+        updateProjectChanges();
     }
 
     @Override
