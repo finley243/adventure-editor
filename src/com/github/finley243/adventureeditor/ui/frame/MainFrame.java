@@ -434,6 +434,7 @@ public class MainFrame extends JFrame implements ViewActions {
     @Override
     public void setHasUnsavedProjectChanges(boolean hasUnsaved) {
         this.hasUnsavedChanges = hasUnsaved;
+        updateTitleBar();
     }
 
     @Override

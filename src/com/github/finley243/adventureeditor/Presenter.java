@@ -312,6 +312,7 @@ public class Presenter implements PresenterActions {
         view.openConfigEditor(initialData, data -> {
             configMenuManager.setConfigData(data);
             view.updateProjectName(configMenuManager.getProjectName());
+            updateProjectChanges();
         }, data -> validateConfig(data, initialData));
     }
 
