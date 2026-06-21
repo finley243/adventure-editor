@@ -56,6 +56,8 @@ public class ScriptEditorFrame extends JDialog {
                     if (row != -1) {
                         scriptTable.setRowSelectionInterval(viewRow, viewRow);
                         openContextMenu(scriptTable, e.getPoint(), (String) tableModel.getValueAt(row, 0), viewRow, presenter);
+                    } else {
+                        openContextMenuNoSelection(scriptTable, e.getPoint(), presenter);
                     }
                 }
             }
@@ -63,6 +65,14 @@ public class ScriptEditorFrame extends JDialog {
         adjustColumnWidths();
 
         JScrollPane scrollPane = new JScrollPane(scriptTable);
+        scrollPane.getViewport().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    openContextMenuNoSelection(scriptTable, e.getPoint(), presenter);
+                }
+            }
+        });
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         this.getContentPane().add(mainPanel);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -201,6 +211,14 @@ public class ScriptEditorFrame extends JDialog {
             selectRow(viewRowIndex);
         });
         menu.add(menuDelete);
+        menu.show(component, point.x, point.y);
+    }
+
+    private void openContextMenuNoSelection(Component component, Point point, PresenterActions presenter) {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem menuNew = new JMenuItem("New");
+        menuNew.addActionListener(e -> presenter.onNewScript());
+        menu.add(menuNew);
         menu.show(component, point.x, point.y);
     }
 

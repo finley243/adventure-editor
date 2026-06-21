@@ -55,7 +55,7 @@ public class EditorManager {
     }
 
     public EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
-        if (categoryID == null | objectID == null) {
+        if (categoryID == null || objectID == null) {
             return null;
         }
         if (!topLevelEditorWindows.containsKey(categoryID)) {

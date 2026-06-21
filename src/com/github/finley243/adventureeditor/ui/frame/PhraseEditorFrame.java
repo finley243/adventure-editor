@@ -57,6 +57,8 @@ public class PhraseEditorFrame extends JDialog {
                     if (row != -1) {
                         phraseTable.setRowSelectionInterval(viewRow, viewRow);
                         openContextMenu(phraseTable, e.getPoint(), (String) tableModel.getValueAt(row, 0), viewRow, presenter);
+                    } else {
+                        openContextMenuNoSelection(phraseTable, e.getPoint(), presenter);
                     }
                 }
             }
@@ -64,6 +66,14 @@ public class PhraseEditorFrame extends JDialog {
         adjustColumnWidths();
 
         JScrollPane scrollPane = new JScrollPane(phraseTable);
+        scrollPane.getViewport().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    openContextMenuNoSelection(phraseTable, e.getPoint(), presenter);
+                }
+            }
+        });
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         this.getContentPane().add(mainPanel);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -202,6 +212,14 @@ public class PhraseEditorFrame extends JDialog {
             selectRow(viewRowIndex);
         });
         menu.add(menuDelete);
+        menu.show(component, point.x, point.y);
+    }
+
+    private void openContextMenuNoSelection(Component component, Point point, PresenterActions presenter) {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem menuNew = new JMenuItem("New");
+        menuNew.addActionListener(e -> presenter.onNewPhrase());
+        menu.add(menuNew);
         menu.show(component, point.x, point.y);
     }
 
