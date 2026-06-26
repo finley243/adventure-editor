@@ -1,7 +1,9 @@
 package com.github.finley243.adventureeditor.ui;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 public class EditorGroup extends JPanel {
@@ -14,7 +16,9 @@ public class EditorGroup extends JPanel {
         this.name = name;
         this.setLayout(new GridBagLayout());
         if (name != null) {
-            this.setBorder(BorderFactory.createTitledBorder(name));
+            TitledBorder border = BorderFactory.createTitledBorder(name);
+            border.setTitleFont(UIManager.getFont("Label.font"));
+            this.setBorder(border);
         } else {
             this.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         }

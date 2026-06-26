@@ -54,7 +54,7 @@ public class EditorFrame extends JDialog {
         mainPanel.add(buttonPanel, BorderLayout.PAGE_END);
         this.getContentPane().add(mainPanel);
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        this.setResizable(false);
+        //this.setResizable(false);
 
         Action saveAction = new AbstractAction() {
             @Override

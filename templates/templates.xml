@@ -235,7 +235,7 @@
         <parameter id="attribute" dataType="objectSetUnique" name="Attributes" type="actorAttribute" group="stats"/>
         <parameter id="skill" dataType="objectSetUnique" name="Skills" type="actorSkill" y="1" group="stats"/>
         <parameter id="senseType" dataType="objectSetUnique" name="Sense Types" type="actorSenseType" optional="true" group="senses"/>
-        <parameter id="attackType" dataType="referenceSet" name="Unarmed Attack Types" type="attackType" optional="true" group="attackTypes"/>
+        <parameter id="attackType" dataType="objectSetUnique" name="Unarmed Attack Types" type="actorAttackType" optional="true" group="attackTypes"/>
         <parameter id="startEffect" dataType="objectSet" name="Starting Effects" type="actorStartEffect" optional="true" group="startEffects"/>
         <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" group="inventory"/>
         <parameter id="limb" dataType="objectSetUnique" name="Limbs" type="actorLimb" optional="true" group="limbs"/>
@@ -270,6 +270,9 @@
     </template>
     <template id="actorSenseType" name="Sense Type" nameFormat="$senseType" primaryParameter="senseType">
         <parameter id="senseType" dataType="reference" name="Sense Type" type="senseType" format="current_tag"/>
+    </template>
+    <template id="actorAttackType" name="Attack Type" nameFormat="$attackType" primaryParameter="attackType">
+        <parameter id="attackType" dataType="reference" name="Attack Type" type="attackType" format="current_tag"/>
     </template>
     <template id="actorLimb" name="Limb" nameFormat="$id" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute"/>
@@ -646,7 +649,10 @@
     <template id="senseType" name="Sense Type" topLevel="true" fileName="sense_types" nameFormat="$id" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="string" name="Name" format="child_tag" y="1"/>
-        <parameter id="bypassedObstructionType" dataType="referenceSet" type="obstructionType" name="Bypassed Obstruction Types" y="2"/>
+        <parameter id="bypassedObstructionType" dataType="objectSetUnique" type="bypassedObstructionType" name="Bypassed Obstruction Types" y="2"/>
+    </template>
+    <template id="bypassedObstructionType" name="Bypassed Obstruction Type" nameFormat="$obstructionType" primaryParameter="obstructionType">
+        <parameter id="obstructionType" dataType="reference" type="obstructionType" format="current_tag"/>
     </template>
     <template id="skill" name="Skill" topLevel="true" fileName="skills" nameFormat="$id" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute"/>
