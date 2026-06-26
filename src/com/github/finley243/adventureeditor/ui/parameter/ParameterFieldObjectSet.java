@@ -193,9 +193,9 @@ public class ParameterFieldObjectSet extends ParameterField {
     public void setEnabledState(boolean enabled) {
         if (!enabled) {
             objectList.setSelectedIndex(-1);
-            objectList.setBackground(UIManager.getColor("Label.disabledBackground"));
+            //objectList.setBackground(UIManager.getColor("Label.disabledBackground"));
         } else {
-            objectList.setBackground(UIManager.getColor("List.background"));
+            //objectList.setBackground(UIManager.getColor("List.background"));
         }
         objectList.setEnabled(enabled);
         if (enabled) {

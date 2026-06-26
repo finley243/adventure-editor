@@ -16,8 +16,8 @@ public class EditorGroup extends JPanel {
         this.name = name;
         this.setLayout(new GridBagLayout());
         if (name != null) {
-            TitledBorder border = BorderFactory.createTitledBorder(name);
-            border.setTitleFont(UIManager.getFont("Label.font"));
+            //TitledBorder border = BorderFactory.createTitledBorder(name);
+            TitledBorder border = new ThemedTitledBorder(name);
             this.setBorder(border);
         } else {
             this.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
