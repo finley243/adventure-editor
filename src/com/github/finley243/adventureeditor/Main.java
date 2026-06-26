@@ -2,9 +2,7 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
-import com.github.finley243.adventureeditor.ui.DarkTheme;
-import com.github.finley243.adventureeditor.ui.LightTheme;
-import com.github.finley243.adventureeditor.ui.ThemeManager;
+import com.github.finley243.adventureeditor.ui.*;
 import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
@@ -40,7 +38,7 @@ public class Main {
         System.setProperty("awt.useSystemAAFontSettings", "on");
         System.setProperty("swing.aatext", "true");
 
-        ThemeManager.setTheme(new LightTheme());
+        ThemeManager.setTheme(new SoftDarkTheme());
 
         DataLoader dataLoader = new DataLoader();
         Map<String, Template> templateMap = dataLoader.loadTemplates();
