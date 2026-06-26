@@ -1,5 +1,9 @@
 package com.github.finley243.adventureeditor.ui;
 
+import com.github.finley243.adventureengine.script.*;
+import com.github.finley243.adventureengine.script.nodes.ASTFile;
+import com.github.finley243.adventureengine.script.nodes.ASTNode;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -8,20 +12,31 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ScriptPane extends JTextPane {
 
-    private static final Set<String> KEYWORDS = Set.of(
-            "if", "else", "while", "for", "return", "break", "continue", "func", "var", "stat", "statHolder"
-    );
-
     private boolean isAddingIndentation;
+    private final ScriptLexer lexer;
+    private final ScriptASTParser parser;
+    private final ScriptValidator validator;
+
+    private List<CompileError> activeErrors;
 
     public ScriptPane() {
         super();
+        this.lexer = new ScriptLexer();
+        this.parser = new ScriptASTParser();
+        this.validator = new ScriptValidator();
+        this.setBackground(Color.decode("#1E1E1E"));
+        this.setCaretColor(Color.decode("#D4D4D4"));
+        this.setSelectionColor(Color.decode("#264F78"));
+        this.setSelectedTextColor(Color.decode("#D4D4D4"));
         this.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -107,6 +122,26 @@ public class ScriptPane extends JTextPane {
                 }
             }
         });
+        ToolTipManager.sharedInstance().registerComponent(this);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        super.paintComponent(g2);
+    }
+
+    @Override
+    public String getToolTipText(MouseEvent e) {
+        int offset = viewToModel2D(e.getPoint());
+        for (CompileError error : activeErrors) {
+            if (offset >= error.range().start() && offset < error.range().end()) {
+                return error.message();
+            }
+        }
+        return null;
     }
 
     public void queueIndentation(DocumentEvent e) {
@@ -154,25 +189,44 @@ public class ScriptPane extends JTextPane {
     private void updateHighlights() {
         StyledDocument doc = this.getStyledDocument();
         Style defaultStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
-        StyleConstants.setFontSize(defaultStyle, 12);
-        StyleConstants.setFontFamily(defaultStyle, "Monospaced");
+        //StyleConstants.setFontSize(defaultStyle, 14);
+        StyleConstants.setFontFamily(defaultStyle, "Noto Sans Mono");
+        StyleConstants.setForeground(defaultStyle, Color.decode("#D4D4D4"));
         Style keywordStyle = doc.addStyle("keyword", defaultStyle);
-        StyleConstants.setForeground(keywordStyle, Color.decode("#000080"));
-        StyleConstants.setBold(keywordStyle, true);
+        StyleConstants.setForeground(keywordStyle, Color.decode("#569CD6"));
+        //StyleConstants.setBold(keywordStyle, true);
         Style literalStyle = doc.addStyle("literal", defaultStyle);
-        StyleConstants.setForeground(literalStyle, Color.decode("#C000C0"));
-        StyleConstants.setBold(literalStyle, true);
+        StyleConstants.setForeground(literalStyle, Color.decode("#569CD6"));
+        //StyleConstants.setBold(literalStyle, true);
         Style stringStyle = doc.addStyle("string", defaultStyle);
-        StyleConstants.setForeground(stringStyle, Color.decode("#00A000"));
+        StyleConstants.setForeground(stringStyle, Color.decode("#CE9178"));
         Style numberStyle = doc.addStyle("number", defaultStyle);
-        StyleConstants.setForeground(numberStyle, Color.decode("#008080"));
+        StyleConstants.setForeground(numberStyle, Color.decode("#B5CEA8"));
         Style operatorStyle = doc.addStyle("operator", defaultStyle);
-        StyleConstants.setForeground(operatorStyle, Color.decode("#CF5C00"));
+        StyleConstants.setForeground(operatorStyle, Color.decode("#D4D4D4"));
         Style errorStyle = doc.addStyle("error", defaultStyle);
-        StyleConstants.setForeground(errorStyle, Color.decode("#DC143C"));
-        StyleConstants.setBold(errorStyle, true);
+        StyleConstants.setForeground(errorStyle, Color.decode("#F44747"));
+        StyleConstants.setUnderline(errorStyle, true);
+        //StyleConstants.setBold(errorStyle, true);
         Style commentStyle = doc.addStyle("comment", defaultStyle);
-        StyleConstants.setForeground(commentStyle, Color.decode("#909090"));
+        StyleConstants.setForeground(commentStyle, Color.decode("#6A9955"));
+        StyleConstants.setItalic(commentStyle, true);
+        Style variableStyle = doc.addStyle("variable", defaultStyle);
+        StyleConstants.setForeground(variableStyle, Color.decode("#9CDCFE"));
+        Style functionStyle = doc.addStyle("function", defaultStyle);
+        StyleConstants.setForeground(functionStyle, Color.decode("#DCDCAA"));
+        Style functionDefStyle = doc.addStyle("functionDef", defaultStyle);
+        StyleConstants.setForeground(functionDefStyle, Color.decode("#DCDCAA"));
+        Style parameterDefStyle = doc.addStyle("parameterDef", defaultStyle);
+        StyleConstants.setForeground(parameterDefStyle, Color.decode("#9CDCFE"));
+        StyleConstants.setItalic(parameterDefStyle, true);
+        Style namedParamStyle = doc.addStyle("namedParam", defaultStyle);
+        StyleConstants.setForeground(namedParamStyle, Color.decode("#9CDCFE"));
+        StyleConstants.setItalic(namedParamStyle, true);
+        Style paramAssignStyle = doc.addStyle("paramAssign", defaultStyle);
+        StyleConstants.setForeground(paramAssignStyle, Color.decode("#A9B7C6"));
+        Style memberNameStyle = doc.addStyle("memberName", defaultStyle);
+        StyleConstants.setForeground(memberNameStyle, Color.decode("#9CDCFE"));
 
         doc.setCharacterAttributes(0, doc.getLength(), defaultStyle, true);
 
@@ -183,30 +237,36 @@ public class ScriptPane extends JTextPane {
             throw new RuntimeException(e);
         }
 
-        String combinedPattern = getString();
-        Pattern pattern = Pattern.compile(combinedPattern);
-        Matcher matcher = pattern.matcher(text);
+        List<CompileError> errors = new ArrayList<>();
+        List<ScriptToken> tokens = lexer.parseToTokens(text, "TEST", errors);
+        ASTFile ast = (ASTFile) parser.parse(tokens, errors);
+        validator.validate(List.of(ast), errors, Set.of());
 
-        while (matcher.find()) {
-            Style matchStyle;
-            if (matcher.group(1) != null) {
-                matchStyle = commentStyle;
-            } else if (matcher.group(2) != null) {
-                matchStyle = keywordStyle;
-            } else if (matcher.group(3) != null) {
-                matchStyle = literalStyle;
-            } else if (matcher.group(4) != null) {
-                matchStyle = stringStyle;
-            } else if (matcher.group(5) != null) {
-                matchStyle = numberStyle;
-            } else if (matcher.group(6) != null) {
-                matchStyle = operatorStyle;
-            } else if (matcher.group(7) != null) {
-                matchStyle = errorStyle;
-            } else {
-                matchStyle = defaultStyle;
-            }
-            doc.setCharacterAttributes(matcher.start(), matcher.end() - matcher.start(), matchStyle, true);
+        List<HighlightData> highlightData = ast.highlightData();
+        highlightData.addAll(lexer.getCommentHighlightData(text, "TEST"));
+
+        this.activeErrors = errors;
+
+        for (HighlightData highlight : highlightData) {
+            Style highlightStyle = switch (highlight.type()) {
+                case KEYWORD -> keywordStyle;
+                case OPERATOR -> operatorStyle;
+                case COMMENT -> commentStyle;
+                case STRING -> stringStyle;
+                case NUMBER -> numberStyle;
+                case BOOLEAN, NULL -> literalStyle;
+                case VARIABLE -> variableStyle;
+                case FUNCTION_CALL -> functionStyle;
+                case FUNCTION_DEFINITION_NAME -> functionDefStyle;
+                case PARAMETER_DEFINITION -> parameterDefStyle;
+                case PARAMETER_ASSIGNMENT -> paramAssignStyle;
+                case NAMED_PARAMETER_REFERENCE -> namedParamStyle;
+                case MEMBER_NAME -> memberNameStyle;
+            };
+            doc.setCharacterAttributes(highlight.range().start(), highlight.range().end() - highlight.range().start(), highlightStyle, true);
+        }
+        for (CompileError error : errors) {
+            doc.setCharacterAttributes(error.range().start(), error.range().end() - error.range().start(), errorStyle, true);
         }
     }
 
@@ -228,18 +288,6 @@ public class ScriptPane extends JTextPane {
             doc.setCharacterAttributes(index, targetString.length(), highlightStyle, true);
             index = text.indexOf(targetString, index + targetString.length());
         }
-    }
-
-    private static String getString() {
-        String commentPattern = "//[^\n]*|/\\*(?:.|\\R)*?(?:\\*/|$)";
-        String keywordPattern = "\\b(?:" + String.join("|", KEYWORDS) + ")\\b";
-        String literalPattern = "\\btrue\\b|\\bfalse\\b|\\bnull\\b";
-        String stringPattern = "\"[^\"]*\"|'[^']*'";
-        String numberPattern = "\\b\\d+\\.\\d+f\\b|\\b\\d+\\b";
-        String operatorPattern = "\\+|-|\\*|/|%|==|!=|<|>|<=|>=|&&|\\|\\||!|\\?|:|\\+=|-=|\\*=|/=|%=|=|\\^";
-        String errorPattern = "\\berror\\b";
-
-        return String.format("(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)", commentPattern, keywordPattern, literalPattern, stringPattern, numberPattern, operatorPattern, errorPattern);
     }
 
 }

@@ -5,6 +5,8 @@ import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,23 @@ public class Main {
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }*/
+        int fontSize = 14;
+        UIManager.getDefaults().keySet().forEach(key -> {
+            Object value = UIManager.get(key);
+            if (value instanceof Font font) {
+                int fontStyle = font.getStyle();
+                if (fontStyle == Font.BOLD) {
+                    fontStyle = Font.PLAIN;
+                } else if (fontStyle == Font.BOLD + Font.ITALIC) {
+                    fontStyle = Font.ITALIC;
+                }
+                UIManager.put(key, new Font("Noto Sans", fontStyle, fontSize));
+            }
+        });
+        UIManager.put("Label.font", new Font("Noto Sans", Font.BOLD, fontSize));
+
+        System.setProperty("awt.useSystemAAFontSettings", "on");
+        System.setProperty("swing.aatext", "true");
 
         DataLoader dataLoader = new DataLoader();
         Map<String, Template> templateMap = dataLoader.loadTemplates();
