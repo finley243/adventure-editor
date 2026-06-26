@@ -18,7 +18,7 @@ import java.awt.event.WindowEvent;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class EditorFrame extends JDialog {
+public class EditorFrame extends ThemedDialog {
 
     private final ParameterField parameterField;
     private final Template template;
@@ -30,7 +30,7 @@ public class EditorFrame extends JDialog {
 
     public EditorFrame(Window parentWindow, Template template, Data objectData, boolean isTopLevel, ParameterFactory parameterFactory, PresenterActions presenter, Consumer<Data> onSave, Function<Data, ErrorData> onValidate, Consumer<EditorFrame> onClose) {
         //super(template.name());
-        super(parentWindow);
+        super(parentWindow, template.name());
         this.onSave = onSave;
         this.onValidate = onValidate;
         this.onClose = onClose;

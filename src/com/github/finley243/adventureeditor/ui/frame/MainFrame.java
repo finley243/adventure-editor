@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class MainFrame extends JFrame implements ViewActions {
+public class MainFrame extends ThemedFrame implements ViewActions {
 
     private static final String EDITOR_NAME = "AdventureEditor";
     private static final String UNNAMED_PROJECT_NAME = "UNNAMED PROJECT";
@@ -127,7 +127,8 @@ public class MainFrame extends JFrame implements ViewActions {
 
         JPanel primaryPanel = new JPanel();
         primaryPanel.setLayout(new BorderLayout());
-        this.getContentPane().add(primaryPanel);
+        //this.getContentPane().add(primaryPanel);
+        add(primaryPanel, BorderLayout.CENTER);
 
         Action newProjectAction = new AbstractAction() {
             @Override
