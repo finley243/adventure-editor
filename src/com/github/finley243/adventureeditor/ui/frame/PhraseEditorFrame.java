@@ -12,7 +12,7 @@ import java.awt.event.*;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class PhraseEditorFrame extends JDialog {
+public class PhraseEditorFrame extends ThemedDialog {
 
     private static final String PHRASE_EDITOR_TITLE = "Phrases";
 
@@ -21,7 +21,7 @@ public class PhraseEditorFrame extends JDialog {
     private final Supplier<Boolean> onClose;
 
     public PhraseEditorFrame(Window parentWindow, PresenterActions presenter, Supplier<Boolean> onClose) {
-        super(parentWindow);
+        super(parentWindow, PHRASE_EDITOR_TITLE);
         this.onClose = onClose;
         this.setTitle(PHRASE_EDITOR_TITLE);
         this.setModalityType(ModalityType.MODELESS);

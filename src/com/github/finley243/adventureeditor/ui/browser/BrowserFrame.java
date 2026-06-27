@@ -4,6 +4,7 @@ import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
+import com.github.finley243.adventureeditor.ui.frame.ThemedDialog;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +12,7 @@ import java.awt.event.WindowEvent;
 import java.util.Map;
 import java.util.Set;
 
-public class BrowserFrame extends JDialog {
+public class BrowserFrame extends ThemedDialog {
 
     //private final DataManager dataManager;
     private final BrowserTree browserTree;
@@ -19,7 +20,7 @@ public class BrowserFrame extends JDialog {
     private PresenterActions presenter;
 
     public BrowserFrame(Window mainFrame, TemplateRegistry templateRegistry) {
-        super(mainFrame);
+        super(mainFrame, "Browser");
         this.templateRegistry = templateRegistry;
 
         this.setTitle("Browser");

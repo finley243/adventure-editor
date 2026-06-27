@@ -12,7 +12,7 @@ import java.awt.event.*;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-public class ReferenceListFrame extends JDialog {
+public class ReferenceListFrame extends ThemedDialog {
 
     private static final String REFERENCE_LIST_TITLE = "References";
 
@@ -21,7 +21,7 @@ public class ReferenceListFrame extends JDialog {
     private final Runnable onClose;
 
     public ReferenceListFrame(Window parentWindow, BiConsumer<String, String> onOpenReference, Runnable onClose) {
-        super(parentWindow);
+        super(parentWindow, REFERENCE_LIST_TITLE);
         this.onClose = onClose;
         this.setTitle(REFERENCE_LIST_TITLE);
         this.setModalityType(ModalityType.MODELESS);

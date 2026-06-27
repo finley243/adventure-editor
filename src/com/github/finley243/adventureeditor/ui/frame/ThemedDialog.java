@@ -1,6 +1,8 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
+import com.github.finley243.adventureeditor.ui.ThemeManager;
 import com.github.finley243.adventureeditor.ui.TitleBar;
+import com.github.finley243.adventureeditor.ui.WindowResizeHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,6 +20,8 @@ public class ThemedDialog extends JDialog {
         super.add(titleBar, BorderLayout.NORTH);
         contentPanel = new JPanel(new BorderLayout());
         super.add(contentPanel, BorderLayout.CENTER);
+        setBackground(ThemeManager.current().background());
+        new WindowResizeHandler(this).install();
     }
 
     @Override

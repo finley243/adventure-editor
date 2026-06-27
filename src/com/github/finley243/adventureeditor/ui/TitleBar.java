@@ -25,8 +25,39 @@ public class TitleBar extends JPanel {
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 4));
         buttons.setOpaque(false);
         if (window instanceof JFrame frame) {
-            JButton minimize = new JButton("-");
-            JButton maximize = new JButton("[]");
+            JButton minimize = createTitleBarButton();
+            minimize.setIcon(new Icon() {
+                public void paintIcon(Component c, Graphics g, int x, int y) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setColor(ThemeManager.current().foreground());
+                    g2.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                    //g2.drawLine(x + 2, y + 8, x + 14, y + 8);
+                    g2.drawLine(x + 2, y + 12, x + 14, y + 12);
+                    g2.dispose();
+                }
+                public int getIconWidth() { return 16; }
+                public int getIconHeight() { return 16; }
+            });
+            JButton maximize = createTitleBarButton();
+            maximize.setIcon(new Icon() {
+                public void paintIcon(Component c, Graphics g, int x, int y) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setColor(ThemeManager.current().foreground());
+                    g2.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                    if (frame.getExtendedState() == Frame.MAXIMIZED_BOTH) {
+                        // two lines peeking out behind (top and right edges of back square)
+                        g2.drawLine(x + 5, y + 2, x + 14, y + 2);
+                        g2.drawLine(x + 14, y + 2, x + 14, y + 11);
+                        // front square
+                        g2.drawRect(x + 2, y + 4, 10, 10);
+                    } else {
+                        g2.drawRect(x + 3, y + 3, 10, 10);
+                    }
+                    g2.dispose();
+                }
+                public int getIconWidth() { return 16; }
+                public int getIconHeight() { return 16; }
+            });
             minimize.addActionListener(e -> frame.setState(Frame.ICONIFIED));
             maximize.addActionListener(e -> {
                 if (frame.getExtendedState() == Frame.MAXIMIZED_BOTH) {
@@ -38,7 +69,19 @@ public class TitleBar extends JPanel {
             buttons.add(minimize);
             buttons.add(maximize);
         }
-        JButton close = new JButton("X");
+        JButton close = createTitleBarButton();
+        close.setIcon(new Icon() {
+            public void paintIcon(Component c, Graphics g, int x, int y) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setColor(ThemeManager.current().foreground());
+                g2.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.drawLine(x + 3, y + 3, x + 13, y + 13);
+                g2.drawLine(x + 13, y + 3, x + 3, y + 13);
+                g2.dispose();
+            }
+            public int getIconWidth() { return 16; }
+            public int getIconHeight() { return 16; }
+        });
         close.addActionListener(e -> window.dispatchEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSING)));
         buttons.add(close);
         add(buttons, BorderLayout.EAST);
@@ -60,5 +103,12 @@ public class TitleBar extends JPanel {
 
     public void setTitle(String title) {
         titleLabel.setText(" " + title);
+    }
+
+    private JButton createTitleBarButton() {
+        JButton button = new JButton();
+        button.setPreferredSize(new Dimension(24, 24));
+        button.setMargin(new Insets(0, 0, 0, 0));
+        return button;
     }
 }

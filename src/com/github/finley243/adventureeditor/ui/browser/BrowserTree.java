@@ -33,6 +33,8 @@ public class BrowserTree extends JTree {
         this.treeModel = new DefaultTreeModel(treeRoot, false);
         this.setModel(treeModel);
         this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        this.setRootVisible(false);
+        this.setShowsRootHandles(true);
         this.addMouseListener(new MouseAdapter() {
             private DefaultMutableTreeNode lastClickedNode;
 

@@ -12,7 +12,7 @@ import java.awt.event.*;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class ScriptEditorFrame extends JDialog {
+public class ScriptEditorFrame extends ThemedDialog {
 
     private static final String SCRIPT_EDITOR_TITLE = "Scripts";
 
@@ -21,7 +21,7 @@ public class ScriptEditorFrame extends JDialog {
     private final Supplier<Boolean> onClose;
 
     public ScriptEditorFrame(Window parentWindow, PresenterActions presenter, Supplier<Boolean> onClose) {
-        super(parentWindow);
+        super(parentWindow, SCRIPT_EDITOR_TITLE);
         this.onClose = onClose;
         this.setTitle(SCRIPT_EDITOR_TITLE);
         this.setModalityType(ModalityType.MODELESS);
