@@ -62,7 +62,7 @@ public class ChildFrameHandler<T> {
         // These MUST be while-loops to prevent concurrent modification exceptions
         Iterator<EditorFrame> itr = activeEditorFrames.values().iterator();
         while (itr.hasNext()) {
-            EditorFrame editorFrame = activeEditorFrames.values().iterator().next();
+            EditorFrame editorFrame = itr.next();
             boolean didClose = editorFrame.requestClose(false, false);
             if (!didClose) return false;
         }
@@ -78,7 +78,7 @@ public class ChildFrameHandler<T> {
         // These MUST be while-loops to prevent concurrent modification exceptions
         Iterator<EditorFrame> itr = activeEditorFrames.values().iterator();
         while (itr.hasNext()) {
-            EditorFrame editorFrame = activeEditorFrames.values().iterator().next();
+            EditorFrame editorFrame = itr.next();
             boolean didClose = editorFrame.requestClose(true, false);
             if (!didClose) return false;
         }

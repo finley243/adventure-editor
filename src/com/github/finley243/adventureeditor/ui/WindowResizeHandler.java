@@ -28,7 +28,10 @@ public class WindowResizeHandler extends MouseAdapter {
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             if (!(event instanceof MouseEvent e)) return;
             Component source = (Component) e.getSource();
-            if (!SwingUtilities.isDescendingFrom(source, window) && source != window) return;
+            //Window sourceWindow = SwingUtilities.getWindowAncestor(source);
+            Window sourceWindow = source instanceof Window ? (Window) source : SwingUtilities.getWindowAncestor(source);
+            if (sourceWindow != window) return;
+            if (sourceWindow != window && source != window) return;
             switch (e.getID()) {
                 case MouseEvent.MOUSE_MOVED -> mouseMoved(e);
                 case MouseEvent.MOUSE_PRESSED -> mousePressed(e);
