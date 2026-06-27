@@ -1,6 +1,7 @@
 package com.github.finley243.adventureeditor.ui;
 
 import com.github.finley243.adventureengine.script.*;
+import com.github.finley243.adventureengine.script.nodes.ASTCompound;
 import com.github.finley243.adventureengine.script.nodes.ASTFile;
 import com.github.finley243.adventureengine.script.nodes.ASTNode;
 
@@ -21,6 +22,11 @@ import java.util.regex.Pattern;
 
 public class ScriptPane extends JTextPane {
 
+    public enum Type {
+        FILE, SCRIPT, EXPRESSION
+    }
+
+    private Type type;
     private boolean isAddingIndentation;
     private final ScriptLexer lexer;
     private final ScriptASTParser parser;
@@ -28,8 +34,9 @@ public class ScriptPane extends JTextPane {
 
     private List<CompileError> activeErrors;
 
-    public ScriptPane() {
+    public ScriptPane(Type type) {
         super();
+        this.type = type;
         this.lexer = new ScriptLexer();
         this.parser = new ScriptASTParser();
         this.validator = new ScriptValidator();
@@ -239,10 +246,27 @@ public class ScriptPane extends JTextPane {
 
         List<CompileError> errors = new ArrayList<>();
         List<ScriptToken> tokens = lexer.parseToTokens(text, "TEST", errors);
-        ASTFile ast = (ASTFile) parser.parse(tokens, errors);
-        validator.validate(List.of(ast), errors, Set.of());
+        ASTNode ast;
+        switch (type) {
+            case EXPRESSION -> {
+                ast = parser.parseSingleExpression(tokens, errors);
+                validator.validateInlineExpression(ast, errors, Set.of(), Set.of());
+            }
+            case SCRIPT -> {
+                ast = (ASTCompound) parser.parseInlineScript(tokens, errors);
+                validator.validateInlineBlock((ASTCompound) ast, errors, Set.of(), Set.of());
+            }
+            case FILE -> {
+                ast = (ASTFile) parser.parse(tokens, errors);
+                validator.validate(List.of((ASTFile) ast), errors, Set.of());
+            }
+            case null -> throw new IllegalArgumentException("ScriptPane has no assigned type");
+        }
 
-        List<HighlightData> highlightData = ast.highlightData();
+        List<HighlightData> highlightData = new ArrayList<>();
+        if (ast != null) {
+            highlightData.addAll(ast.highlightData());
+        }
         highlightData.addAll(lexer.getCommentHighlightData(text, "TEST"));
 
         this.activeErrors = errors;

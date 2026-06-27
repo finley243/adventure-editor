@@ -176,7 +176,7 @@
         <parameter id="script" dataType="script" name="Script" format="current_tag"/>
     </template>
     <template id="condition" name="Condition" primaryParameter="condition">
-        <parameter id="condition" dataType="string" name="Condition" format="current_tag"/>
+        <parameter id="condition" dataType="expression" name="Condition" format="current_tag"/>
     </template>
     <template id="sceneChoice" name="Scene Choice" nameFormat="$text">
         <parameter id="link" dataType="reference" name="Link" format="attribute" type="scene"/>
@@ -196,7 +196,7 @@
         <parameter id="prompt" dataType="string" name="Prompt" format="child_tag" x="1"/>
         <parameter id="parameter" dataType="objectSetUnique" name="Parameters" type="actionParameter" y="1"/>
         <parameter id="condition" dataType="objectSet" name="Conditions" type="actionCondition" x="1" y="1"/>
-        <parameter id="conditionShow" dataType="string" name="Display Condition" optional="true" format="child_tag" x="2"/>
+        <parameter id="conditionShow" dataType="expression" name="Display Condition" optional="true" format="child_tag" x="2"/>
         <parameter id="script" dataType="object" name="Script" type="script" x="2" y="1"/>
     </template>
     <template id="actionParameter" name="Parameter" nameFormat="$name" primaryParameter="name">

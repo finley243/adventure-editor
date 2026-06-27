@@ -106,7 +106,9 @@ public class DataLoader {
                         case "reference" -> TemplateParameter.ParameterDataType.REFERENCE;
                         case "referenceSet" -> TemplateParameter.ParameterDataType.REFERENCE_SET;
                         case "enum" -> TemplateParameter.ParameterDataType.ENUM;
+                        case "expression" -> TemplateParameter.ParameterDataType.EXPRESSION;
                         case "script" -> TemplateParameter.ParameterDataType.SCRIPT;
+                        case "scriptFile" -> TemplateParameter.ParameterDataType.SCRIPT_FILE;
                         case "component" -> TemplateParameter.ParameterDataType.COMPONENT;
                         case "tree" -> TemplateParameter.ParameterDataType.TREE;
                         case "treeBranch" -> TemplateParameter.ParameterDataType.TREE_BRANCH;
@@ -147,7 +149,7 @@ public class DataLoader {
                             case STRING, STRING_LONG -> new DataString(defaultValueString);
                             case REFERENCE -> new DataReference(defaultValueString);
                             case ENUM -> new DataEnum(defaultValueString);
-                            case SCRIPT -> new DataScript(defaultValueString);
+                            case EXPRESSION, SCRIPT_FILE, SCRIPT -> new DataScript(defaultValueString);
                             case COMPONENT -> new DataComponent(defaultValueString, null, null);
                             case OBJECT, OBJECT_SET_UNIQUE, OBJECT_SET, REFERENCE_SET, TREE, TREE_BRANCH -> null;
                         };

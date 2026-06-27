@@ -82,7 +82,9 @@
             <xs:enumeration value="reference"/>
             <xs:enumeration value="referenceSet"/>
             <xs:enumeration value="enum"/>
+            <xs:enumeration value="expression"/>
             <xs:enumeration value="script"/>
+            <xs:enumeration value="scriptFile"/>
             <xs:enumeration value="component"/>
             <xs:enumeration value="tree"/>
             <xs:enumeration value="treeBranch"/>

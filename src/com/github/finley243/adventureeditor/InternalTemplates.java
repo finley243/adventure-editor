@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class InternalTemplates {
 
     public static final Template SCRIPT_TEMPLATE = new Template("script", "Script", false, null, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>() {{
-        add(new TemplateParameter("script", TemplateParameter.ParameterDataType.SCRIPT, null, null, false, false, null, null, new ArrayList<>(), false, null, 0, 1, 1, 1, null));
+        add(new TemplateParameter("script", TemplateParameter.ParameterDataType.SCRIPT_FILE, null, null, false, false, null, null, new ArrayList<>(), false, null, 0, 1, 1, 1, null));
     }}, null, null);
 
     public static final Template PHRASE_TEMPLATE = new Template("phrase", "Phrase", false, null, false, new ArrayList<>(), new ArrayList<>(), new ArrayList<>() {{

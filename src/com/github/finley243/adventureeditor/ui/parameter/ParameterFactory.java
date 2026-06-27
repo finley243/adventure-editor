@@ -4,6 +4,7 @@ import com.github.finley243.adventureeditor.DataManager;
 import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
+import com.github.finley243.adventureeditor.ui.ScriptPane;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 public class ParameterFactory {
@@ -29,7 +30,9 @@ public class ParameterFactory {
             case REFERENCE -> new ParameterFieldReference(editorFrame, parameter.optional(), parameter.name(), parentField, parameter.type(), dataManager.getIDsForCategoryArray(parameter.type()), dataManager, presenter);
             case REFERENCE_SET -> new ParameterFieldReferenceSet(editorFrame, parameter.optional(), parameter.name(), parentField, templateRegistry.getTemplate(parameter.type()), presenter);
             case ENUM -> new ParameterFieldEnum(editorFrame, parameter.optional(), parameter.name(), parentField, templateRegistry.getEnumValuesArray(parameter.type()));
-            case SCRIPT -> new ParameterFieldScript(editorFrame, parameter.optional(), parameter.name(), parentField);
+            case SCRIPT -> new ParameterFieldScript(editorFrame, parameter.optional(), parameter.name(), parentField, ScriptPane.Type.SCRIPT);
+            case EXPRESSION -> new ParameterFieldScript(editorFrame, parameter.optional(), parameter.name(), parentField, ScriptPane.Type.EXPRESSION);
+            case SCRIPT_FILE -> new ParameterFieldScript(editorFrame, parameter.optional(), parameter.name(), parentField, ScriptPane.Type.FILE);
             case COMPONENT -> new ParameterFieldComponent(editorFrame, parameter.optional(), parameter.name(), parentField, parameter.componentOptions(), templateRegistry.getTemplatesForComponents(parameter.componentOptions()), this, presenter);
             case TREE -> new ParameterFieldTree(editorFrame, parameter.optional(), parameter.name(), parentField, templateRegistry.getTemplate(parameter.type()), parameter.id(), this, presenter);
             case TREE_BRANCH -> null;
