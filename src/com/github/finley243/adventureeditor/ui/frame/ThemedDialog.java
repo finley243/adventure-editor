@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.ui.ThemeManager;
+import com.github.finley243.adventureeditor.ui.theme.ThemeManager;
 import com.github.finley243.adventureeditor.ui.TitleBar;
 import com.github.finley243.adventureeditor.ui.WindowResizeHandler;
 

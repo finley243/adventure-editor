@@ -1,7 +1,8 @@
 package com.github.finley243.adventureeditor.ui;
 
+import com.github.finley243.adventureeditor.ui.theme.ThemedTitledBorder;
+
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;

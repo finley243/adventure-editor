@@ -1,4 +1,4 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.theme;
 
 import java.awt.*;
 

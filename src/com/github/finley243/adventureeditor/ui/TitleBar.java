@@ -1,5 +1,7 @@
 package com.github.finley243.adventureeditor.ui;
 
+import com.github.finley243.adventureeditor.ui.theme.ThemeManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;

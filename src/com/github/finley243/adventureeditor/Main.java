@@ -2,9 +2,10 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
-import com.github.finley243.adventureeditor.ui.*;
 import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
+import com.github.finley243.adventureeditor.ui.theme.SoftDarkTheme;
+import com.github.finley243.adventureeditor.ui.theme.ThemeManager;
 
 import javax.swing.*;
 import java.awt.*;

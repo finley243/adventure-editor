@@ -1,4 +1,4 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor.ui.theme;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
