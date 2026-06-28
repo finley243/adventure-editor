@@ -1,116 +1,61 @@
 package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
+import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.frame.MainFrame;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.List;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
+import com.github.finley243.adventureeditor.ui.theme.SoftDarkTheme;
+import com.github.finley243.adventureeditor.ui.theme.ThemeManager;
 
 import javax.swing.*;
-import javax.xml.parsers.ParserConfigurationException;
+import java.awt.*;
+import java.util.List;
+import java.util.Map;
 
 public class Main {
 
-    private final Map<String, Template> templates;
-    private final Map<String, List<String>> enumTypes;
-
-    private final ConfigMenuManager configMenuManager;
-    private final ProjectManager projectManager;
-    private final DataManager dataManager;
-    private final PhraseEditorManager phraseEditorManager;
-    private final ScriptEditorManager scriptEditorManager;
-    private final ReferenceListManager referenceListManager;
-    private final EditorManager editorManager;
-
-    private final MainFrame mainFrame;
-    private final BrowserFrame browserFrame;
-
-    public static void main(String[] args) throws ParserConfigurationException, IOException, SAXException {
-        Main main = new Main();
-    }
-
-    public Main() throws ParserConfigurationException, IOException, SAXException {
-        try {
+    public static void main(String[] args) {
+        /*try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | UnsupportedLookAndFeelException | InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
-        }
+        }*/
+        int fontSize = 14;
+        UIManager.getDefaults().keySet().forEach(key -> {
+            Object value = UIManager.get(key);
+            if (value instanceof Font font) {
+                int fontStyle = font.getStyle();
+                if (fontStyle == Font.BOLD) {
+                    fontStyle = Font.PLAIN;
+                } else if (fontStyle == Font.BOLD + Font.ITALIC) {
+                    fontStyle = Font.ITALIC;
+                }
+                UIManager.put(key, new Font("Noto Sans", fontStyle, fontSize));
+            }
+        });
+        UIManager.put("Label.font", new Font("Noto Sans", Font.BOLD, fontSize));
 
-        this.templates = new HashMap<>();
-        this.enumTypes = new HashMap<>();
-        this.configMenuManager = new ConfigMenuManager(this);
-        this.projectManager = new ProjectManager(this);
-        this.dataManager = new DataManager(this);
-        this.editorManager = new EditorManager(this);
-        this.mainFrame = new MainFrame(this);
-        this.browserFrame = new BrowserFrame(this, mainFrame);
-        this.phraseEditorManager = new PhraseEditorManager(this);
-        this.scriptEditorManager = new ScriptEditorManager(this);
-        this.referenceListManager = new ReferenceListManager(this);
-        initialLoad();
-    }
+        System.setProperty("awt.useSystemAAFontSettings", "on");
+        System.setProperty("swing.aatext", "true");
 
-    private void initialLoad() throws ParserConfigurationException, IOException, SAXException {
-        Map<String, List<String>> loadedEnumTypes = DataLoader.loadEnumTypes();
-        if (loadedEnumTypes == null) throw new RuntimeException("Failed to load enum types");
-        Map<String, Template> loadedTemplates = DataLoader.loadTemplates();
-        if (loadedTemplates == null) throw new RuntimeException("Failed to load templates");
-        templates.putAll(loadedTemplates);
-        enumTypes.putAll(loadedEnumTypes);
-        List<ProjectData> recentProjects = DataLoader.loadRecentProjects();
-        projectManager.setRecentProjects(recentProjects);
-    }
+        ThemeManager.setTheme(new SoftDarkTheme());
 
-    public ConfigMenuManager getConfigMenuManager() {
-        return configMenuManager;
-    }
-
-    public ProjectManager getProjectManager() {
-        return projectManager;
-    }
-
-    public DataManager getDataManager() {
-        return dataManager;
-    }
-
-    public EditorManager getEditorManager() {
-        return editorManager;
-    }
-
-    public MainFrame getMainFrame() {
-        return mainFrame;
-    }
-
-    public BrowserFrame getBrowserFrame() {
-        return browserFrame;
-    }
-
-    public PhraseEditorManager getPhraseEditorManager() {
-        return phraseEditorManager;
-    }
-
-    public ScriptEditorManager getScriptEditorManager() {
-        return scriptEditorManager;
-    }
-
-    public ReferenceListManager getReferenceListManager() {
-        return referenceListManager;
-    }
-
-    public Template getTemplate(String categoryID) {
-        return templates.get(categoryID);
-    }
-
-    public Map<String, Template> getAllTemplates() {
-        return new HashMap<> (templates);
-    }
-
-    public List<String> getEnumValues(String enumID) {
-        return enumTypes.get(enumID);
+        DataLoader dataLoader = new DataLoader();
+        Map<String, Template> templateMap = dataLoader.loadTemplates();
+        Map<String, List<String>> enumTypeMap = dataLoader.loadEnumTypes();
+        TemplateRegistry templateRegistry = new TemplateRegistry(templateMap, enumTypeMap);
+        PhraseEditorManager phraseEditorManager = new PhraseEditorManager();
+        ScriptEditorManager scriptEditorManager = new ScriptEditorManager();
+        ConfigMenuManager configMenuManager = new ConfigMenuManager(templateRegistry.getConfigTemplate());
+        DataManager dataManager = new DataManager();
+        ParameterFactory parameterFactory = new ParameterFactory(templateRegistry, dataManager);
+        ProjectManager projectManager = new ProjectManager();
+        MainFrame mainFrame = new MainFrame(parameterFactory, templateRegistry);
+        mainFrame.setVisible(true);
+        Presenter presenter = new Presenter(dataManager, projectManager, configMenuManager, phraseEditorManager, scriptEditorManager, templateRegistry, dataLoader, mainFrame);
+        mainFrame.registerPresenter(presenter);
+        presenter.start();
     }
 
 }

@@ -1,77 +1,78 @@
-<data>
-    <template id="config" name="Project Configuration" topLevel="false">
+<data xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../schemas/templates.xsd">
+    <template id="config" name="Project Configuration">
         <group id="startTime" name="Start Time" y="5" width="2"/>
         <group id="startDate" name="Start Date" y="4" width="2"/>
-        <group id="player" name="Player Settings" x="1" y="0" height="3"/>
-        <parameter id="gameName" dataType="string" name="Game Name" format="child_tag" y="0"/>
+        <group id="player" name="Player Settings" x="1" height="3"/>
+        <parameter id="gameName" dataType="string" name="Game Name" format="child_tag"/>
         <parameter id="interfaceType" dataType="enum" type="interfaceType" name="Interface Type" format="child_tag" y="1"/>
         <parameter id="enableDebugLog" dataType="boolean" name="Enable Debug Log" format="child_tag" y="2"/>
-        <parameter id="playerStats" dataType="reference" type="actor" name="Actor Template" format="child_tag" group="player" y="0"/>
+        <parameter id="playerStats" dataType="reference" type="actor" name="Actor Template" format="child_tag" group="player"/>
         <parameter id="playerID" dataType="string" name="Instance ID" format="child_tag" group="player" y="1" default="player"/>
         <parameter id="playerStartArea" dataType="reference" type="area" name="Start Area" format="child_tag" group="player" y="2"/>
-        <parameter id="defaultDamageType" dataType="reference" type="damageType" name="Default Damage Type" format="child_tag" x="0" y="3"/>
+        <parameter id="defaultDamageType" dataType="reference" type="damageType" name="Default Damage Type" format="child_tag" y="3"/>
         <parameter id="defaultLinkType" dataType="reference" type="linkType" name="Default Link Type" format="child_tag" x="1" y="3"/>
-        <parameter id="startTimeHours" dataType="integer" name="Hours" format="child_tag" group="startTime" x="0"/>
+        <parameter id="startTimeHours" dataType="integer" name="Hours" format="child_tag" group="startTime"/>
         <parameter id="startTimeMinutes" dataType="integer" name="Minutes" format="child_tag" group="startTime" x="1"/>
-        <parameter id="startDateYear" dataType="integer" name="Year" format="child_tag" group="startDate" x="0" y="0"/>
-        <parameter id="startDateMonth" dataType="integer" name="Month" format="child_tag" group="startDate" x="1" y="0"/>
-        <parameter id="startDateDay" dataType="integer" name="Day" format="child_tag" group="startDate" x="0" y="1"/>
+        <parameter id="startDateYear" dataType="integer" name="Year" format="child_tag" group="startDate"/>
+        <parameter id="startDateMonth" dataType="integer" name="Month" format="child_tag" group="startDate" x="1"/>
+        <parameter id="startDateDay" dataType="integer" name="Day" format="child_tag" group="startDate" y="1"/>
         <parameter id="startDateWeekday" dataType="enum" type="weekday" name="Weekday" format="child_tag" group="startDate" x="1" y="1"/>
     </template>
-    <template id="room" name="Room" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
-        <parameter id="name" dataType="object" name="Name" type="roomName" x="0" y="1"/>
-        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" optional="true" x="0" y="2"/>
-        <parameter id="restriction" dataType="enum" type="areaRestrictionType" name="Restriction Type" format="attribute" optional="true" default="PUBLIC" x="0" y="3"/>
-        <parameter id="allowAllies" dataType="boolean" name="Allow Allies" format="attribute" optional="true" default="false" x="0" y="4"/>
-        <parameter id="description" dataType="object" name="Description" type="description" optional="true" x="1" y="0" height="5"/>
-        <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerRoom" name="Script Triggers" x="2" y="0" height="3"/>
+    <template id="room" name="Room" topLevel="true" fileName="rooms" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="name" dataType="object" name="Name" type="roomName" y="1"/>
+        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" optional="true" y="2"/>
+        <parameter id="restriction" dataType="enum" type="areaRestrictionType" name="Restriction Type" format="attribute" optional="true" default="PUBLIC" y="3"/>
+        <parameter id="allowAllies" dataType="boolean" name="Allow Allies" format="attribute" optional="true" default="false" y="4"/>
+        <parameter id="description" dataType="object" name="Description" type="description" optional="true" x="1" height="5"/>
+        <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerRoom" name="Script Triggers" x="2" height="3"/>
     </template>
-    <template id="area" name="Area" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
-        <parameter id="name" dataType="object" name="Name" type="areaName" optional="true" x="0" y="1"/>
-        <parameter id="room" dataType="reference" type="room" name="Room" format="attribute" optional="true" x="0" y="2"/>
-        <parameter id="landmark" dataType="reference" name="Landmark" type="objectInstance" format="attribute" optional="true" x="0" y="3"/>
-        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" optional="true" x="0" y="4"/>
-        <parameter id="restriction" dataType="enum" type="areaRestrictionType" name="Restriction Type" format="attribute" optional="true" default="PUBLIC" x="0" y="5"/>
-        <parameter id="allowAllies" dataType="boolean" name="Allow Allies" format="attribute" optional="true" default="false" x="0" y="6"/>
-        <parameter id="description" dataType="object" name="Description" type="description" optional="true" x="1" y="0" height="3"/>
+    <template id="area" name="Area" topLevel="true" fileName="areas" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="name" dataType="object" name="Name" type="areaName" optional="true" y="1"/>
+        <parameter id="room" dataType="reference" type="room" name="Room" format="attribute" optional="true" y="2"/>
+        <parameter id="landmark" dataType="reference" name="Landmark" type="objectInstance" format="attribute" optional="true" y="3"/>
+        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" optional="true" y="4"/>
+        <parameter id="restriction" dataType="enum" type="areaRestrictionType" name="Restriction Type" format="attribute" optional="true" default="PUBLIC" y="5"/>
+        <parameter id="allowAllies" dataType="boolean" name="Allow Allies" format="attribute" optional="true" default="false" y="6"/>
+        <parameter id="description" dataType="object" name="Description" type="description" optional="true" x="1" height="3"/>
         <parameter id="link" dataType="objectSetUnique" name="Links" type="areaLink" x="1" y="3" height="2"/>
         <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerArea" name="Script Triggers" x="1" y="5" height="2"/>
-        <parameter id="object" dataType="referenceSet" type="objectInstance" name="Objects" x="2" y="0" height="2"/>
+        <parameter id="object" dataType="referenceSet" type="objectInstance" name="Objects" x="2" height="2"/>
         <parameter id="item" dataType="objectSetUnique" type="itemInstance" name="Items" x="2" y="2" height="2"/>
         <parameter id="actor" dataType="referenceSet" type="actorInstance" name="Actors" x="2" y="4" height="2"/>
     </template>
-    <template id="objectInstance" name="Object" topLevel="false" unique="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="template" dataType="reference" type="object" name="Template" format="attribute" y="0"/>
+    <template id="objectInstance" name="Object" unique="true" nameFormat="$id" primaryParameter="id">
+        <parameter id="template" dataType="reference" type="object" name="Template" format="attribute"/>
         <parameter id="id" dataType="string" name="ID" format="attribute" y="1"/>
         <parameter id="startDisabled" dataType="boolean" name="Start Disabled" format="attribute" default="false" y="2"/>
         <parameter id="startHidden" dataType="boolean" name="Start Hidden" format="attribute" default="false" y="3"/>
         <parameter id="localVar" dataType="objectSetUnique" type="localVar" y="4"/>
     </template>
-    <template id="itemInstance" name="Item" topLevel="false" nameFormat="$template" primaryParameter="template">
-        <parameter id="template" dataType="reference" type="item" name="Template" format="attribute" y="0"/>
+    <template id="itemInstance" name="Item" nameFormat="$template" primaryParameter="template">
+        <parameter id="template" dataType="reference" type="item" name="Template" format="attribute"/>
         <parameter id="id" dataType="string" name="ID" format="attribute" optional="true" y="1"/>
     </template>
-    <template id="actorInstance" name="Actor" topLevel="false" unique="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="template" dataType="reference" type="actor" name="Template" format="attribute" y="0"/>
+    <template id="actorInstance" name="Actor" unique="true" nameFormat="$id" primaryParameter="id">
+        <parameter id="template" dataType="reference" type="actor" name="Template" format="attribute"/>
         <parameter id="id" dataType="string" name="ID" format="attribute" y="1"/>
         <parameter id="startDead" dataType="boolean" name="Start Dead" default="false" format="attribute" y="2"/>
         <parameter id="startDisabled" dataType="boolean" name="Start Disabled" default="false" format="attribute" y="3"/>
-        <parameter id="behaviors" dataType="object" type="actorBehaviorSet" name="Behaviors" y="4"/>
+        <parameter id="descriptor" dataType="string" name="Descriptor" optional="true" format="child_tag" y="4"/>
+        <parameter id="behaviors" dataType="object" type="actorBehaviorSet" name="Behaviors" y="5"/>
     </template>
-    <template id="actorBehaviorSet" name="Behaviors" topLevel="false">
+    <template id="actorBehaviorSet" name="Behaviors">
         <!--<parameter id="behavior" dataType="objectSet" type="actorBehavior" name="Behaviors"/>-->
         <parameter id="behavior" dataType="tree" type="actorBehavior" name="Behaviors"/>
     </template>
-    <template id="actorBehavior" name="Behavior" topLevel="false" nameFormat="$behaviorType">
-        <tabGroup id="scriptTabs" name="Scripts" x="0" y="1"/>
+    <template id="actorBehavior" name="Behavior" nameFormat="$behaviorType">
+        <tabGroup id="scriptTabs" name="Scripts" y="1"/>
         <group id="scriptStartGroup" name="Start" tabGroup="scriptTabs"/>
         <group id="scriptEachRoundGroup" name="Each Round" tabGroup="scriptTabs"/>
-        <parameter id="condition" dataType="string" name="Condition" optional="true" x="0" y="0"/>
+        <parameter id="condition" dataType="string" name="Condition" optional="true"/>
         <parameter id="scriptStart" dataType="script" name="Start Script" optional="true" group="scriptStartGroup"/>
         <parameter id="scriptEachRound" dataType="script" name="Each Round Script" optional="true" group="scriptEachRoundGroup"/>
-        <parameter id="behaviorType" dataType="component" componentFormat="typeAttribute" useComponentTypeName="true" name="Behavior Type" x="1" y="0" height="2">
+        <parameter id="behaviorType" dataType="component" componentFormat="typeAttribute" useComponentTypeName="true" name="Behavior Type" x="1" height="2">
             <component id="move" name="Move" object="behaviorMove"/>
             <component id="action" name="Action" object="behaviorAction"/>
             <component id="use" name="Use" object="behaviorUse"/>
@@ -80,183 +81,201 @@
             <component id="procedure" name="Procedure" object="behaviorProcedure"/>
         </parameter>
     </template>
-    <template id="idle" name="Idle" topLevel="false" nameFormat="$phrase">
-        <parameter id="condition" dataType="string" name="Condition" format="child_tag" optional="true" y="0"/>
+    <template id="idle" name="Idle" nameFormat="$phrase">
+        <parameter id="condition" dataType="string" name="Condition" format="child_tag" optional="true"/>
         <parameter id="phrase" dataType="string" name="Phrase" format="child_tag" y="1"/>
     </template>
-    <template id="behaviorCommonObject" name="Core" topLevel="false">
-        <parameter id="duration" dataType="integer" name="Duration" default="0" format="attribute" y="0"/>
+    <template id="behaviorCommonObject" name="Core">
+        <parameter id="duration" dataType="integer" name="Duration" default="0" format="attribute"/>
         <parameter id="idle" dataType="objectSet" type="idle" name="Idles" y="1"/>
     </template>
-    <template id="behaviorMove" name="Move" topLevel="false" nameFormat="Move ($area)">
-        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag" y="0"/>
+    <template id="behaviorMove" name="Move" nameFormat="Move ($area)">
+        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag"/>
         <parameter id="area" dataType="reference" type="area" name="Target Area" format="attribute" y="1"/>
     </template>
-    <template id="behaviorAction" name="Action" topLevel="false" nameFormat="Action ($action)">
-        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag" y="0"/>
+    <template id="behaviorAction" name="Action" nameFormat="Action ($action)">
+        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag"/>
         <parameter id="action" dataType="reference" type="action" name="Action" format="attribute" y="1"/>
         <parameter id="actionCondition" dataType="string" name="Action Condition" format="child_tag" y="2"/>
     </template>
-    <template id="behaviorUse" name="Use" topLevel="false" nameFormat="Use ($object)">
-        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag" y="0"/>
+    <template id="behaviorUse" name="Use" nameFormat="Use ($object)">
+        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag"/>
         <parameter id="object" dataType="reference" type="objectInstance" name="Target Object" format="attribute" y="1"/>
         <parameter id="slot" dataType="string" name="Use Slot" format="attribute" y="2"/>
     </template>
-    <template id="behaviorGuard" name="Guard" topLevel="false" nameFormat="Guard ($object)">
-        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag" y="0"/>
+    <template id="behaviorGuard" name="Guard" nameFormat="Guard ($object)">
+        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag"/>
         <parameter id="object" dataType="reference" type="objectInstance" name="Guard Object" format="attribute" y="1"/>
     </template>
-    <template id="behaviorFollow" name="Follow" topLevel="false" nameFormat="Follow ($actor)">
-        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag" y="0"/>
+    <template id="behaviorFollow" name="Follow" nameFormat="Follow ($actor)">
+        <parameter id="core" dataType="object" type="behaviorCommonObject" format="current_tag"/>
         <parameter id="actor" dataType="reference" type="actorInstance" name="Target Actor" format="attribute" y="1"/>
     </template>
-    <template id="behaviorProcedure" name="Procedure" topLevel="false" nameFormat="Procedure (Cycle: $isCycle)">
-        <parameter id="isCycle" dataType="boolean" name="Is Cycle" format="attribute" default="false" y="0"/>
+    <template id="behaviorProcedure" name="Procedure" nameFormat="Procedure (Cycle: $isCycle)">
+        <parameter id="isCycle" dataType="boolean" name="Is Cycle" format="attribute" default="false"/>
         <!--<parameter id="behavior" dataType="objectSet" type="actorBehavior" name="Behaviors" y="1"/>-->
         <parameter id="behavior" dataType="treeBranch" type="actorBehavior" name="Behaviors"/>
     </template>
-    <template id="localVar" name="Local Variable" topLevel="false" nameFormat="$name" primaryParameter="name">
-        <parameter id="name" dataType="string" name="Name" format="attribute" y="0"/>
+    <template id="localVar" name="Local Variable" nameFormat="$name" primaryParameter="name">
+        <parameter id="name" dataType="string" name="Name" format="attribute"/>
         <parameter id="expression" dataType="string" name="Expression" format="current_tag" y="1"/>
         <parameter id="isInstanceParameter" dataType="boolean" name="Is Instance Parameter" format="attribute" default="false" y="2"/>
     </template>
-    <template id="description" name="Description" topLevel="false">
-        <group id="lines" name="Lines" x="0" y="1"/>
-        <parameter id="once" dataType="boolean" name="Show Once" format="attribute" x="0" y="0" default="false"/>
-        <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="0" y="0" group="lines" default="all"/>
-        <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine" x="0" y="1" group="lines"/>
+    <template id="description" name="Description">
+        <group id="lines" name="Lines" y="1"/>
+        <parameter id="once" dataType="boolean" name="Show Once" format="attribute" default="false"/>
+        <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" group="lines" default="all"/>
+        <parameter id="line" dataType="objectSet" name="Lines" type="sceneLine" y="1" group="lines"/>
     </template>
-    <template id="areaLink" name="Area Link" topLevel="false" nameFormat="$area" primaryParameter="area">
-        <parameter id="type" dataType="string" name="Link Type" format="attribute" x="0" y="0"/>
-        <parameter id="dir" dataType="enum" type="direction" name="Direction" format="attribute" x="0" y="1" default="N"/>
-        <parameter id="dist" dataType="enum" type="distance" name="Distance" format="attribute" x="0" y="2" default="CLOSE"/>
-        <parameter id="area" dataType="reference" name="Area" type="area" format="attribute" x="0" y="3"/>
+    <template id="areaLink" name="Area Link" nameFormat="$area" primaryParameter="area">
+        <parameter id="type" dataType="string" name="Link Type" format="attribute"/>
+        <parameter id="dir" dataType="enum" type="direction" name="Direction" format="attribute" y="1" default="N"/>
+        <parameter id="dist" dataType="enum" type="distance" name="Distance" format="attribute" y="2" default="CLOSE"/>
+        <parameter id="area" dataType="reference" name="Area" type="area" format="attribute" y="3"/>
     </template>
     <template id="roomName" name="Name">
-        <parameter id="name" dataType="string" name="Name" format="current_tag" x="0" y="0"/>
-        <parameter id="proper" dataType="boolean" name="Proper" format="attribute" x="0" y="1" default="false"/>
-        <parameter id="type" dataType="enum" type="areaNameType" name="Type" format="attribute" x="0" y="2" default="in"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
+        <parameter id="proper" dataType="boolean" name="Proper" format="attribute" y="1" default="false"/>
+        <parameter id="type" dataType="enum" type="areaNameType" name="Type" format="attribute" y="2" default="in"/>
     </template>
     <template id="areaName" name="Name">
-        <parameter id="name" dataType="string" name="Name" format="current_tag" x="0" y="0"/>
-        <parameter id="proper" dataType="boolean" name="Proper" format="attribute" x="0" y="1" default="false"/>
-        <parameter id="plural" dataType="boolean" name="Plural" format="attribute" x="0" y="2" default="false"/>
-        <parameter id="type" dataType="enum" type="areaNameType" name="Type" format="attribute" x="0" y="3" default="in"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
+        <parameter id="proper" dataType="boolean" name="Proper" format="attribute" y="1" default="false"/>
+        <parameter id="plural" dataType="boolean" name="Plural" format="attribute" y="2" default="false"/>
+        <parameter id="type" dataType="enum" type="areaNameType" name="Type" format="attribute" y="3" default="in"/>
     </template>
-    <template id="scene" name="Scene" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" topLevelOnly="true" format="attribute" x="0" y="0"/>
-        <parameter id="once" dataType="boolean" name="Show Once" format="attribute" x="0" y="1" default="false"/>
-        <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" x="0" y="2"/>
-        <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="1" y="0" default="all"/>
+    <template id="scene" name="Scene" topLevel="true" fileName="scenes" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" topLevelOnly="true" format="attribute"/>
+        <parameter id="once" dataType="boolean" name="Show Once" format="attribute" y="1" default="false"/>
+        <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" y="2"/>
+        <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="1" default="all"/>
         <parameter id="line" dataType="tree" name="Lines" type="sceneLine" x="1" y="1" height="2"/>
-        <parameter id="choice" dataType="objectSet" name="Choices" type="sceneChoice" topLevelOnly="true" x="2" y="0" height="3"/>
+        <parameter id="choice" dataType="objectSet" name="Choices" type="sceneChoice" topLevelOnly="true" x="2" height="3"/>
     </template>
-    <template id="sceneLine" name="Scene Line" topLevel="false" nameFormat="{flag:once:o }{flag:exit:x }$line">
-        <parameter id="once" dataType="boolean" name="Show Once" format="attribute" x="0" y="0" default="false"/>
-        <parameter id="exit" dataType="boolean" name="Exit After" format="attribute" x="1" y="0" default="false"/>
-        <parameter id="from" dataType="reference" name="Show Only From" type="scene" format="attribute" optional="true" x="0" y="1" width="2"/>
-        <parameter id="redirect" dataType="reference" name="Redirect To" type="scene" format="attribute" optional="true" x="0" y="2" width="2"/>
-        <parameter id="line" dataType="component" name="Line" componentFormat="textOrTags" x="2" y="0" height="4">
+    <template id="sceneLine" name="Scene Line" nameFormat="{flag:once:o }{flag:exit:x }$line">
+        <parameter id="once" dataType="boolean" name="Show Once" format="attribute" default="false"/>
+        <parameter id="exit" dataType="boolean" name="Exit After" format="attribute" x="1" default="false"/>
+        <parameter id="from" dataType="reference" name="Show Only From" type="scene" format="attribute" optional="true" y="1" width="2"/>
+        <parameter id="redirect" dataType="reference" name="Redirect To" type="scene" format="attribute" optional="true" y="2" width="2"/>
+        <parameter id="line" dataType="component" name="Line" componentFormat="textOrTags" x="2" height="4">
             <component id="text" name="Text" object="sceneLineText"/>
             <component id="tags" name="Logic" object="sceneLineLogic"/>
         </parameter>
     </template>
-    <template id="sceneLineLogic" name="Logic" topLevel="false" nameFormat="($type){value:condition: (:)}">
-        <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" x="0" y="0" height="2"/>
-        <parameter id="scriptPre" dataType="object" name="Pre Script" type="script" optional="true" x="1" y="0" height="4"/>
+    <template id="sceneLineLogic" name="Logic" nameFormat="($type){value:condition: (:)}">
+        <parameter id="condition" dataType="object" name="Condition" type="condition" optional="true" height="2"/>
+        <parameter id="scriptPre" dataType="object" name="Pre Script" type="script" optional="true" x="1" height="4"/>
         <parameter id="scriptPost" dataType="object" name="Post Script" type="script" optional="true" x="1" y="4" height="4"/>
-        <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" x="0" y="2" default="all"/>
-        <parameter id="line" dataType="treeBranch" name="Sub-Lines" type="sceneLine" x="0" y="3" height="3"/>
+        <parameter id="type" dataType="enum" type="sceneFlowType" name="Type" format="attribute" y="2" default="all"/>
+        <parameter id="line" dataType="treeBranch" name="Sub-Lines" type="sceneLine" y="3" height="3"/>
     </template>
-    <template id="sceneLineText" name="Text" topLevel="false" nameFormat="$text">
-        <parameter id="text" dataType="stringLong" name="Text" format="current_tag" x="0" y="0"/>
+    <template id="sceneLineText" name="Text" nameFormat="$text">
+        <parameter id="text" dataType="stringLong" name="Text" format="current_tag"/>
     </template>
-    <template id="script" name="Script" topLevel="false">
+    <template id="script" name="Script">
         <parameter id="script" dataType="script" name="Script" format="current_tag"/>
     </template>
-    <template id="condition" name="Condition" topLevel="false" primaryParameter="condition">
-        <parameter id="condition" dataType="string" name="Condition" format="current_tag"/>
+    <template id="condition" name="Condition" primaryParameter="condition">
+        <parameter id="condition" dataType="expression" name="Condition" format="current_tag"/>
     </template>
-    <template id="sceneChoice" name="Scene Choice" topLevel="false" nameFormat="$text">
-        <parameter id="link" dataType="reference" name="Link" format="attribute" type="scene" x="0" y="0"/>
-        <parameter id="text" dataType="string" name="Text" format="current_tag" x="0" y="1"/>
+    <template id="sceneChoice" name="Scene Choice" nameFormat="$text">
+        <parameter id="link" dataType="reference" name="Link" format="attribute" type="scene"/>
+        <parameter id="text" dataType="string" name="Text" format="current_tag" y="1"/>
     </template>
-    <template id="faction" name="Faction" topLevel="true" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
-        <parameter id="default" dataType="enum" type="factionRelation" name="Default Relation" format="attribute" x="0" y="1" default="NEUTRAL"/>
-        <parameter id="relation" dataType="objectSetUnique" name="Relations" type="factionRelation" x="0" y="2"/>
+    <template id="faction" name="Faction" topLevel="true" fileName="factions" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="default" dataType="enum" type="factionRelation" name="Default Relation" format="attribute" y="1" default="NEUTRAL"/>
+        <parameter id="relation" dataType="objectSetUnique" name="Relations" type="factionRelation" y="2"/>
     </template>
-    <template id="factionRelation" name="Faction Relation" topLevel="false" nameFormat="$faction">
-        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" y="0"/>
+    <template id="factionRelation" name="Faction Relation" nameFormat="$faction">
+        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute"/>
         <parameter id="type" dataType="enum" type="factionRelation" name="Relation" format="attribute" y="1" default="NEUTRAL"/>
     </template>
-    <template id="action" name="Action" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
-        <parameter id="prompt" dataType="string" name="Prompt" format="child_tag" x="1" y="0"/>
-        <parameter id="parameter" dataType="objectSetUnique" name="Parameters" type="actionParameter" x="0" y="1"/>
+    <template id="action" name="Action" topLevel="true" fileName="actions" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="prompt" dataType="string" name="Prompt" format="child_tag" x="1"/>
+        <parameter id="parameter" dataType="objectSetUnique" name="Parameters" type="actionParameter" y="1"/>
         <parameter id="condition" dataType="objectSet" name="Conditions" type="actionCondition" x="1" y="1"/>
-        <parameter id="conditionShow" dataType="string" name="Display Condition" optional="true" format="child_tag" x="2" y="0"/>
-        <parameter id="script" dataType="object" name="Script" type="script" x="2" y="1" height="1"/>
+        <parameter id="conditionShow" dataType="expression" name="Display Condition" optional="true" format="child_tag" x="2"/>
+        <parameter id="script" dataType="object" name="Script" type="script" x="2" y="1"/>
     </template>
-    <template id="actionParameter" name="Parameter" topLevel="false" nameFormat="$name" primaryParameter="name">
-        <parameter id="name" dataType="string" name="Name" format="attribute" y="0"/>
+    <template id="actionParameter" name="Parameter" nameFormat="$name" primaryParameter="name">
+        <parameter id="name" dataType="string" name="Name" format="attribute"/>
         <parameter id="parameter" dataType="string" name="Expression" format="current_tag" y="1"/>
     </template>
-    <template id="actionCondition" name="Condition" topLevel="false" nameFormat="$blockMessage">
-        <parameter id="blockMessage" dataType="string" name="Block Message" format="child_tag" y="0"/>
+    <template id="actionCondition" name="Condition" nameFormat="$blockMessage">
+        <parameter id="blockMessage" dataType="string" name="Block Message" format="child_tag"/>
         <parameter id="script" dataType="string" name="Expression" format="child_tag" y="1"/>
     </template>
-    <template id="actor" name="Actor" topLevel="true" nameFormat="$id" primaryParameter="id">
+    <template id="actor" name="Actor" topLevel="true" fileName="actors" nameFormat="$id" primaryParameter="id">
         <tabGroup id="tabs" x="1" y="1" width="2" height="8"/>
         <group id="stats" name="Stats" tabGroup="tabs"/>
         <group id="level" name="Leveling" tabGroup="tabs"/>
         <group id="inventory" name="Inventory" tabGroup="tabs"/>
         <group id="actions" name="Actions" tabGroup="tabs"/>
         <group id="scripts" name="Scripts" tabGroup="tabs"/>
+        <group id="barks" name="Barks" tabGroup="tabs"/>
         <group id="limbs" name="Limbs" tabGroup="tabs"/>
         <group id="damage" name="Resistances" tabGroup="tabs"/>
         <group id="senses" name="Senses" tabGroup="tabs"/>
         <group id="equipSlots" name="Equip Slots" tabGroup="tabs"/>
-        <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
-        <parameter id="parent" dataType="reference" name="Parent" type="actor" format="attribute" optional="true" x="1" y="0"/>
-        <parameter id="name" dataType="object" name="Name" type="actorName" x="0" y="1" height="3"/>
-        <parameter id="dialogueStart" dataType="reference" name="Dialogue Start" type="scene" format="attribute" optional="true" x="2" y="0"/>
-        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" optional="true" x="0" y="4"/>
-        <parameter id="isEnforcer" dataType="boolean" name="Is Enforcer" format="attribute" optional="true" x="0" y="5"/>
-        <parameter id="hp" dataType="integer" name="HP" format="attribute" optional="true" x="0" y="6"/>
-        <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute" optional="true" x="0" y="7"/>
-        <parameter id="movePoints" dataType="integer" name="Move Points" format="attribute" optional="true" x="0" y="8"/>
-        <parameter id="attribute" dataType="objectSetUnique" name="Attributes" type="actorAttribute" y="0" group="stats"/>
+        <group id="startEffects" name="Effects" tabGroup="tabs"/>
+        <group id="attackTypes" name="Attack Types" tabGroup="tabs"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="parent" dataType="reference" name="Parent" type="actor" format="attribute" optional="true" x="1"/>
+        <parameter id="name" dataType="object" name="Name" type="actorName" y="1" height="3"/>
+        <parameter id="levelUpThreshold" dataType="string" name="Level-Up Threshold Expression" optional="true" format="child_tag" y="1" group="level"/>
+        <parameter id="startLevel" dataType="integer" name="Starting Level" optional="true" format="attribute" group="level"/>
+        <parameter id="dialogueStart" dataType="reference" name="Dialogue Start" type="scene" format="attribute" optional="true" x="2"/>
+        <parameter id="faction" dataType="reference" name="Faction" type="faction" format="attribute" optional="true" y="4"/>
+        <parameter id="isEnforcer" dataType="boolean" name="Is Enforcer" format="attribute" optional="true" y="5"/>
+        <parameter id="hp" dataType="integer" name="HP" format="attribute" optional="true" y="6"/>
+        <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute" optional="true" y="7"/>
+        <parameter id="movePoints" dataType="integer" name="Move Points" format="attribute" optional="true" y="8"/>
+        <parameter id="attribute" dataType="objectSetUnique" name="Attributes" type="actorAttribute" group="stats"/>
         <parameter id="skill" dataType="objectSetUnique" name="Skills" type="actorSkill" y="1" group="stats"/>
         <parameter id="senseType" dataType="objectSetUnique" name="Sense Types" type="actorSenseType" optional="true" group="senses"/>
+        <parameter id="attackType" dataType="objectSetUnique" name="Unarmed Attack Types" type="actorAttackType" optional="true" group="attackTypes"/>
+        <parameter id="startEffect" dataType="objectSet" name="Starting Effects" type="actorStartEffect" optional="true" group="startEffects"/>
+        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" group="inventory"/>
         <parameter id="limb" dataType="objectSetUnique" name="Limbs" type="actorLimb" optional="true" group="limbs"/>
         <parameter id="equipSlot" dataType="objectSetUnique" name="Equip Slots" type="actorEquipSlot" optional="true" group="equipSlots"/>
-        <parameter id="damageResistance" dataType="objectSetUnique" name="Damage Resistances" type="actorDamageResistance" optional="true" group="damage"/>
-        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" optional="true" group="inventory"/>
-        <parameter id="action" dataType="objectSet" name="Actions" type="customActionReference" y="0" group="actions"/>
-        <parameter id="script" dataType="objectSet" name="Scripts" type="scriptWithTriggerActor" group="scripts"/>
+        <parameter id="damage" dataType="objectSetUnique" name="Damage Resistances" type="damageResistance" optional="true" group="damage"/>
+        <parameter id="action" dataType="objectSet" name="Actions" type="customActionReference" group="actions"/>
         <parameter id="itemAction" dataType="objectSet" name="Item Actions" type="customActionReference" y="1" group="actions"/>
-        <parameter id="startLevel" dataType="integer" name="Starting Level" optional="true" format="attribute" y="0" group="level"/>
-        <parameter id="levelUpThreshold" dataType="string" name="Level-Up Threshold Expression" optional="true" format="child_tag" y="1" group="level"/>
+        <parameter id="bark" dataType="objectSetUnique" name="Barks" type="actorBark" group="barks"/>
+        <parameter id="script" dataType="objectSet" name="Scripts" type="scriptWithTriggerActor" group="scripts"/>
+    </template>
+    <template id="actorBark" name="Bark" nameFormat="$trigger" primaryParameter="trigger">
+        <parameter id="trigger" name="Trigger" dataType="enum" type="barkTriggers" format="attribute"/>
+        <parameter id="response" name="Response Type" dataType="enum" type="barkResponseType" default="NONE" format="attribute" x="1"/>
+        <parameter id="visible" name="Visible Phrases" dataType="objectSet" type="barkPhrase" y="1"/>
+        <parameter id="nonVisible" name="Non-Visible Phrases" dataType="objectSet" type="barkPhrase" x="1" y="1"/>
+    </template>
+    <template id="barkPhrase" name="Phrase" nameFormat="$phrase" primaryParameter="phrase">
+        <parameter id="phrase" dataType="stringLong" format="current_tag"/>
     </template>
     <template id="actorName" name="Name">
-        <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
         <parameter id="proper" dataType="boolean" name="Proper" format="attribute" y="1" default="false"/>
         <parameter id="pronoun" dataType="enum" type="pronoun" name="Pronoun" format="attribute" y="2" default="THEY"/>
     </template>
     <template id="actorAttribute" name="Attribute" nameFormat="$key" primaryParameter="key">
-        <parameter id="key" dataType="reference" name="Attribute" type="attribute" format="attribute" y="0"/>
+        <parameter id="key" dataType="reference" name="Attribute" type="attribute" format="attribute"/>
         <parameter id="value" dataType="integer" name="Value" format="attribute" y="1" default="0"/>
     </template>
     <template id="actorSkill" name="Skill" nameFormat="$key" primaryParameter="key">
-        <parameter id="key" dataType="reference" name="Skill" type="skill" format="attribute" y="0"/>
+        <parameter id="key" dataType="reference" name="Skill" type="skill" format="attribute"/>
         <parameter id="value" dataType="integer" name="Value" format="attribute" y="1" default="0"/>
     </template>
     <template id="actorSenseType" name="Sense Type" nameFormat="$senseType" primaryParameter="senseType">
         <parameter id="senseType" dataType="reference" name="Sense Type" type="senseType" format="current_tag"/>
     </template>
+    <template id="actorAttackType" name="Attack Type" nameFormat="$attackType" primaryParameter="attackType">
+        <parameter id="attackType" dataType="reference" name="Attack Type" type="attackType" format="current_tag"/>
+    </template>
     <template id="actorLimb" name="Limb" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="string" name="Name" y="1"/>
         <parameter id="hitEffect" dataType="objectSet" name="Hit Effects" type="effectReference" optional="true" y="2"/>
         <parameter id="hitChance" dataType="float" name="Hit Chance" format="attribute" y="3" default="1.0"/>
@@ -264,65 +283,73 @@
         <parameter id="apparelSlot" dataType="reference" name="Apparel Slot" type="actorEquipSlot" format="attribute" y="5"/>
     </template>
     <template id="actorEquipSlot" name="Equip Slot" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="1"/>
     </template>
-    <template id="actorDamageResistance" name="Damage Resistance" nameFormat="$type" primaryParameter="type">
-        <parameter id="type" dataType="reference" name="Damage Type" type="damageType" format="attribute" y="0"/>
-        <parameter id="value" dataType="integer" name="Value" format="attribute" y="1"/>
+    <template id="actorStartEffect" name="Starting Effect" nameFormat="$id">
+        <parameter id="id" dataType="reference" name="Effect" format="current_tag"/>
     </template>
-    <template id="attackType" name="Attack Type" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <group id="phrases" name="Phrases" x="0" y="2" width="1" height="3"/>
-        <group id="hitChance" name="Hit Chance" x="1" y="2" width="2" height="1"/>
-        <group id="damage" name="Damage" x="1" y="3" width="2" height="1"/>
-        <parameter id="id" dataType="string" name="ID" format="attribute" x="0" y="0"/>
-        <parameter id="prompt" dataType="string" name="Prompt" format="child_tag" x="0" y="1"/>
-        <parameter id="category" dataType="enum" type="attackTypeCategory" name="Category" format="attribute" x="1" y="0" default="single"/>
-        <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute" x="2" y="0" default="1"/>
-        <parameter id="ammoConsumed" dataType="integer" name="Ammo Consumed" format="attribute" x="3" y="0" default="1"/>
-        <parameter id="weaponConsumeType" dataType="enum" type="attackTypeWeaponConsumeType" name="Weapon Consume Type" format="attribute" x="4" y="0" default="none"/>
+    <template id="damageResistance" name="Damage Resistance" nameFormat="$type" primaryParameter="type">
+        <parameter id="type" dataType="reference" name="Damage Type" type="damageType" format="attribute"/>
+        <parameter id="resistance" dataType="integer" name="Resistance" format="attribute" y="1" optional="true" default="0"/>
+        <parameter id="mult" dataType="float" name="Multiplier" format="attribute" y="2" optional="true" default="0.0"/>
+    </template>
+    <template id="attackType" name="Attack Type" topLevel="true" fileName="attack_types" nameFormat="$id" primaryParameter="id">
+        <group id="phrases" name="Phrases" y="2" height="3"/>
+        <group id="hitChance" name="Hit Chance" x="1" y="2" width="2"/>
+        <group id="damage" name="Damage" x="1" y="3" width="2"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="prompt" dataType="string" name="Prompt" format="child_tag" y="1"/>
+        <parameter id="category" dataType="enum" type="attackTypeCategory" name="Category" format="attribute" x="1" default="single"/>
+        <parameter id="actionPoints" dataType="integer" name="Action Points" format="attribute" x="2" default="1"/>
+        <parameter id="ammoConsumed" dataType="integer" name="Ammo Consumed" format="attribute" x="3" default="1"/>
+        <parameter id="weaponConsumeType" dataType="enum" type="attackTypeWeaponConsumeType" name="Weapon Consume Type" format="attribute" x="4" default="none"/>
         <parameter id="rate" dataType="integer" name="Override Rate" format="attribute" optional="true" x="2" y="1"/>
         <parameter id="isLoudOverride" dataType="boolean" name="Override Is Loud" format="attribute" optional="true" x="1" y="1"/>
         <parameter id="nonIdealRange" dataType="boolean" name="Use Non-Ideal Ranges" format="attribute" default="false" x="4" y="1"/>
-        <parameter id="range" dataType="objectSetUnique" type="weaponClassRange" name="Ranges" x="4" y="2" height="2"/>
-        <parameter id="overrideEffects" dataType="boolean" name="Override Target Effects" default="false" x="3" y="1"/>
-        <parameter id="targetEffect" dataType="objectSet" type="effectReference" name="Target Effects" x="3" y="2" height="2"/>
-        <parameter id="attackPhrase" dataType="string" name="Per-Target Phrase" format="child_tag" optional="true" y="0" group="phrases"/>
+        <parameter id="attackPhrase" dataType="string" name="Per-Target Phrase" format="child_tag" optional="true" group="phrases"/>
         <parameter id="attackOverallPhrase" dataType="string" name="Overall Phrase" format="child_tag" optional="true" y="1" group="phrases"/>
         <parameter id="attackPhraseAudible" dataType="string" name="Audible Per-Target Phrase" format="child_tag" optional="true" y="2" group="phrases"/>
         <parameter id="attackOverallPhraseAudible" dataType="string" name="Audible Overall Phrase" format="child_tag" optional="true" y="3" group="phrases"/>
-        <parameter id="hitChance" dataType="string" name="Hit Chance" format="child_tag" optional="true" group="hitChance" x="0" y="0"/>
-        <parameter id="hitChanceOverall" dataType="string" name="Hit Chance Overall" format="child_tag" optional="true" x="0" y="1" group="hitChance"/>
-        <parameter id="hitChanceMult" dataType="float" name="Hit Chance Mult" format="attribute" optional="true" x="1" y="0" group="hitChance"/>
-        <parameter id="damageMult" dataType="float" name="Damage Mult" format="attribute" optional="true" x="0" y="0" group="damage"/>
-        <parameter id="damage" dataType="string" name="Override Damage" format="child_tag" optional="true" x="1" y="0" group="damage"/>
-        <parameter id="damageType" dataType="reference" type="damageType" name="Override Damage Type" format="attribute" optional="true" x="0" y="1" group="damage"/>
+        <parameter id="damageMult" dataType="float" name="Damage Mult" format="attribute" optional="true" default="0.0" group="damage"/>
+        <parameter id="damage" dataType="string" name="Override Damage" format="child_tag" optional="true" x="1" group="damage"/>
+        <parameter id="damageType" dataType="reference" type="damageType" name="Override Damage Type" format="attribute" optional="true" y="1" group="damage"/>
         <parameter id="armorMult" dataType="float" name="Override Armor Mult" format="attribute" optional="true" x="1" y="1" group="damage"/>
+        <parameter id="hitChance" dataType="string" name="Hit Chance" format="child_tag" optional="true" group="hitChance"/>
+        <parameter id="hitChanceOverall" dataType="string" name="Hit Chance Overall" format="child_tag" optional="true" y="1" group="hitChance"/>
+        <parameter id="hitChanceMult" dataType="float" name="Hit Chance Mult" format="attribute" optional="true" default="0.0" x="1" group="hitChance"/>
+        <parameter id="range" dataType="objectSetUnique" type="weaponClassRange" name="Ranges" x="4" y="2" height="2"/>
+        <parameter id="overrideEffects" dataType="boolean" name="Override Target Effects" default="false" x="3" y="1"/>
+        <parameter id="targetEffect" dataType="objectSet" type="effectReference" name="Target Effects" x="3" y="2" height="2"/>
     </template>
-    <template id="effectReference" name="Effect" topLevel="false" nameFormat="$id" primaryParameter="id">
+    <template id="effectReference" name="Effect" nameFormat="$id" primaryParameter="id">
         <parameter id="id" dataType="reference" type="effect" name="Effect" format="current_tag"/>
     </template>
-    <template id="attribute" name="Attribute" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+    <template id="attribute" name="Attribute" topLevel="true" fileName="attributes" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="1"/>
     </template>
-    <template id="damageType" name="Damage Type" topLevel="true" nameFormat="$id" primaryParameter="id">
+    <template id="damageType" name="Damage Type" topLevel="true" fileName="damage_types" nameFormat="$id" primaryParameter="id">
         <parameter id="id" dataType="string" name="ID" format="attribute"/>
     </template>
-    <template id="effect" name="Effect" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <tabGroup id="scripts" name="Scripts" x="3" y="0" width="1" height="6"/>
+    <template id="effect" name="Effect" topLevel="true" fileName="effects" nameFormat="$id" primaryParameter="id">
+        <tabGroup id="scripts" name="Scripts" x="3" height="6"/>
         <group id="tabAdd" name="Add" tabGroup="scripts"/>
         <group id="tabRemove" name="Remove" tabGroup="scripts"/>
         <group id="tabRound" name="Each Round" tabGroup="scripts"/>
-        <group id="conditions" name="Conditions" x="0" y="3" width="2"/>
-        <parameter id="id" dataType="string" name="ID" format="attribute" topLevelOnly="true" x="0" y="0" width="2"/>
-        <parameter id="permanent" dataType="boolean" name="Is Permanent" format="attribute" x="0" y="1" default="false"/>
+        <group id="conditions" name="Conditions" y="3" width="2"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute" topLevelOnly="true" width="2"/>
+        <parameter id="permanent" dataType="boolean" name="Is Permanent" format="attribute" y="1" default="false"/>
         <parameter id="stack" dataType="boolean" name="Can Stack" format="attribute" x="1" y="1" default="true"/>
-        <parameter id="duration" dataType="integer" name="Duration" format="attribute" x="0" y="2" width="2" default="0"/>
-        <parameter id="conditionAdd" dataType="string" name="Add Condition" format="child_tag" x="0" y="0" optional="true" group="conditions"/>
-        <parameter id="conditionRemove" dataType="string" name="Remove Condition" format="child_tag" x="0" y="1" optional="true" group="conditions"/>
-        <parameter id="conditionActive" dataType="string" name="Active Condition" format="child_tag" x="0" y="2" optional="true" group="conditions"/>
-        <parameter id="component" dataType="component" name="Stat Modifier" componentFormat="typeAttribute" format="current_tag" useComponentTypeName="true" optional="true" x="2" y="0" width="1" height="6">
+        <parameter id="duration" dataType="integer" name="Duration" format="attribute" y="2" width="2" default="0"/>
+        <parameter id="conditionAdd" dataType="string" name="Add Condition" format="child_tag" optional="true" group="conditions"/>
+        <parameter id="conditionRemove" dataType="string" name="Remove Condition" format="child_tag" y="1" optional="true" group="conditions"/>
+        <parameter id="conditionActive" dataType="string" name="Active Condition" format="child_tag" y="2" optional="true" group="conditions"/>
+        <parameter id="scriptAdd" dataType="script" name="Add Script" format="child_tag" optional="true" group="tabAdd"/>
+        <parameter id="scriptRemove" dataType="script" name="Remove Script" format="child_tag" optional="true" group="tabRemove"/>
+        <parameter id="scriptRound" dataType="script" name="Each Round Script" format="child_tag" optional="true" group="tabRound"/>
+        <parameter id="component" dataType="component" name="Stat Modifier" componentFormat="typeAttribute" format="current_tag" useComponentTypeName="true" optional="true" x="2"
+                   height="6">
             <component id="add" name="Add" object="effectComponentAdd"/>
             <component id="mult" name="Multiply" object="effectComponentMult"/>
             <component id="boolean" name="Boolean" object="effectComponentBoolean"/>
@@ -330,70 +357,66 @@
             <component id="stringSet" name="String Set" object="effectComponentStringSet"/>
             <component id="compound" name="Compound" object="effectComponentCompound"/>
         </parameter>
-        <parameter id="scriptAdd" dataType="script" name="Add Script" format="child_tag" optional="true" group="tabAdd"/>
-        <parameter id="scriptRemove" dataType="script" name="Remove Script" format="child_tag" optional="true" group="tabRemove"/>
-        <parameter id="scriptRound" dataType="script" name="Each Round Script" format="child_tag" optional="true" group="tabRound"/>
     </template>
-    <template id="effectComponentAdd" name="Add" topLevel="false">
-        <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
+    <template id="effectComponentAdd" name="Add">
+        <parameter id="stat" dataType="string" name="Stat Name" format="attribute"/>
         <parameter id="amount" dataType="integer" name="Add Amount" format="attribute" y="1"/>
         <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
     </template>
-    <template id="effectComponentMult" name="Multiply" topLevel="false">
-        <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
+    <template id="effectComponentMult" name="Multiply">
+        <parameter id="stat" dataType="string" name="Stat Name" format="attribute"/>
         <parameter id="amount" dataType="float" name="Multiplier" format="attribute" y="1"/>
         <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
     </template>
-    <template id="effectComponentBoolean" name="Boolean" topLevel="false">
-        <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
+    <template id="effectComponentBoolean" name="Boolean">
+        <parameter id="stat" dataType="string" name="Stat Name" format="attribute"/>
         <parameter id="value" dataType="boolean" name="Set True" format="attribute" y="1"/>
         <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
     </template>
-    <template id="effectComponentString" name="String" topLevel="false">
-        <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
+    <template id="effectComponentString" name="String">
+        <parameter id="stat" dataType="string" name="Stat Name" format="attribute"/>
         <parameter id="value" dataType="string" name="String Value" format="attribute" y="1"/>
         <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
     </template>
-    <template id="effectComponentStringSet" name="String Set" topLevel="false">
+    <template id="effectComponentStringSet" name="String Set">
         <tabGroup id="values" y="1"/>
         <group id="valuesAdd" tabGroup="values" name="Add"/>
         <group id="valuesRemove" tabGroup="values" name="Remove"/>
-        <parameter id="stat" dataType="string" name="Stat Name" format="attribute" y="0"/>
+        <parameter id="stat" dataType="string" name="Stat Name" format="attribute"/>
+        <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
         <parameter id="add" dataType="objectSetUnique" type="stringValue" name="Add Values" group="valuesAdd"/>
         <parameter id="remove" dataType="objectSetUnique" type="stringValue" name="Remove Values" group="valuesRemove"/>
-        <parameter id="statCondition" dataType="string" name="Condition" optional="true" format="child_tag" y="2"/>
     </template>
-    <template id="stringValue" name="String Value" topLevel="false" nameFormat="$value">
+    <template id="stringValue" name="String Value" nameFormat="$value">
         <parameter id="value" dataType="string" name="String Value" format="current_tag"/>
     </template>
-    <template id="effectComponentCompound" name="Compound" topLevel="false">
+    <template id="effectComponentCompound" name="Compound">
         <parameter id="effect" dataType="objectSet" type="effect" name="Child Effects"/>
     </template>
-    <template id="item" name="Item" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <tabGroup id="tabs" x="2" y="0" height="5"/>
+    <template id="item" name="Item" topLevel="true" fileName="items" nameFormat="$id" primaryParameter="id">
+        <tabGroup id="tabs" x="2" height="5"/>
         <group id="components" name="Components" tabGroup="tabs"/>
         <group id="actions" name="Actions" tabGroup="tabs"/>
         <group id="scripts" name="Scripts" tabGroup="tabs"/>
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="object" type="itemName" name="Name" y="1" height="2"/>
         <parameter id="price" dataType="integer" name="Price" format="attribute" y="3" default="0"/>
-        <parameter id="description" dataType="object" type="description" name="Description" optional="true" x="1" y="0" height="5"/>
-        <parameter id="component" dataType="objectSetUnique" type="itemComponent" name="Components" group="components"/>
-        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" group="actions"/>
+        <parameter id="description" dataType="object" type="description" name="Description" optional="true" x="1" height="5"/>
         <parameter id="script" dataType="objectSetUnique" type="scriptWithTriggerItem" name="Script Triggers" group="scripts"/>
+        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" group="actions"/>
+        <parameter id="component" dataType="objectSetUnique" type="itemComponent" name="Components" group="components"/>
     </template>
-    <template id="itemName" name="Name" topLevel="false" nameFormat="$name">
-        <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
-        <parameter id="proper" dataType="boolean" name="Is Proper" default="false" format="attribute" y="1"/>
+    <template id="itemName" name="Name" nameFormat="$name">
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
     </template>
-    <template id="itemComponent" name="Item Component" topLevel="false" nameFormat="$component" primaryParameter="component">
-        <parameter id="startEnabled" dataType="boolean" name="Start Enabled" format="attribute" x="0" y="0" default="true"/>
-        <parameter id="restricted" dataType="boolean" name="Actions Restricted" format="attribute" x="1" y="0" default="false"/>
-        <parameter id="component" dataType="component" name="Component" componentFormat="typeAttribute" useComponentTypeName="true" x="0" y="1" width="2">
+    <template id="itemComponent" name="Item Component" nameFormat="$component" primaryParameter="component">
+        <parameter id="startEnabled" dataType="boolean" name="Start Enabled" format="attribute" default="true"/>
+        <parameter id="restricted" dataType="boolean" name="Actions Restricted" format="attribute" x="1" default="false"/>
+        <parameter id="component" dataType="component" name="Component" componentFormat="typeAttribute" useComponentTypeName="true" y="1" width="2">
             <component id="ammo" name="Ammo" object="itemComponentAmmo"/>
             <component id="armor" name="Armor" object="itemComponentArmor"/>
             <component id="consumable" name="Consumable" object="itemComponentConsumable"/>
-            <component id="effectible" name="Effectible" object="itemComponentEffectible"/>
+            <component id="effectable" name="Effectable" object="itemComponentEffectable"/>
             <component id="equippable" name="Equippable" object="itemComponentEquippable"/>
             <component id="magazine" name="Magazine" object="itemComponentMagazine"/>
             <component id="mod" name="Mod" object="itemComponentMod"/>
@@ -401,115 +424,116 @@
             <component id="weapon" name="Weapon" object="itemComponentWeapon"/>
         </parameter>
     </template>
-    <template id="itemComponentAmmo" name="Ammo" topLevel="false">
-        <parameter id="isReusable" dataType="boolean" name="Is Reusable" format="attribute" default="false" y="0"/>
+    <template id="itemComponentAmmo" name="Ammo">
+        <parameter id="isReusable" dataType="boolean" name="Is Reusable" format="attribute" default="false"/>
         <parameter id="weaponEffect" dataType="objectSet" type="effectReference" name="Weapon Effects" y="1"/>
     </template>
-    <template id="itemComponentArmor" name="Armor" topLevel="false">
-        <parameter id="damage" dataType="objectSetUnique" type="itemComponentArmorDamage" name="Damage Data" y="0"/>
+    <template id="itemComponentArmor" name="Armor">
+        <parameter id="damage" dataType="objectSetUnique" type="itemComponentArmorDamage" name="Damage Data"/>
         <parameter id="coveredLimb" dataType="objectSetUnique" type="limbReference" name="Covered Limbs" y="1"/>
         <parameter id="coversMainBody" dataType="boolean" name="Covers Main Body" format="attribute" y="2"/>
     </template>
-    <template id="limbReference" name="Limb" topLevel="false" nameFormat="$limb">
+    <template id="limbReference" name="Limb" nameFormat="$limb">
         <parameter id="limb" dataType="string" name="Limb" format="current_tag"/>
     </template>
-    <template id="itemComponentArmorDamage" name="Armor Data" topLevel="false" nameFormat="$type">
-        <parameter id="type" dataType="reference" type="damageType" name="Damage Type" format="attribute" y="0"/>
+    <template id="itemComponentArmorDamage" name="Armor Data" nameFormat="$type">
+        <parameter id="type" dataType="reference" type="damageType" name="Damage Type" format="attribute"/>
         <parameter id="resistance" dataType="integer" name="Damage Resistance" format="attribute" optional="true" y="1"/>
         <parameter id="mult" dataType="float" name="Damage Mult" format="attribute" optional="true" y="2"/>
     </template>
-    <template id="itemComponentConsumable" name="Consumable" topLevel="false">
-        <parameter id="consumePrompt" dataType="string" name="Consume Prompt" format="child_tag" y="0"/>
+    <template id="itemComponentConsumable" name="Consumable">
+        <parameter id="consumePrompt" dataType="string" name="Consume Prompt" format="child_tag"/>
         <parameter id="consumePhrase" dataType="string" name="Consume Phrase" format="child_tag" y="1"/>
         <parameter id="effect" dataType="objectSet" type="effectReference" name="Effects" y="2"/>
     </template>
-    <template id="itemComponentEffectible" name="Effectible" topLevel="false"/>
-    <template id="itemComponentEquippable" name="Equippable" topLevel="false">
+    <template id="itemComponentEffectable" name="Effectable"/>
+    <template id="itemComponentEquippable" name="Equippable">
         <parameter id="slotGroup" dataType="objectSetUnique" type="itemComponentEquippableSlotData" name="Equip Slot Groups"/>
     </template>
-    <template id="itemComponentEquippableSlotData" name="Equip Slot Data" topLevel="false" nameFormat="$slot" primaryParameter="slot">
-        <parameter id="slot" dataType="objectSetUnique" type="equipSlotReference" name="Equip Slot Group" y="0"/>
+    <template id="itemComponentEquippableSlotData" name="Equip Slot Data" nameFormat="$slot" primaryParameter="slot">
+        <parameter id="slot" dataType="objectSetUnique" type="equipSlotReference" name="Equip Slot Group"/>
         <parameter id="exposedComponent" dataType="objectSetUnique" type="itemComponentReference" name="Exposed Components" y="1"/>
         <parameter id="effect" dataType="objectSet" type="effectReference" name="Equipped Effects" y="2"/>
         <parameter id="equippedAction" dataType="objectSet" type="customActionReference" name="Equipped Actions" y="3"/>
     </template>
-    <template id="equipSlotReference" name="Equip Slot" topLevel="false" nameFormat="$slot" primaryParameter="slot">
+    <template id="equipSlotReference" name="Equip Slot" nameFormat="$slot" primaryParameter="slot">
         <parameter id="slot" dataType="string" name="Equip Slot" format="current_tag"/>
     </template>
-    <template id="itemComponentReference" name="Item Component" topLevel="false" nameFormat="$component">
+    <template id="itemComponentReference" name="Item Component" nameFormat="$component">
         <parameter id="component" dataType="enum" type="itemComponentTypes" name="Item Component" format="current_tag"/>
     </template>
-    <template id="itemComponentMagazine" name="Ammo" topLevel="false">
-        <parameter id="size" dataType="integer" name="Magazine Size" default="1" y="0"/>
+    <template id="itemComponentMagazine" name="Ammo">
+        <parameter id="size" dataType="integer" name="Magazine Size" default="1"/>
         <parameter id="reloadActionPoints" dataType="integer" name="Reload Action Points" default="1" y="1"/>
         <parameter id="ammoType" dataType="objectSetUnique" type="ammoTypeReference" name="Ammo Types" y="2"/>
     </template>
-    <template id="ammoTypeReference" name="Ammo Type" topLevel="false" nameFormat="$ammoType">
+    <template id="ammoTypeReference" name="Ammo Type" nameFormat="$ammoType">
         <parameter id="ammoType" dataType="reference" type="item" name="Ammo Type" format="current_tag"/>
     </template>
-    <template id="itemComponentMod" name="Mod" topLevel="false">
-        <parameter id="modSlot" dataType="string" name="Mod Slot ID" format="attribute" y="0"/>
+    <template id="itemComponentMod" name="Mod">
+        <parameter id="modSlot" dataType="string" name="Mod Slot ID" format="attribute"/>
         <parameter id="effect" dataType="objectSet" type="effectReference" name="Effects" y="1"/>
     </template>
-    <template id="itemComponentModdable" name="Moddable" topLevel="false">
+    <template id="itemComponentModdable" name="Moddable">
         <parameter id="modSlot" dataType="objectSetUnique" type="itemComponentModdableSlot" name="Mod Slots"/>
     </template>
-    <template id="itemComponentModdableSlot" name="Mod Slot" topLevel="false" nameFormat="$name">
-        <parameter id="name" dataType="string" name="Mod Slot ID" format="attribute" y="0"/>
+    <template id="itemComponentModdableSlot" name="Mod Slot" nameFormat="$name">
+        <parameter id="name" dataType="string" name="Mod Slot ID" format="attribute"/>
         <parameter id="count" dataType="integer" name="Count" format="attribute" default="1" y="1"/>
     </template>
-    <template id="itemComponentWeapon" name="Weapon" topLevel="false">
-        <parameter id="class" dataType="reference" type="weaponClass" name="Weapon Class" format="attribute" y="0"/>
+    <template id="itemComponentWeapon" name="Weapon">
+        <parameter id="class" dataType="reference" type="weaponClass" name="Weapon Class" format="attribute"/>
         <parameter id="rate" dataType="integer" name="Attack Rate" format="child_tag" default="1" y="1"/>
         <parameter id="damage" dataType="object" type="itemComponentWeaponDamage" name="Damage" y="2"/>
         <parameter id="critChance" dataType="float" name="Critical Chance" format="attribute" default="0.0" y="3"/>
-        <parameter id="armorMult" dataType="float" name="Armor Mult" format="attribute" optional="true" default="1.0" y="4"/>
-        <parameter id="silenced" dataType="boolean" name="Is Silenced" format="attribute" default="false" y="5"/>
+        <parameter id="armorMult" dataType="float" name="Armor Mult" format="child_tag" optional="true" default="1.0" y="4"/>
+        <parameter id="silenced" dataType="boolean" name="Is Silenced" format="child_tag" default="false" y="5"/>
         <parameter id="targetEffect" dataType="objectSet" type="effectReference" name="Target Effects" y="6"/>
     </template>
-    <template id="itemComponentWeaponDamage" name="Damage" topLevel="false">
-        <parameter id="base" dataType="integer" name="Base Damage" format="attribute" y="0"/>
+    <template id="itemComponentWeaponDamage" name="Damage">
+        <parameter id="base" dataType="integer" name="Base Damage" format="attribute"/>
         <parameter id="crit" dataType="integer" name="Critical Damage" format="attribute" y="1"/>
         <parameter id="type" dataType="reference" type="damageType" name="Damage Type" optional="true" y="2"/>
     </template>
-    <template id="linkType" name="Link Type" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+    <template id="linkType" name="Link Type" topLevel="true" fileName="link_types" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="visible" dataType="boolean" name="Visible" format="attribute" y="1" default="true"/>
         <parameter id="moveAction" dataType="reference" type="action" name="Move Action" format="attribute" optional="true" y="2"/>
         <parameter id="moveDistance" dataType="objectSetUnique" type="linkMoveDistance" name="Move Distances" y="3"/>
         <parameter id="vehicleMoveAction" dataType="objectSetUnique" type="linkVehicleMoveAction" name="Vehicle Move Actions" y="4"/>
     </template>
-    <template id="linkMoveDistance" name="Move Distance" topLevel="false" nameFormat="$distance" primaryParameter="distance">
+    <template id="linkMoveDistance" name="Move Distance" nameFormat="$distance" primaryParameter="distance">
         <parameter id="distance" dataType="enum" type="distance" format="current_tag"/>
     </template>
-    <template id="linkVehicleMoveAction" name="Vehicle Move Action" topLevel="false" nameFormat="$type" primaryParameter="type">
-        <parameter id="type" dataType="string" name="Vehicle Type" format="attribute" y="0"/>
+    <template id="linkVehicleMoveAction" name="Vehicle Move Action" nameFormat="$type" primaryParameter="type">
+        <parameter id="type" dataType="string" name="Vehicle Type" format="attribute"/>
         <parameter id="action" dataType="reference" type="action" name="Move Action" format="attribute" y="1"/>
     </template>
-    <template id="lootTable" name="Loot Table" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" topLevelOnly="true" y="0"/>
+    <template id="lootTable" name="Loot Table" topLevel="true" fileName="loot_tables" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute" topLevelOnly="true"/>
         <parameter id="useAll" dataType="boolean" name="Use All" format="attribute" topLevelOnly="true" y="1" default="false"/>
         <parameter id="item" dataType="objectSet" name="Items" type="lootTableRefItem" y="2"/>
         <parameter id="table" dataType="objectSet" name="Tables" type="lootTableRefTable" y="3"/>
     </template>
     <template id="lootTableRefItem" name="Item Entry" nameFormat="$id{value:count: (:)}{value:countMin: (:}{value:countMax:-:)}" primaryParameter="id">
-        <parameter id="id" dataType="reference" name="Item" type="item" format="current_tag" y="0"/>
+        <parameter id="id" dataType="reference" name="Item" type="item" format="current_tag"/>
         <parameter id="chance" dataType="float" name="Chance" format="attribute" y="1" default="1.0"/>
         <parameter id="count" dataType="integer" name="Count" format="attribute" optional="true" y="2" default="1"/>
         <parameter id="countMin" dataType="integer" name="Min Count" format="attribute" optional="true" y="3" default="0"/>
         <parameter id="countMax" dataType="integer" name="Max Count" format="attribute" optional="true" y="4" default="0"/>
         <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true" y="5"/>
+        <parameter id="modChance" dataType="float" name="Mod Chance" default="1.0" format="attribute" optional="true" y="6"/>
     </template>
     <template id="lootTableRefTable" name="Table Entry" nameFormat="$id{value:count: (:)}{value:countMin: (:}{value:countMax:-:)}" primaryParameter="id">
-        <parameter id="id" dataType="reference" name="Loot Table" type="lootTable" format="current_tag" y="0"/>
+        <parameter id="id" dataType="reference" name="Loot Table" type="lootTable" format="current_tag"/>
         <parameter id="chance" dataType="float" name="Chance" format="attribute" y="1" default="1.0"/>
         <parameter id="count" dataType="integer" name="Count" format="attribute" optional="true" y="2" default="1"/>
         <parameter id="countMin" dataType="integer" name="Min Count" format="attribute" optional="true" y="3" default="0"/>
         <parameter id="countMax" dataType="integer" name="Max Count" format="attribute" optional="true" y="4" default="0"/>
         <parameter id="modTable" dataType="reference" name="Mod Table" type="lootTable" format="attribute" optional="true" y="5"/>
     </template>
-    <template id="node" name="Network Node" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+    <template id="node" name="Network Node" topLevel="true" fileName="networks" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="string" name="Name" format="child_tag" y="1"/>
         <parameter id="component" dataType="component" name="Type" format="current_tag" componentFormat="typeAttribute" default="group" y="2">
             <component id="group" name="Group" object="nodeGroup"/>
@@ -517,17 +541,17 @@
             <component id="data" name="Data" object="nodeData"/>
         </parameter>
     </template>
-    <template id="nodeControl" name="Control Node" topLevel="false">
+    <template id="nodeControl" name="Control Node">
         <parameter id="object" dataType="reference" type="objectInstance" name="Object" format="attribute"/>
     </template>
-    <template id="nodeData" name="Data Node" topLevel="false">
+    <template id="nodeData" name="Data Node">
         <parameter id="scene" dataType="reference" type="scene" name="Scene" format="attribute"/>
     </template>
-    <template id="nodeGroup" name="Group Node" topLevel="false">
+    <template id="nodeGroup" name="Group Node">
         <parameter id="node" dataType="tree" type="nodeInner" name="Group"/>
     </template>
-    <template id="nodeInner" name="Network Node" topLevel="false" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+    <template id="nodeInner" name="Network Node" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="string" name="Name" format="child_tag" y="1"/>
         <parameter id="component" dataType="component" name="Type" format="current_tag" componentFormat="typeAttribute" default="group" y="2">
             <component id="group" name="Group" object="nodeGroupInner"/>
@@ -535,20 +559,24 @@
             <component id="data" name="Data" object="nodeData"/>
         </parameter>
     </template>
-    <template id="nodeGroupInner" name="Group Node" topLevel="false">
+    <template id="nodeGroupInner" name="Group Node">
         <parameter id="node" dataType="treeBranch" type="nodeInner" name="Group"/>
     </template>
-    <template id="object" name="Object" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+    <template id="object" name="Object" topLevel="true" fileName="objects" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="object" name="Name" type="objectName" y="1"/>
-        <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="2" height="3"/>
-        <parameter id="component" dataType="objectSetUnique" type="objectComponent" name="Components" x="1" y="0" height="3"/>
-        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" x="1" y="3" height="2"/>
+        <parameter id="maxHP" dataType="integer" name="Max HP" format="attribute" y="2"/>
+        <parameter id="description" dataType="object" type="description" name="Description" optional="true" y="3" height="2"/>
+        <parameter id="damage" dataType="objectSetUnique" type="damageResistance" name="Damage Resistances" x="1" y="3"/>
+        <parameter id="script" dataType="objectSet" type="scriptWithTriggerObject" name="Scripts" x="2" y="3"/>
+        <parameter id="action" dataType="objectSet" type="customActionReference" name="Actions" x="1" y="4"/>
+        <parameter id="networkAction" dataType="objectSet" type="customActionReference" name="Network Actions" x="2" y="4"/>
+        <parameter id="component" dataType="objectSetUnique" type="objectComponent" name="Components" x="2" height="3"/>
     </template>
-    <template id="objectComponent" name="Object Component" topLevel="false" nameFormat="$component" primaryParameter="component">
-        <parameter id="startEnabled" dataType="boolean" name="Start Enabled" format="attribute" x="0" y="0" default="true"/>
-        <parameter id="restricted" dataType="boolean" name="Actions Restricted" format="attribute" x="1" y="0" default="false"/>
-        <parameter id="component" dataType="component" name="Component" componentFormat="typeAttribute" useComponentTypeName="true" x="0" y="1" width="2">
+    <template id="objectComponent" name="Object Component" nameFormat="$component" primaryParameter="component">
+        <parameter id="startEnabled" dataType="boolean" name="Start Enabled" format="attribute" default="true"/>
+        <parameter id="restricted" dataType="boolean" name="Actions Restricted" format="attribute" x="1" default="false"/>
+        <parameter id="component" dataType="component" name="Component" componentFormat="typeAttribute" useComponentTypeName="true" y="1" width="2">
             <component id="inventory" name="Inventory" object="objectComponentInventory"/>
             <component id="network" name="Network" object="objectComponentNetwork"/>
             <component id="link" name="Link" object="objectComponentLink"/>
@@ -556,39 +584,39 @@
             <component id="vehicle" name="Vehicle" object="objectComponentVehicle"/>
         </parameter>
     </template>
-    <template id="objectComponentInventory" name="Inventory" topLevel="false">
-        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" x="0" y="0" height="5"/>
+    <template id="objectComponentInventory" name="Inventory">
+        <parameter id="inventory" dataType="object" name="Inventory" type="lootTable" height="5"/>
         <parameter id="takePrompt" dataType="string" name="Take Prompt" format="child_tag" x="1" y="1" width="2"/>
         <parameter id="takePhrase" dataType="string" name="Take Phrase" format="child_tag" x="1" y="2" width="2"/>
         <parameter id="storePrompt" dataType="string" name="Store Prompt" format="child_tag" x="1" y="3" width="2"/>
         <parameter id="storePhrase" dataType="string" name="Store Phrase" format="child_tag" x="1" y="4" width="2"/>
-        <parameter id="enableTake" dataType="boolean" name="Enable Take" format="attribute" x="1" y="0" default="true"/>
-        <parameter id="enableStore" dataType="boolean" name="Enable Store" format="attribute" x="2" y="0" default="true"/>
-        <parameter id="itemAction" dataType="objectSet" type="customActionReference" name="Per-Item Actions" x="3" y="0" height="5"/>
+        <parameter id="enableTake" dataType="boolean" name="Enable Take" format="attribute" x="1" default="true"/>
+        <parameter id="enableStore" dataType="boolean" name="Enable Store" format="attribute" x="2" default="true"/>
+        <parameter id="itemAction" dataType="objectSet" type="customActionReference" name="Per-Item Actions" x="3" height="5"/>
     </template>
-    <template id="objectComponentNetwork" name="Network" topLevel="false"/>
-    <template id="objectComponentLink" name="Link" topLevel="false">
+    <template id="objectComponentNetwork" name="Network"/>
+    <template id="objectComponentLink" name="Link">
         <parameter id="link" dataType="objectSetUnique" type="objectComponentLinkData" name="Links"/>
     </template>
-    <template id="objectComponentLinkData" name="Link" topLevel="false" nameFormat="$id">
-        <parameter id="id" dataType="string" name="Link ID" format="attribute" y="0"/>
+    <template id="objectComponentLinkData" name="Link" nameFormat="$id">
+        <parameter id="id" dataType="string" name="Link ID" format="attribute"/>
         <parameter id="moveAction" dataType="reference" type="action" name="Move Action" format="attribute" optional="true" y="1"/>
         <parameter id="conditionVisible" dataType="string" name="Visible Condition" format="child_tag" optional="true" y="2"/>
         <parameter id="visible" dataType="boolean" name="Is Visible" format="attribute" y="3" default="false"/>
     </template>
-    <template id="objectComponentUsable" name="Usable" topLevel="false">
+    <template id="objectComponentUsable" name="Usable">
         <parameter id="slot" dataType="objectSetUnique" type="objectComponentUsableSlot" name="Usable Slots"/>
     </template>
-    <template id="objectComponentUsableSlot" name="Usable Slot" topLevel="false" nameFormat="$id">
+    <template id="objectComponentUsableSlot" name="Usable Slot" nameFormat="$id">
         <group id="prompts" name="Prompts" y="1" height="2"/>
         <group id="phrases" name="Phrases" y="3" height="2"/>
-        <group id="flags" name="Flags" x="1" y="0" height="5"/>
-        <parameter id="id" dataType="string" name="Slot ID" format="attribute" y="0"/>
-        <parameter id="startPrompt" dataType="string" name="Start Prompt" format="child_tag" y="0" group="prompts"/>
+        <group id="flags" name="Flags" x="1" height="5"/>
+        <parameter id="id" dataType="string" name="Slot ID" format="attribute"/>
+        <parameter id="startPrompt" dataType="string" name="Start Prompt" format="child_tag" group="prompts"/>
         <parameter id="endPrompt" dataType="string" name="End Prompt" format="child_tag" y="1" group="prompts"/>
-        <parameter id="startPhrase" dataType="string" name="Start Phrase" format="child_tag" y="0" group="phrases"/>
+        <parameter id="startPhrase" dataType="string" name="Start Phrase" format="child_tag" group="phrases"/>
         <parameter id="endPhrase" dataType="string" name="End Phrase" format="child_tag" y="1" group="phrases"/>
-        <parameter id="cover" dataType="boolean" name="Provides Cover" format="attribute" y="0" group="flags"/>
+        <parameter id="cover" dataType="boolean" name="Provides Cover" format="attribute" group="flags"/>
         <parameter id="hidden" dataType="boolean" name="Hides User" format="attribute" y="1" group="flags"/>
         <parameter id="seeOtherAreas" dataType="boolean" name="User Can See Other Areas" format="attribute" y="2" default="true" group="flags"/>
         <parameter id="localActions" dataType="boolean" name="User Can Perform Local Actions" format="attribute" y="3" default="true" group="flags"/>
@@ -596,74 +624,82 @@
         <parameter id="exposedComponent" dataType="objectSetUnique" type="objectExposedComponent" name="Exposed Components" y="5"/>
         <parameter id="usingAction" dataType="objectSet" type="customActionReference" name="User Actions" x="1" y="5"/>
     </template>
-    <template id="objectExposedComponent" name="Exposed Component" topLevel="false" nameFormat="$exposedComponent">
+    <template id="objectExposedComponent" name="Exposed Component" nameFormat="$exposedComponent">
         <parameter id="exposedComponent" dataType="enum" type="objectComponentTypes" name="Component Type" format="current_tag"/>
     </template>
-    <template id="objectComponentVehicle" name="Vehicle" topLevel="false">
+    <template id="objectComponentVehicle" name="Vehicle">
         <parameter id="vehicleType" dataType="string" name="Vehicle Type" format="attribute"/>
     </template>
-    <template id="customActionReference" name="Action Reference" topLevel="false" nameFormat="$template">
-        <parameter id="template" dataType="reference" type="action" name="Action" format="attribute" y="0"/>
+    <template id="customActionReference" name="Action Reference" nameFormat="$template">
+        <parameter id="template" dataType="reference" type="action" name="Action" format="attribute"/>
         <parameter id="parameter" dataType="objectSetUnique" type="customActionReferenceParameter" name="Parameters" y="1"/>
     </template>
-    <template id="customActionReferenceParameter" name="Parameter" topLevel="false" nameFormat="$name" primaryParameter="name">
-        <parameter id="name" dataType="string" name="Name" format="attribute" y="0"/>
+    <template id="customActionReferenceParameter" name="Parameter" nameFormat="$name" primaryParameter="name">
+        <parameter id="name" dataType="string" name="Name" format="attribute"/>
         <parameter id="expression" dataType="string" name="Expression" format="current_tag" y="1"/>
     </template>
-    <template id="objectName" name="Name" topLevel="false">
-        <parameter id="name" dataType="string" name="Name" format="current_tag" y="0"/>
+    <template id="objectName" name="Name">
+        <parameter id="name" dataType="string" name="Name" format="current_tag"/>
         <parameter id="proper" dataType="boolean" name="Proper" format="attribute" y="1" default="false"/>
     </template>
-    <template id="senseType" name="Sense Type" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+    <template id="obstructionType" name="Obstruction Type" topLevel="true" fileName="obstruction_types" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="1"/>
     </template>
-    <template id="skill" name="Skill" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+    <template id="senseType" name="Sense Type" topLevel="true" fileName="sense_types" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
+        <parameter id="name" dataType="string" name="Name" format="child_tag" y="1"/>
+        <parameter id="bypassedObstructionType" dataType="objectSetUnique" type="bypassedObstructionType" name="Bypassed Obstruction Types" y="2"/>
+    </template>
+    <template id="bypassedObstructionType" name="Bypassed Obstruction Type" nameFormat="$obstructionType" primaryParameter="obstructionType">
+        <parameter id="obstructionType" dataType="reference" type="obstructionType" format="current_tag"/>
+    </template>
+    <template id="skill" name="Skill" topLevel="true" fileName="skills" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="name" dataType="string" name="Name" format="current_tag" y="1"/>
     </template>
-    <template id="weaponClass" name="Weapon Class" topLevel="true" nameFormat="$id" primaryParameter="id">
-        <parameter id="id" dataType="string" name="ID" format="attribute" y="0"/>
+    <template id="weaponClass" name="Weapon Class" topLevel="true" fileName="weapon_classes" nameFormat="$id" primaryParameter="id">
+        <parameter id="id" dataType="string" name="ID" format="attribute"/>
         <parameter id="isRanged" dataType="boolean" name="Is Ranged" format="attribute" y="1" default="false"/>
         <parameter id="isLoud" dataType="boolean" name="Is Loud" format="attribute" y="2" default="false"/>
         <parameter id="skill" dataType="reference" name="Skill" type="skill" format="attribute" y="3"/>
         <parameter id="name" dataType="string" name="Name" format="child_tag" y="4"/>
-        <parameter id="range" dataType="objectSetUnique" name="Ranges" type="weaponClassRange" x="1" y="0" height="3"/>
+        <parameter id="range" dataType="objectSetUnique" name="Ranges" type="weaponClassRange" x="1" height="3"/>
         <parameter id="attackType" dataType="objectSetUnique" name="Attack Types" type="weaponClassAttackType" x="1" y="3" height="2"/>
     </template>
-    <template id="equipSlotGroup" name="Slot Group" topLevel="false" nameFormat="$slot" primaryParameter="slot">
+    <template id="equipSlotGroup" name="Slot Group" nameFormat="$slot" primaryParameter="slot">
         <parameter id="slot" dataType="objectSetUnique" name="Slots" type="weaponClassSlot"/>
     </template>
-    <template id="weaponClassSlot" name="Slot" topLevel="false" nameFormat="$slot" primaryParameter="slot">
+    <template id="weaponClassSlot" name="Slot" nameFormat="$slot" primaryParameter="slot">
         <parameter id="slot" dataType="string" name="Slot" format="current_tag"/>
     </template>
-    <template id="weaponClassAmmoType" name="Ammo Type" topLevel="false" nameFormat="$ammo" primaryParameter="ammo">
+    <template id="weaponClassAmmoType" name="Ammo Type" nameFormat="$ammo" primaryParameter="ammo">
         <parameter id="ammo" dataType="reference" name="Ammo Item" type="item" format="current_tag"/>
     </template>
-    <template id="weaponClassRange" name="Range" topLevel="false" nameFormat="$range" primaryParameter="range">
+    <template id="weaponClassRange" name="Range" nameFormat="$range" primaryParameter="range">
         <parameter id="range" dataType="enum" type="distance" name="Range" format="current_tag"/>
     </template>
-    <template id="weaponClassAttackType" name="AttackType" topLevel="false" nameFormat="$attackType" primaryParameter="attackType">
+    <template id="weaponClassAttackType" name="AttackType" nameFormat="$attackType" primaryParameter="attackType">
         <parameter id="attackType" dataType="reference" name="Attack Type" type="attackType" format="current_tag"/>
     </template>
-    <template id="scriptWithTriggerRoom" name="Script Trigger" topLevel="false" nameFormat="$trigger">
-        <parameter id="trigger" dataType="enum" type="scriptTriggersRoom" name="Trigger" format="attribute" y="0"/>
+    <template id="scriptWithTriggerRoom" name="Script Trigger" nameFormat="$trigger">
+        <parameter id="trigger" dataType="enum" type="scriptTriggersRoom" name="Trigger" format="attribute"/>
         <parameter id="script" dataType="script" name="Script" format="current_tag" y="1"/>
     </template>
-    <template id="scriptWithTriggerArea" name="Script Trigger" topLevel="false" nameFormat="$trigger">
-        <parameter id="trigger" dataType="enum" type="scriptTriggersArea" name="Trigger" format="attribute" y="0"/>
+    <template id="scriptWithTriggerArea" name="Script Trigger" nameFormat="$trigger">
+        <parameter id="trigger" dataType="enum" type="scriptTriggersArea" name="Trigger" format="attribute"/>
         <parameter id="script" dataType="script" name="Script" format="current_tag" y="1"/>
     </template>
-    <template id="scriptWithTriggerItem" name="Script Trigger" topLevel="false" nameFormat="$trigger">
-        <parameter id="trigger" dataType="enum" type="scriptTriggersItem" name="Trigger" format="attribute" y="0"/>
+    <template id="scriptWithTriggerItem" name="Script Trigger" nameFormat="$trigger">
+        <parameter id="trigger" dataType="enum" type="scriptTriggersItem" name="Trigger" format="attribute"/>
         <parameter id="script" dataType="script" name="Script" format="current_tag" y="1"/>
     </template>
-    <template id="scriptWithTriggerObject" name="Script Trigger" topLevel="false" nameFormat="$trigger">
-        <parameter id="trigger" dataType="enum" type="scriptTriggersObject" name="Trigger" format="attribute" y="0"/>
+    <template id="scriptWithTriggerObject" name="Script Trigger" nameFormat="$trigger">
+        <parameter id="trigger" dataType="enum" type="scriptTriggersObject" name="Trigger" format="attribute"/>
         <parameter id="script" dataType="script" name="Script" format="current_tag" y="1"/>
     </template>
-    <template id="scriptWithTriggerActor" name="Script Trigger" topLevel="false" nameFormat="$trigger">
-        <parameter id="trigger" dataType="enum" type="scriptTriggersActor" name="Trigger" format="attribute" y="0"/>
+    <template id="scriptWithTriggerActor" name="Script Trigger" nameFormat="$trigger">
+        <parameter id="trigger" dataType="enum" type="scriptTriggersActor" name="Trigger" format="attribute"/>
         <parameter id="script" dataType="script" name="Script" format="current_tag" y="1"/>
     </template>
 </data>

@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.browser;
 
-import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserCategoryNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserObjectNode;
@@ -18,18 +18,23 @@ import java.util.Map;
 
 public class BrowserTree extends JTree {
 
+    private final BrowserFrame browserFrame;
+
     private final DefaultMutableTreeNode treeRoot;
     private final DefaultTreeModel treeModel;
     private final Map<String, BrowserCategoryNode> categoryNodes;
-    private final Main main;
 
-    public BrowserTree(Main main) {
+    private PresenterActions presenter;
+
+    public BrowserTree(BrowserFrame browserFrame) {
+        this.browserFrame = browserFrame;
         this.treeRoot = new BrowserRootNode();
         this.categoryNodes = new HashMap<>();
-        this.main = main;
         this.treeModel = new DefaultTreeModel(treeRoot, false);
         this.setModel(treeModel);
         this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        this.setRootVisible(false);
+        this.setShowsRootHandles(true);
         this.addMouseListener(new MouseAdapter() {
             private DefaultMutableTreeNode lastClickedNode;
 
@@ -64,9 +69,9 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserCategoryNode categoryNode) {
-                    main.getDataManager().newObject(categoryNode.getCategoryID());
+                    getPresenter().onCreateObject(categoryNode.getCategoryID());
                 } else if (node instanceof BrowserObjectNode objectNode) {
-                    main.getDataManager().newObject(objectNode.getCategoryID());
+                    getPresenter().onCreateObject(objectNode.getCategoryID());
                 }
             }
         };
@@ -79,7 +84,7 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    main.getDataManager().editObject(objectNode.getCategoryID(), objectNode.getObjectID());
+                    getPresenter().onEditObject(objectNode.getCategoryID(), objectNode.getObjectID());
                 }
             }
         };
@@ -92,7 +97,7 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    main.getDataManager().duplicateObject(objectNode.getCategoryID(), objectNode.getObjectID());
+                    getPresenter().onDuplicateObject(objectNode.getCategoryID(), objectNode.getObjectID());
                 }
             }
         };
@@ -105,7 +110,7 @@ public class BrowserTree extends JTree {
                 }
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 if (node instanceof BrowserObjectNode objectNode) {
-                    main.getDataManager().deleteObject(objectNode.getCategoryID(), objectNode.getObjectID());
+                    getPresenter().onDeleteObject(objectNode.getCategoryID(), objectNode.getObjectID());
                 }
             }
         };
@@ -123,6 +128,16 @@ public class BrowserTree extends JTree {
         inputMapFocused.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deleteGameObject");
     }
 
+    public void registerPresenter(PresenterActions presenter) {
+        if (this.presenter != null) throw new IllegalStateException("Presenter is already registered");
+        this.presenter = presenter;
+    }
+
+    private PresenterActions getPresenter() {
+        if (presenter == null) throw new IllegalStateException("Presenter has not been registered");
+        return presenter;
+    }
+
     @Override
     public void collapsePath(TreePath path) {
         if (path.equals(new TreePath(getModel().getRoot()))) {
@@ -132,7 +147,7 @@ public class BrowserTree extends JTree {
     }
 
     public void addCategory(String categoryID, String name) {
-        BrowserCategoryNode node = new BrowserCategoryNode(main, categoryID, name);
+        BrowserCategoryNode node = new BrowserCategoryNode(categoryID, name);
         categoryNodes.put(categoryID, node);
         treeRoot.add(node);
         treeModel.nodeStructureChanged(treeRoot);
@@ -143,13 +158,10 @@ public class BrowserTree extends JTree {
         treeModel.nodeStructureChanged(categoryNodes.get(categoryID));
     }
 
-    public void addGameObject(String categoryID, String objectID, boolean selectAfterAdding) {
+    public void addGameObject(String categoryID, String objectID) {
         if (categoryNodes.containsKey(categoryID)) {
             categoryNodes.get(categoryID).addGameObject(objectID);
             updateCategory(categoryID);
-            if (selectAfterAdding) {
-                this.setSelectionPath(new TreePath(treeModel.getPathToRoot(categoryNodes.get(categoryID).getObjectNode(objectID))));
-            }
         }
         this.expandRow(0);
     }
@@ -180,9 +192,6 @@ public class BrowserTree extends JTree {
     }
 
     public void clearData() {
-        /*for (BrowserCategoryNode node : categoryNodes.values()) {
-            treeModel.removeNodeFromParent(node);
-        }*/
         treeRoot.removeAllChildren();
         treeModel.nodeStructureChanged(treeRoot);
         categoryNodes.clear();
@@ -198,7 +207,7 @@ public class BrowserTree extends JTree {
 
     private void onDoubleClick(DefaultMutableTreeNode node) {
         if (node instanceof BrowserObjectNode objectNode) {
-            main.getDataManager().editObject(objectNode.getCategoryID(), objectNode.getObjectID());
+            getPresenter().onEditObject(objectNode.getCategoryID(), objectNode.getObjectID());
         }
     }
 
@@ -209,10 +218,7 @@ public class BrowserTree extends JTree {
         }
         BrowserNode node = (BrowserNode) path.getLastPathComponent();
         this.setSelectionPath(path);
-        JPopupMenu contextMenu = node.getContextMenu();
-        if (contextMenu != null) {
-            contextMenu.show(this, mousePos.x, mousePos.y);
-        }
+        browserFrame.openContextMenu(node, mousePos.x, mousePos.y);
     }
 
 }

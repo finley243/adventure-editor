@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
-import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataTreeBranch;
@@ -8,10 +8,10 @@ import com.github.finley243.adventureeditor.template.Group;
 import com.github.finley243.adventureeditor.template.TabGroup;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
-import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 import com.github.finley243.adventureeditor.ui.EditorGroup;
 import com.github.finley243.adventureeditor.ui.EditorTabGroup;
 import com.github.finley243.adventureeditor.ui.OptionalBorderedPanel;
+import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +25,7 @@ public class ParameterFieldObject extends ParameterField {
     private final Map<String, EditorTabGroup> tabGroups;
     private final Template template;
 
-    public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, Main main, boolean isTopLevelEditor) {
+    public ParameterFieldObject(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, boolean isTopLevelEditor, ParameterFactory parameterFactory, PresenterActions presenter) {
         super(editorFrame, optional, name, parentField);
         this.template = template;
         JPanel objectPanel = new JPanel();
@@ -72,7 +72,7 @@ public class ParameterFieldObject extends ParameterField {
         }
         for (TemplateParameter parameter : template.parameters()) {
             if (isTopLevelEditor || !parameter.topLevelOnly()) {
-                ParameterField parameterElement = ParameterFieldFactory.create(parameter, main, editorFrame, parentField);
+                ParameterField parameterElement = parameterFactory.create(parameter, editorFrame, parentField, presenter);
                 if (parameterElement == null) {
                     continue;
                 }

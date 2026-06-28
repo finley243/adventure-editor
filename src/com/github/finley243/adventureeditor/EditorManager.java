@@ -1,8 +1,5 @@
 package com.github.finley243.adventureeditor;
 
-import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import java.util.HashMap;
@@ -11,23 +8,14 @@ import java.util.Map;
 
 public class EditorManager {
 
-    private final Main main;
     private final Map<String, Map<String, EditorFrame>> topLevelEditorWindows;
 
-    public EditorManager(Main main) {
-        this.main = main;
+    public EditorManager() {
         this.topLevelEditorWindows = new HashMap<>();
     }
 
-    public void openEditorFrame(String categoryID, String objectID, Template template, Data objectData, DataSaveTarget saveTargetOverride) {
-        EditorFrame activeFrame = getActiveTopLevelFrame(categoryID, objectID);
-        if (activeFrame != null) {
-            activeFrame.toFront();
-            activeFrame.requestFocus();
-        } else {
-            EditorFrame editorFrame = new EditorFrame(main, null, main.getMainFrame(), template, objectData, saveTargetOverride != null ? saveTargetOverride : main.getMainFrame(), true);
-            addActiveTopLevelFrame(categoryID, objectID, editorFrame);
-        }
+    public boolean hasAnyOpenFrame() {
+        return topLevelEditorWindows.values().stream().anyMatch(m -> !m.isEmpty());
     }
 
     public void closeEditorFrameIfActive(String categoryID, String objectID) {
@@ -47,8 +35,27 @@ public class EditorManager {
         topLevelEditorWindows.clear();
     }
 
-    private EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
-        if (categoryID == null | objectID == null) {
+    public boolean requestCloseAllEditorFrames() {
+        for (Map<String, EditorFrame> categoryEditors : topLevelEditorWindows.values()) {
+            for (EditorFrame editorFrame : categoryEditors.values()) {
+                boolean didClose = editorFrame.requestClose(false, false);
+                if (!didClose) return false;
+            }
+        }
+        return true;
+    }
+
+    public void forceCloseAllEditorFrames() {
+        for (Map<String, EditorFrame> categoryEditors : topLevelEditorWindows.values()) {
+            for (EditorFrame editorFrame : categoryEditors.values()) {
+                boolean didClose = editorFrame.requestClose(true, false);
+                if (!didClose) return;
+            }
+        }
+    }
+
+    public EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
+        if (categoryID == null || objectID == null) {
             return null;
         }
         if (!topLevelEditorWindows.containsKey(categoryID)) {
@@ -57,17 +64,14 @@ public class EditorManager {
         return topLevelEditorWindows.get(categoryID).get(objectID);
     }
 
-    private void addActiveTopLevelFrame(String categoryID, String objectID, EditorFrame frame) {
+    public void addActiveTopLevelFrame(String categoryID, String objectID, EditorFrame frame) {
         if (objectID == null) {
             return;
         }
-        if (!topLevelEditorWindows.containsKey(categoryID)) {
-            topLevelEditorWindows.put(categoryID, new HashMap<>());
-        }
-        topLevelEditorWindows.get(categoryID).put(objectID, frame);
+        topLevelEditorWindows.computeIfAbsent(categoryID, k -> new HashMap<>()).put(objectID, frame);
     }
 
-    private void removeActiveTopLevelFrame(String categoryID, String objectID) {
+    public void removeActiveTopLevelFrame(String categoryID, String objectID) {
         if (objectID == null) {
             return;
         }

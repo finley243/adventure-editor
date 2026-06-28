@@ -1,6 +1,7 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
-import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.DataManager;
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataReference;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
@@ -16,7 +17,7 @@ public class ParameterFieldReference extends ParameterField {
     private final JComboBox<String> dropdownMenu;
     private final JButton openReferenceButton;
 
-    public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Main main, String categoryID) {
+    public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, String categoryID, String[] referenceValues, DataManager dataManager, PresenterActions presenter) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
@@ -26,9 +27,8 @@ public class ParameterFieldReference extends ParameterField {
         } else {
             label = new JLabel(name);
         }
-        String[] values = main.getDataManager().getIDsForCategoryArray(categoryID);
-        Arrays.sort(values);
-        this.dropdownMenu = new JComboBox<>(values);
+        Arrays.sort(referenceValues);
+        this.dropdownMenu = new JComboBox<>(referenceValues);
         dropdownMenu.setPreferredSize(new Dimension(150, 20));
         dropdownMenu.setEditable(true);
         dropdownMenu.addActionListener(e -> onFieldUpdated());
@@ -36,8 +36,8 @@ public class ParameterFieldReference extends ParameterField {
         openReferenceButton.setPreferredSize(new Dimension(20, 20));
         openReferenceButton.addActionListener(e -> {
             String value = (String) dropdownMenu.getSelectedItem();
-            if (value != null && main.getDataManager().getIDsForCategory(categoryID).contains(value)) {
-                main.getDataManager().editObject(categoryID, value);
+            if (value != null && dataManager.categoryContainsID(categoryID, value)) {
+                presenter.onEditObject(categoryID, value);
             }
         });
         ((JTextField) dropdownMenu.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {

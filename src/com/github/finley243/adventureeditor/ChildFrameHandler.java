@@ -26,6 +26,10 @@ public class ChildFrameHandler<T> {
         return activeEditorFrames.get(key);
     }
 
+    public boolean hasAnyOpenFrame() {
+        return !activeEditorFramesUnsaved.isEmpty() || !activeEditorFrames.isEmpty();
+    }
+
     public boolean requestFocusIfOpen(T key) {
         if (key == null) return false;
         if (activeEditorFrames.containsKey(key)) {
@@ -56,14 +60,31 @@ public class ChildFrameHandler<T> {
 
     public boolean closeAll() {
         // These MUST be while-loops to prevent concurrent modification exceptions
-        while (activeEditorFrames.values().iterator().hasNext()) {
-            EditorFrame editorFrame = activeEditorFrames.values().iterator().next();
+        Iterator<EditorFrame> itr = activeEditorFrames.values().iterator();
+        while (itr.hasNext()) {
+            EditorFrame editorFrame = itr.next();
             boolean didClose = editorFrame.requestClose(false, false);
             if (!didClose) return false;
         }
         while (!activeEditorFramesUnsaved.isEmpty()) {
             EditorFrame editorFrame = activeEditorFramesUnsaved.getFirst();
             boolean didClose = editorFrame.requestClose(false, false);
+            if (!didClose) return false;
+        }
+        return true;
+    }
+
+    public boolean forceCloseAll() {
+        // These MUST be while-loops to prevent concurrent modification exceptions
+        Iterator<EditorFrame> itr = activeEditorFrames.values().iterator();
+        while (itr.hasNext()) {
+            EditorFrame editorFrame = itr.next();
+            boolean didClose = editorFrame.requestClose(true, false);
+            if (!didClose) return false;
+        }
+        while (!activeEditorFramesUnsaved.isEmpty()) {
+            EditorFrame editorFrame = activeEditorFramesUnsaved.getFirst();
+            boolean didClose = editorFrame.requestClose(true, false);
             if (!didClose) return false;
         }
         return true;

@@ -10,10 +10,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
@@ -28,23 +25,46 @@ public class DataLoader {
     private static final String TEMPLATE_DIRECTORY = "templates";
     private static final String RECENT_PROJECTS_FILE = "recents.txt";
 
-    private static final String DATA_DIRECTORY = "/data";
-    private static final String CONFIG_FILE = "/config.xml";
+    private static final String DATA_DIRECTORY = "data";
+    private static final String DATA_EXTENSION = "xml";
+    private static final String SCRIPT_DIRECTORY = "data/scripts";
+    private static final String SCRIPT_EXTENSION = "ascr";
+    private static final String CONFIG_FILE = "config.xml";
+    private static final String PHRASE_FILE = "phrases.aphr";
+    private static final String PHRASE_DIRECTORY = "data";
+    private static final String PHRASE_EXTENSION = "aphr";
 
+    private static final String TOP_LEVEL_ELEMENT_NAME = "data";
     private static final String COMPONENT_TYPE_ATTRIBUTE_ID = "type";
 
-    public static Map<String, Template> loadTemplates() throws ParserConfigurationException, IOException, SAXException {
+    private final DocumentBuilder documentBuilder;
+    private final Transformer transformer;
+
+    public DataLoader() {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            this.documentBuilder = factory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            throw new DataIOException("Failed to create document builder");
+        }
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        try {
+            this.transformer = transformerFactory.newTransformer();
+        } catch (TransformerConfigurationException e) {
+            throw new DataIOException("Failed to create XML transformer");
+        }
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+    }
+
+    public Map<String, Template> loadTemplates() {
         Map<String, Template> templates = new HashMap<>();
         File dir = new File(TEMPLATE_DIRECTORY);
         if (!dir.isDirectory()) return null;
         File[] files = dir.listFiles();
         if (files == null) return null;
         for (File file : files) {
-            if (!file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("xml")) continue;
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(file);
-            Element rootElement = document.getDocumentElement();
+            if (!file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase(DATA_EXTENSION)) continue;
+            Element rootElement = getRootElementFromFile(file);
             for (Element templateElement : LoadUtils.directChildrenWithName(rootElement, "template")) {
                 String id = LoadUtils.attribute(templateElement, "id", null);
                 String name = LoadUtils.attribute(templateElement, "name", null);
@@ -86,7 +106,9 @@ public class DataLoader {
                         case "reference" -> TemplateParameter.ParameterDataType.REFERENCE;
                         case "referenceSet" -> TemplateParameter.ParameterDataType.REFERENCE_SET;
                         case "enum" -> TemplateParameter.ParameterDataType.ENUM;
+                        case "expression" -> TemplateParameter.ParameterDataType.EXPRESSION;
                         case "script" -> TemplateParameter.ParameterDataType.SCRIPT;
+                        case "scriptFile" -> TemplateParameter.ParameterDataType.SCRIPT_FILE;
                         case "component" -> TemplateParameter.ParameterDataType.COMPONENT;
                         case "tree" -> TemplateParameter.ParameterDataType.TREE;
                         case "treeBranch" -> TemplateParameter.ParameterDataType.TREE_BRANCH;
@@ -127,23 +149,24 @@ public class DataLoader {
                             case STRING, STRING_LONG -> new DataString(defaultValueString);
                             case REFERENCE -> new DataReference(defaultValueString);
                             case ENUM -> new DataEnum(defaultValueString);
-                            case SCRIPT -> new DataScript(defaultValueString);
+                            case EXPRESSION, SCRIPT_FILE, SCRIPT -> new DataScript(defaultValueString);
                             case COMPONENT -> new DataComponent(defaultValueString, null, null);
                             case OBJECT, OBJECT_SET_UNIQUE, OBJECT_SET, REFERENCE_SET, TREE, TREE_BRANCH -> null;
                         };
                     }
                     parameters.add(new TemplateParameter(parameterID, dataType, parameterName, type, topLevelOnly, optional, format, componentFormat, componentOptions, useComponentTypeName, group, x, y, width, height, defaultValue));
                 }
+                String fileName = LoadUtils.attribute(templateElement, "fileName", null);
                 String nameFormat = LoadUtils.attribute(templateElement, "nameFormat", null);
                 String primaryParameter = LoadUtils.attribute(templateElement, "primaryParameter", null);
-                Template template = new Template(id, name, topLevel, isUnique, groups, tabGroups, parameters, nameFormat, primaryParameter);
+                Template template = new Template(id, name, topLevel, fileName, isUnique, groups, tabGroups, parameters, nameFormat, primaryParameter);
                 templates.put(id, template);
             }
         }
         return templates;
     }
 
-    public static Map<String, List<String>> loadEnumTypes() throws ParserConfigurationException, IOException, SAXException {
+    public Map<String, List<String>> loadEnumTypes() {
         Map<String, List<String>> enumTypes = new HashMap<>();
         File dir = new File(TEMPLATE_DIRECTORY);
         if (!dir.isDirectory()) return null;
@@ -151,10 +174,7 @@ public class DataLoader {
         if (files == null) return null;
         for (File file : files) {
             if (!file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("xml")) continue;
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(file);
-            Element rootElement = document.getDocumentElement();
+            Element rootElement = getRootElementFromFile(file);
             for (Element enumTypeElement : LoadUtils.directChildrenWithName(rootElement, "enumType")) {
                 String id = LoadUtils.attribute(enumTypeElement, "id", null);
                 List<String> values = LoadUtils.listOfTags(enumTypeElement, "value");
@@ -164,193 +184,266 @@ public class DataLoader {
         return enumTypes;
     }
 
-    public static List<ProjectData> loadRecentProjects() {
-        List<ProjectData> recentProjects = new ArrayList<>();
+    public List<ProjectFile> loadRecentProjects() {
+        List<ProjectFile> recentProjects = new ArrayList<>();
         File file = new File(RECENT_PROJECTS_FILE);
         if (!file.exists()) {
             return recentProjects;
         }
-        try {
-            Scanner scanner = new Scanner(file);
+        try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 String[] parts = line.split("\\|");
                 if (parts.length == 2) {
-                    recentProjects.add(new ProjectData(parts[0], parts[1]));
+                    recentProjects.add(new ProjectFile(parts[0], parts[1]));
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new DataIOException("Failed to load recent projects file");
         }
         return recentProjects;
     }
 
-    public static void saveRecentProjects(List<ProjectData> recentProjects) {
+    public void saveRecentProjects(List<ProjectFile> recentProjects) {
         File file = new File(RECENT_PROJECTS_FILE);
         try (FileWriter writer = new FileWriter(file); BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
-            file.createNewFile();
             StringBuilder builder = new StringBuilder();
-            for (ProjectData project : recentProjects) {
+            for (ProjectFile project : recentProjects) {
                 builder.append(project.name()).append("|").append(project.absolutePath()).append("\n");
             }
             String content = builder.toString();
             bufferedWriter.write(content);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new DataIOException("Failed to save recent projects file");
         }
     }
 
-    public static void loadFromDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> scripts, Map<String, String> phrases) throws ParserConfigurationException, IOException, SAXException {
-        if (dir.isDirectory()) {
-            loadConfigData(dir, templates.get(ConfigMenuManager.CONFIG_TEMPLATE), configMenuManager);
-            File dataDirectory = new File(dir, DATA_DIRECTORY);
-            if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
-                return;
-            }
-            File[] files = dataDirectory.listFiles();
-            if (files == null) {
-                return;
-            }
-            for (File file : files) {
-                if (file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("xml")) {
-                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                    DocumentBuilder builder = factory.newDocumentBuilder();
-                    Document document = builder.parse(file);
-                    Element rootElement = document.getDocumentElement();
-                    Node currentChild = rootElement.getFirstChild();
-                    while (currentChild != null) {
-                        if (currentChild.getNodeType() == Node.ELEMENT_NODE) {
-                            Element currentElement = (Element) currentChild;
-                            String elementType = currentChild.getNodeName();
-                            Template template = templates.get(elementType);
-                            if (template != null && template.topLevel()) {
-                                DataObject data = loadDataFromElement(currentElement, template, templates, true, dataMap);
-                                if (!dataMap.containsKey(elementType)) {
-                                    dataMap.put(elementType, new HashMap<>());
-                                }
-                                String dataID = data.getID();
-                                if (dataID != null) {
-                                    dataMap.get(elementType).put(data.getID(), data);
-                                }
+    public ProjectLoadData loadFromDir(File projectDir, TemplateRegistry templateRegistry) {
+        if (!projectDir.isDirectory()) {
+            throw new IllegalArgumentException("Selected file is not a directory");
+        }
+        Data configData = loadConfigDataFromDir(projectDir, templateRegistry.getConfigTemplate(), templateRegistry);
+        Map<String, Map<String, Data>> gameData = loadDataFromDir(projectDir, templateRegistry);
+        Map<String, String> phrases = loadPhrasesFromDir(projectDir);
+        Map<String, String> scripts = loadScriptsFromDir(projectDir);
+        return new ProjectLoadData(configData, gameData, phrases, scripts);
+    }
+
+    private Map<String, Map<String, Data>> loadDataFromDir(File projectDir, TemplateRegistry templateRegistry) {
+        Map<String, Map<String, Data>> dataMap = new HashMap<>();
+        File dataDirectory = new File(projectDir, DATA_DIRECTORY);
+        if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
+            return dataMap;
+        }
+        File[] files = dataDirectory.listFiles();
+        if (files == null) {
+            return dataMap;
+        }
+        for (File file : files) {
+            String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+            if (fileExtension.equalsIgnoreCase(DATA_EXTENSION)) {
+                Element rootElement = getRootElementFromFile(file);
+                Node currentChild = rootElement.getFirstChild();
+                while (currentChild != null) {
+                    if (currentChild.getNodeType() == Node.ELEMENT_NODE) {
+                        Element currentElement = (Element) currentChild;
+                        String elementType = currentChild.getNodeName();
+                        Template template = templateRegistry.getTemplate(elementType);
+                        if (template != null && template.topLevel()) {
+                            DataObject data = loadDataFromElement(currentElement, template, templateRegistry, true, dataMap);
+                            if (!dataMap.containsKey(elementType)) {
+                                dataMap.put(elementType, new HashMap<>());
+                            }
+                            String dataID = data.getID();
+                            if (dataID != null) {
+                                dataMap.get(elementType).put(data.getID(), data);
                             }
                         }
-                        currentChild = currentChild.getNextSibling();
                     }
-                } else if (file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("ascr")) {
-                    String scriptName = file.getName().substring(0, file.getName().lastIndexOf("."));
-                    //String scriptPath = file.getAbsolutePath();
-                    String scriptBody = Files.readString(file.toPath());
-                    scripts.put(scriptName, scriptBody);
-                } else if (file.getName().substring(file.getName().lastIndexOf(".") + 1).equalsIgnoreCase("aphr")) {
-                    Scanner scanner = new Scanner(file);
-                    while (scanner.hasNextLine()) {
-                        String line = scanner.nextLine();
-                        String[] split = line.split(":");
-                        if (split.length != 2) throw new UnsupportedOperationException("Invalid phrase file format - line: " + line);
-                        phrases.put(split[0].trim(), split[1].trim());
-                    }
-                    scanner.close();
+                    currentChild = currentChild.getNextSibling();
                 }
             }
         }
+        return dataMap;
     }
 
-    public static void saveToDir(File dir, Map<String, Template> templates, Map<String, Map<String, Data>> dataMap, ConfigMenuManager configMenuManager, Map<String, String> scripts, Map<String, String> phrases) throws IOException, TransformerException, ParserConfigurationException {
+    private Map<String, String> loadPhrasesFromDir(File projectDir) {
+        Map<String, String> phrases = new HashMap<>();
+        File phraseDirectory = new File(projectDir, PHRASE_DIRECTORY);
+        if (!phraseDirectory.exists() || !phraseDirectory.isDirectory()) {
+            return phrases;
+        }
+        File[] files = phraseDirectory.listFiles();
+        if (files == null) {
+            return phrases;
+        }
+        for (File file : files) {
+            String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+            if (fileExtension.equalsIgnoreCase(PHRASE_EXTENSION)) {
+                try (Scanner scanner = new Scanner(file)) {
+                    while (scanner.hasNextLine()) {
+                        String line = scanner.nextLine();
+                        String[] split = line.split(":", 2);
+                        if (split.length != 2) throw new DataIOException("Invalid phrase file format - line: " + line);
+                        phrases.put(split[0].trim(), split[1].trim());
+                    }
+                } catch (FileNotFoundException e) {
+                    throw new DataIOException("Scanner could not find file while loading phrase file: " + file.getAbsolutePath());
+                }
+            }
+        }
+        return phrases;
+    }
+
+    private Map<String, String> loadScriptsFromDir(File projectDir) {
+        Map<String, String> scripts = new HashMap<>();
+        File scriptDirectory = new File(projectDir, SCRIPT_DIRECTORY);
+        if (!scriptDirectory.exists() || !scriptDirectory.isDirectory()) {
+            return scripts;
+        }
+        File[] files = scriptDirectory.listFiles();
+        if (files == null) {
+            return scripts;
+        }
+        for (File file : files) {
+            String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+            if (fileExtension.equalsIgnoreCase(SCRIPT_EXTENSION)) {
+                String scriptName = file.getName().substring(0, file.getName().lastIndexOf("."));
+                String scriptBody;
+                try {
+                    scriptBody = Files.readString(file.toPath());
+                } catch (IOException e) {
+                    throw new DataIOException("Failed to read script file: " + file.getAbsolutePath());
+                }
+                scripts.put(scriptName, scriptBody);
+            }
+        }
+        return scripts;
+    }
+
+    public void saveToDir(File dir, TemplateRegistry templateRegistry, Map<String, Map<String, Data>> dataMap, Data configData, Map<String, String> scripts, Map<String, String> phrases) {
         if (dir.isDirectory()) {
-            saveConfigData(dir, templates.get(ConfigMenuManager.CONFIG_TEMPLATE), configMenuManager, dataMap);
+            saveConfigData(dir, templateRegistry.getConfigTemplate(), configData, dataMap);
             File dataDirectory = new File(dir, DATA_DIRECTORY);
             dataDirectory.mkdirs();
+            File scriptDirectory = new File(dir, SCRIPT_DIRECTORY);
+            scriptDirectory.mkdirs();
 
             // Delete all existing game files in the directory
             Path dirPath = Paths.get(dataDirectory.getAbsolutePath());
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*.xml")) {
+            Path scriptDirPath = Paths.get(scriptDirectory.getAbsolutePath());
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*." + DATA_EXTENSION)) {
                 for (Path path : stream) {
                     Files.delete(path);
                 }
+            } catch (IOException e) {
+                throw new DataIOException("Failed to delete existing game data files while saving");
             }
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*.ascr")) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(scriptDirPath, "*." + SCRIPT_EXTENSION)) {
                 for (Path path : stream) {
                     Files.delete(path);
                 }
+            } catch (IOException e) {
+                throw new DataIOException("Failed to delete existing script files while saving");
             }
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*.aphr")) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*." + PHRASE_EXTENSION)) {
                 for (Path path : stream) {
                     Files.delete(path);
                 }
+            } catch (IOException e) {
+                throw new DataIOException("Failed to delete existing phrase files while saving");
             }
 
             for (Map.Entry<String, Map<String, Data>> entry : dataMap.entrySet()) {
                 String categoryID = entry.getKey();
-                Template categoryTemplate = templates.get(categoryID);
+                Template categoryTemplate = templateRegistry.getTemplate(categoryID);
                 if (!categoryTemplate.topLevel()) {
                     continue;
                 }
                 Map<String, Data> categoryData = entry.getValue();
-                File categoryFile = new File(dataDirectory, categoryID + ".xml");
-                categoryFile.createNewFile();
-                saveDataToFile(categoryData, categoryFile, templates, dataMap);
+                String fileName = categoryTemplate.fileName();
+                if (fileName == null) fileName = categoryTemplate.id();
+                File categoryFile = new File(dataDirectory, fileName + "." + DATA_EXTENSION);
+                try {
+                    categoryFile.createNewFile();
+                } catch (IOException e) {
+                    throw new DataIOException("Failed to create data file for type: " + categoryID);
+                }
+                saveDataToFile(categoryData, categoryFile, dataMap);
             }
 
-            File phraseFile = new File(dataDirectory, "phrases.aphr");
-            phraseFile.createNewFile();
+            File phraseFile = new File(dataDirectory, PHRASE_FILE);
+            try {
+                phraseFile.createNewFile();
+            } catch (IOException e) {
+                throw new DataIOException("Failed to create phrase file");
+            }
+            List<String> phraseLines = new ArrayList<>();
+            for (Map.Entry<String, String> phrase : phrases.entrySet()) {
+                phraseLines.add(phrase.getKey() + ":" + phrase.getValue());
+            }
+            phraseLines.sort(Comparator.naturalOrder());
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(phraseFile))) {
-                for (Map.Entry<String, String> phrase : phrases.entrySet()) {
-                    writer.write(phrase.getKey() + ":" + phrase.getValue());
+                for (String phraseLine : phraseLines) {
+                    writer.write(phraseLine);
                     writer.newLine();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new DataIOException("Failed to write phrase file");
             }
 
             for (Map.Entry<String, String> script : scripts.entrySet()) {
-                File scriptFile = new File(dataDirectory, script.getKey() + ".ascr");
-                scriptFile.createNewFile();
+                File scriptFile = new File(scriptDirectory, script.getKey() + "." + SCRIPT_EXTENSION);
+                try {
+                    scriptFile.createNewFile();
+                } catch (IOException e) {
+                    throw new DataIOException("Failed to create script file");
+                }
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(scriptFile))) {
                     writer.write(script.getValue());
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new DataIOException("Failed to write to script file: " + scriptFile.getAbsolutePath());
                 }
             }
         }
     }
 
-    private static void loadConfigData(File dir, Template configTemplate, ConfigMenuManager configMenuManager) throws ParserConfigurationException, IOException, SAXException {
+    private Data loadConfigDataFromDir(File dir, Template configTemplate, TemplateRegistry templateRegistry) {
         File configFile = new File(dir, CONFIG_FILE);
         if (!configFile.exists()) {
-            return;
+            return null;
         }
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.parse(configFile);
-        Element rootElement = document.getDocumentElement();
+        Element rootElement = getRootElementFromFile(configFile);
         if (rootElement == null) {
-            return;
+            return null;
         }
-        Data configData = loadDataFromElement(rootElement, configTemplate, new HashMap<>(), true, new HashMap<>());
-        configMenuManager.setConfigData(configData);
+        return loadDataFromElement(rootElement, configTemplate, templateRegistry, true, new HashMap<>());
     }
 
-    private static void saveConfigData(File dir, Template configTemplate, ConfigMenuManager configMenuManager, Map<String, Map<String, Data>> globalDataMap) throws IOException, ParserConfigurationException, TransformerException {
+    private void saveConfigData(File dir, Template configTemplate, Data configData, Map<String, Map<String, Data>> globalDataMap) {
         File configFile = new File(dir, CONFIG_FILE);
         if (!configFile.exists()) {
-            configFile.createNewFile();
+            try {
+                configFile.createNewFile();
+            } catch (IOException e) {
+                throw new DataIOException("Failed to create new config file: " + configFile.getAbsolutePath());
+            }
         }
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.newDocument();
-        Element rootElement = document.createElement("data");
+        Document document = documentBuilder.newDocument();
+        Element rootElement = document.createElement(TOP_LEVEL_ELEMENT_NAME);
         document.appendChild(rootElement);
-        DataObject objectData = (DataObject) configMenuManager.getConfigData();
+        DataObject objectData = (DataObject) configData;
         addObjectToElement(objectData, rootElement, document, globalDataMap);
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         DOMSource source = new DOMSource(document);
         StreamResult result = new StreamResult(configFile);
-        transformer.transform(source, result);
+        try {
+            transformer.transform(source, result);
+        } catch (TransformerException e) {
+            throw new DataIOException("An error has occurred during transformer operation while saving config: " + e.getMessage());
+        }
     }
 
-    private static DataObject loadDataFromElement(Element element, Template template, Map<String, Template> templates, boolean isTopLevel, Map<String, Map<String, Data>> globalDataMap) {
+    private DataObject loadDataFromElement(Element element, Template template, TemplateRegistry templateRegistry, boolean isTopLevel, Map<String, Map<String, Data>> globalDataMap) {
         if (element == null) {
             return null;
         }
@@ -416,8 +509,8 @@ public class DataLoader {
                     if (objectElement == null) {
                         objectDataMap.put(parameter.id(), null);
                     } else {
-                        Template objectTemplate = templates.get(parameter.type());
-                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templates, false, globalDataMap);
+                        Template objectTemplate = templateRegistry.getTemplate(parameter.type());
+                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templateRegistry, false, globalDataMap);
                         if (!objectTemplate.topLevel() && objectTemplate.unique()) {
                             String objectType = parameter.type();
                             if (!globalDataMap.containsKey(objectType)) {
@@ -433,9 +526,9 @@ public class DataLoader {
                 }
                 case OBJECT_SET, OBJECT_SET_UNIQUE -> {
                     List<Data> objectList = new ArrayList<>();
-                    Template objectTemplate = templates.get(parameter.type());
+                    Template objectTemplate = templateRegistry.getTemplate(parameter.type());
                     for (Element objectElement : LoadUtils.directChildrenWithName(element, parameter.id())) {
-                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templates, false, globalDataMap);
+                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templateRegistry, false, globalDataMap);
                         if (!objectTemplate.topLevel() && objectTemplate.unique()) {
                             String objectType = parameter.type();
                             if (!globalDataMap.containsKey(objectType)) {
@@ -452,9 +545,9 @@ public class DataLoader {
                 }
                 case REFERENCE_SET -> {
                     List<String> referenceList = new ArrayList<>();
-                    Template objectTemplate = templates.get(parameter.type());
+                    Template objectTemplate = templateRegistry.getTemplate(parameter.type());
                     for (Element objectElement : LoadUtils.directChildrenWithName(element, parameter.id())) {
-                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templates, false, globalDataMap);
+                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templateRegistry, false, globalDataMap);
                         String objectID = objectData.getID();
                         if (!objectTemplate.topLevel() && objectTemplate.unique()) {
                             String objectType = parameter.type();
@@ -517,35 +610,25 @@ public class DataLoader {
                         for (ComponentOption option : parameter.componentOptions()) {
                             optionsMap.put(option.id(), option);
                         }
-                        Data objectData = loadDataFromElement(element, templates.get(optionsMap.get(componentType).object()), templates, false, globalDataMap);
+                        Data objectData = loadDataFromElement(element, templateRegistry.getTemplate(optionsMap.get(componentType).object()), templateRegistry, false, globalDataMap);
                         String nameOverride = parameter.useComponentTypeName() ? optionsMap.get(componentType).name() : null;
                         objectDataMap.put(parameter.id(), new DataComponent(componentType, objectData, nameOverride));
                     }
                 }
                 case TREE -> {
                     List<Data> topNodes = new ArrayList<>();
-                    Template objectTemplate = templates.get(parameter.type());
+                    Template objectTemplate = templateRegistry.getTemplate(parameter.type());
                     for (Element objectElement : LoadUtils.directChildrenWithName(element, parameter.id())) {
-                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templates, false, globalDataMap);
-                        /*if (!objectTemplate.topLevel() && objectTemplate.unique()) {
-                            String objectType = parameter.type();
-                            if (!globalDataMap.containsKey(objectType)) {
-                                globalDataMap.put(objectType, new HashMap<>());
-                            }
-                            String objectID = objectData.getID();
-                            if (objectID != null) {
-                                globalDataMap.get(objectType).put(objectID, objectData);
-                            }
-                        }*/
+                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templateRegistry, false, globalDataMap);
                         topNodes.add(objectData);
                     }
                     objectDataMap.put(parameter.id(), new DataTree(topNodes));
                 }
                 case TREE_BRANCH -> {
                     List<Data> topNodes = new ArrayList<>();
-                    Template objectTemplate = templates.get(parameter.type());
+                    Template objectTemplate = templateRegistry.getTemplate(parameter.type());
                     for (Element objectElement : LoadUtils.directChildrenWithName(element, parameter.id())) {
-                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templates, false, globalDataMap);
+                        DataObject objectData = loadDataFromElement(objectElement, objectTemplate, templateRegistry, false, globalDataMap);
                         topNodes.add(objectData);
                     }
                     objectDataMap.put(parameter.id(), new DataTreeBranch(topNodes));
@@ -555,11 +638,9 @@ public class DataLoader {
         return new DataObject(template, objectDataMap);
     }
 
-    private static void saveDataToFile(Map<String, Data> data, File file, Map<String, Template> templates, Map<String, Map<String, Data>> globalDataMap) throws TransformerException, ParserConfigurationException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.newDocument();
-        Element rootElement = document.createElement("data");
+    private void saveDataToFile(Map<String, Data> data, File file, Map<String, Map<String, Data>> globalDataMap) {
+        Document document = documentBuilder.newDocument();
+        Element rootElement = document.createElement(TOP_LEVEL_ELEMENT_NAME);
         document.appendChild(rootElement);
         for (Data currentData : data.values()) {
             DataObject objectData = (DataObject) currentData;
@@ -569,15 +650,16 @@ public class DataLoader {
                 rootElement.appendChild(objectElement);
             }
         }
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         DOMSource source = new DOMSource(document);
         StreamResult result = new StreamResult(file);
-        transformer.transform(source, result);
+        try {
+            transformer.transform(source, result);
+        } catch (TransformerException e) {
+            throw new DataIOException("An error has occurred during transformer operation while saving game data: " + e.getMessage());
+        }
     }
 
-    private static void addObjectToElement(DataObject objectData, Element objectElement, Document document, Map<String, Map<String, Data>> globalDataMap) {
+    private void addObjectToElement(DataObject objectData, Element objectElement, Document document, Map<String, Map<String, Data>> globalDataMap) {
         if (objectData == null) {
             return;
         }
@@ -588,7 +670,7 @@ public class DataLoader {
             }
             switch (parameter.dataType()) {
                 case BOOLEAN -> {
-                    String value = ((DataBoolean) parameterData).getValue() ? "true" : "false";
+                    String value = Boolean.toString(((DataBoolean) parameterData).getValue());
                     switch (parameter.format()) {
                         case ATTRIBUTE -> objectElement.setAttribute(parameter.id(), value);
                         case CHILD_TAG -> {
@@ -633,7 +715,6 @@ public class DataLoader {
                     }
                 }
                 case OBJECT -> {
-                    //Element childElement = document.createElement(parameter.id());
                     Element childElement;
                     if (parameter.format() == TemplateParameter.ParameterFormat.CURRENT_TAG) {
                         childElement = objectElement;
@@ -641,7 +722,9 @@ public class DataLoader {
                         childElement = document.createElement(parameter.id());
                     }
                     addObjectToElement((DataObject) parameterData, childElement, document, globalDataMap);
-                    objectElement.appendChild(childElement);
+                    if (parameter.format() != TemplateParameter.ParameterFormat.CURRENT_TAG) {
+                        objectElement.appendChild(childElement);
+                    }
                 }
                 case OBJECT_SET, OBJECT_SET_UNIQUE -> {
                     List<Data> values = ((DataObjectSet) parameterData).getValue();
@@ -698,12 +781,10 @@ public class DataLoader {
                 case COMPONENT -> {
                     String componentType = ((DataComponent) parameterData).getType();
                     DataObject componentObjectData = (DataObject) ((DataComponent) parameterData).getObjectData();
-                    //Element childElement = document.createElement(parameter.id());
                     if (parameter.componentFormat() == TemplateParameter.ComponentFormat.TYPE_ATTRIBUTE && componentType != null) {
                         objectElement.setAttribute(COMPONENT_TYPE_ATTRIBUTE_ID, componentType);
                     }
                     addObjectToElement(componentObjectData, objectElement, document, globalDataMap);
-                    //objectElement.appendChild(childElement);
                 }
                 case TREE -> {
                     List<Data> values = ((DataTree) parameterData).getValue();
@@ -723,6 +804,16 @@ public class DataLoader {
                 }
             }
         }
+    }
+
+    private Element getRootElementFromFile(File file) {
+        Document document;
+        try {
+            document = documentBuilder.parse(file);
+        } catch (SAXException | IOException e) {
+            throw new DataIOException("Failed to create document for file: " + file.getAbsolutePath());
+        }
+        return document.getDocumentElement();
     }
 
 }

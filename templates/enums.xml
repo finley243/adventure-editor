@@ -1,4 +1,4 @@
-<data>
+<data xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../schemas/enums.xsd">
     <enumType id="interfaceType">
         <value>graphicalChoice</value>
         <value>consoleChoice</value>
@@ -78,7 +78,7 @@
         <value>ammo</value>
         <value>armor</value>
         <value>consumable</value>
-        <value>effectible</value>
+        <value>effectable</value>
         <value>equippable</value>
         <value>magazine</value>
         <value>mod</value>
@@ -129,5 +129,31 @@
         <value>on_detect_target_hostile_faction</value>
         <value>on_detect_target_passive</value>
         <value>on_trespassing_become_hostile</value>
+    </enumType>
+    <enumType id="barkTriggers">
+        <value>on_level_up</value>
+        <value>on_player_visible_round</value>
+        <value>on_reload</value>
+        <value>on_take_cover</value>
+        <value>on_leave_cover</value>
+        <value>on_attack</value>
+        <value>on_attack_success</value>
+        <value>on_attack_failure</value>
+        <value>on_damaged</value>
+        <value>on_death</value>
+        <value>on_combat_start</value>
+        <value>on_combat_end</value>
+        <value>on_target_trespassing_start</value>
+        <value>on_target_trespassing_end</value>
+        <value>on_detect_dead</value>
+        <value>on_detect_target_trespassing</value>
+        <value>on_detect_target_hostile_area</value>
+        <value>on_detect_target_hostile_faction</value>
+        <value>on_detect_target_passive</value>
+        <value>on_trespassing_become_hostile</value>
+    </enumType>
+    <enumType id="barkResponseType">
+        <value>NONE</value>
+        <value>HOSTILE</value>
     </enumType>
 </data>

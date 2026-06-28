@@ -1,27 +1,32 @@
 package com.github.finley243.adventureeditor.ui.browser;
 
-import com.github.finley243.adventureeditor.Main;
-import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.template.TemplateRegistry;
+import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
+import com.github.finley243.adventureeditor.ui.frame.ThemedDialog;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.util.Map;
+import java.util.Set;
 
-public class BrowserFrame extends JDialog {
+public class BrowserFrame extends ThemedDialog {
 
-    private final Main main;
+    //private final DataManager dataManager;
     private final BrowserTree browserTree;
+    private final TemplateRegistry templateRegistry;
+    private PresenterActions presenter;
 
-    public BrowserFrame(Main main, Window mainFrame) {
-        super(mainFrame);
-        this.main = main;
+    public BrowserFrame(Window mainFrame, TemplateRegistry templateRegistry) {
+        super(mainFrame, "Browser");
+        this.templateRegistry = templateRegistry;
 
         this.setTitle("Browser");
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-        this.browserTree = new BrowserTree(main);
+        this.browserTree = new BrowserTree(this);
 
         JMenuBar menuBar = new JMenuBar();
         this.setJMenuBar(menuBar);
@@ -47,8 +52,19 @@ public class BrowserFrame extends JDialog {
         this.setLocation(windowX, windowY);
     }
 
-    public void addGameObject(String categoryID, String newObjectID, boolean selectedAfterLoading) {
-        browserTree.addGameObject(categoryID, newObjectID, selectedAfterLoading);
+    public void registerPresenter(PresenterActions presenter) {
+        if (this.presenter != null) throw new IllegalStateException("Presenter is already registered");
+        this.presenter = presenter;
+        browserTree.registerPresenter(presenter);
+    }
+
+    private PresenterActions getPresenter() {
+        if (presenter == null) throw new IllegalStateException("Presenter has not been registered");
+        return presenter;
+    }
+
+    public void addGameObject(String categoryID, String newObjectID) {
+        browserTree.addGameObject(categoryID, newObjectID);
     }
 
     public void removeGameObject(String categoryID, String objectID) {
@@ -59,25 +75,36 @@ public class BrowserFrame extends JDialog {
         browserTree.setSelectedNode(categoryID, objectID);
     }
 
-    public void updateCategory(String categoryID) {
-        browserTree.updateCategory(categoryID);
-    }
-
-    public void reloadBrowserData(Map<String, Template> templates, Map<String, Map<String, Data>> data) {
-        main.getEditorManager().closeAllActiveEditorFrames();
+    public void setCategories() {
         browserTree.clearData();
         browserTree.expandRow(0);
-        for (String category : templates.keySet()) {
-            if (templates.get(category).topLevel()) {
-                browserTree.addCategory(category, templates.get(category).name());
+        for (Map.Entry<String, Template> entry : templateRegistry.getAllTemplates().entrySet()) {
+            if (entry.getValue().topLevel()) {
+                browserTree.addCategory(entry.getKey(), entry.getValue().name());
             }
         }
-        for (String category : data.keySet()) {
-            if (templates.get(category).topLevel()) {
-                for (String object : data.get(category).keySet()) {
-                    this.addGameObject(category, object, false);
+    }
+
+    public void clearCategories() {
+        browserTree.clearData();
+        browserTree.expandRow(0);
+    }
+
+    public void reloadBrowserObjects(Map<String, Set<String>> objects) {
+        setCategories();
+        for (String category : objects.keySet()) {
+            if (templateRegistry.getTemplate(category).topLevel()) {
+                for (String object : objects.get(category)) {
+                    this.addGameObject(category, object);
                 }
             }
+        }
+    }
+
+    public void openContextMenu(BrowserNode node, int posX, int posY) {
+        JPopupMenu contextMenu = node.getContextMenu(getPresenter());
+        if (contextMenu != null) {
+            contextMenu.show(this, posX, posY);
         }
     }
 

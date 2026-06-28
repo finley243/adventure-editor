@@ -1,6 +1,6 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.ui.table.PhraseTableModel;
 
 import javax.swing.*;
@@ -10,18 +10,19 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
+import java.util.function.Supplier;
 
-public class PhraseEditorFrame extends JDialog {
+public class PhraseEditorFrame extends ThemedDialog {
 
     private static final String PHRASE_EDITOR_TITLE = "Phrases";
 
-    private final Main main;
     private final PhraseTableModel tableModel;
     private final JTable phraseTable;
+    private final Supplier<Boolean> onClose;
 
-    public PhraseEditorFrame(Main main) {
-        super(main.getBrowserFrame());
-        this.main = main;
+    public PhraseEditorFrame(Window parentWindow, PresenterActions presenter, Supplier<Boolean> onClose) {
+        super(parentWindow, PHRASE_EDITOR_TITLE);
+        this.onClose = onClose;
         this.setTitle(PHRASE_EDITOR_TITLE);
         this.setModalityType(ModalityType.MODELESS);
         JPanel mainPanel = new JPanel();
@@ -38,8 +39,6 @@ public class PhraseEditorFrame extends JDialog {
         phraseTable.setRowSorter(sorter);
         sorter.setSortKeys(java.util.List.of(new RowSorter.SortKey(0, SortOrder.ASCENDING)));
 
-        reloadPhrases();
-
         phraseTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -47,7 +46,7 @@ public class PhraseEditorFrame extends JDialog {
                     int viewRow = phraseTable.rowAtPoint(e.getPoint());
                     int row = phraseTable.convertRowIndexToModel(viewRow);
                     String phraseKey = (String) tableModel.getValueAt(row, 0);
-                    main.getPhraseEditorManager().editPhrase(phraseKey);
+                    presenter.onOpenPhrase(phraseKey);
                 }
             }
             @Override
@@ -57,7 +56,9 @@ public class PhraseEditorFrame extends JDialog {
                     int row = phraseTable.convertRowIndexToModel(viewRow);
                     if (row != -1) {
                         phraseTable.setRowSelectionInterval(viewRow, viewRow);
-                        openContextMenu(phraseTable, e.getPoint(), (String) tableModel.getValueAt(row, 0), viewRow);
+                        openContextMenu(phraseTable, e.getPoint(), (String) tableModel.getValueAt(row, 0), viewRow, presenter);
+                    } else {
+                        openContextMenuNoSelection(phraseTable, e.getPoint(), presenter);
                     }
                 }
             }
@@ -65,6 +66,14 @@ public class PhraseEditorFrame extends JDialog {
         adjustColumnWidths();
 
         JScrollPane scrollPane = new JScrollPane(phraseTable);
+        scrollPane.getViewport().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    openContextMenuNoSelection(phraseTable, e.getPoint(), presenter);
+                }
+            }
+        });
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         this.getContentPane().add(mainPanel);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -79,7 +88,7 @@ public class PhraseEditorFrame extends JDialog {
         Action newPhraseAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getPhraseEditorManager().newPhrase();
+                presenter.onNewPhrase();
             }
         };
         Action editPhraseAction = new AbstractAction() {
@@ -88,7 +97,7 @@ public class PhraseEditorFrame extends JDialog {
                 int selectedRow = phraseTable.getSelectedRow();
                 if (selectedRow != -1) {
                     String phraseKey = (String) tableModel.getValueAt(phraseTable.convertRowIndexToModel(selectedRow), 0);
-                    main.getPhraseEditorManager().editPhrase(phraseKey);
+                    presenter.onOpenPhrase(phraseKey);
                 }
             }
         };
@@ -98,7 +107,7 @@ public class PhraseEditorFrame extends JDialog {
                 int selectedRow = phraseTable.getSelectedRow();
                 if (selectedRow != -1) {
                     String phraseKey = (String) tableModel.getValueAt(phraseTable.convertRowIndexToModel(selectedRow), 0);
-                    main.getPhraseEditorManager().duplicatePhrase(phraseKey);
+                    presenter.onDuplicatePhrase(phraseKey);
                     selectPhrase(phraseKey);
                 }
             }
@@ -109,7 +118,7 @@ public class PhraseEditorFrame extends JDialog {
                 int selectedRow = phraseTable.getSelectedRow();
                 if (selectedRow != -1) {
                     String phraseKey = (String) tableModel.getValueAt(phraseTable.convertRowIndexToModel(selectedRow), 0);
-                    main.getPhraseEditorManager().deletePhrase(phraseKey);
+                    presenter.onDeletePhrase(phraseKey);
                     selectRow(selectedRow);
                 }
             }
@@ -134,14 +143,13 @@ public class PhraseEditorFrame extends JDialog {
         this.setVisible(true);
     }
 
-    public void reloadPhrases() {
+    public void reloadPhrases(Map<String, String> phrases) {
         String selectedPhraseKey = null;
         int selectedRow = phraseTable.getSelectedRow();
         if (selectedRow != -1) {
             selectedPhraseKey = (String) tableModel.getValueAt(phraseTable.convertRowIndexToModel(selectedRow), 0);
         }
         tableModel.setRowCount(0);
-        Map<String, String> phrases = main.getPhraseEditorManager().getPhrases();
         for (String phraseKey : phrases.keySet()) {
             tableModel.addRow(new Object[]{phraseKey, phrases.get(phraseKey)});
         }
@@ -169,16 +177,6 @@ public class PhraseEditorFrame extends JDialog {
         }
     }
 
-    private int indexOfPhrase(String phraseKey) {
-        for (int i = 0; i < phraseTable.getRowCount(); i++) {
-            String rowKey = (String) tableModel.getValueAt(i, 0);
-            if (rowKey.equals(phraseKey)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     private void selectRow(int viewIndex) {
         if (phraseTable.getRowCount() == 0) return;
         if (viewIndex >= phraseTable.getRowCount()) {
@@ -191,31 +189,37 @@ public class PhraseEditorFrame extends JDialog {
     }
 
     private void closeEditor() {
-        boolean didClose = main.getPhraseEditorManager().onClosePhraseEditor();
+        boolean didClose = onClose.get();
         if (didClose) {
             this.dispose();
         }
     }
 
-    private void openContextMenu(Component component, Point point, String selectedPhraseKey, int viewRowIndex) {
+    private void openContextMenu(Component component, Point point, String selectedPhraseKey, int viewRowIndex, PresenterActions presenter) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuOpen = new JMenuItem("Open");
-        menuOpen.addActionListener(e -> main.getPhraseEditorManager().editPhrase(selectedPhraseKey));
+        menuOpen.addActionListener(e -> presenter.onOpenPhrase(selectedPhraseKey));
         menu.add(menuOpen);
         JMenuItem menuNew = new JMenuItem("New");
-        menuNew.addActionListener(e -> {
-            main.getPhraseEditorManager().newPhrase();
-        });
+        menuNew.addActionListener(e -> presenter.onNewPhrase());
         menu.add(menuNew);
         JMenuItem menuDuplicate = new JMenuItem("Duplicate");
-        menuDuplicate.addActionListener(e -> main.getPhraseEditorManager().duplicatePhrase(selectedPhraseKey));
+        menuDuplicate.addActionListener(e -> presenter.onDuplicatePhrase(selectedPhraseKey));
         menu.add(menuDuplicate);
         JMenuItem menuDelete = new JMenuItem("Delete");
         menuDelete.addActionListener(e -> {
-            main.getPhraseEditorManager().deletePhrase(selectedPhraseKey);
+            presenter.onDeletePhrase(selectedPhraseKey);
             selectRow(viewRowIndex);
         });
         menu.add(menuDelete);
+        menu.show(component, point.x, point.y);
+    }
+
+    private void openContextMenuNoSelection(Component component, Point point, PresenterActions presenter) {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem menuNew = new JMenuItem("New");
+        menuNew.addActionListener(e -> presenter.onNewPhrase());
+        menu.add(menuNew);
         menu.show(component, point.x, point.y);
     }
 

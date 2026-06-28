@@ -1,10 +1,15 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
-import com.github.finley243.adventureeditor.Main;
-import com.github.finley243.adventureeditor.ProjectData;
+import com.github.finley243.adventureeditor.*;
 import com.github.finley243.adventureeditor.data.Data;
-import com.github.finley243.adventureeditor.data.DataObject;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.template.TemplateRegistry;
+import com.github.finley243.adventureeditor.ui.DeleteConfirmationResult;
+import com.github.finley243.adventureeditor.ui.DeleteObjectConfirmationResult;
+import com.github.finley243.adventureeditor.ui.ErrorData;
+import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
+import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
+import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -14,17 +19,46 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-public class MainFrame extends JFrame implements DataSaveTarget {
+public class MainFrame extends ThemedFrame implements ViewActions {
 
-    private final Main main;
+    private static final String EDITOR_NAME = "AdventureEditor";
+    private static final String UNNAMED_PROJECT_NAME = "UNNAMED PROJECT";
+
+    private PresenterActions presenter;
+    private boolean hasUnsavedChanges;
+    private boolean isProjectLoaded;
+
+    private final ParameterFactory parameterFactory;
+    private final TemplateRegistry templateRegistry;
+    private final EditorManager editorManager;
+
+    private EditorFrame configFrame;
+    private PhraseEditorFrame phraseEditorFrame;
+    private final ChildFrameHandler<String> phraseFrameHandler;
+    private ScriptEditorFrame scriptEditorFrame;
+    private final ChildFrameHandler<String> scriptFrameHandler;
+    private ReferenceListFrame referenceListFrame;
+
+    private final BrowserFrame browserFrame;
+
     private final JMenu fileOpenRecent;
 
-    public MainFrame(Main main) {
-        super("AdventureEditor");
-        this.main = main;
+    private String projectName;
+
+    public MainFrame(ParameterFactory parameterFactory, TemplateRegistry templateRegistry) {
+        super(EDITOR_NAME);
+        this.parameterFactory = parameterFactory;
+        this.templateRegistry = templateRegistry;
+        this.editorManager = new EditorManager();
+        this.phraseFrameHandler = new ChildFrameHandler<>();
+        this.scriptFrameHandler = new ChildFrameHandler<>();
 
         this.setSize(800, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -35,19 +69,19 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
         JMenuItem fileNew = new JMenuItem("New");
-        fileNew.addActionListener(e -> main.getProjectManager().newProject());
+        fileNew.addActionListener(e -> getPresenter().onNewProject());
         JMenuItem fileOpen = new JMenuItem("Open");
-        fileOpen.addActionListener(e -> main.getProjectManager().openProjectFromMenu());
+        fileOpen.addActionListener(e -> getPresenter().onOpenProject(selectProjectLoadDirectory()));
         this.fileOpenRecent = new JMenu("Open Recent");
         JMenuItem fileSave = new JMenuItem("Save");
-        fileSave.addActionListener(e -> main.getProjectManager().saveProjectToCurrentPath());
+        fileSave.addActionListener(e -> getPresenter().onSaveProject());
         JMenuItem fileSaveAs = new JMenuItem("Save As");
-        fileSaveAs.addActionListener(e -> main.getProjectManager().saveProjectToMenu());
+        fileSaveAs.addActionListener(e -> getPresenter().onSaveProjectAs(selectProjectSaveDirectory()));
         fileMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
-                fileSave.setEnabled(main.getProjectManager().hasUnsavedChanges());
-                fileSaveAs.setEnabled(main.getProjectManager().isProjectLoaded());
+                fileSave.setEnabled(hasUnsavedChanges);
+                fileSaveAs.setEnabled(isProjectLoaded);
             }
             @Override
             public void menuDeselected(MenuEvent e) {}
@@ -64,18 +98,17 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         JMenu toolsMenu = new JMenu("Tools");
         menuBar.add(toolsMenu);
         JMenuItem toolsProjectConfig = new JMenuItem("Project Configuration");
-        toolsProjectConfig.addActionListener(e -> main.getConfigMenuManager().openConfigMenu());
+        toolsProjectConfig.addActionListener(e -> getPresenter().onOpenConfigEditor());
         toolsMenu.add(toolsProjectConfig);
         JMenuItem toolsPhraseEditor = new JMenuItem("Phrase Editor");
-        toolsPhraseEditor.addActionListener(e -> main.getPhraseEditorManager().openPhraseEditor());
+        toolsPhraseEditor.addActionListener(e -> getPresenter().onOpenPhraseMenu());
         toolsMenu.add(toolsPhraseEditor);
         JMenuItem toolsScriptEditor = new JMenuItem("Script Editor");
-        toolsScriptEditor.addActionListener(e -> main.getScriptEditorManager().openScriptEditor());
+        toolsScriptEditor.addActionListener(e -> getPresenter().onOpenScriptMenu());
         toolsMenu.add(toolsScriptEditor);
         toolsMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
-                boolean isProjectLoaded = main.getProjectManager().isProjectLoaded();
                 toolsProjectConfig.setEnabled(isProjectLoaded);
                 toolsPhraseEditor.setEnabled(isProjectLoaded);
                 toolsScriptEditor.setEnabled(isProjectLoaded);
@@ -89,41 +122,42 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         JMenu windowMenu = new JMenu("Window");
         menuBar.add(windowMenu);
         JMenuItem windowCloseAll = new JMenuItem("Close All Objects");
-        windowCloseAll.addActionListener(e -> main.getEditorManager().closeAllActiveEditorFrames());
+        windowCloseAll.addActionListener(e -> editorManager.closeAllActiveEditorFrames());
         windowMenu.add(windowCloseAll);
 
         JPanel primaryPanel = new JPanel();
         primaryPanel.setLayout(new BorderLayout());
-        this.getContentPane().add(primaryPanel);
+        //this.getContentPane().add(primaryPanel);
+        add(primaryPanel, BorderLayout.CENTER);
 
         Action newProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getProjectManager().newProject();
+                getPresenter().onNewProject();
             }
         };
         Action openProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getProjectManager().openProjectFromMenu();
+                getPresenter().onOpenProject(selectProjectLoadDirectory());
             }
         };
         Action saveProjectAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getProjectManager().saveProjectToMenu();
+                getPresenter().onSaveProject();
             }
         };
         Action saveProjectAsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getProjectManager().saveProjectToCurrentPath();
+                getPresenter().onSaveProjectAs(selectProjectSaveDirectory());
             }
         };
         Action openConfigAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                main.getConfigMenuManager().openConfigMenu();
+                getPresenter().onOpenConfigEditor();
             }
         };
 
@@ -145,36 +179,45 @@ public class MainFrame extends JFrame implements DataSaveTarget {
         this.setVisible(true);
         this.setLocationRelativeTo(null);
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        this.browserFrame = new BrowserFrame(this, templateRegistry);
     }
 
-    public void setProjectName(String name) {
-        if (name == null) {
-            this.setTitle("AdventureEditor");
-        } else {
-            this.setTitle("AdventureEditor - " + name);
-        }
+    public void registerPresenter(PresenterActions presenter) {
+        if (this.presenter != null) throw new IllegalStateException("Presenter is already registered");
+        this.presenter = presenter;
+        browserFrame.registerPresenter(presenter);
     }
 
-    public void updateRecentProjects() {
-        List<ProjectData> recentProjects = main.getProjectManager().getRecentProjects();
-        fileOpenRecent.setEnabled(!recentProjects.isEmpty());
-        fileOpenRecent.removeAll();
-        for (ProjectData recentProject : recentProjects) {
-            JMenuItem recentProjectItem = new JMenuItem(recentProject.name());
-            recentProjectItem.addActionListener(e -> main.getProjectManager().openRecentProject(recentProject));
-            fileOpenRecent.add(recentProjectItem);
+    private PresenterActions getPresenter() {
+        if (presenter == null) throw new IllegalStateException("Presenter has not been registered");
+        return presenter;
+    }
+
+    public File selectProjectSaveDirectory() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = fileChooser.showSaveDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return null;
         }
-        JSeparator separator = new JSeparator();
-        fileOpenRecent.add(separator);
-        JMenuItem clearRecentProjects = new JMenuItem("Clear Recent Projects");
-        clearRecentProjects.addActionListener(e -> main.getProjectManager().clearRecentProjects());
-        fileOpenRecent.add(clearRecentProjects);
+        return fileChooser.getSelectedFile();
+    }
+
+    public File selectProjectLoadDirectory() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = fileChooser.showOpenDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return null;
+        }
+        return fileChooser.getSelectedFile();
     }
 
     @Override
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-            boolean shouldClose = main.getProjectManager().saveConfirmationIfHasUnsavedData();
+            boolean shouldClose = getPresenter().onCloseProgram();
             if (shouldClose) {
                 super.processWindowEvent(e);
             }
@@ -184,35 +227,339 @@ public class MainFrame extends JFrame implements DataSaveTarget {
     }
 
     @Override
-    public void saveObjectData(String editorID, Data data, Data initialData) {
-        main.getDataManager().saveObjectData(data, initialData);
+    public void browserAddObject(String categoryID, String objectID) {
+        browserFrame.addGameObject(categoryID, objectID);
+        browserFrame.setSelectedNode(categoryID, objectID);
     }
 
     @Override
-    public void onEditorFrameClose(EditorFrame frame) {
-        main.getEditorManager().closeEditorFrameIfActive(frame.getTemplate().id(), frame.getObjectID());
+    public void browserRemoveObject(String categoryID, String objectID) {
+        browserFrame.removeGameObject(categoryID, objectID);
     }
 
     @Override
-    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
-        boolean isNewInstance = initialData == null;
-        String categoryID = ((DataObject) currentData).getTemplate().id();
-        String currentID = ((DataObject) currentData).getID();
-        if (currentID == null || currentID.trim().isEmpty()) {
-            return new ErrorData(true, "ID cannot be empty.");
+    public void browserClear() {
+        browserFrame.clearCategories();
+    }
+
+    @Override
+    public void browserLoadObjects(Map<String, Set<String>> objects) {
+        browserFrame.reloadBrowserObjects(objects);
+    }
+
+    @Override
+    public void openConfigEditor(Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+        if (configFrame != null) {
+            configFrame.toFront();
+            configFrame.requestFocus();
+        } else {
+            Consumer<EditorFrame> onClose = _ -> configFrame = null;
+            configFrame = new EditorFrame(this, templateRegistry.getConfigTemplate(), initialData, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
         }
-        Set<String> objectIDsInCategory = main.getDataManager().getIDsForCategory(categoryID);
-        if (isNewInstance) {
-            if (objectIDsInCategory != null && objectIDsInCategory.contains(currentID)) {
-                return new ErrorData(true, "An object with ID \"" + currentID + "\" already exists.");
+    }
+
+    @Override
+    public void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+        EditorFrame activeFrame = editorManager.getActiveTopLevelFrame(template.id(), objectID);
+        if (activeFrame != null) {
+            activeFrame.toFront();
+            activeFrame.requestFocus();
+        } else {
+            Consumer<EditorFrame> onClose = _ -> editorManager.removeActiveTopLevelFrame(template.id(), objectID);
+            EditorFrame editorFrame = new EditorFrame(this, template, initialData, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
+            editorManager.addActiveTopLevelFrame(template.id(), objectID, editorFrame);
+        }
+    }
+
+    @Override
+    public void openPhraseMenu(Map<String, String> phrases) {
+        if (phraseEditorFrame != null) {
+            phraseEditorFrame.toFront();
+            phraseEditorFrame.requestFocus();
+        } else {
+            phraseEditorFrame = new PhraseEditorFrame(this, getPresenter(), () -> {
+                boolean didCloseAllFrames = phraseFrameHandler.closeAll();
+                if (didCloseAllFrames) {
+                    phraseEditorFrame = null;
+                }
+                return didCloseAllFrames;
+            });
+        }
+        updatePhrases(phrases);
+    }
+
+    @Override
+    public void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+        boolean isOpen = phraseFrameHandler.requestFocusIfOpen(phraseKey);
+        if (!isOpen) {
+            Consumer<EditorFrame> onClose = phraseFrameHandler::removeChildFrame;
+            EditorFrame editorFrame = new EditorFrame(phraseEditorFrame, InternalTemplates.PHRASE_TEMPLATE, content, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
+            phraseFrameHandler.add(phraseKey, editorFrame);
+        }
+    }
+
+    @Override
+    public void updatePhrases(Map<String, String> phrases) {
+        if (phraseEditorFrame != null) {
+            phraseEditorFrame.reloadPhrases(phrases);
+        }
+    }
+
+    @Override
+    public void openScriptMenu(Map<String, String> scripts) {
+        if (scriptEditorFrame != null) {
+            scriptEditorFrame.toFront();
+            scriptEditorFrame.requestFocus();
+        } else {
+            scriptEditorFrame = new ScriptEditorFrame(this, getPresenter(), () -> {
+                boolean didCloseAllFrames = scriptFrameHandler.closeAll();
+                if (didCloseAllFrames) {
+                    scriptEditorFrame = null;
+                }
+                return didCloseAllFrames;
+            });
+        }
+        updateScripts(scripts);
+    }
+
+    @Override
+    public void openScriptEditor(String name, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+        boolean isOpen = scriptFrameHandler.requestFocusIfOpen(name);
+        if (!isOpen) {
+            Consumer<EditorFrame> onClose = scriptFrameHandler::removeChildFrame;
+            EditorFrame editorFrame = new EditorFrame(scriptEditorFrame, InternalTemplates.SCRIPT_TEMPLATE, content, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
+            editorFrame.setResizable(true);
+            editorFrame.setSize(new Dimension(800, 800));
+            editorFrame.setLocationRelativeTo(null);
+            scriptFrameHandler.add(name, editorFrame);
+        }
+    }
+
+    @Override
+    public String promptScriptName() {
+        return JOptionPane.showInputDialog(scriptEditorFrame, "Enter a name for the script:");
+    }
+
+    @Override
+    public void updateScripts(Map<String, String> scripts) {
+        if (scriptEditorFrame != null) {
+            scriptEditorFrame.reloadScripts(scripts);
+        }
+    }
+
+    @Override
+    public void openReferenceList(Set<Reference> references) {
+        if (referenceListFrame != null) {
+            referenceListFrame.toFront();
+            referenceListFrame.requestFocus();
+        } else {
+            referenceListFrame = new ReferenceListFrame(this, (category, object) -> getPresenter().onOpenReference(category, object), () -> referenceListFrame = null);
+        }
+        referenceListFrame.loadReferences(references);
+    }
+
+    @Override
+    public void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    @Override
+    public SaveConfirmationResult confirmProjectSave() {
+        int result = JOptionPane.showConfirmDialog(this, "Save changes to the current project?", "Save Changes?", JOptionPane.YES_NO_CANCEL_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+            return SaveConfirmationResult.YES;
+        } else if (result == JOptionPane.NO_OPTION) {
+            return SaveConfirmationResult.NO;
+        } else {
+            return SaveConfirmationResult.CANCEL;
+        }
+    }
+
+    @Override
+    public DeleteConfirmationResult confirmDeletePhrase(String deleteName) {
+        Object[] confirmOptions = {"Delete", "Cancel"};
+        int confirmResult = JOptionPane.showOptionDialog(phraseEditorFrame, "Are you sure you want to delete " + deleteName + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        if (confirmResult == 0) {
+            return DeleteConfirmationResult.DELETE;
+        } else {
+            return  DeleteConfirmationResult.CANCEL;
+        }
+    }
+
+    @Override
+    public DeleteConfirmationResult confirmDeleteScript(String deleteName) {
+        Object[] confirmOptions = {"Delete", "Cancel"};
+        int confirmResult = JOptionPane.showOptionDialog(scriptEditorFrame, "Are you sure you want to delete " + deleteName + "?", "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        if (confirmResult == 0) {
+            return DeleteConfirmationResult.DELETE;
+        } else {
+            return  DeleteConfirmationResult.CANCEL;
+        }
+    }
+
+    @Override
+    public DeleteObjectConfirmationResult confirmDeleteObject(String objectID, int referenceCount) {
+        Object[] confirmOptions;
+        if (referenceCount > 0) {
+            confirmOptions = new Object[]{"Delete", "View References", "Cancel"};
+        } else {
+            confirmOptions = new Object[]{"Delete", "Cancel"};
+        }
+        int confirmResult = JOptionPane.showOptionDialog(browserFrame, "Are you sure you want to delete " + objectID + "?\nReferences: " + referenceCount, "Confirm Delete", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        if (confirmResult == 0) {
+            return DeleteObjectConfirmationResult.DELETE;
+        } else if (confirmResult == 1 && referenceCount > 0) {
+            return DeleteObjectConfirmationResult.VIEW_REFERENCES;
+        } else {
+            return DeleteObjectConfirmationResult.CANCEL;
+        }
+    }
+
+    @Override
+    public File selectSaveDirectory() {
+        return selectProjectSaveDirectory();
+    }
+
+    @Override
+    public void setProjectIsLoaded(boolean isProjectLoaded) {
+        this.isProjectLoaded = isProjectLoaded;
+        updateTitleBar();
+    }
+
+    @Override
+    public void updateProjectName(String name) {
+        this.projectName = name;
+        updateTitleBar();
+    }
+
+    @Override
+    public void setHasUnsavedProjectChanges(boolean hasUnsaved) {
+        this.hasUnsavedChanges = hasUnsaved;
+        updateTitleBar();
+    }
+
+    @Override
+    public void updateRecentProjects(List<ProjectFile> recentProjects) {
+        fileOpenRecent.setEnabled(!recentProjects.isEmpty());
+        fileOpenRecent.removeAll();
+        for (ProjectFile recentProject : recentProjects) {
+            JMenuItem recentProjectItem = new JMenuItem(recentProject.name());
+            recentProjectItem.addActionListener(e -> attemptOpeningRecentProject(recentProject));
+            fileOpenRecent.add(recentProjectItem);
+        }
+        JSeparator separator = new JSeparator();
+        fileOpenRecent.add(separator);
+        JMenuItem clearRecentProjects = new JMenuItem("Clear Recent Projects");
+        clearRecentProjects.addActionListener(e -> getPresenter().onClearRecentProjects());
+        fileOpenRecent.add(clearRecentProjects);
+    }
+
+    @Override
+    public void forceCloseObject(String categoryID, String objectID) {
+        EditorFrame frame = editorManager.getActiveTopLevelFrame(categoryID, objectID);
+        if (frame != null) {
+            frame.requestClose(true, false);
+            editorManager.removeActiveTopLevelFrame(categoryID, objectID);
+        }
+    }
+
+    @Override
+    public void forceCloseConfig() {
+        if (configFrame != null) {
+            configFrame.requestClose(true, false);
+            configFrame = null;
+        }
+    }
+
+    @Override
+    public void forceCloseScript(String name) {
+        EditorFrame frame = scriptFrameHandler.get(name);
+        if (frame != null) {
+            frame.requestClose(true, false);
+            scriptFrameHandler.removeChildFrame(frame);
+        }
+    }
+
+    @Override
+    public void forceClosePhrase(String key) {
+        EditorFrame frame = phraseFrameHandler.get(key);
+        if (frame != null) {
+            frame.requestClose(true, false);
+            phraseFrameHandler.removeChildFrame(frame);
+        }
+    }
+
+    @Override
+    public void forceCloseAllEditors() {
+        if (configFrame != null) {
+            configFrame.requestClose(true, false);
+            configFrame = null;
+        }
+        scriptFrameHandler.forceCloseAll();
+        if (scriptEditorFrame != null) {
+            scriptEditorFrame.dispose();
+            scriptEditorFrame = null;
+        }
+        phraseFrameHandler.forceCloseAll();
+        if (phraseEditorFrame != null) {
+            phraseEditorFrame.dispose();
+            phraseEditorFrame = null;
+        }
+        editorManager.forceCloseAllEditorFrames();
+    }
+
+    @Override
+    public boolean hasOpenEditors() {
+        if (configFrame != null) return true;
+        if (scriptFrameHandler.hasAnyOpenFrame()) return true;
+        if (phraseFrameHandler.hasAnyOpenFrame()) return true;
+        return editorManager.hasAnyOpenFrame();
+    }
+
+    @Override
+    public boolean closeAllEditorsWithConfirmation() {
+        if (configFrame != null) {
+            boolean closedConfig = configFrame.requestClose(false, false);
+            if (closedConfig) {
+                configFrame = null;
+            } else {
+                return false;
+            }
+        }
+        if (!scriptFrameHandler.closeAll()) return false;
+        if (scriptEditorFrame != null) {
+            scriptEditorFrame.dispose();
+            scriptEditorFrame = null;
+        }
+        if (!phraseFrameHandler.closeAll()) return false;
+        if (phraseEditorFrame != null) {
+            phraseEditorFrame.dispose();
+            phraseEditorFrame = null;
+        }
+        return editorManager.requestCloseAllEditorFrames();
+    }
+
+    private void attemptOpeningRecentProject(ProjectFile projectFile) {
+        File file = new File(projectFile.absolutePath());
+        if (!file.exists()) {
+            int choice = JOptionPane.showOptionDialog(this, "The selected project file was not found. Remove it from recent projects?", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Yes", "No"}, "No");
+            boolean deleteMissingProject = choice == JOptionPane.YES_OPTION;
+            if (deleteMissingProject) {
+                getPresenter().onRemoveRecentProject(projectFile);
             }
         } else {
-            String initialID = ((DataObject) initialData).getID();
-            if (!initialID.equals(currentID) && objectIDsInCategory != null && objectIDsInCategory.contains(currentID)) {
-                return new ErrorData(true, "An object with ID \"" + currentID + "\" already exists.");
-            }
+            getPresenter().onOpenProject(file);
         }
-        return new ErrorData(false, null);
+    }
+
+    private void updateTitleBar() {
+        if (!isProjectLoaded) {
+            this.setTitle(EDITOR_NAME);
+        } else if (projectName == null) {
+            this.setTitle(EDITOR_NAME + " - " + (hasUnsavedChanges ? "*" : "") + UNNAMED_PROJECT_NAME);
+        } else {
+            this.setTitle(EDITOR_NAME + " - " + (hasUnsavedChanges ? "*" : "") + projectName);
+        }
     }
 
 }

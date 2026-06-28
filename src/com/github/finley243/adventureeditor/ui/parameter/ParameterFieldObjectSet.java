@@ -1,10 +1,10 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
-import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObjectSet;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
+import com.github.finley243.adventureeditor.ui.ErrorData;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -14,7 +14,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParameterFieldObjectSet extends ParameterField implements DataSaveTarget {
+public class ParameterFieldObjectSet extends ParameterField {
 
     private final JList<Data> objectList;
     private final JButton buttonAdd;
@@ -27,7 +27,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
     private final Template template;
     private final boolean requireUniqueValues;
 
-    public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, boolean requireUniqueValues, Main main) {
+    public ParameterFieldObjectSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, boolean requireUniqueValues, ParameterFactory parameterFactory, PresenterActions presenter) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.editorFrames = new ArrayList<>();
@@ -65,7 +65,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
                                 editorFrames.get(index).toFront();
                                 editorFrames.get(index).requestFocus();
                             } else {
-                                EditorFrame objectFrame = new EditorFrame(main, null, editorFrame, template, selectedItem, ParameterFieldObjectSet.this, false);
+                                EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedItem, false, parameterFactory, presenter, data -> ParameterFieldObjectSet.this.saveObjectData(data, selectedItem), data -> ParameterFieldObjectSet.this.validateObject(data, selectedItem), ParameterFieldObjectSet.this::onEditorFrameClose);
                                 editorFrames.set(index, objectFrame);
                             }
                         }
@@ -106,7 +106,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
             buttonRemove.setEnabled(enableSelectionButtons);
         });
         buttonAdd.addActionListener(e -> {
-            EditorFrame objectFrame = new EditorFrame(main, null, editorFrame, template, null, this, false);
+            EditorFrame objectFrame = new EditorFrame(editorFrame, template, null, false, parameterFactory, presenter, data -> this.saveObjectData(data, null), data -> this.validateObject(data, null), this::onEditorFrameClose);
             unsavedEditorFrames.add(objectFrame);
         });
         buttonEdit.addActionListener(e -> {
@@ -117,7 +117,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
                     editorFrames.get(objectIndex).toFront();
                     editorFrames.get(objectIndex).requestFocus();
                 } else {
-                    EditorFrame objectFrame = new EditorFrame(main, null, editorFrame, template, objectData, this, false);
+                    EditorFrame objectFrame = new EditorFrame(editorFrame, template, objectData, false, parameterFactory, presenter, data -> this.saveObjectData(data, objectData), data -> this.validateObject(data, objectData), this::onEditorFrameClose);
                     editorFrames.set(objectIndex, objectFrame);
                 }
             }
@@ -171,9 +171,9 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
 
     @Override
     public boolean requestClose(boolean forceClose, boolean forceSave) {
-        for (int i = 0; i < editorFrames.size(); i++) {
-            if (editorFrames.get(i) != null) {
-                boolean didClose = editorFrames.get(i).requestClose(forceClose, forceSave);
+        for (EditorFrame editorFrame : editorFrames) {
+            if (editorFrame != null) {
+                boolean didClose = editorFrame.requestClose(forceClose, forceSave);
                 if (!didClose) {
                     return false;
                 }
@@ -193,9 +193,9 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
     public void setEnabledState(boolean enabled) {
         if (!enabled) {
             objectList.setSelectedIndex(-1);
-            objectList.setBackground(UIManager.getColor("Label.disabledBackground"));
+            //objectList.setBackground(UIManager.getColor("Label.disabledBackground"));
         } else {
-            objectList.setBackground(UIManager.getColor("List.background"));
+            //objectList.setBackground(UIManager.getColor("List.background"));
         }
         objectList.setEnabled(enabled);
         if (enabled) {
@@ -210,8 +210,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
         }
     }
 
-    @Override
-    public void saveObjectData(String editorID, Data data, Data initialData) {
+    public void saveObjectData(Data data, Data initialData) {
         int addIndex = objectList.getSelectedIndex() + 1;
         if (addIndex == 0) {
             addIndex = objectList.getModel().getSize();
@@ -226,8 +225,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
         onFieldUpdated();
     }
 
-    @Override
-    public void onEditorFrameClose(EditorFrame frame) {
+    private void onEditorFrameClose(EditorFrame frame) {
          int index = editorFrames.indexOf(frame);
          if (index != -1) {
              editorFrames.set(index, null);
@@ -236,8 +234,7 @@ public class ParameterFieldObjectSet extends ParameterField implements DataSaveT
          }
     }
 
-    @Override
-    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
+    private ErrorData validateObject(Data currentData, Data initialData) {
         if (requireUniqueValues && !isDataUnique(currentData, initialData)) {
             String value = currentData.toString();
             return new ErrorData(true, name + " already contains the value " + value + ".");

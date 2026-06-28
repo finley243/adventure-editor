@@ -1,11 +1,10 @@
 package com.github.finley243.adventureeditor.ui.parameter;
 
-import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataReferenceSet;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.DataSaveTarget;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -15,9 +14,8 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParameterFieldReferenceSet extends ParameterField implements DataSaveTarget {
+public class ParameterFieldReferenceSet extends ParameterField {
 
-    private final Main main;
     private final JList<String> referenceList;
     private final JButton buttonAdd;
     private final JButton buttonEdit;
@@ -25,9 +23,8 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
 
     private final String name;
 
-    public ParameterFieldReferenceSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, Main main) {
+    public ParameterFieldReferenceSet(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, Template template, PresenterActions presenter) {
         super(editorFrame, optional, name, parentField);
-        this.main = main;
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.name = name;
         getInnerPanel().setLayout(new GridBagLayout());
@@ -88,21 +85,21 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
                     if (index >= 0) {
                         String selectedItem = referenceList.getModel().getElementAt(index);
                         if (selectedItem != null) {
-                            main.getDataManager().editObject(template.id(), selectedItem, ParameterFieldReferenceSet.this);
+                            presenter.onEditObject(template.id(), selectedItem, ParameterFieldReferenceSet.this::saveObjectData);
                         }
                     }
                 }
             }
         });
         buttonAdd.addActionListener(e -> {
-            main.getDataManager().newObject(template.id(), this);
+            presenter.onCreateObject(template.id(), data -> saveObjectData(data, null));
         });
         buttonEdit.addActionListener(e -> {
-            main.getDataManager().editObject(template.id(), referenceList.getSelectedValue(), this);
+            presenter.onEditObject(template.id(), referenceList.getSelectedValue(), this::saveObjectData);
         });
         buttonRemove.addActionListener(e -> {
             int selectedIndex = referenceList.getSelectedIndex();
-            boolean didDelete = main.getDataManager().deleteObject(template.id(), referenceList.getSelectedValue());
+            boolean didDelete = presenter.onDeleteObject(template.id(), referenceList.getSelectedValue());
             if (didDelete) {
                 ((DefaultListModel<String>) referenceList.getModel()).remove(selectedIndex);
             }
@@ -153,9 +150,7 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
         }
     }
 
-    @Override
-    public void saveObjectData(String editorID, Data data, Data initialData) {
-        main.getMainFrame().saveObjectData(editorID, data, initialData);
+    public void saveObjectData(Data data, Data initialData) {
         int addIndex = referenceList.getSelectedIndex() + 1;
         if (addIndex == 0) {
             addIndex = referenceList.getModel().getSize();
@@ -168,16 +163,6 @@ public class ParameterFieldReferenceSet extends ParameterField implements DataSa
         }
         ((DefaultListModel<String>) referenceList.getModel()).add(addIndex, objectID);
         parentFrame.onEditorElementUpdated();
-    }
-
-    @Override
-    public void onEditorFrameClose(EditorFrame frame) {
-        main.getMainFrame().onEditorFrameClose(frame);
-    }
-
-    @Override
-    public ErrorData isDataValidOrShowDialog(Data currentData, Data initialData) {
-        return main.getMainFrame().isDataValidOrShowDialog(currentData, initialData);
     }
 
     @Override

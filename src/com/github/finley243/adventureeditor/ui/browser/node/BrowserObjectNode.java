@@ -1,18 +1,16 @@
 package com.github.finley243.adventureeditor.ui.browser.node;
 
-import com.github.finley243.adventureeditor.Main;
+import com.github.finley243.adventureeditor.PresenterActions;
 
 import javax.swing.*;
 
 public class BrowserObjectNode extends BrowserNode {
 
-    private final Main main;
     private final String objectID;
     private final String categoryID;
 
-    public BrowserObjectNode(Main main, String objectID, String categoryID) {
+    public BrowserObjectNode(String objectID, String categoryID) {
         super(objectID);
-        this.main = main;
         this.objectID = objectID;
         this.categoryID = categoryID;
     }
@@ -26,22 +24,22 @@ public class BrowserObjectNode extends BrowserNode {
     }
 
     @Override
-    public JPopupMenu getContextMenu() {
+    public JPopupMenu getContextMenu(PresenterActions presenter) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem menuOpen = new JMenuItem("Open");
-        menuOpen.addActionListener(e -> main.getDataManager().editObject(categoryID, objectID));
+        menuOpen.addActionListener(e -> presenter.onEditObject(getCategoryID(), getObjectID()));
         menu.add(menuOpen);
         /*JMenuItem menuNew = new JMenuItem("New " + main.getTemplate(categoryID).name());
         menuNew.addActionListener(e -> main.newObject(categoryID));
         menu.add(menuNew);*/
         JMenuItem menuDuplicate = new JMenuItem("Duplicate");
-        menuDuplicate.addActionListener(e -> main.getDataManager().duplicateObject(categoryID, objectID));
+        menuDuplicate.addActionListener(e -> presenter.onDuplicateObject(getCategoryID(), getObjectID()));
         menu.add(menuDuplicate);
         JMenuItem menuDelete = new JMenuItem("Delete");
-        menuDelete.addActionListener(e -> main.getDataManager().deleteObject(categoryID, objectID));
+        menuDelete.addActionListener(e -> presenter.onDeleteObject(getCategoryID(), getObjectID()));
         menu.add(menuDelete);
         JMenuItem menuReferences = new JMenuItem("Find references");
-        menuReferences.addActionListener(e -> main.getDataManager().displayReferences(categoryID, objectID));
+        menuReferences.addActionListener(e -> presenter.onShowReferences(getCategoryID(), getObjectID()));
         menu.add(menuReferences);
         return menu;
     }

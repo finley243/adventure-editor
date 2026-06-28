@@ -2,8 +2,8 @@ package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataScript;
-import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 import com.github.finley243.adventureeditor.ui.ScriptPane;
+import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -14,7 +14,7 @@ public class ParameterFieldScript extends ParameterField {
 
     private final ScriptPane textPane;
 
-    public ParameterFieldScript(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField) {
+    public ParameterFieldScript(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, ScriptPane.Type type) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
@@ -24,7 +24,7 @@ public class ParameterFieldScript extends ParameterField {
         } else {
             label = new JLabel(name);
         }
-        this.textPane = new ScriptPane();
+        this.textPane = new ScriptPane(type);
         JPanel sizeLimiterPanel = new JPanel(new BorderLayout());
         sizeLimiterPanel.add(textPane);
         JScrollPane scrollPane = new JScrollPane(sizeLimiterPanel);
