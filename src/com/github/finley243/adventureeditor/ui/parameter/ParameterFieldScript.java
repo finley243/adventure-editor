@@ -3,6 +3,7 @@ package com.github.finley243.adventureeditor.ui.parameter;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataScript;
 import com.github.finley243.adventureeditor.ui.ScriptPane;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -30,7 +31,7 @@ public class ParameterFieldScript extends ParameterField {
         JScrollPane scrollPane = new JScrollPane(sizeLimiterPanel);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-        scrollPane.setPreferredSize(new Dimension(300, 250));
+        scrollPane.setPreferredSize(UIConstants.PREFERRED_SIZE_SCRIPT);
         textPane.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -87,7 +88,7 @@ public class ParameterFieldScript extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data instanceof DataScript dataScript) {
             setValue(dataScript.getValue());

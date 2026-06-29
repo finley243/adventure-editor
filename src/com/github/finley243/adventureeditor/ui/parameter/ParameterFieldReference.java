@@ -4,6 +4,7 @@ import com.github.finley243.adventureeditor.DataManager;
 import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataReference;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -16,6 +17,7 @@ public class ParameterFieldReference extends ParameterField {
 
     private final JComboBox<String> dropdownMenu;
     private final JButton openReferenceButton;
+    private final Timer debounceTimer;
 
     public ParameterFieldReference(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, String categoryID, String[] referenceValues, DataManager dataManager, PresenterActions presenter) {
         super(editorFrame, optional, name, parentField);
@@ -28,8 +30,10 @@ public class ParameterFieldReference extends ParameterField {
             label = new JLabel(name);
         }
         Arrays.sort(referenceValues);
+        this.debounceTimer = new Timer(UIConstants.DEBOUNCE_DELAY_REFERENCE_TYPED, e -> onFieldUpdated());
+        debounceTimer.setRepeats(false);
         this.dropdownMenu = new JComboBox<>(referenceValues);
-        dropdownMenu.setPreferredSize(new Dimension(150, 20));
+        dropdownMenu.setPreferredSize(UIConstants.PREFERRED_SIZE_DROPDOWN);
         dropdownMenu.setEditable(true);
         dropdownMenu.addActionListener(e -> onFieldUpdated());
         this.openReferenceButton = new JButton("...");
@@ -43,15 +47,24 @@ public class ParameterFieldReference extends ParameterField {
         ((JTextField) dropdownMenu.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                onFieldUpdated();
+                //onFieldUpdated();
+                if (!isUpdatingData()) {
+                    debounceTimer.restart();
+                }
             }
             @Override
             public void removeUpdate(DocumentEvent e) {
-                onFieldUpdated();
+                //onFieldUpdated();
+                if (!isUpdatingData()) {
+                    debounceTimer.restart();
+                }
             }
             @Override
             public void changedUpdate(DocumentEvent e) {
-                onFieldUpdated();
+                //onFieldUpdated();
+                if (!isUpdatingData()) {
+                    debounceTimer.restart();
+                }
             }
         });
         GridBagConstraints labelConstraints = new GridBagConstraints();
@@ -100,7 +113,7 @@ public class ParameterFieldReference extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data == null) {
             setValue(null);

@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataString;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -12,11 +13,14 @@ import java.awt.*;
 public class ParameterFieldString extends ParameterField {
 
     private final JTextField textField;
+    private final Timer debounceTimer;
 
     public ParameterFieldString(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
+        this.debounceTimer = new Timer(UIConstants.DEBOUNCE_DELAY_TEXT, e -> onFieldUpdated());
+        debounceTimer.setRepeats(false);
         JComponent label;
         if (optional) {
             label = getOptionalCheckbox();
@@ -29,17 +33,26 @@ public class ParameterFieldString extends ParameterField {
         textField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                onFieldUpdated();
+                //onFieldUpdated();
+                if (!isUpdatingData()) {
+                    debounceTimer.restart();
+                }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                onFieldUpdated();
+                //onFieldUpdated();
+                if (!isUpdatingData()) {
+                    debounceTimer.restart();
+                }
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                onFieldUpdated();
+                //onFieldUpdated();
+                if (!isUpdatingData()) {
+                    debounceTimer.restart();
+                }
             }
         });
         GridBagConstraints labelConstraints = new GridBagConstraints();
@@ -82,7 +95,7 @@ public class ParameterFieldString extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data instanceof DataString dataString) {
             setValue(dataString.getValue());

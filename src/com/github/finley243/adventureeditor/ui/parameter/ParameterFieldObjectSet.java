@@ -5,6 +5,7 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObjectSet;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.ErrorData;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -47,7 +48,7 @@ public class ParameterFieldObjectSet extends ParameterField {
         this.buttonAdd = new JButton("New");
         this.buttonEdit = new JButton("Edit");
         this.buttonRemove = new JButton("Remove");
-        scrollPane.setPreferredSize(new Dimension(150, 100));
+        scrollPane.setPreferredSize(UIConstants.PREFERRED_SIZE_LIST);
         objectList.setModel(new DefaultListModel<>());
         objectList.setDragEnabled(false);
         objectList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -252,7 +253,7 @@ public class ParameterFieldObjectSet extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data instanceof DataObjectSet dataObjectSet) {
             List<Data> objectData = dataObjectSet.getValue();

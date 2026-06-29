@@ -99,7 +99,7 @@ public class ParameterFieldComponent extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data instanceof DataComponent dataComponent) {
             setActiveOption(dataComponent.getType());

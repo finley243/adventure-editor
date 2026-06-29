@@ -68,7 +68,7 @@ public class ParameterFieldBoolean extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data instanceof DataBoolean dataBoolean) {
             setValue(dataBoolean.getValue());

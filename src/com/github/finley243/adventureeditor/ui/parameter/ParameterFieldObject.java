@@ -150,7 +150,7 @@ public class ParameterFieldObject extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data instanceof DataObject dataObject) {
             for (Map.Entry<String, Data> entry : dataObject.getValue().entrySet()) {

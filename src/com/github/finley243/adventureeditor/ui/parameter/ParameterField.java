@@ -15,6 +15,8 @@ public abstract class ParameterField extends JPanel {
     private final boolean isOptional;
     private boolean isOptionalEnabled;
 
+    private boolean isUpdatingData;
+
     public ParameterField(EditorFrame parentFrame, boolean isOptional, String name, ParameterField parentField) {
         this.parentFrame = parentFrame;
         this.parentField = parentField;
@@ -29,7 +31,9 @@ public abstract class ParameterField extends JPanel {
                 boolean isEnabled = optionalCheckbox.isSelected();
                 this.isOptionalEnabled = isEnabled;
                 setEnabledState(isEnabled);
-                parentFrame.onEditorElementUpdated();
+                if (!isUpdatingData) {
+                    parentFrame.onEditorElementUpdated();
+                }
             });
             optionalCheckbox.setVerticalTextPosition(SwingConstants.TOP);
             this.isOptionalEnabled = false;
@@ -40,6 +44,7 @@ public abstract class ParameterField extends JPanel {
     }
 
     public void onFieldUpdated() {
+        if (isUpdatingData) return;
         if (parentField != null) {
             parentField.onFieldUpdated();
         } else {
@@ -88,6 +93,16 @@ public abstract class ParameterField extends JPanel {
 
     public abstract Data getData();
 
-    public abstract void setData(Data data);
+    public void setData(Data data) {
+        this.isUpdatingData = true;
+        setDataInternal(data);
+        this.isUpdatingData = false;
+    }
+
+    protected abstract void setDataInternal(Data data);
+
+    protected boolean isUpdatingData() {
+        return isUpdatingData;
+    }
 
 }

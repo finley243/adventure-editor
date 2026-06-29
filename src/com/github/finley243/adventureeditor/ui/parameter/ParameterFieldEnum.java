@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataEnum;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -22,7 +23,7 @@ public class ParameterFieldEnum extends ParameterField {
             label = new JLabel(name);
         }
         this.dropdownMenu = new JComboBox<>(values);
-        dropdownMenu.setPreferredSize(new Dimension(150, 20));
+        dropdownMenu.setPreferredSize(UIConstants.PREFERRED_SIZE_DROPDOWN);
         dropdownMenu.setEditable(false);
         dropdownMenu.addActionListener(e -> onFieldUpdated());
         GridBagConstraints labelConstraints = new GridBagConstraints();
@@ -65,7 +66,7 @@ public class ParameterFieldEnum extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data instanceof DataEnum dataEnum) {
             setValue(dataEnum.getValue());
