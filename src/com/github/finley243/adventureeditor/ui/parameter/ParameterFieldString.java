@@ -28,7 +28,7 @@ public class ParameterFieldString extends ParameterField {
             label = new JLabel(name);
         }
         this.textField = new JTextField();
-        textField.setPreferredSize(new Dimension(150, 20));
+        textField.setPreferredSize(UIConstants.PREFERRED_SIZE_TEXT);
         textField.addActionListener(e -> onFieldUpdated());
         textField.getDocument().addDocumentListener(new DocumentListener() {
             @Override

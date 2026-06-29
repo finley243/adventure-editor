@@ -14,11 +14,14 @@ import java.awt.*;
 public class ParameterFieldScript extends ParameterField {
 
     private final ScriptPane textPane;
+    private final Timer debounceTimer;
 
     public ParameterFieldScript(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField, ScriptPane.Type type) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
+        this.debounceTimer = new Timer(UIConstants.DEBOUNCE_DELAY_SCRIPT, e -> onFieldUpdated());
+        debounceTimer.setRepeats(false);
         JComponent label;
         if (optional) {
             label = getOptionalCheckbox();
@@ -35,18 +38,20 @@ public class ParameterFieldScript extends ParameterField {
         textPane.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                onFieldUpdated();
+                if (!isUpdatingData()) {
+                    debounceTimer.restart();
+                }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                onFieldUpdated();
+                if (!isUpdatingData()) {
+                    debounceTimer.restart();
+                }
             }
 
             @Override
-            public void changedUpdate(DocumentEvent e) {
-                //onFieldUpdated();
-            }
+            public void changedUpdate(DocumentEvent e) {}
         });
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
