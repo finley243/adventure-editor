@@ -28,12 +28,15 @@ public class EditorFrame extends ThemedDialog {
     private final Function<Data, ErrorData> onValidate;
     private final Consumer<EditorFrame> onClose;
 
+    private boolean isUpdatingData;
+
     public EditorFrame(Window parentWindow, Template template, Data objectData, boolean isTopLevel, ParameterFactory parameterFactory, PresenterActions presenter, Consumer<Data> onSave, Function<Data, ErrorData> onValidate, Consumer<EditorFrame> onClose) {
         //super(template.name());
         super(parentWindow, template.name());
         this.onSave = onSave;
         this.onValidate = onValidate;
         this.onClose = onClose;
+        this.isUpdatingData = false;
         //this.setAutoRequestFocus(false);
         this.setTitle(template.name());
         this.setModalityType(ModalityType.MODELESS);
@@ -80,6 +83,17 @@ public class EditorFrame extends ThemedDialog {
         this.pack();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
+    }
+
+    public void updateData(Data data) {
+        this.isUpdatingData = true;
+        parameterField.setData(data);
+        this.isUpdatingData = false;
+    }
+
+    public void triggerAutoSave() {
+        if (this.isUpdatingData) return;
+        // TODO - Send current data to Presenter
     }
 
     public boolean requestClose(boolean forceClose, boolean forceSave) {

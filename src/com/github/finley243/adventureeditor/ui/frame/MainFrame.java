@@ -10,6 +10,7 @@ import com.github.finley243.adventureeditor.ui.ErrorData;
 import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
+import com.github.finley243.adventureeditor.undo.ObjectChange;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -537,6 +538,16 @@ public class MainFrame extends ThemedFrame implements ViewActions {
             phraseEditorFrame = null;
         }
         return editorManager.requestCloseAllEditorFrames();
+    }
+
+    @Override
+    public void updateObjectData(List<ObjectChange> changes) {
+        // TODO - Implement
+    }
+
+    @Override
+    public void updateUndoRedoButtons(boolean canUndo, boolean canRedo) {
+        // TODO - Implement
     }
 
     private void attemptOpeningRecentProject(ProjectFile projectFile) {

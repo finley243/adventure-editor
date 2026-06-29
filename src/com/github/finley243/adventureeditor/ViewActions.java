@@ -6,6 +6,7 @@ import com.github.finley243.adventureeditor.ui.DeleteConfirmationResult;
 import com.github.finley243.adventureeditor.ui.DeleteObjectConfirmationResult;
 import com.github.finley243.adventureeditor.ui.ErrorData;
 import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
+import com.github.finley243.adventureeditor.undo.ObjectChange;
 
 import java.io.File;
 import java.util.List;
@@ -77,5 +78,9 @@ public interface ViewActions {
     boolean hasOpenEditors();
 
     boolean closeAllEditorsWithConfirmation();
+
+    void updateObjectData(List<ObjectChange> changes);
+
+    void updateUndoRedoButtons(boolean canUndo, boolean canRedo);
 
 }

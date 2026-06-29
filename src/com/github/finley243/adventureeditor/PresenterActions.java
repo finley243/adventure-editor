@@ -58,4 +58,8 @@ public interface PresenterActions {
 
     boolean onCloseProgram();
 
+    void onUndo();
+
+    void onRedo();
+
 }

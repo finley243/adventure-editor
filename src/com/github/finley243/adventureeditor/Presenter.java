@@ -340,6 +340,16 @@ public class Presenter implements PresenterActions {
         } else return result != SaveConfirmationResult.CANCEL;
     }
 
+    @Override
+    public void onUndo() {
+        // TODO - Implement
+    }
+
+    @Override
+    public void onRedo() {
+        // TODO - Implement
+    }
+
     private SaveConfirmationResult closeProjectWithSaveConfirmation() {
         if (projectHasUnsavedChanges() || view.hasOpenEditors()) {
             SaveConfirmationResult result = view.confirmProjectSave();
