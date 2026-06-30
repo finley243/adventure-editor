@@ -21,6 +21,7 @@ import java.util.function.Function;
 public class EditorFrame extends ThemedDialog {
 
     private final ParameterField parameterField;
+    private final JLabel errorLabel;
     private final Template template;
     private final Data initialData;
     private final Consumer<Data> onSave;
@@ -40,6 +41,10 @@ public class EditorFrame extends ThemedDialog {
         this.initialData = objectData;
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
+        this.errorLabel = new JLabel(" ");
+        this.errorLabel.setForeground(Color.RED);
+        this.errorLabel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        mainPanel.add(errorLabel, BorderLayout.NORTH);
         this.parameterField = new ParameterFieldObject(this, false, template.name(), null, template, isTopLevel, parameterFactory, presenter);
         if (objectData != null) {
             updateData(objectData);
@@ -145,7 +150,9 @@ public class EditorFrame extends ThemedDialog {
     }
 
     public void onEditorElementUpdated() {
-        onSave.accept(parameterField.getData());
+        Data currentData = parameterField.getData();
+        onSave.accept(currentData);
+        updateErrorLabel(currentData);
     }
 
     @Override
@@ -173,6 +180,11 @@ public class EditorFrame extends ThemedDialog {
         }
         Data currentData = parameterField.getData();
         return !initialData.equals(currentData);
+    }
+
+    private void updateErrorLabel(Data currentData) {
+        ErrorData errorData = onValidate.apply(currentData);
+        errorLabel.setText(errorData.hasError() ? errorData.message() : " ");
     }
 
 }
