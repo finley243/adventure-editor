@@ -234,6 +234,7 @@ public class Presenter implements PresenterActions {
         Set<Reference> references = getReferences(categoryID, objectID);
         DeleteObjectConfirmationResult result = view.confirmDeleteObject(objectID, references.size());
         if (result == DeleteObjectConfirmationResult.DELETE) {
+            view.forceCloseObject(categoryID, objectID);
             dataManager.removeData(categoryID, objectID);
             view.browserRemoveObject(categoryID, objectID);
             updateProjectChanges();
