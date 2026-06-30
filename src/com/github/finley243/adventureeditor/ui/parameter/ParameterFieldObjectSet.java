@@ -14,6 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ParameterFieldObjectSet extends ParameterField {
 
@@ -66,7 +67,11 @@ public class ParameterFieldObjectSet extends ParameterField {
                                 editorFrames.get(index).toFront();
                                 editorFrames.get(index).requestFocus();
                             } else {
-                                EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedItem, false, parameterFactory, presenter, data -> ParameterFieldObjectSet.this.saveObjectData(data, selectedItem), data -> ParameterFieldObjectSet.this.validateObject(data, selectedItem), ParameterFieldObjectSet.this::onEditorFrameClose);
+                                AtomicReference<Data> currentData = new AtomicReference<>(selectedItem);
+                                EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedItem, false, parameterFactory, presenter, data -> {
+                                    ParameterFieldObjectSet.this.saveObjectData(data, currentData.get());
+                                    currentData.set(data);
+                                    }, data -> ParameterFieldObjectSet.this.validateObject(data, currentData.get()), ParameterFieldObjectSet.this::onEditorFrameClose);
                                 editorFrames.set(index, objectFrame);
                             }
                         }
@@ -107,7 +112,11 @@ public class ParameterFieldObjectSet extends ParameterField {
             buttonRemove.setEnabled(enableSelectionButtons);
         });
         buttonAdd.addActionListener(e -> {
-            EditorFrame objectFrame = new EditorFrame(editorFrame, template, null, false, parameterFactory, presenter, data -> this.saveObjectData(data, null), data -> this.validateObject(data, null), this::onEditorFrameClose);
+            AtomicReference<Data> currentData = new AtomicReference<>(null);
+            EditorFrame objectFrame = new EditorFrame(editorFrame, template, null, false, parameterFactory, presenter, data -> {
+                this.saveObjectData(data, currentData.get());
+                currentData.set(data);
+                }, data -> this.validateObject(data, currentData.get()), this::onEditorFrameClose);
             unsavedEditorFrames.add(objectFrame);
         });
         buttonEdit.addActionListener(e -> {
@@ -118,7 +127,11 @@ public class ParameterFieldObjectSet extends ParameterField {
                     editorFrames.get(objectIndex).toFront();
                     editorFrames.get(objectIndex).requestFocus();
                 } else {
-                    EditorFrame objectFrame = new EditorFrame(editorFrame, template, objectData, false, parameterFactory, presenter, data -> this.saveObjectData(data, objectData), data -> this.validateObject(data, objectData), this::onEditorFrameClose);
+                    AtomicReference<Data> currentData = new AtomicReference<>(objectData);
+                    EditorFrame objectFrame = new EditorFrame(editorFrame, template, objectData, false, parameterFactory, presenter, data -> {
+                        this.saveObjectData(data, currentData.get());
+                        currentData.set(data);
+                        }, data -> this.validateObject(data, currentData.get()), this::onEditorFrameClose);
                     editorFrames.set(objectIndex, objectFrame);
                 }
             }

@@ -25,7 +25,11 @@ public class ParameterFieldEnum extends ParameterField {
         this.dropdownMenu = new JComboBox<>(values);
         dropdownMenu.setPreferredSize(UIConstants.PREFERRED_SIZE_DROPDOWN);
         dropdownMenu.setEditable(false);
-        dropdownMenu.addActionListener(e -> onFieldUpdated());
+        dropdownMenu.addActionListener(e -> {
+            if (!isUpdatingData()) {
+                onFieldUpdated();
+            }
+        });
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
         labelConstraints.gridx = 0;

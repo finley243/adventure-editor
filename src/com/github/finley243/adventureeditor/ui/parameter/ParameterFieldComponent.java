@@ -5,6 +5,7 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataComponent;
 import com.github.finley243.adventureeditor.template.ComponentOption;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -40,7 +41,9 @@ public class ParameterFieldComponent extends ParameterField {
         }
         ComponentOption[] optionsArray = componentOptions.toArray(new ComponentOption[0]);
         this.dropdownMenu = new JComboBox<>(optionsArray);
-        dropdownMenu.setPreferredSize(new Dimension(150, 20));
+        dropdownMenu.setPreferredSize(UIConstants.PREFERRED_SIZE_DROPDOWN);
+        // setActiveOption for the default option must be called before setting up the action listener
+        setActiveOption(componentOptions.getFirst().id());
         dropdownMenu.addActionListener(e -> {
             ComponentOption selectedOption = (ComponentOption) dropdownMenu.getSelectedItem();
             CardLayout cardLayout = (CardLayout) objectPanel.getLayout();
@@ -48,7 +51,6 @@ public class ParameterFieldComponent extends ParameterField {
             activeOption = selectedOption.id();
             onFieldUpdated();
         });
-        setActiveOption(componentOptions.getFirst().id());
         getInnerPanel().setLayout(new GridBagLayout());
         GridBagConstraints optionalConstraints = new GridBagConstraints();
         optionalConstraints.gridx = 0;

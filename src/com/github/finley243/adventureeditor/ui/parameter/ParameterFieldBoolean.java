@@ -17,7 +17,11 @@ public class ParameterFieldBoolean extends ParameterField {
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         this.checkBox = new JCheckBox(name);
         checkBox.setVerticalTextPosition(SwingConstants.TOP);
-        checkBox.addActionListener(e -> onFieldUpdated());
+        checkBox.addActionListener(e -> {
+            if (!isUpdatingData()) {
+                onFieldUpdated();
+            }
+        });
         JPanel checkBoxPanel = new JPanel();
         checkBoxPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         getInnerPanel().setLayout(new GridBagLayout());

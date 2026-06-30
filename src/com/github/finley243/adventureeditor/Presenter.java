@@ -13,6 +13,7 @@ import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -144,41 +145,49 @@ public class Presenter implements PresenterActions {
     @Override
     public void onCreateObject(String categoryID) {
         Template template = templateRegistry.getTemplate(categoryID);
+        AtomicReference<Data> currentData = new AtomicReference<>(null);
         view.openEditorFrame(template, null, null, data -> {
-            saveObjectData(data, null);
+            saveObjectData(data, currentData.get());
+            currentData.set(data);
             updateProjectChanges();
-            }, data -> validateObject(data, null));
+            }, data -> validateObject(data, currentData.get()));
     }
 
     @Override
     public void onCreateObject(String categoryID, Consumer<Data> onSave) {
         Template template = templateRegistry.getTemplate(categoryID);
+        AtomicReference<Data> currentData = new AtomicReference<>(null);
         view.openEditorFrame(template, null, null, data -> {
-            saveObjectData(data, null);
+            saveObjectData(data, currentData.get());
             onSave.accept(data);
+            currentData.set(data);
             updateProjectChanges();
-        }, data -> validateObject(data, null));
+        }, data -> validateObject(data, currentData.get()));
     }
 
     @Override
     public void onEditObject(String categoryID, String objectID) {
         Template template = templateRegistry.getTemplate(categoryID);
         Data initialData = dataManager.getData(categoryID, objectID);
+        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         view.openEditorFrame(template, objectID, initialData, data -> {
-            saveObjectData(data, initialData);
+            saveObjectData(data, currentData.get());
+            currentData.set(data);
             updateProjectChanges();
-            }, data -> validateObject(data, initialData));
+            }, data -> validateObject(data, currentData.get()));
     }
 
     @Override
     public void onEditObject(String categoryID, String objectID, BiConsumer<Data, Data> onSave) {
         Template template = templateRegistry.getTemplate(categoryID);
         Data initialData = dataManager.getData(categoryID, objectID);
+        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         view.openEditorFrame(template, objectID, initialData, data -> {
-            saveObjectData(data, initialData);
-            onSave.accept(data, initialData);
+            saveObjectData(data, currentData.get());
+            onSave.accept(data, currentData.get());
+            currentData.set(data);
             updateProjectChanges();
-        }, data -> validateObject(data, initialData));
+        }, data -> validateObject(data, currentData.get()));
     }
 
     @Override
@@ -233,6 +242,7 @@ public class Presenter implements PresenterActions {
     @Override
     public void onOpenPhrase(String phraseKey) {
         Data initialData = generateDataForPhrase(phraseKey);
+        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         view.openPhraseEditor(phraseKey, initialData, data -> {
             String newKey = getPhraseKeyFromData(data);
             String newText = getPhraseTextFromData(data);
@@ -241,17 +251,20 @@ public class Presenter implements PresenterActions {
                 phraseEditorManager.removePhrase(phraseKey);
             }
             view.updatePhrases(phraseEditorManager.getPhrases());
+            currentData.set(data);
             updateProjectChanges();
-        }, data -> validatePhrase(data, initialData));
+        }, data -> validatePhrase(data, currentData.get()));
     }
 
     @Override
     public void onNewPhrase() {
+        AtomicReference<Data> currentData = new AtomicReference<>(null);
         view.openPhraseEditor(null, null, data -> {
             phraseEditorManager.setPhrase(getPhraseKeyFromData(data), getPhraseTextFromData(data));
             view.updatePhrases(phraseEditorManager.getPhrases());
+            currentData.set(data);
             updateProjectChanges();
-        }, data -> validatePhrase(data, null));
+        }, data -> validatePhrase(data, currentData.get()));
     }
 
     @Override
@@ -282,10 +295,12 @@ public class Presenter implements PresenterActions {
     @Override
     public void onOpenScript(String scriptName) {
         Data initialData = generateDataForScript(scriptName);
+        //AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         view.openScriptEditor(scriptName, initialData, data -> {
             String scriptBody = getScriptBodyFromData(data);
             scriptEditorManager.setScript(scriptName, scriptBody);
             view.updateScripts(scriptEditorManager.getScripts());
+            //currentData.set(data);
             updateProjectChanges();
         }, data -> new ErrorData(false, null));
     }
@@ -324,11 +339,13 @@ public class Presenter implements PresenterActions {
     @Override
     public void onOpenConfigEditor() {
         Data initialData = configMenuManager.getConfigData();
+        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         view.openConfigEditor(initialData, data -> {
             configMenuManager.setConfigData(data);
             view.updateProjectName(configMenuManager.getProjectName());
+            currentData.set(data);
             updateProjectChanges();
-        }, data -> validateConfig(data, initialData));
+        }, data -> validateConfig(data, currentData.get()));
     }
 
     @Override
@@ -433,9 +450,9 @@ public class Presenter implements PresenterActions {
                 renameReferences(categoryID, initialID, objectID);
             } else { // Edit with same ID
                 dataManager.setData(categoryID, objectID, objectData);
-                if (objectDataCast.getTemplate().topLevel()) {
+                /*if (objectDataCast.getTemplate().topLevel()) {
                     view.browserAddObject(categoryID, objectID);
-                }
+                }*/
             }
         } else { // New object instance
             dataManager.setData(categoryID, objectID, objectData);

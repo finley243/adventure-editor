@@ -30,12 +30,20 @@ public class ParameterFieldReference extends ParameterField {
             label = new JLabel(name);
         }
         Arrays.sort(referenceValues);
-        this.debounceTimer = new Timer(UIConstants.DEBOUNCE_DELAY_REFERENCE_TYPED, e -> onFieldUpdated());
+        this.debounceTimer = new Timer(UIConstants.DEBOUNCE_DELAY_REFERENCE_TYPED, e -> {
+            if (!isUpdatingData()) {
+                onFieldUpdated();
+            }
+        });
         debounceTimer.setRepeats(false);
         this.dropdownMenu = new JComboBox<>(referenceValues);
         dropdownMenu.setPreferredSize(UIConstants.PREFERRED_SIZE_DROPDOWN);
         dropdownMenu.setEditable(true);
-        dropdownMenu.addActionListener(e -> onFieldUpdated());
+        dropdownMenu.addActionListener(e -> {
+            if (!isUpdatingData()) {
+                onFieldUpdated();
+            }
+        });
         this.openReferenceButton = new JButton("...");
         openReferenceButton.setPreferredSize(new Dimension(20, 20));
         openReferenceButton.addActionListener(e -> {

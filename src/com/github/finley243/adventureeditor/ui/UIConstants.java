@@ -19,4 +19,6 @@ public class UIConstants {
     public static final int DEBOUNCE_DELAY_SPINNER = 400;
     public static final int DEBOUNCE_DELAY_SCRIPT = 600;
 
+    public static final String UNNAMED_TREE_NODE = "(UNNAMED)";
+
 }

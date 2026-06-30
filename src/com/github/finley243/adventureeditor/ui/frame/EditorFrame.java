@@ -86,10 +86,6 @@ public class EditorFrame extends ThemedDialog {
         parameterField.setData(data);
     }
 
-    public void triggerAutoSave() {
-        // TODO - Send current data to Presenter
-    }
-
     public boolean requestClose(boolean forceClose, boolean forceSave) {
         if (forceSave) {
             boolean subElementsClosed = parameterField.requestClose(false, false);
@@ -176,6 +172,7 @@ public class EditorFrame extends ThemedDialog {
     }
 
     public void onEditorElementUpdated() {
+        onSave.accept(parameterField.getData());
         if (saveButton != null) {
             saveButton.setEnabled(hasUnsavedChanges());
         }
