@@ -123,7 +123,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
         JMenu windowMenu = new JMenu("Window");
         menuBar.add(windowMenu);
         JMenuItem windowCloseAll = new JMenuItem("Close All Objects");
-        windowCloseAll.addActionListener(e -> editorManager.closeAllActiveEditorFrames());
+        windowCloseAll.addActionListener(e -> editorManager.requestCloseAllEditorFrames());
         windowMenu.add(windowCloseAll);
 
         JPanel primaryPanel = new JPanel();
@@ -279,11 +279,8 @@ public class MainFrame extends ThemedFrame implements ViewActions {
             phraseEditorFrame.requestFocus();
         } else {
             phraseEditorFrame = new PhraseEditorFrame(this, getPresenter(), () -> {
-                boolean didCloseAllFrames = phraseFrameHandler.closeAll();
-                if (didCloseAllFrames) {
-                    phraseEditorFrame = null;
-                }
-                return didCloseAllFrames;
+                phraseFrameHandler.closeAll();
+                phraseEditorFrame = null;
             });
         }
         updatePhrases(phrases);
@@ -313,11 +310,8 @@ public class MainFrame extends ThemedFrame implements ViewActions {
             scriptEditorFrame.requestFocus();
         } else {
             scriptEditorFrame = new ScriptEditorFrame(this, getPresenter(), () -> {
-                boolean didCloseAllFrames = scriptFrameHandler.closeAll();
-                if (didCloseAllFrames) {
-                    scriptEditorFrame = null;
-                }
-                return didCloseAllFrames;
+                scriptFrameHandler.closeAll();
+                scriptEditorFrame = null;
             });
         }
         updateScripts(scripts);
@@ -473,7 +467,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
-    public void forceCloseScript(String name) {
+    public void closeScript(String name) {
         EditorFrame frame = scriptFrameHandler.get(name);
         if (frame != null) {
             frame.requestClose();
@@ -482,31 +476,12 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
-    public void forceClosePhrase(String key) {
+    public void closePhrase(String key) {
         EditorFrame frame = phraseFrameHandler.get(key);
         if (frame != null) {
             frame.requestClose();
             phraseFrameHandler.removeChildFrame(frame);
         }
-    }
-
-    @Override
-    public void forceCloseAllEditors() {
-        if (configFrame != null) {
-            configFrame.requestClose();
-            configFrame = null;
-        }
-        scriptFrameHandler.forceCloseAll();
-        if (scriptEditorFrame != null) {
-            scriptEditorFrame.dispose();
-            scriptEditorFrame = null;
-        }
-        phraseFrameHandler.forceCloseAll();
-        if (phraseEditorFrame != null) {
-            phraseEditorFrame.dispose();
-            phraseEditorFrame = null;
-        }
-        editorManager.requestCloseAllEditorFrames();
     }
 
     @Override
@@ -518,26 +493,22 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
-    public boolean closeAllEditorsWithConfirmation() {
+    public void closeAllEditors() {
         if (configFrame != null) {
-            boolean closedConfig = configFrame.requestClose();
-            if (closedConfig) {
-                configFrame = null;
-            } else {
-                return false;
-            }
+            configFrame.requestClose();
+            configFrame = null;
         }
-        if (!scriptFrameHandler.closeAll()) return false;
+        scriptFrameHandler.closeAll();
         if (scriptEditorFrame != null) {
             scriptEditorFrame.dispose();
             scriptEditorFrame = null;
         }
-        if (!phraseFrameHandler.closeAll()) return false;
+        phraseFrameHandler.closeAll();
         if (phraseEditorFrame != null) {
             phraseEditorFrame.dispose();
             phraseEditorFrame = null;
         }
-        return editorManager.requestCloseAllEditorFrames();
+        editorManager.requestCloseAllEditorFrames();
     }
 
     @Override

@@ -69,15 +69,13 @@ public interface ViewActions {
 
     void forceCloseConfig();
 
-    void forceCloseScript(String name);
+    void closeScript(String name);
 
-    void forceClosePhrase(String key);
-
-    void forceCloseAllEditors();
+    void closePhrase(String key);
 
     boolean hasOpenEditors();
 
-    boolean closeAllEditorsWithConfirmation();
+    void closeAllEditors();
 
     void updateObjectData(List<ObjectChange> changes);
 

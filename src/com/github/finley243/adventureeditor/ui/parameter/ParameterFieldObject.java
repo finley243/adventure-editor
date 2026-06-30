@@ -109,14 +109,10 @@ public class ParameterFieldObject extends ParameterField {
     }
 
     @Override
-    public boolean requestClose() {
+    public void requestClose() {
         for (ParameterField parameterField : editorElements.values()) {
-            boolean didClose = parameterField.requestClose();
-            if (!didClose) {
-                return false;
-            }
+            parameterField.requestClose();
         }
-        return true;
     }
 
     @Override

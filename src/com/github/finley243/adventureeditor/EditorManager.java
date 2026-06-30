@@ -3,7 +3,7 @@ package com.github.finley243.adventureeditor;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 public class EditorManager {
@@ -26,23 +26,14 @@ public class EditorManager {
         }
     }
 
-    public void closeAllActiveEditorFrames() {
-        for (String categoryID : new HashSet<>(topLevelEditorWindows.keySet())) {
-            for (String objectID : new HashSet<>(topLevelEditorWindows.get(categoryID).keySet())) {
-                topLevelEditorWindows.get(categoryID).get(objectID).requestClose();
-            }
+    public void requestCloseAllEditorFrames() {
+        List<EditorFrame> frames = topLevelEditorWindows.values().stream()
+                .flatMap(m -> m.values().stream())
+                .toList();
+        for (EditorFrame editorFrame : frames) {
+            editorFrame.requestClose();
         }
         topLevelEditorWindows.clear();
-    }
-
-    public boolean requestCloseAllEditorFrames() {
-        for (Map<String, EditorFrame> categoryEditors : topLevelEditorWindows.values()) {
-            for (EditorFrame editorFrame : categoryEditors.values()) {
-                boolean didClose = editorFrame.requestClose();
-                if (!didClose) return false;
-            }
-        }
-        return true;
     }
 
     public EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {

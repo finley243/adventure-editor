@@ -139,10 +139,7 @@ public class ParameterFieldObjectSet extends ParameterField {
             int selectedIndex = objectList.getSelectedIndex();
             if (selectedIndex != -1) {
                 if (editorFrames.get(selectedIndex) != null) {
-                    boolean didClose = editorFrames.get(selectedIndex).requestClose();
-                    if (!didClose) {
-                        return;
-                    }
+                    editorFrames.get(selectedIndex).requestClose();
                 }
                 ((DefaultListModel<ObjectSetEntry>) objectList.getModel()).removeElementAt(selectedIndex);
                 editorFrames.remove(selectedIndex);
@@ -186,25 +183,18 @@ public class ParameterFieldObjectSet extends ParameterField {
     }
 
     @Override
-    public boolean requestClose() {
+    public void requestClose() {
         Iterator<EditorFrame> itr = unsavedEditorFrames.iterator();
         while (itr.hasNext()) {
             EditorFrame editorFrame = itr.next();
             if (editorFrame != null) {
-                boolean didClose = editorFrame.requestClose();
-                if (!didClose) {
-                    return false;
-                }
+                editorFrame.requestClose();
             }
         }
         while (!unsavedEditorFrames.isEmpty()) {
             EditorFrame frame = unsavedEditorFrames.getFirst();
-            boolean didClose = frame.requestClose();
-            if (!didClose) {
-                return false;
-            }
+            frame.requestClose();
         }
-        return true;
     }
 
     @Override

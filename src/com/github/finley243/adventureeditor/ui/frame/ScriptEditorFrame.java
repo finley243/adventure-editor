@@ -10,7 +10,6 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class ScriptEditorFrame extends ThemedDialog {
 
@@ -18,9 +17,9 @@ public class ScriptEditorFrame extends ThemedDialog {
 
     private final ScriptTableModel tableModel;
     private final JTable scriptTable;
-    private final Supplier<Boolean> onClose;
+    private final Runnable onClose;
 
-    public ScriptEditorFrame(Window parentWindow, PresenterActions presenter, Supplier<Boolean> onClose) {
+    public ScriptEditorFrame(Window parentWindow, PresenterActions presenter, Runnable onClose) {
         super(parentWindow, SCRIPT_EDITOR_TITLE);
         this.onClose = onClose;
         this.setTitle(SCRIPT_EDITOR_TITLE);
@@ -188,10 +187,7 @@ public class ScriptEditorFrame extends ThemedDialog {
     }
 
     private void closeEditor() {
-        boolean didClose = onClose.get();
-        if (didClose) {
-            this.dispose();
-        }
+        onClose.run();
     }
 
     private void openContextMenu(Component component, Point point, String selectedScriptName, int viewRowIndex, PresenterActions presenter) {

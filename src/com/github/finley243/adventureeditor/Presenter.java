@@ -286,7 +286,7 @@ public class Presenter implements PresenterActions {
     public void onDeletePhrase(String phraseKey) {
         DeleteConfirmationResult result = view.confirmDeletePhrase(phraseKey);
         if (result == DeleteConfirmationResult.DELETE) {
-            view.forceClosePhrase(phraseKey);
+            view.closePhrase(phraseKey);
             phraseEditorManager.removePhrase(phraseKey);
             view.updatePhrases(phraseEditorManager.getPhrases());
             updateProjectChanges();
@@ -342,7 +342,7 @@ public class Presenter implements PresenterActions {
     public void onDeleteScript(String scriptName) {
         DeleteConfirmationResult result = view.confirmDeleteScript(scriptName);
         if (result == DeleteConfirmationResult.DELETE) {
-            view.forceCloseScript(scriptName);
+            view.closeScript(scriptName);
             scriptEditorManager.removeScript(scriptName);
             view.updateScripts(scriptEditorManager.getScripts());
             updateProjectChanges();
@@ -381,15 +381,14 @@ public class Presenter implements PresenterActions {
     }
 
     private SaveConfirmationResult closeProjectWithSaveConfirmation() {
-        if (projectHasUnsavedChanges() || view.hasOpenEditors()) {
+        if (projectHasUnsavedChanges()) {
             SaveConfirmationResult result = view.confirmProjectSave();
             if (result == SaveConfirmationResult.CANCEL) return SaveConfirmationResult.CANCEL;
             if (result == SaveConfirmationResult.YES) {
-                boolean continueClosing = view.closeAllEditorsWithConfirmation();
-                if (!continueClosing) return SaveConfirmationResult.CANCEL;
+                view.closeAllEditors();
                 return SaveConfirmationResult.YES;
             } else {
-                view.forceCloseAllEditors();
+                view.closeAllEditors();
                 return SaveConfirmationResult.NO;
             }
         }

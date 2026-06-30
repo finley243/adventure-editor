@@ -58,36 +58,17 @@ public class ChildFrameHandler<T> {
         return false;
     }
 
-    public boolean closeAll() {
+    public void closeAll() {
         // These MUST be while-loops to prevent concurrent modification exceptions
         Iterator<EditorFrame> itr = activeEditorFrames.values().iterator();
         while (itr.hasNext()) {
             EditorFrame editorFrame = itr.next();
-            boolean didClose = editorFrame.requestClose();
-            if (!didClose) return false;
+            editorFrame.requestClose();
         }
         while (!activeEditorFramesUnsaved.isEmpty()) {
             EditorFrame editorFrame = activeEditorFramesUnsaved.getFirst();
-            boolean didClose = editorFrame.requestClose();
-            if (!didClose) return false;
+            editorFrame.requestClose();
         }
-        return true;
-    }
-
-    public boolean forceCloseAll() {
-        // These MUST be while-loops to prevent concurrent modification exceptions
-        Iterator<EditorFrame> itr = activeEditorFrames.values().iterator();
-        while (itr.hasNext()) {
-            EditorFrame editorFrame = itr.next();
-            boolean didClose = editorFrame.requestClose();
-            if (!didClose) return false;
-        }
-        while (!activeEditorFramesUnsaved.isEmpty()) {
-            EditorFrame editorFrame = activeEditorFramesUnsaved.getFirst();
-            boolean didClose = editorFrame.requestClose();
-            if (!didClose) return false;
-        }
-        return true;
     }
 
 }

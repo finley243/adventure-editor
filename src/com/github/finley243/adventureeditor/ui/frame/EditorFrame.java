@@ -76,15 +76,11 @@ public class EditorFrame extends ThemedDialog {
         parameterField.setData(data);
     }
 
-    public boolean requestClose() {
-        boolean subElementsClosed = parameterField.requestClose();
-        if (!subElementsClosed) {
-            return false;
-        }
+    public void requestClose() {
+        parameterField.requestClose();
         onSave.accept(parameterField.getData());
         onClose.accept(this);
         this.dispose();
-        return true;
     }
 
     public Template getTemplate() {
