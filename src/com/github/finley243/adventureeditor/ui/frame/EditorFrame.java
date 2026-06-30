@@ -96,8 +96,8 @@ public class EditorFrame extends ThemedDialog {
 
     public void onEditorElementUpdated() {
         Data currentData = parameterField.getData();
-        onSave.accept(currentData);
         updateErrorLabel(currentData);
+        onSave.accept(currentData);
     }
 
     @Override

@@ -151,13 +151,11 @@ public class Presenter implements PresenterActions {
         if (template.topLevel()) {
             view.browserAddObject(categoryID, defaultID);
         }
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(defaultID);
         view.openEditorFrame(template, defaultID, initialData, data -> {
             savedKey.set(saveObjectData(data, savedKey.get()));
-            currentData.set(data);
             updateProjectChanges();
-            }, data -> validateObject(data, currentData.get()));
+            }, data -> validateObject(data, savedKey.get()));
     }
 
     @Override
@@ -169,27 +167,23 @@ public class Presenter implements PresenterActions {
         if (template.topLevel()) {
             view.browserAddObject(categoryID, defaultID);
         }
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(defaultID);
         view.openEditorFrame(template, defaultID, initialData, data -> {
             savedKey.set(saveObjectData(data, savedKey.get()));
             onSave.accept(data);
-            currentData.set(data);
             updateProjectChanges();
-        }, data -> validateObject(data, currentData.get()));
+        }, data -> validateObject(data, savedKey.get()));
     }
 
     @Override
     public void onEditObject(String categoryID, String objectID) {
         Template template = templateRegistry.getTemplate(categoryID);
         Data initialData = dataManager.getData(categoryID, objectID);
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(objectID);
         view.openEditorFrame(template, objectID, initialData, data -> {
             savedKey.set(saveObjectData(data, savedKey.get()));
-            currentData.set(data);
             updateProjectChanges();
-            }, data -> validateObject(data, currentData.get()));
+            }, data -> validateObject(data, savedKey.get()));
     }
 
     @Override
@@ -203,7 +197,7 @@ public class Presenter implements PresenterActions {
             onSave.accept(data, currentData.get());
             currentData.set(data);
             updateProjectChanges();
-        }, data -> validateObject(data, currentData.get()));
+        }, data -> validateObject(data, savedKey.get()));
     }
 
     @Override
@@ -258,13 +252,11 @@ public class Presenter implements PresenterActions {
     @Override
     public void onOpenPhrase(String phraseKey) {
         Data initialData = generateDataForPhrase(phraseKey);
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(phraseKey);
         view.openPhraseEditor(phraseKey, initialData, data -> {
             savedKey.set(savePhraseData(data, savedKey.get()));
-            currentData.set(data);
             updateProjectChanges();
-        }, data -> validatePhrase(data, currentData.get()));
+        }, data -> validatePhrase(data, savedKey.get()));
     }
 
     @Override
@@ -273,13 +265,11 @@ public class Presenter implements PresenterActions {
         phraseEditorManager.setPhrase(defaultKey, "");
         view.updatePhrases(phraseEditorManager.getPhrases());
         Data initialData = generateDataForPhrase(defaultKey);
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(defaultKey);
         view.openPhraseEditor(defaultKey, initialData, data -> {
             savedKey.set(savePhraseData(data, savedKey.get()));
-            currentData.set(data);
             updateProjectChanges();
-        }, data -> validatePhrase(data, currentData.get()));
+        }, data -> validatePhrase(data, savedKey.get()));
     }
 
     @Override
@@ -488,19 +478,18 @@ public class Presenter implements PresenterActions {
         return ((DataObject) data).getTemplate().id();
     }
 
-    private ErrorData validateObject(Data currentData, Data initialData) {
+    private ErrorData validateObject(Data currentData, String savedKey) {
         String currentObjectID = getObjectIDFromData(currentData);
-        String initialObjectID = getObjectIDFromData(initialData);
         String categoryID = getObjectCategoryIDFromData(currentData);
         if (currentObjectID == null || currentObjectID.trim().isEmpty()) {
             return new ErrorData(true, "Object ID cannot be empty.");
-        } else if (!Objects.equals(currentObjectID, initialObjectID) && dataManager.categoryContainsID(categoryID, currentObjectID)) {
+        } else if (!Objects.equals(currentObjectID, savedKey) && dataManager.categoryContainsID(categoryID, currentObjectID)) {
             return new ErrorData(true, "An object with ID \"" + currentObjectID + "\" already exists.");
         }
         return new ErrorData(false, null);
     }
 
-    private ErrorData validatePhrase(Data currentData, Data initialData) {
+    private ErrorData validatePhrase(Data currentData, String savedKey) {
         String newKey = getPhraseKeyFromData(currentData);
         if (newKey.trim().isEmpty()) {
             return new ErrorData(true, "Key cannot be empty.");
@@ -509,8 +498,7 @@ public class Presenter implements PresenterActions {
         if (newPhrase.trim().isEmpty()) {
             return new ErrorData(true, "Phrase cannot be empty.");
         }
-        String initialKey = getPhraseKeyFromData(initialData);
-        if (phraseEditorManager.hasPhraseWithKey(newKey) && !Objects.equals(newKey, initialKey)) {
+        if (!Objects.equals(newKey, savedKey) && phraseEditorManager.hasPhraseWithKey(newKey)) {
             return new ErrorData(true, "A phrase with the key " + newKey + " already exists.");
         }
         return new ErrorData(false, null);
