@@ -459,7 +459,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     public void forceCloseObject(String categoryID, String objectID) {
         EditorFrame frame = editorManager.getActiveTopLevelFrame(categoryID, objectID);
         if (frame != null) {
-            frame.requestClose(true, false);
+            frame.requestClose();
             editorManager.removeActiveTopLevelFrame(categoryID, objectID);
         }
     }
@@ -467,7 +467,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     @Override
     public void forceCloseConfig() {
         if (configFrame != null) {
-            configFrame.requestClose(true, false);
+            configFrame.requestClose();
             configFrame = null;
         }
     }
@@ -476,7 +476,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     public void forceCloseScript(String name) {
         EditorFrame frame = scriptFrameHandler.get(name);
         if (frame != null) {
-            frame.requestClose(true, false);
+            frame.requestClose();
             scriptFrameHandler.removeChildFrame(frame);
         }
     }
@@ -485,7 +485,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     public void forceClosePhrase(String key) {
         EditorFrame frame = phraseFrameHandler.get(key);
         if (frame != null) {
-            frame.requestClose(true, false);
+            frame.requestClose();
             phraseFrameHandler.removeChildFrame(frame);
         }
     }
@@ -493,7 +493,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     @Override
     public void forceCloseAllEditors() {
         if (configFrame != null) {
-            configFrame.requestClose(true, false);
+            configFrame.requestClose();
             configFrame = null;
         }
         scriptFrameHandler.forceCloseAll();
@@ -506,7 +506,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
             phraseEditorFrame.dispose();
             phraseEditorFrame = null;
         }
-        editorManager.forceCloseAllEditorFrames();
+        editorManager.requestCloseAllEditorFrames();
     }
 
     @Override
@@ -520,7 +520,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     @Override
     public boolean closeAllEditorsWithConfirmation() {
         if (configFrame != null) {
-            boolean closedConfig = configFrame.requestClose(false, false);
+            boolean closedConfig = configFrame.requestClose();
             if (closedConfig) {
                 configFrame = null;
             } else {

@@ -12,7 +12,6 @@ import com.github.finley243.adventureeditor.ui.parameter.ParameterFieldObject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.util.function.Consumer;
@@ -58,7 +57,7 @@ public class EditorFrame extends ThemedDialog {
         Action closeAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                requestClose(true, false);
+                requestClose();
             }
         };
 
@@ -77,65 +76,15 @@ public class EditorFrame extends ThemedDialog {
         parameterField.setData(data);
     }
 
-    public boolean requestClose(boolean forceClose, boolean forceSave) {
-        if (forceSave) {
-            boolean subElementsClosed = parameterField.requestClose(false, false);
-            if (!subElementsClosed) {
-                return false;
-            }
-            if (isDataValidOrShowDialog()) {
-                onSave.accept(parameterField.getData());
-                onClose.accept(this);
-                this.dispose();
-                return true;
-            }
-            return false;
-        } else if (forceClose) {
-            boolean subElementsClosed = parameterField.requestClose(true, false);
-            if (!subElementsClosed) {
-                return false;
-            }
-            onClose.accept(this);
-            this.dispose();
-            return true;
-        }
-        boolean subElementsClosed = parameterField.requestClose(false, false);
+    public boolean requestClose() {
+        boolean subElementsClosed = parameterField.requestClose();
         if (!subElementsClosed) {
             return false;
         }
-        boolean hasUnsavedChanges = hasUnsavedChanges();
-        if (!hasUnsavedChanges) {
-            onClose.accept(this);
-            this.dispose();
-            return true;
-        }
-        String[] confirmOptions = new String[] {"Yes", "No", "Cancel"};
-        int confirmResult = JOptionPane.showOptionDialog(this, "Would you like to save changes?", "Save Confirmation",
-                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, confirmOptions, confirmOptions[0]);
-        if (confirmResult == 0) {
-            // Save
-            boolean editorElementClosed = parameterField.requestClose(false, false);
-            if (!editorElementClosed) {
-                return false;
-            }
-            if (isDataValidOrShowDialog()) {
-                onSave.accept(parameterField.getData());
-                onClose.accept(this);
-                this.dispose();
-                return true;
-            }
-        } else if (confirmResult == 1) {
-            // Don't save
-            boolean editorElementClosed = parameterField.requestClose(true, false);
-            if (!editorElementClosed) {
-                return false;
-            }
-            onClose.accept(this);
-            this.dispose();
-            return true;
-        }
-        // Cancel (do nothing)
-        return false;
+        onSave.accept(parameterField.getData());
+        onClose.accept(this);
+        this.dispose();
+        return true;
     }
 
     public Template getTemplate() {
@@ -158,20 +107,10 @@ public class EditorFrame extends ThemedDialog {
     @Override
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-            requestClose(true, false);
+            requestClose();
         } else {
             super.processWindowEvent(e);
         }
-    }
-
-    // Returns true if data is valid, shows error dialog and returns false if not
-    private boolean isDataValidOrShowDialog() {
-        ErrorData errorData = onValidate.apply(parameterField.getData());
-        if (!errorData.hasError()) {
-            return true;
-        }
-        JOptionPane.showMessageDialog(this, errorData.message(), "Error", JOptionPane.ERROR_MESSAGE);
-        return false;
     }
 
     private boolean hasUnsavedChanges() {

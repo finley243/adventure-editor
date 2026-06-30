@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -138,7 +139,7 @@ public class ParameterFieldObjectSet extends ParameterField {
             int selectedIndex = objectList.getSelectedIndex();
             if (selectedIndex != -1) {
                 if (editorFrames.get(selectedIndex) != null) {
-                    boolean didClose = editorFrames.get(selectedIndex).requestClose(false, false);
+                    boolean didClose = editorFrames.get(selectedIndex).requestClose();
                     if (!didClose) {
                         return;
                     }
@@ -185,10 +186,12 @@ public class ParameterFieldObjectSet extends ParameterField {
     }
 
     @Override
-    public boolean requestClose(boolean forceClose, boolean forceSave) {
-        for (EditorFrame editorFrame : editorFrames) {
+    public boolean requestClose() {
+        Iterator<EditorFrame> itr = unsavedEditorFrames.iterator();
+        while (itr.hasNext()) {
+            EditorFrame editorFrame = itr.next();
             if (editorFrame != null) {
-                boolean didClose = editorFrame.requestClose(forceClose, forceSave);
+                boolean didClose = editorFrame.requestClose();
                 if (!didClose) {
                     return false;
                 }
@@ -196,7 +199,7 @@ public class ParameterFieldObjectSet extends ParameterField {
         }
         while (!unsavedEditorFrames.isEmpty()) {
             EditorFrame frame = unsavedEditorFrames.getFirst();
-            boolean didClose = frame.requestClose(forceClose, forceSave);
+            boolean didClose = frame.requestClose();
             if (!didClose) {
                 return false;
             }

@@ -85,7 +85,7 @@ public abstract class ParameterField extends JPanel {
         }
     }
 
-    public boolean requestClose(boolean forceClose, boolean forceSave) {
+    public boolean requestClose() {
         return true;
     }
 

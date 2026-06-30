@@ -29,7 +29,7 @@ public class EditorManager {
     public void closeAllActiveEditorFrames() {
         for (String categoryID : new HashSet<>(topLevelEditorWindows.keySet())) {
             for (String objectID : new HashSet<>(topLevelEditorWindows.get(categoryID).keySet())) {
-                topLevelEditorWindows.get(categoryID).get(objectID).requestClose(false, false);
+                topLevelEditorWindows.get(categoryID).get(objectID).requestClose();
             }
         }
         topLevelEditorWindows.clear();
@@ -38,20 +38,11 @@ public class EditorManager {
     public boolean requestCloseAllEditorFrames() {
         for (Map<String, EditorFrame> categoryEditors : topLevelEditorWindows.values()) {
             for (EditorFrame editorFrame : categoryEditors.values()) {
-                boolean didClose = editorFrame.requestClose(false, false);
+                boolean didClose = editorFrame.requestClose();
                 if (!didClose) return false;
             }
         }
         return true;
-    }
-
-    public void forceCloseAllEditorFrames() {
-        for (Map<String, EditorFrame> categoryEditors : topLevelEditorWindows.values()) {
-            for (EditorFrame editorFrame : categoryEditors.values()) {
-                boolean didClose = editorFrame.requestClose(true, false);
-                if (!didClose) return;
-            }
-        }
     }
 
     public EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {

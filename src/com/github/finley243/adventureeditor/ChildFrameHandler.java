@@ -63,12 +63,12 @@ public class ChildFrameHandler<T> {
         Iterator<EditorFrame> itr = activeEditorFrames.values().iterator();
         while (itr.hasNext()) {
             EditorFrame editorFrame = itr.next();
-            boolean didClose = editorFrame.requestClose(false, false);
+            boolean didClose = editorFrame.requestClose();
             if (!didClose) return false;
         }
         while (!activeEditorFramesUnsaved.isEmpty()) {
             EditorFrame editorFrame = activeEditorFramesUnsaved.getFirst();
-            boolean didClose = editorFrame.requestClose(false, false);
+            boolean didClose = editorFrame.requestClose();
             if (!didClose) return false;
         }
         return true;
@@ -79,12 +79,12 @@ public class ChildFrameHandler<T> {
         Iterator<EditorFrame> itr = activeEditorFrames.values().iterator();
         while (itr.hasNext()) {
             EditorFrame editorFrame = itr.next();
-            boolean didClose = editorFrame.requestClose(true, false);
+            boolean didClose = editorFrame.requestClose();
             if (!didClose) return false;
         }
         while (!activeEditorFramesUnsaved.isEmpty()) {
             EditorFrame editorFrame = activeEditorFramesUnsaved.getFirst();
-            boolean didClose = editorFrame.requestClose(true, false);
+            boolean didClose = editorFrame.requestClose();
             if (!didClose) return false;
         }
         return true;
