@@ -10,6 +10,7 @@ import com.github.finley243.adventureeditor.ui.DeleteConfirmationResult;
 import com.github.finley243.adventureeditor.ui.DeleteObjectConfirmationResult;
 import com.github.finley243.adventureeditor.ui.ErrorData;
 import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
+import com.github.finley243.adventureeditor.undo.*;
 
 import java.io.File;
 import java.util.*;
@@ -32,9 +33,10 @@ public class Presenter implements PresenterActions {
     private final ScriptEditorManager scriptEditorManager;
     private final TemplateRegistry templateRegistry;
     private final DataLoader dataLoader;
+    private final UndoManager undoManager;
     private final ViewActions view;
 
-    public Presenter(DataManager dataManager, ProjectManager projectManager, ConfigMenuManager configMenuManager, PhraseEditorManager phraseEditorManager, ScriptEditorManager scriptEditorManager, TemplateRegistry templateRegistry, DataLoader dataLoader, ViewActions view) {
+    public Presenter(DataManager dataManager, ProjectManager projectManager, ConfigMenuManager configMenuManager, PhraseEditorManager phraseEditorManager, ScriptEditorManager scriptEditorManager, TemplateRegistry templateRegistry, DataLoader dataLoader, UndoManager undoManager, ViewActions view) {
         this.dataManager = dataManager;
         this.projectManager = projectManager;
         this.configMenuManager = configMenuManager;
@@ -42,6 +44,7 @@ public class Presenter implements PresenterActions {
         this.scriptEditorManager = scriptEditorManager;
         this.templateRegistry = templateRegistry;
         this.dataLoader = dataLoader;
+        this.undoManager = undoManager;
         this.view = view;
     }
 
@@ -159,8 +162,9 @@ public class Presenter implements PresenterActions {
             currentData.set(data);
             updateProjectChanges();
         }, data -> {
-            savedKey.set(saveObjectData(data, savedKey.get()));
-            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), currentData.get(), data);
+            String afterKey = saveObjectData(data, savedKey.get());
+            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), afterKey, currentData.get(), data);
+            savedKey.set(afterKey);
             currentData.set(data);
             updateProjectChanges();
             }, data -> validateObject(data, savedKey.get()));
@@ -183,8 +187,9 @@ public class Presenter implements PresenterActions {
             currentData.set(data);
             updateProjectChanges();
         }, data -> {
-            savedKey.set(saveObjectData(data, savedKey.get()));
-            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), currentData.get(), data);
+            String afterKey = saveObjectData(data, savedKey.get());
+            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), afterKey, currentData.get(), data);
+            savedKey.set(afterKey);
             onSave.accept(data);
             currentData.set(data);
             updateProjectChanges();
@@ -202,8 +207,9 @@ public class Presenter implements PresenterActions {
             currentData.set(data);
             updateProjectChanges();
         }, data -> {
-            savedKey.set(saveObjectData(data, savedKey.get()));
-            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), currentData.get(), data);
+            String afterKey = saveObjectData(data, savedKey.get());
+            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), afterKey, currentData.get(), data);
+            savedKey.set(afterKey);
             currentData.set(data);
             updateProjectChanges();
             }, data -> validateObject(data, savedKey.get()));
@@ -221,8 +227,9 @@ public class Presenter implements PresenterActions {
             currentData.set(data);
             updateProjectChanges();
         }, data -> {
-            savedKey.set(saveObjectData(data, savedKey.get()));
-            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), currentData.get(), data);
+            String afterKey = saveObjectData(data, savedKey.get());
+            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), afterKey, currentData.get(), data);
+            savedKey.set(afterKey);
             onSave.accept(data, currentData.get());
             currentData.set(data);
             updateProjectChanges();
@@ -282,13 +289,19 @@ public class Presenter implements PresenterActions {
     @Override
     public void onOpenPhrase(String phraseKey) {
         Data initialData = generateDataForPhrase(phraseKey);
+        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(phraseKey);
         view.openPhraseEditor(phraseKey, initialData, data -> {
             savedKey.set(savePhraseData(data, savedKey.get()));
+            currentData.set(data);
             updateProjectChanges();
         }, data -> {
-            // TODO - Update undo data
-            savedKey.set(savePhraseData(data, savedKey.get()));
+            String afterKey = savePhraseData(data, savedKey.get());
+            if (!Objects.equals(currentData.get(), data)) {
+                undoManager.pushChange(new DataChangeCommand(List.of(new PhraseChange(savedKey.get(), afterKey, currentData.get(), data))));
+            }
+            savedKey.set(afterKey);
+            currentData.set(data);
             updateProjectChanges();
         }, data -> validatePhrase(data, savedKey.get()));
     }
@@ -299,13 +312,19 @@ public class Presenter implements PresenterActions {
         phraseEditorManager.setPhrase(defaultKey, "");
         view.updatePhrases(phraseEditorManager.getPhrases());
         Data initialData = generateDataForPhrase(defaultKey);
+        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(defaultKey);
         view.openPhraseEditor(defaultKey, initialData, data -> {
             savedKey.set(savePhraseData(data, savedKey.get()));
+            currentData.set(data);
             updateProjectChanges();
         }, data -> {
-            // TODO - Update undo data
-            savedKey.set(savePhraseData(data, savedKey.get()));
+            String afterKey = savePhraseData(data, savedKey.get());
+            if (!Objects.equals(currentData.get(), data)) {
+                undoManager.pushChange(new DataChangeCommand(List.of(new PhraseChange(savedKey.get(), afterKey, currentData.get(), data))));
+            }
+            savedKey.set(afterKey);
+            currentData.set(data);
             updateProjectChanges();
         }, data -> validatePhrase(data, savedKey.get()));
     }
@@ -344,8 +363,11 @@ public class Presenter implements PresenterActions {
             view.updateScripts(scriptEditorManager.getScripts());
             updateProjectChanges();
         }, data -> {
-            // TODO - Update undo data
             String scriptBody = getScriptBodyFromData(data);
+            String initialScriptBody = scriptEditorManager.getScript(scriptName);
+            if (!Objects.equals(initialScriptBody, scriptBody)) {
+                undoManager.pushChange(new DataChangeCommand(List.of(new ScriptChange(scriptName, initialScriptBody, scriptBody))));
+            }
             scriptEditorManager.setScript(scriptName, scriptBody);
             view.updateScripts(scriptEditorManager.getScripts());
             updateProjectChanges();
@@ -370,8 +392,11 @@ public class Presenter implements PresenterActions {
             view.updateScripts(scriptEditorManager.getScripts());
             updateProjectChanges();
         }, data -> {
-            // TODO - Update undo data
             String scriptBody = getScriptBodyFromData(data);
+            String initialScriptBody = scriptEditorManager.getScript(scriptName);
+            if (!Objects.equals(initialScriptBody, scriptBody)) {
+                undoManager.pushChange(new DataChangeCommand(List.of(new ScriptChange(scriptName, initialScriptBody, scriptBody))));
+            }
             scriptEditorManager.setScript(scriptName, scriptBody);
             view.updateScripts(scriptEditorManager.getScripts());
             updateProjectChanges();
@@ -399,7 +424,9 @@ public class Presenter implements PresenterActions {
             currentData.set(data);
             updateProjectChanges();
         }, data -> {
-            // TODO - Update undo data
+            if (!Objects.equals(currentData.get(), data)) {
+                undoManager.pushChange(new DataChangeCommand(List.of(new ConfigChange(currentData.get(), data))));
+            }
             configMenuManager.setConfigData(data);
             view.updateProjectName(configMenuManager.getProjectName());
             currentData.set(data);
@@ -426,9 +453,9 @@ public class Presenter implements PresenterActions {
         // TODO - Implement
     }
 
-    private void createObjectUndoPointIfDataChanged(String categoryID, String objectID, Data before, Data after) {
-        if (Objects.equals(before, after)) return;
-
+    private void createObjectUndoPointIfDataChanged(String categoryID, String beforeKey, String afterKey, Data before, Data after) {
+        if (Objects.equals(before, after) && Objects.equals(beforeKey, afterKey)) return;
+        undoManager.pushChange(new DataChangeCommand(List.of(new ObjectChange(categoryID, beforeKey, afterKey, before, after))));
     }
 
     private SaveConfirmationResult closeProjectWithSaveConfirmation() {
@@ -508,7 +535,8 @@ public class Presenter implements PresenterActions {
                 view.browserRemoveObject(categoryID, savedKey);
                 view.browserAddObject(categoryID, targetKey);
             }
-            renameReferences(categoryID, savedKey, targetKey);
+            // TODO - Replace with manual reference renaming tool
+            //renameReferences(categoryID, savedKey, targetKey);
         }
         return targetKey;
     }
