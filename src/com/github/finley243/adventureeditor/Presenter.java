@@ -153,7 +153,7 @@ public class Presenter implements PresenterActions {
         }
         AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(defaultID);
-        view.openEditorFrame(template, null, null, data -> {
+        view.openEditorFrame(template, defaultID, initialData, data -> {
             savedKey.set(saveObjectData(data, savedKey.get()));
             currentData.set(data);
             updateProjectChanges();
@@ -171,7 +171,7 @@ public class Presenter implements PresenterActions {
         }
         AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(defaultID);
-        view.openEditorFrame(template, null, null, data -> {
+        view.openEditorFrame(template, defaultID, initialData, data -> {
             savedKey.set(saveObjectData(data, savedKey.get()));
             onSave.accept(data);
             currentData.set(data);
@@ -447,11 +447,12 @@ public class Presenter implements PresenterActions {
         }
         String newID = objectDataCast.getID();
         String categoryID = objectDataCast.getTemplate().id();
+        boolean newIDInvalid = newID == null || newID.trim().isEmpty();
         boolean idChanged = !Objects.equals(savedKey, newID);
-        boolean collision = idChanged && dataManager.categoryContainsID(categoryID, newID);
-        String targetKey = collision ? savedKey : newID;
+        boolean collision = idChanged && !newIDInvalid && dataManager.categoryContainsID(categoryID, newID);
+        String targetKey = (collision || newIDInvalid) ? savedKey : newID;
         dataManager.setData(categoryID, targetKey, objectData);
-        if (idChanged && !collision) {
+        if (idChanged && !collision && !newIDInvalid) {
             dataManager.removeData(categoryID, savedKey);
             if (objectDataCast.getTemplate().topLevel()) {
                 view.browserRemoveObject(categoryID, savedKey);
@@ -465,12 +466,13 @@ public class Presenter implements PresenterActions {
     private String savePhraseData(Data data, String savedKey) {
         String newKey = getPhraseKeyFromData(data);
         String newText = getPhraseTextFromData(data);
+        boolean newKeyInvalid = newKey == null || newKey.trim().isEmpty();
         boolean keyChanged = !Objects.equals(savedKey, newKey);
-        boolean collision = keyChanged && phraseEditorManager.hasPhraseWithKey(newKey);
-        String targetKey = collision ? savedKey : newKey;
+        boolean collision = keyChanged && !newKeyInvalid && phraseEditorManager.hasPhraseWithKey(newKey);
+        String targetKey = (collision || newKeyInvalid) ? savedKey : newKey;
 
         phraseEditorManager.setPhrase(targetKey, newText);
-        if (keyChanged && !collision) {
+        if (keyChanged && !collision && !newKeyInvalid) {
             phraseEditorManager.removePhrase(savedKey);
         }
         view.updatePhrases(phraseEditorManager.getPhrases());
