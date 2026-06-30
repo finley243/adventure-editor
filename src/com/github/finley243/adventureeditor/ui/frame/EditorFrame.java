@@ -23,7 +23,6 @@ public class EditorFrame extends ThemedDialog {
     private final ParameterField parameterField;
     private final Template template;
     private final Data initialData;
-    private final JButton saveButton;
     private final Consumer<Data> onSave;
     private final Function<Data, ErrorData> onValidate;
     private final Consumer<EditorFrame> onClose;
@@ -47,21 +46,10 @@ public class EditorFrame extends ThemedDialog {
         }
         JScrollPane scrollPane = new JScrollPane(parameterField);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
-        boolean isNewInstance = objectData == null;
-        this.saveButton = new JButton("OK");
-        saveButton.setEnabled(isNewInstance);
-        JPanel buttonPanel = getButtonPanel();
-        mainPanel.add(buttonPanel, BorderLayout.PAGE_END);
         this.getContentPane().add(mainPanel);
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         //this.setResizable(false);
 
-        Action saveAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                requestClose(false, true);
-            }
-        };
         Action closeAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -70,11 +58,9 @@ public class EditorFrame extends ThemedDialog {
         };
 
         ActionMap actionMap = getRootPane().getActionMap();
-        actionMap.put("saveEditor", saveAction);
         actionMap.put("closeEditor", closeAction);
 
         InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "saveEditor");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "closeEditor");
 
         this.pack();
@@ -158,24 +144,8 @@ public class EditorFrame extends ThemedDialog {
         return ((DataObject) initialData).getID();
     }
 
-    private JPanel getButtonPanel() {
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-        buttonPanel.add(Box.createHorizontalGlue());
-        saveButton.addActionListener(e -> {
-            requestClose(false, true);
-        });
-        saveButton.setPreferredSize(new Dimension(100, saveButton.getPreferredSize().height));
-        buttonPanel.add(saveButton);
-        return buttonPanel;
-    }
-
     public void onEditorElementUpdated() {
         onSave.accept(parameterField.getData());
-        if (saveButton != null) {
-            saveButton.setEnabled(hasUnsavedChanges());
-        }
     }
 
     @Override
