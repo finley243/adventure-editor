@@ -67,6 +67,8 @@ public class ParameterFieldObjectSet extends ParameterField {
                             } else {
                                 UUID entryID = selectedEntry.id();
                                 EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedEntry.data(), false, parameterFactory, presenter, data -> {
+                                    ParameterFieldObjectSet.this.updateEntryDataSilently(data, entryID);
+                                }, data -> {
                                     ParameterFieldObjectSet.this.saveObjectData(data, entryID);
                                 }, data -> ParameterFieldObjectSet.this.validateObject(data, entryID), ParameterFieldObjectSet.this::onEditorFrameClose);
                                 editorFrames.set(index, objectFrame);
@@ -120,6 +122,8 @@ public class ParameterFieldObjectSet extends ParameterField {
             onFieldUpdated();
 
             EditorFrame objectFrame = new EditorFrame(editorFrame, template, initialData, false, parameterFactory, presenter, data -> {
+                this.updateEntryDataSilently(data, entryID);
+            }, data -> {
                 this.saveObjectData(data, entryID);
             }, data -> this.validateObject(data, entryID), this::onEditorFrameClose);
             editorFrames.set(addIndex, objectFrame);
@@ -134,6 +138,8 @@ public class ParameterFieldObjectSet extends ParameterField {
                 } else {
                     UUID entryID = selectedEntry.id();
                     EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedEntry.data(), false, parameterFactory, presenter, data -> {
+                        this.updateEntryDataSilently(data, entryID);
+                    }, data -> {
                         this.saveObjectData(data, entryID);
                     }, data -> this.validateObject(data, entryID), this::onEditorFrameClose);
                     editorFrames.set(objectIndex, objectFrame);
@@ -221,6 +227,11 @@ public class ParameterFieldObjectSet extends ParameterField {
         int index = findIndexByID(entryID);
         ((DefaultListModel<ObjectSetEntry>) objectList.getModel()).set(index, new ObjectSetEntry(entryID, data));
         onFieldUpdated();
+    }
+
+    private void updateEntryDataSilently(Data data, UUID entryID) {
+        int index = findIndexByID(entryID);
+        ((DefaultListModel<ObjectSetEntry>) objectList.getModel()).set(index, new ObjectSetEntry(entryID, data));
     }
 
     private int findIndexByID(UUID id) {

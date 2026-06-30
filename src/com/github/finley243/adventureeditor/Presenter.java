@@ -148,12 +148,20 @@ public class Presenter implements PresenterActions {
         String defaultID = generateDefaultID(categoryID, template);
         Data initialData = new DataObject(template, new HashMap<>());
         dataManager.setData(categoryID, defaultID, initialData);
+        updateProjectChanges();
         if (template.topLevel()) {
             view.browserAddObject(categoryID, defaultID);
         }
+        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(defaultID);
         view.openEditorFrame(template, defaultID, initialData, data -> {
             savedKey.set(saveObjectData(data, savedKey.get()));
+            currentData.set(data);
+            updateProjectChanges();
+        }, data -> {
+            savedKey.set(saveObjectData(data, savedKey.get()));
+            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), currentData.get(), data);
+            currentData.set(data);
             updateProjectChanges();
             }, data -> validateObject(data, savedKey.get()));
     }
@@ -167,10 +175,18 @@ public class Presenter implements PresenterActions {
         if (template.topLevel()) {
             view.browserAddObject(categoryID, defaultID);
         }
+        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(defaultID);
         view.openEditorFrame(template, defaultID, initialData, data -> {
             savedKey.set(saveObjectData(data, savedKey.get()));
             onSave.accept(data);
+            currentData.set(data);
+            updateProjectChanges();
+        }, data -> {
+            savedKey.set(saveObjectData(data, savedKey.get()));
+            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), currentData.get(), data);
+            onSave.accept(data);
+            currentData.set(data);
             updateProjectChanges();
         }, data -> validateObject(data, savedKey.get()));
     }
@@ -179,9 +195,16 @@ public class Presenter implements PresenterActions {
     public void onEditObject(String categoryID, String objectID) {
         Template template = templateRegistry.getTemplate(categoryID);
         Data initialData = dataManager.getData(categoryID, objectID);
+        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         AtomicReference<String> savedKey = new AtomicReference<>(objectID);
         view.openEditorFrame(template, objectID, initialData, data -> {
             savedKey.set(saveObjectData(data, savedKey.get()));
+            currentData.set(data);
+            updateProjectChanges();
+        }, data -> {
+            savedKey.set(saveObjectData(data, savedKey.get()));
+            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), currentData.get(), data);
+            currentData.set(data);
             updateProjectChanges();
             }, data -> validateObject(data, savedKey.get()));
     }
@@ -194,6 +217,12 @@ public class Presenter implements PresenterActions {
         AtomicReference<String> savedKey = new AtomicReference<>(objectID);
         view.openEditorFrame(template, objectID, initialData, data -> {
             savedKey.set(saveObjectData(data, savedKey.get()));
+            onSave.accept(data, currentData.get());
+            currentData.set(data);
+            updateProjectChanges();
+        }, data -> {
+            savedKey.set(saveObjectData(data, savedKey.get()));
+            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), currentData.get(), data);
             onSave.accept(data, currentData.get());
             currentData.set(data);
             updateProjectChanges();
@@ -256,6 +285,10 @@ public class Presenter implements PresenterActions {
         view.openPhraseEditor(phraseKey, initialData, data -> {
             savedKey.set(savePhraseData(data, savedKey.get()));
             updateProjectChanges();
+        }, data -> {
+            // TODO - Update undo data
+            savedKey.set(savePhraseData(data, savedKey.get()));
+            updateProjectChanges();
         }, data -> validatePhrase(data, savedKey.get()));
     }
 
@@ -267,6 +300,10 @@ public class Presenter implements PresenterActions {
         Data initialData = generateDataForPhrase(defaultKey);
         AtomicReference<String> savedKey = new AtomicReference<>(defaultKey);
         view.openPhraseEditor(defaultKey, initialData, data -> {
+            savedKey.set(savePhraseData(data, savedKey.get()));
+            updateProjectChanges();
+        }, data -> {
+            // TODO - Update undo data
             savedKey.set(savePhraseData(data, savedKey.get()));
             updateProjectChanges();
         }, data -> validatePhrase(data, savedKey.get()));
@@ -305,6 +342,12 @@ public class Presenter implements PresenterActions {
             scriptEditorManager.setScript(scriptName, scriptBody);
             view.updateScripts(scriptEditorManager.getScripts());
             updateProjectChanges();
+        }, data -> {
+            // TODO - Update undo data
+            String scriptBody = getScriptBodyFromData(data);
+            scriptEditorManager.setScript(scriptName, scriptBody);
+            view.updateScripts(scriptEditorManager.getScripts());
+            updateProjectChanges();
         }, data -> new ErrorData(false, null));
     }
 
@@ -321,6 +364,12 @@ public class Presenter implements PresenterActions {
             return;
         }
         view.openScriptEditor(scriptName, null, data -> {
+            String scriptBody = getScriptBodyFromData(data);
+            scriptEditorManager.setScript(scriptName, scriptBody);
+            view.updateScripts(scriptEditorManager.getScripts());
+            updateProjectChanges();
+        }, data -> {
+            // TODO - Update undo data
             String scriptBody = getScriptBodyFromData(data);
             scriptEditorManager.setScript(scriptName, scriptBody);
             view.updateScripts(scriptEditorManager.getScripts());
@@ -348,6 +397,12 @@ public class Presenter implements PresenterActions {
             view.updateProjectName(configMenuManager.getProjectName());
             currentData.set(data);
             updateProjectChanges();
+        }, data -> {
+            // TODO - Update undo data
+            configMenuManager.setConfigData(data);
+            view.updateProjectName(configMenuManager.getProjectName());
+            currentData.set(data);
+            updateProjectChanges();
         }, data -> validateConfig(data, currentData.get()));
     }
 
@@ -368,6 +423,11 @@ public class Presenter implements PresenterActions {
     @Override
     public void onRedo() {
         // TODO - Implement
+    }
+
+    private void createObjectUndoPointIfDataChanged(String categoryID, String objectID, Data before, Data after) {
+        if (Objects.equals(before, after)) return;
+
     }
 
     private SaveConfirmationResult closeProjectWithSaveConfirmation() {

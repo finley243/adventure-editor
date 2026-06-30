@@ -27,7 +27,7 @@ public class EditorFrame extends ThemedDialog {
     private final Function<Data, ErrorData> onValidate;
     private final Consumer<EditorFrame> onClose;
 
-    public EditorFrame(Window parentWindow, Template template, Data objectData, boolean isTopLevel, ParameterFactory parameterFactory, PresenterActions presenter, Consumer<Data> onSave, Function<Data, ErrorData> onValidate, Consumer<EditorFrame> onClose) {
+    public EditorFrame(Window parentWindow, Template template, Data objectData, boolean isTopLevel, ParameterFactory parameterFactory, PresenterActions presenter, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate, Consumer<EditorFrame> onClose) {
         //super(template.name());
         super(parentWindow, template.name());
         this.onSave = onSave;
@@ -70,6 +70,10 @@ public class EditorFrame extends ThemedDialog {
         this.pack();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
+
+        Data fullInitialData = parameterField.getData();
+        onInitialize.accept(fullInitialData);
+        updateErrorLabel(fullInitialData);
     }
 
     public void updateData(Data data) {

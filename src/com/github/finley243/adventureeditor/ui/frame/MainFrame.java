@@ -249,25 +249,25 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
-    public void openConfigEditor(Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+    public void openConfigEditor(Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
         if (configFrame != null) {
             configFrame.toFront();
             configFrame.requestFocus();
         } else {
             Consumer<EditorFrame> onClose = _ -> configFrame = null;
-            configFrame = new EditorFrame(this, templateRegistry.getConfigTemplate(), initialData, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
+            configFrame = new EditorFrame(this, templateRegistry.getConfigTemplate(), initialData, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
         }
     }
 
     @Override
-    public void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+    public void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
         EditorFrame activeFrame = editorManager.getActiveTopLevelFrame(template.id(), objectID);
         if (activeFrame != null) {
             activeFrame.toFront();
             activeFrame.requestFocus();
         } else {
             Consumer<EditorFrame> onClose = _ -> editorManager.removeActiveTopLevelFrame(template.id(), objectID);
-            EditorFrame editorFrame = new EditorFrame(this, template, initialData, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
+            EditorFrame editorFrame = new EditorFrame(this, template, initialData, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
             editorManager.addActiveTopLevelFrame(template.id(), objectID, editorFrame);
         }
     }
@@ -287,11 +287,11 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
-    public void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+    public void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
         boolean isOpen = phraseFrameHandler.requestFocusIfOpen(phraseKey);
         if (!isOpen) {
             Consumer<EditorFrame> onClose = phraseFrameHandler::removeChildFrame;
-            EditorFrame editorFrame = new EditorFrame(phraseEditorFrame, InternalTemplates.PHRASE_TEMPLATE, content, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
+            EditorFrame editorFrame = new EditorFrame(phraseEditorFrame, InternalTemplates.PHRASE_TEMPLATE, content, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
             phraseFrameHandler.add(phraseKey, editorFrame);
         }
     }
@@ -318,11 +318,11 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
-    public void openScriptEditor(String name, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+    public void openScriptEditor(String name, Data content, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
         boolean isOpen = scriptFrameHandler.requestFocusIfOpen(name);
         if (!isOpen) {
             Consumer<EditorFrame> onClose = scriptFrameHandler::removeChildFrame;
-            EditorFrame editorFrame = new EditorFrame(scriptEditorFrame, InternalTemplates.SCRIPT_TEMPLATE, content, true, parameterFactory, getPresenter(), onSave, onValidate, onClose);
+            EditorFrame editorFrame = new EditorFrame(scriptEditorFrame, InternalTemplates.SCRIPT_TEMPLATE, content, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
             editorFrame.setResizable(true);
             editorFrame.setSize(new Dimension(800, 800));
             editorFrame.setLocationRelativeTo(null);

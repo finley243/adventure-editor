@@ -25,19 +25,19 @@ public interface ViewActions {
 
     void browserLoadObjects(Map<String, Set<String>> objects);
 
-    void openConfigEditor(Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
+    void openConfigEditor(Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
-    void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
+    void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
     void openPhraseMenu(Map<String, String> phrases);
 
-    void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
+    void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
     void updatePhrases(Map<String, String> phrases);
 
     void openScriptMenu(Map<String, String> scripts);
 
-    void openScriptEditor(String name, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
+    void openScriptEditor(String name, Data content, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
     String promptScriptName();
 
