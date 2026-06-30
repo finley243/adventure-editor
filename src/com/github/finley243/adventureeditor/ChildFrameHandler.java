@@ -59,10 +59,7 @@ public class ChildFrameHandler<T> {
     }
 
     public void closeAll() {
-        // These MUST be while-loops to prevent concurrent modification exceptions
-        Iterator<EditorFrame> itr = activeEditorFrames.values().iterator();
-        while (itr.hasNext()) {
-            EditorFrame editorFrame = itr.next();
+        for (EditorFrame editorFrame : new ArrayList<>(activeEditorFrames.values())) {
             editorFrame.requestClose();
         }
         while (!activeEditorFramesUnsaved.isEmpty()) {

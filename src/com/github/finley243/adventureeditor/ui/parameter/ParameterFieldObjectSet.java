@@ -184,7 +184,7 @@ public class ParameterFieldObjectSet extends ParameterField {
 
     @Override
     public void requestClose() {
-        Iterator<EditorFrame> itr = unsavedEditorFrames.iterator();
+        Iterator<EditorFrame> itr = editorFrames.iterator();
         while (itr.hasNext()) {
             EditorFrame editorFrame = itr.next();
             if (editorFrame != null) {
@@ -192,8 +192,7 @@ public class ParameterFieldObjectSet extends ParameterField {
             }
         }
         while (!unsavedEditorFrames.isEmpty()) {
-            EditorFrame frame = unsavedEditorFrames.getFirst();
-            frame.requestClose();
+            unsavedEditorFrames.getFirst().requestClose();
         }
     }
 
