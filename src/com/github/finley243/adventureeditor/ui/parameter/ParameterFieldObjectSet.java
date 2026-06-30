@@ -14,11 +14,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ParameterFieldObjectSet extends ParameterField {
 
-    private final JList<Data> objectList;
+    private final JList<ObjectSetEntry> objectList;
     private final JButton buttonAdd;
     private final JButton buttonEdit;
     private final JButton buttonRemove;
@@ -61,17 +62,16 @@ public class ParameterFieldObjectSet extends ParameterField {
                 if (e.getClickCount() == 2) {
                     int index = objectList.locationToIndex(e.getPoint());
                     if (index >= 0) {
-                        Data selectedItem = objectList.getModel().getElementAt(index);
-                        if (selectedItem != null) {
+                        ObjectSetEntry selectedEntry = objectList.getModel().getElementAt(index);
+                        if (selectedEntry != null) {
                             if (editorFrames.get(index) != null) {
                                 editorFrames.get(index).toFront();
                                 editorFrames.get(index).requestFocus();
                             } else {
-                                AtomicReference<Data> currentData = new AtomicReference<>(selectedItem);
-                                EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedItem, false, parameterFactory, presenter, data -> {
-                                    ParameterFieldObjectSet.this.saveObjectData(data, currentData.get());
-                                    currentData.set(data);
-                                    }, data -> ParameterFieldObjectSet.this.validateObject(data, currentData.get()), ParameterFieldObjectSet.this::onEditorFrameClose);
+                                AtomicReference<UUID> entryID = new AtomicReference<>(selectedEntry.id());
+                                EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedEntry.data(), false, parameterFactory, presenter, data -> {
+                                    entryID.set(ParameterFieldObjectSet.this.saveObjectData(data, entryID.get()));
+                                }, data -> ParameterFieldObjectSet.this.validateObject(data, entryID.get()), ParameterFieldObjectSet.this::onEditorFrameClose);
                                 editorFrames.set(index, objectFrame);
                             }
                         }
@@ -112,26 +112,24 @@ public class ParameterFieldObjectSet extends ParameterField {
             buttonRemove.setEnabled(enableSelectionButtons);
         });
         buttonAdd.addActionListener(e -> {
-            AtomicReference<Data> currentData = new AtomicReference<>(null);
+            AtomicReference<UUID> entryID = new AtomicReference<>(null);
             EditorFrame objectFrame = new EditorFrame(editorFrame, template, null, false, parameterFactory, presenter, data -> {
-                this.saveObjectData(data, currentData.get());
-                currentData.set(data);
-                }, data -> this.validateObject(data, currentData.get()), this::onEditorFrameClose);
+                entryID.set(this.saveObjectData(data, entryID.get()));
+            }, data -> this.validateObject(data, entryID.get()), this::onEditorFrameClose);
             unsavedEditorFrames.add(objectFrame);
         });
         buttonEdit.addActionListener(e -> {
-            Data objectData = objectList.getSelectedValue();
+            ObjectSetEntry selectedEntry = objectList.getSelectedValue();
             int objectIndex = objectList.getSelectedIndex();
-            if (objectData != null) {
+            if (selectedEntry != null) {
                 if (editorFrames.get(objectIndex) != null) {
                     editorFrames.get(objectIndex).toFront();
                     editorFrames.get(objectIndex).requestFocus();
                 } else {
-                    AtomicReference<Data> currentData = new AtomicReference<>(objectData);
-                    EditorFrame objectFrame = new EditorFrame(editorFrame, template, objectData, false, parameterFactory, presenter, data -> {
-                        this.saveObjectData(data, currentData.get());
-                        currentData.set(data);
-                        }, data -> this.validateObject(data, currentData.get()), this::onEditorFrameClose);
+                    AtomicReference<UUID> entryID = new AtomicReference<>(selectedEntry.id());
+                    EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedEntry.data(), false, parameterFactory, presenter, data -> {
+                        entryID.set(this.saveObjectData(data, entryID.get()));
+                    }, data -> this.validateObject(data, entryID.get()), this::onEditorFrameClose);
                     editorFrames.set(objectIndex, objectFrame);
                 }
             }
@@ -145,7 +143,7 @@ public class ParameterFieldObjectSet extends ParameterField {
                         return;
                     }
                 }
-                ((DefaultListModel<Data>) objectList.getModel()).removeElementAt(selectedIndex);
+                ((DefaultListModel<ObjectSetEntry>) objectList.getModel()).removeElementAt(selectedIndex);
                 editorFrames.remove(selectedIndex);
                 if (objectList.getModel().getSize() > selectedIndex) {
                     objectList.setSelectedIndex(selectedIndex);
@@ -166,17 +164,20 @@ public class ParameterFieldObjectSet extends ParameterField {
         }
     }
 
-    public java.util.List<Data> getValue() {
-        java.util.List<Data> test = new ArrayList<>();
+    public List<Data> getValue() {
+        List<Data> result = new ArrayList<>();
         for (int i = 0; i < objectList.getModel().getSize(); i++) {
-            test.add(objectList.getModel().getElementAt(i));
+            result.add(objectList.getModel().getElementAt(i).data());
         }
-        return test;
+        return result;
     }
 
     public void setValue(List<Data> value) {
-        ((DefaultListModel<Data>) objectList.getModel()).clear();
-        ((DefaultListModel<Data>) objectList.getModel()).addAll(value);
+        DefaultListModel<ObjectSetEntry> model = (DefaultListModel<ObjectSetEntry>) objectList.getModel();
+        model.clear();
+        for (Data d : value) {
+            model.addElement(new ObjectSetEntry(UUID.randomUUID(), d));
+        }
         editorFrames.clear();
         for (int i = 0; i < value.size(); i++) {
             editorFrames.add(null);
@@ -224,19 +225,31 @@ public class ParameterFieldObjectSet extends ParameterField {
         }
     }
 
-    public void saveObjectData(Data data, Data initialData) {
+    public UUID saveObjectData(Data data, UUID entryID) {
         int addIndex = objectList.getSelectedIndex() + 1;
         if (addIndex == 0) {
             addIndex = objectList.getModel().getSize();
         }
-        if (initialData != null) {
-            addIndex = ((DefaultListModel<Data>) objectList.getModel()).indexOf(initialData);
-            ((DefaultListModel<Data>) objectList.getModel()).remove(addIndex);
+        UUID resultID = entryID != null ? entryID : UUID.randomUUID();
+        if (entryID != null) {
+            addIndex = findIndexByID(entryID);
+            ((DefaultListModel<ObjectSetEntry>) objectList.getModel()).remove(addIndex);
             editorFrames.remove(addIndex);
         }
-        ((DefaultListModel<Data>) objectList.getModel()).add(addIndex, data);
+        ((DefaultListModel<ObjectSetEntry>) objectList.getModel()).add(addIndex, new ObjectSetEntry(resultID, data));
         editorFrames.add(addIndex, null);
         onFieldUpdated();
+        return resultID;
+    }
+
+    private int findIndexByID(UUID id) {
+        DefaultListModel<ObjectSetEntry> model = (DefaultListModel<ObjectSetEntry>) objectList.getModel();
+        for (int i = 0; i < model.getSize(); i++) {
+            if (model.getElementAt(i).id().equals(id)) {
+                return i;
+            }
+        }
+        throw new IllegalStateException("No object set entry found with ID " + id);
     }
 
     private void onEditorFrameClose(EditorFrame frame) {
@@ -248,12 +261,25 @@ public class ParameterFieldObjectSet extends ParameterField {
          }
     }
 
-    private ErrorData validateObject(Data currentData, Data initialData) {
-        if (requireUniqueValues && !isDataUnique(currentData, initialData)) {
-            String value = currentData.toString();
-            return new ErrorData(true, name + " already contains the value " + value + ".");
+    private ErrorData validateObject(Data currentData, UUID entryID) {
+        if (requireUniqueValues && !isDataUnique(currentData, entryID)) {
+            return new ErrorData(true, name + " already contains the value " + currentData + ".");
         }
         return new ErrorData(false, null);
+    }
+
+    private boolean isDataUnique(Data newData, UUID excludeID) {
+        DefaultListModel<ObjectSetEntry> model = (DefaultListModel<ObjectSetEntry>) objectList.getModel();
+        for (int i = 0; i < model.getSize(); i++) {
+            ObjectSetEntry entry = model.getElementAt(i);
+            if (entry.id().equals(excludeID)) {
+                continue;
+            }
+            if (entry.data().isDuplicateValue(newData)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -277,17 +303,11 @@ public class ParameterFieldObjectSet extends ParameterField {
         }
     }
 
-    private boolean isDataUnique(Data newData, Data initialData) {
-        for (int i = 0; i < objectList.getModel().getSize(); i++) {
-            Data currentData = objectList.getModel().getElementAt(i);
-            if (initialData != null && initialData.equals(currentData)) {
-                continue;
-            }
-            if (currentData.isDuplicateValue(newData)) {
-                return false;
-            }
+    private record ObjectSetEntry(UUID id, Data data) {
+        @Override
+        public String toString() {
+            return data.toString();
         }
-        return true;
     }
 
 }
