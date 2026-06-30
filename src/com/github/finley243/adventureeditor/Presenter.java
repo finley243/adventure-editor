@@ -246,12 +246,13 @@ public class Presenter implements PresenterActions {
         view.openPhraseEditor(phraseKey, initialData, data -> {
             String newKey = getPhraseKeyFromData(data);
             String newText = getPhraseTextFromData(data);
+            String currentKey = getPhraseKeyFromData(currentData.get());
             phraseEditorManager.setPhrase(newKey, newText);
-            if (!Objects.equals(newKey, phraseKey)) {
-                phraseEditorManager.removePhrase(phraseKey);
+            if (!Objects.equals(newKey, currentKey)) {
+                phraseEditorManager.removePhrase(currentKey);
             }
-            view.updatePhrases(phraseEditorManager.getPhrases());
             currentData.set(data);
+            view.updatePhrases(phraseEditorManager.getPhrases());
             updateProjectChanges();
         }, data -> validatePhrase(data, currentData.get()));
     }
@@ -260,9 +261,15 @@ public class Presenter implements PresenterActions {
     public void onNewPhrase() {
         AtomicReference<Data> currentData = new AtomicReference<>(null);
         view.openPhraseEditor(null, null, data -> {
-            phraseEditorManager.setPhrase(getPhraseKeyFromData(data), getPhraseTextFromData(data));
-            view.updatePhrases(phraseEditorManager.getPhrases());
+            String newKey = getPhraseKeyFromData(data);
+            String newText = getPhraseTextFromData(data);
+            String currentKey = currentData.get() == null ? null : getPhraseKeyFromData(currentData.get());
+            phraseEditorManager.setPhrase(newKey, newText);
+            if (!Objects.equals(newKey, currentKey)) {
+                phraseEditorManager.removePhrase(currentKey);
+            }
             currentData.set(data);
+            view.updatePhrases(phraseEditorManager.getPhrases());
             updateProjectChanges();
         }, data -> validatePhrase(data, currentData.get()));
     }
@@ -295,12 +302,10 @@ public class Presenter implements PresenterActions {
     @Override
     public void onOpenScript(String scriptName) {
         Data initialData = generateDataForScript(scriptName);
-        //AtomicReference<Data> currentData = new AtomicReference<>(initialData);
         view.openScriptEditor(scriptName, initialData, data -> {
             String scriptBody = getScriptBodyFromData(data);
             scriptEditorManager.setScript(scriptName, scriptBody);
             view.updateScripts(scriptEditorManager.getScripts());
-            //currentData.set(data);
             updateProjectChanges();
         }, data -> new ErrorData(false, null));
     }
@@ -450,9 +455,6 @@ public class Presenter implements PresenterActions {
                 renameReferences(categoryID, initialID, objectID);
             } else { // Edit with same ID
                 dataManager.setData(categoryID, objectID, objectData);
-                /*if (objectDataCast.getTemplate().topLevel()) {
-                    view.browserAddObject(categoryID, objectID);
-                }*/
             }
         } else { // New object instance
             dataManager.setData(categoryID, objectID, objectData);
