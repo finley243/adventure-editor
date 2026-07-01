@@ -7,6 +7,7 @@ import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.*;
 import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
+import com.github.finley243.adventureeditor.validation.ValidationIssue;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -42,6 +43,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     private ScriptEditorFrame scriptEditorFrame;
     private final ChildFrameHandler<String> scriptFrameHandler;
     private ReferenceListFrame referenceListFrame;
+    private ErrorListFrame errorListFrame;
 
     private final BrowserFrame browserFrame;
 
@@ -125,12 +127,16 @@ public class MainFrame extends ThemedFrame implements ViewActions {
         JMenuItem toolsScriptEditor = new JMenuItem("Script Editor");
         toolsScriptEditor.addActionListener(e -> getPresenter().onOpenScriptMenu());
         toolsMenu.add(toolsScriptEditor);
+        JMenuItem toolsProjectErrors = new JMenuItem("View Project Errors");
+        toolsProjectErrors.addActionListener(e -> getPresenter().onOpenProjectErrors());
+        toolsMenu.add(toolsProjectErrors);
         toolsMenu.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
                 toolsProjectConfig.setEnabled(isProjectLoaded);
                 toolsPhraseEditor.setEnabled(isProjectLoaded);
                 toolsScriptEditor.setEnabled(isProjectLoaded);
+                toolsProjectErrors.setEnabled(isProjectLoaded);
             }
             @Override
             public void menuDeselected(MenuEvent e) {}
@@ -399,8 +405,32 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
+    public void showProjectErrors(List<ValidationIssue> issues) {
+        if (errorListFrame != null) {
+            errorListFrame.toFront();
+            errorListFrame.requestFocus();
+        } else {
+            errorListFrame = new ErrorListFrame(this, issue -> getPresenter().onOpenValidationIssue(issue), () -> errorListFrame = null);
+        }
+        errorListFrame.loadIssues(issues);
+    }
+
+    @Override
     public void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    @Override
+    public BlockedSaveConfirmationResult confirmBlockedProjectClose() {
+        Object[] confirmOptions = {"View Errors", "Discard Changes", "Cancel"};
+        int result = JOptionPane.showOptionDialog(this,
+                "This project has validation errors and cannot be saved.",
+                "Cannot Save Project", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, confirmOptions, confirmOptions[0]);
+        return switch (result) {
+            case 0 -> BlockedSaveConfirmationResult.VIEW_ERRORS;
+            case 1 -> BlockedSaveConfirmationResult.DISCARD;
+            default -> BlockedSaveConfirmationResult.CANCEL;
+        };
     }
 
     @Override

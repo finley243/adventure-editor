@@ -8,6 +8,7 @@ import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.*;
 import com.github.finley243.adventureeditor.undo.*;
+import com.github.finley243.adventureeditor.validation.*;
 
 import java.io.File;
 import java.util.*;
@@ -104,6 +105,11 @@ public class Presenter implements PresenterActions {
 
     @Override
     public void onSaveProject() {
+        List<ValidationIssue> issues = validateProject();
+        if (!issues.isEmpty()) {
+            view.showProjectErrors(issues);
+            return;
+        }
         File file;
         if (projectManager.getLoadedProjectPath() != null) {
             file = new File(projectManager.getLoadedProjectPath());
@@ -120,6 +126,11 @@ public class Presenter implements PresenterActions {
 
     @Override
     public void onSaveProjectAs(File file) {
+        List<ValidationIssue> issues = validateProject();
+        if (!issues.isEmpty()) {
+            view.showProjectErrors(issues);
+            return;
+        }
         if (file == null) return;
         dataLoader.saveToDir(file, templateRegistry, dataManager.getAllData(), configMenuManager.getConfigData(), scriptEditorManager.getScripts(), phraseEditorManager.getPhrases());
         projectManager.setLoadedProjectPath(file.getAbsolutePath());
@@ -258,6 +269,21 @@ public class Presenter implements PresenterActions {
             onOpenConfigEditor();
         } else {
             onEditObject(categoryID, objectID);
+        }
+    }
+
+    @Override
+    public void onOpenProjectErrors() {
+        view.showProjectErrors(validateProject());
+    }
+
+    @Override
+    public void onOpenValidationIssue(ValidationIssue issue) {
+        switch (issue) {
+            case ObjectValidationIssue oi -> onEditObject(oi.categoryID(), oi.key());
+            case PhraseValidationIssue pi -> onOpenPhrase(pi.key());
+            case ConfigValidationIssue ci -> onOpenConfigEditor();
+            case ScriptValidationIssue sci -> onOpenScript(sci.scriptName());
         }
     }
 
@@ -469,6 +495,22 @@ public class Presenter implements PresenterActions {
 
     private SaveConfirmationResult closeProjectWithSaveConfirmation() {
         if (projectHasUnsavedChanges()) {
+            List<ValidationIssue> issues = validateProject();
+            boolean hasBlockingErrors = issues.stream().anyMatch(issue -> issue.severity() == ValidationSeverity.ERROR);
+            if (hasBlockingErrors) {
+                BlockedSaveConfirmationResult result = view.confirmBlockedProjectClose();
+                return switch (result) {
+                    case VIEW_ERRORS -> {
+                        view.showProjectErrors(issues);
+                        yield SaveConfirmationResult.CANCEL;
+                    }
+                    case DISCARD -> {
+                        view.closeAllEditors();
+                        yield SaveConfirmationResult.NO;
+                    }
+                    case CANCEL -> SaveConfirmationResult.CANCEL;
+                };
+            }
             SaveConfirmationResult result = view.confirmProjectSave();
             if (result == SaveConfirmationResult.CANCEL) return SaveConfirmationResult.CANCEL;
             if (result == SaveConfirmationResult.YES) {
@@ -764,6 +806,40 @@ public class Presenter implements PresenterActions {
         view.closePhrase(key);
         phraseEditorManager.removePhrase(key);
         view.updatePhrases(phraseEditorManager.getPhrases());
+    }
+
+    private List<ValidationIssue> validateProject() {
+        List<ValidationIssue> issues = new ArrayList<>();
+        for (Map.Entry<String, Set<String>> entry : dataManager.getAllObjectIDs().entrySet()) {
+            String categoryID = entry.getKey();
+            for (String key : entry.getValue()) {
+                Data data = dataManager.getData(categoryID, key);
+                ErrorData errorData = validateObject(data, key);
+                if (errorData.hasError()) {
+                    issues.add(new ObjectValidationIssue(categoryID, key, errorData.message(), ValidationSeverity.ERROR));
+                }
+                for (String brokenRefID : ReferenceUtils.findBrokenReferences(data, dataManager)) {
+                    issues.add(new ObjectValidationIssue(categoryID, key, "References a nonexistent object: " + brokenRefID, ValidationSeverity.WARNING));
+                }
+            }
+        }
+        for (String phraseKey : phraseEditorManager.getPhraseIDs()) {
+            ErrorData errorData = validatePhrase(generateDataForPhrase(phraseKey), phraseKey);
+            if (errorData.hasError()) {
+                issues.add(new PhraseValidationIssue(phraseKey, errorData.message(), ValidationSeverity.ERROR));
+            }
+        }
+        ErrorData configError = validateConfig(configMenuManager.getConfigData(), configMenuManager.getConfigData());
+        if (configError.hasError()) {
+            issues.add(new ConfigValidationIssue(configError.message(), ValidationSeverity.ERROR));
+        }
+        for (String scriptName : scriptEditorManager.getScripts().keySet()) {
+            String body = scriptEditorManager.getScript(scriptName);
+            if (body == null || body.isBlank()) {
+                issues.add(new ScriptValidationIssue(scriptName, "Script body is empty.", ValidationSeverity.WARNING));
+            }
+        }
+        return issues;
     }
 
 }

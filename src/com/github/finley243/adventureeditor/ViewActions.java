@@ -3,6 +3,7 @@ package com.github.finley243.adventureeditor;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.*;
+import com.github.finley243.adventureeditor.validation.ValidationIssue;
 
 import java.io.File;
 import java.util.List;
@@ -43,7 +44,11 @@ public interface ViewActions {
 
     void openReferenceList(Set<Reference> references);
 
+    void showProjectErrors(List<ValidationIssue> issues);
+
     void showError(String message);
+
+    BlockedSaveConfirmationResult confirmBlockedProjectClose();
 
     SaveConfirmationResult confirmProjectSave();
 

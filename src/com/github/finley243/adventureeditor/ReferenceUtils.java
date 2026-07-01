@@ -1,8 +1,11 @@
-package com.github.finley243.adventureeditor.ui;
+package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.*;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateParameter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReferenceUtils {
 
@@ -66,6 +69,42 @@ public class ReferenceUtils {
                 }
             } else if (innerData instanceof DataComponent innerComponent) {
                 renameReferencesInData(innerComponent.getObjectData(), categoryID, objectID, newObjectID);
+            }
+        }
+    }
+
+    public static List<String> findBrokenReferences(Data data, DataManager dataManager) {
+        List<String> broken = new ArrayList<>();
+        collectBrokenReferences(data, dataManager, broken);
+        return broken;
+    }
+
+    private static void collectBrokenReferences(Data data, DataManager dataManager, List<String> broken) {
+        if (!(data instanceof DataObject dataObject)) {
+            throw new IllegalArgumentException("Data must be an object");
+        }
+        Template template = dataObject.getTemplate();
+        for (TemplateParameter parameter : template.parameters()) {
+            Data innerData = dataObject.getValue().get(parameter.id());
+            if (innerData instanceof DataReference innerReference) {
+                String targetID = innerReference.getValue();
+                if (targetID != null && !targetID.isEmpty() && !dataManager.categoryContainsID(parameter.type(), targetID)) {
+                    broken.add(targetID);
+                }
+            } else if (innerData instanceof DataReferenceSet innerReferenceSet) {
+                for (String targetID : innerReferenceSet.getValue()) {
+                    if (targetID != null && !targetID.isEmpty() && !dataManager.categoryContainsID(parameter.type(), targetID)) {
+                        broken.add(targetID);
+                    }
+                }
+            } else if (innerData instanceof DataObject innerObject) {
+                collectBrokenReferences(innerObject, dataManager, broken);
+            } else if (innerData instanceof DataObjectSet innerObjectSet) {
+                for (Data innerObj : innerObjectSet.getValue()) {
+                    collectBrokenReferences(innerObj, dataManager, broken);
+                }
+            } else if (innerData instanceof DataComponent innerComponent) {
+                collectBrokenReferences(innerComponent.getObjectData(), dataManager, broken);
             }
         }
     }
