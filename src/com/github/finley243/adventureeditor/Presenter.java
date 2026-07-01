@@ -160,6 +160,7 @@ public class Presenter implements PresenterActions {
         view.openEditorFrame(template, defaultID, initialData, data -> {
             savedKey.set(saveObjectData(data, savedKey.get()));
             currentData.set(data);
+            undoManager.pushChange(new DataChangeCommand(List.of(new ObjectCreate(categoryID, savedKey.get(), currentData.get()))));
             updateProjectChanges();
         }, data -> {
             String afterKey = saveObjectData(data, savedKey.get());
@@ -185,6 +186,7 @@ public class Presenter implements PresenterActions {
             savedKey.set(saveObjectData(data, savedKey.get()));
             onSave.accept(data);
             currentData.set(data);
+            undoManager.pushChange(new DataChangeCommand(List.of(new ObjectCreate(categoryID, savedKey.get(), currentData.get()))));
             updateProjectChanges();
         }, data -> {
             String afterKey = saveObjectData(data, savedKey.get());
@@ -241,9 +243,11 @@ public class Presenter implements PresenterActions {
         Set<Reference> references = getReferences(categoryID, objectID);
         DeleteObjectConfirmationResult result = view.confirmDeleteObject(objectID, references.size());
         if (result == DeleteObjectConfirmationResult.DELETE) {
-            view.forceCloseObject(categoryID, objectID);
+            view.closeObject(categoryID, objectID);
+            Data objectData = dataManager.getData(categoryID, objectID);
             dataManager.removeData(categoryID, objectID);
             view.browserRemoveObject(categoryID, objectID);
+            undoManager.pushChange(new DataChangeCommand(List.of(new ObjectDelete(categoryID, objectID, objectData))));
             updateProjectChanges();
             return true;
         } else if (result == DeleteObjectConfirmationResult.VIEW_REFERENCES) {
@@ -263,6 +267,7 @@ public class Presenter implements PresenterActions {
         }
         dataManager.setData(categoryID, newObjectID, objectDataCopy);
         view.browserAddObject(categoryID, newObjectID);
+        undoManager.pushChange(new DataChangeCommand(List.of(new ObjectCreate(categoryID, newObjectID, objectDataCopy))));
         updateProjectChanges();
     }
 
@@ -298,7 +303,7 @@ public class Presenter implements PresenterActions {
         }, data -> {
             String afterKey = savePhraseData(data, savedKey.get());
             if (!Objects.equals(currentData.get(), data)) {
-                undoManager.pushChange(new DataChangeCommand(List.of(new PhraseChange(savedKey.get(), afterKey, currentData.get(), data))));
+                undoManager.pushChange(new DataChangeCommand(List.of(new PhraseChange(savedKey.get(), afterKey, getPhraseTextFromData(currentData.get()), getPhraseTextFromData(data)))));
             }
             savedKey.set(afterKey);
             currentData.set(data);
@@ -317,11 +322,12 @@ public class Presenter implements PresenterActions {
         view.openPhraseEditor(defaultKey, initialData, data -> {
             savedKey.set(savePhraseData(data, savedKey.get()));
             currentData.set(data);
+            undoManager.pushChange(new DataChangeCommand(List.of(new PhraseCreate(savedKey.get(), getPhraseTextFromData(data)))));
             updateProjectChanges();
         }, data -> {
             String afterKey = savePhraseData(data, savedKey.get());
             if (!Objects.equals(currentData.get(), data)) {
-                undoManager.pushChange(new DataChangeCommand(List.of(new PhraseChange(savedKey.get(), afterKey, currentData.get(), data))));
+                undoManager.pushChange(new DataChangeCommand(List.of(new PhraseChange(savedKey.get(), afterKey, getPhraseTextFromData(currentData.get()), getPhraseTextFromData(data)))));
             }
             savedKey.set(afterKey);
             currentData.set(data);
@@ -334,8 +340,10 @@ public class Presenter implements PresenterActions {
         DeleteConfirmationResult result = view.confirmDeletePhrase(phraseKey);
         if (result == DeleteConfirmationResult.DELETE) {
             view.closePhrase(phraseKey);
+            String phraseText = phraseEditorManager.getPhrase(phraseKey);
             phraseEditorManager.removePhrase(phraseKey);
             view.updatePhrases(phraseEditorManager.getPhrases());
+            undoManager.pushChange(new DataChangeCommand(List.of(new PhraseDelete(phraseKey, phraseText))));
             updateProjectChanges();
         }
     }
@@ -390,6 +398,7 @@ public class Presenter implements PresenterActions {
             String scriptBody = getScriptBodyFromData(data);
             scriptEditorManager.setScript(scriptName, scriptBody);
             view.updateScripts(scriptEditorManager.getScripts());
+            undoManager.pushChange(new DataChangeCommand(List.of(new ScriptCreate(scriptName, scriptBody))));
             updateProjectChanges();
         }, data -> {
             String scriptBody = getScriptBodyFromData(data);
@@ -408,6 +417,8 @@ public class Presenter implements PresenterActions {
         DeleteConfirmationResult result = view.confirmDeleteScript(scriptName);
         if (result == DeleteConfirmationResult.DELETE) {
             view.closeScript(scriptName);
+            String scriptText = scriptEditorManager.getScript(scriptName);
+            undoManager.pushChange(new DataChangeCommand(List.of(new ScriptDelete(scriptName, scriptText))));
             scriptEditorManager.removeScript(scriptName);
             view.updateScripts(scriptEditorManager.getScripts());
             updateProjectChanges();

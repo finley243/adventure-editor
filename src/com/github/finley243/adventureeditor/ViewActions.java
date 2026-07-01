@@ -65,7 +65,7 @@ public interface ViewActions {
 
     void updateRecentProjects(List<ProjectFile> recentProjects);
 
-    void forceCloseObject(String categoryID, String objectID);
+    void closeObject(String categoryID, String objectID);
 
     void forceCloseConfig();
 

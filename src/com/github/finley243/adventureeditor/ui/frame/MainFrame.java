@@ -450,7 +450,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
-    public void forceCloseObject(String categoryID, String objectID) {
+    public void closeObject(String categoryID, String objectID) {
         EditorFrame frame = editorManager.getActiveTopLevelFrame(categoryID, objectID);
         if (frame != null) {
             frame.requestClose();
