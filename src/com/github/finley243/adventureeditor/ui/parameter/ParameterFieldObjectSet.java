@@ -287,13 +287,6 @@ public class ParameterFieldObjectSet extends ParameterField {
         }
     }
 
-    private record ObjectSetEntry(UUID id, Data data) {
-        @Override
-        public String toString() {
-            return data.toString();
-        }
-    }
-
     private void setValue(List<Data> values, List<UUID> ids) {
         DefaultListModel<ObjectSetEntry> model = (DefaultListModel<ObjectSetEntry>) objectList.getModel();
 
@@ -319,6 +312,14 @@ public class ParameterFieldObjectSet extends ParameterField {
 
         for (EditorFrame frame : previousFrames.values()) {
             frame.disposeWithoutSaving();
+        }
+    }
+
+    private record ObjectSetEntry(UUID id, Data data) {
+        @Override
+        public String toString() {
+            String name = data.toString();
+            return (name == null || name.isBlank()) ? UIConstants.UNNAMED_OBJECT_SET_ENTRY : name;
         }
     }
 
