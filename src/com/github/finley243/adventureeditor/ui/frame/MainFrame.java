@@ -239,6 +239,11 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
+    public void reregisterObject(String categoryID, String oldObjectID, String newObjectID) {
+        editorManager.renameActiveTopLevelFrame(categoryID, oldObjectID, newObjectID);
+    }
+
+    @Override
     public void browserClear() {
         browserFrame.clearCategories();
     }

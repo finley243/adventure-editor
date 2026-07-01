@@ -245,6 +245,7 @@ public class Presenter implements PresenterActions {
         if (result == DeleteObjectConfirmationResult.DELETE) {
             view.closeObject(categoryID, objectID);
             Data objectData = dataManager.getData(categoryID, objectID);
+            if (objectData == null) return true; // Only occurs if the object key is somehow changed while the editor frame is closing
             dataManager.removeData(categoryID, objectID);
             view.browserRemoveObject(categoryID, objectID);
             undoManager.pushChange(new DataChangeCommand(List.of(new ObjectDelete(categoryID, objectID, objectData))));
@@ -545,6 +546,7 @@ public class Presenter implements PresenterActions {
             if (objectDataCast.getTemplate().topLevel()) {
                 view.browserRemoveObject(categoryID, savedKey);
                 view.browserAddObject(categoryID, targetKey);
+                view.reregisterObject(categoryID, savedKey, targetKey);
             }
             // TODO - Replace with manual reference renaming tool
             //renameReferences(categoryID, savedKey, targetKey);

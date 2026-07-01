@@ -21,6 +21,8 @@ public interface ViewActions {
 
     void browserRemoveObject(String categoryID, String objectID);
 
+    void reregisterObject(String categoryID, String oldObjectID, String newObjectID);
+
     void browserClear();
 
     void browserLoadObjects(Map<String, Set<String>> objects);

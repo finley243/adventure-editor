@@ -66,4 +66,15 @@ public class EditorManager {
         }
     }
 
+    public void renameActiveTopLevelFrame(String categoryID, String oldObjectID, String newObjectID) {
+        if (!topLevelEditorWindows.containsKey(categoryID)) {
+            return;
+        }
+        Map<String, EditorFrame> categoryMap = topLevelEditorWindows.get(categoryID);
+        EditorFrame frame = categoryMap.remove(oldObjectID);
+        if (frame != null) {
+            categoryMap.put(newObjectID, frame);
+        }
+    }
+
 }
