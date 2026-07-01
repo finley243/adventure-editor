@@ -181,18 +181,6 @@ public class ParameterFieldObjectSet extends ParameterField {
         return result;
     }
 
-    public void setValue(List<Data> value) {
-        DefaultListModel<ObjectSetEntry> model = (DefaultListModel<ObjectSetEntry>) objectList.getModel();
-        model.clear();
-        for (Data d : value) {
-            model.addElement(new ObjectSetEntry(UUID.randomUUID(), d));
-        }
-        editorFrames.clear();
-        for (int i = 0; i < value.size(); i++) {
-            editorFrames.add(null);
-        }
-    }
-
     @Override
     public void requestClose() {
         for (EditorFrame editorFrame : new ArrayList<>(editorFrames)) {
@@ -275,10 +263,16 @@ public class ParameterFieldObjectSet extends ParameterField {
     @Override
     public Data getData() {
         if (!isOptionalEnabled()) {
-            return new DataObjectSet(new ArrayList<>());
+            return new DataObjectSet(new ArrayList<>(), new ArrayList<>());
         }
-        List<Data> objectData = new ArrayList<>(getValue());
-        return new DataObjectSet(objectData);
+        List<Data> objectData = new ArrayList<>();
+        List<UUID> ids = new ArrayList<>();
+        for (int i = 0; i < objectList.getModel().getSize(); i++) {
+            ObjectSetEntry entry = objectList.getModel().getElementAt(i);
+            objectData.add(entry.data());
+            ids.add(entry.id());
+        }
+        return new DataObjectSet(objectData, ids);
     }
 
     @Override
@@ -289,7 +283,7 @@ public class ParameterFieldObjectSet extends ParameterField {
             if (objectData.isEmpty()) {
                 setOptionalEnabled(false);
             }
-            setValue(objectData);
+            setValue(objectData, dataObjectSet.getIds());
         }
     }
 
@@ -297,6 +291,34 @@ public class ParameterFieldObjectSet extends ParameterField {
         @Override
         public String toString() {
             return data.toString();
+        }
+    }
+
+    private void setValue(List<Data> values, List<UUID> ids) {
+        DefaultListModel<ObjectSetEntry> model = (DefaultListModel<ObjectSetEntry>) objectList.getModel();
+
+        Map<UUID, EditorFrame> previousFrames = new HashMap<>();
+        for (int i = 0; i < model.getSize(); i++) {
+            EditorFrame frame = editorFrames.get(i);
+            if (frame != null) {
+                previousFrames.put(model.getElementAt(i).id(), frame);
+            }
+        }
+
+        model.clear();
+        editorFrames.clear();
+        for (int i = 0; i < values.size(); i++) {
+            UUID id = ids.get(i);
+            model.addElement(new ObjectSetEntry(id, values.get(i)));
+            EditorFrame frame = previousFrames.remove(id);
+            editorFrames.add(frame);
+            if (frame != null) {
+                frame.refreshData(null, values.get(i));
+            }
+        }
+
+        for (EditorFrame frame : previousFrames.values()) {
+            frame.disposeWithoutSaving();
         }
     }
 

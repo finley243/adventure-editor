@@ -3,21 +3,33 @@ package com.github.finley243.adventureeditor.data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class DataObjectSet extends Data {
 
     private final List<Data> value;
+    private final List<UUID> ids;
 
     public DataObjectSet(List<Data> value) {
+        this(value, generateFreshIDs(value.size()));
+    }
+
+    public DataObjectSet(List<Data> value, List<UUID> ids) {
         this.value = value;
+        this.ids = ids;
     }
 
     public List<Data> getValue() {
         return value;
     }
 
+    public List<UUID> getIds() {
+        return ids;
+    }
+
     @Override
     public Data createCopy() {
+        // Do not copy UUIDs
         List<Data> copyList = new ArrayList<>();
         for (Data data : value) {
             copyList.add(data.createCopy());
@@ -32,6 +44,7 @@ public class DataObjectSet extends Data {
 
     @Override
     public boolean equals(Object o) {
+        // Do not check UUIDs here (they are for internal use only, and have no bearing on data equality)
         return o instanceof DataObjectSet dataObjectSet && Objects.equals(value, dataObjectSet.value);
     }
 
@@ -73,6 +86,14 @@ public class DataObjectSet extends Data {
         }
         sb.append("]");
         return sb.toString();
+    }
+
+    private static List<UUID> generateFreshIDs(int count) {
+        List<UUID> ids = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            ids.add(UUID.randomUUID());
+        }
+        return ids;
     }
 
 }

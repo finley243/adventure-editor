@@ -119,6 +119,12 @@ public class EditorFrame extends ThemedDialog implements EditorSession {
         this.dispose();
     }
 
+    public void disposeWithoutSaving() {
+        parameterField.requestClose();
+        onClose.accept(this);
+        this.dispose();
+    }
+
     public Template getTemplate() {
         return template;
     }
