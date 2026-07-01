@@ -271,10 +271,11 @@ public class Presenter implements PresenterActions {
         Data initialData = generateDataForPhrase(phraseKey);
         AtomicReference<EditorSession> sessionRef = new AtomicReference<>();
         EditorSession session = view.openPhraseEditor(phraseKey, initialData, data -> {
-            EditorSession currentSession = sessionRef.get();
-            String afterKey = savePhraseData(data, currentSession.getCurrentKey());
-            currentSession.setCurrentKey(afterKey);
-            currentSession.setCurrentData(data);
+            //EditorSession currentSession = sessionRef.get();
+            //String afterKey = savePhraseData(data, currentSession.getCurrentKey());
+            savePhraseData(data, phraseKey);
+            //currentSession.setCurrentKey(afterKey);
+            //currentSession.setCurrentData(data);
             updateProjectChanges();
         }, data -> {
             EditorSession currentSession = sessionRef.get();
@@ -287,7 +288,7 @@ public class Presenter implements PresenterActions {
             currentSession.setCurrentKey(afterKey);
             currentSession.setCurrentData(data);
             updateProjectChanges();
-        }, data -> validatePhrase(data, sessionRef.get().getCurrentKey()));
+        }, data -> validatePhrase(data, sessionRef.get() != null ? sessionRef.get().getCurrentKey() : phraseKey));
         sessionRef.set(session);
     }
 
@@ -297,13 +298,12 @@ public class Presenter implements PresenterActions {
         phraseEditorManager.setPhrase(defaultKey, "");
         view.updatePhrases(phraseEditorManager.getPhrases());
         Data initialData = generateDataForPhrase(defaultKey);
-
         AtomicReference<EditorSession> sessionRef = new AtomicReference<>();
         EditorSession session = view.openPhraseEditor(defaultKey, initialData, data -> {
-            EditorSession currentSession = sessionRef.get();
-            String afterKey = savePhraseData(data, currentSession.getCurrentKey());
-            currentSession.setCurrentKey(afterKey);
-            currentSession.setCurrentData(data);
+            //EditorSession currentSession = sessionRef.get();
+            String afterKey = savePhraseData(data, defaultKey);
+            //currentSession.setCurrentKey(afterKey);
+            //currentSession.setCurrentData(data);
             undoManager.pushChange(new DataChangeCommand(List.of(new PhraseCreate(afterKey, getPhraseTextFromData(data)))));
             updateProjectChanges();
         }, data -> {
@@ -317,7 +317,7 @@ public class Presenter implements PresenterActions {
             currentSession.setCurrentKey(afterKey);
             currentSession.setCurrentData(data);
             updateProjectChanges();
-        }, data -> validatePhrase(data, sessionRef.get().getCurrentKey()));
+        }, data -> validatePhrase(data, sessionRef.get() != null ? sessionRef.get().getCurrentKey() : defaultKey));
         sessionRef.set(session);
     }
 
