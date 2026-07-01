@@ -74,7 +74,7 @@ public class DataObject extends Data {
         parameterKeys.sort(Comparator.comparingInt(String::length));
         for (String parameterKey : parameterKeys) {
             Data parameterValue = value.get(parameterKey);
-            String parameterString = parameterValue == null ? "null" : parameterValue.toString();
+            String parameterString = parameterValue == null || parameterValue.toString() == null ? "null" : parameterValue.toString();
             nameString = nameString.replace("$" + parameterKey, parameterString);
         }
         return nameString;

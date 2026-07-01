@@ -23,7 +23,7 @@ public interface ViewActions {
 
     void browserLoadObjects(Map<String, Set<String>> objects);
 
-    void openConfigEditor(Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
+    EditorSession openConfigEditor(Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
     EditorSession openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 

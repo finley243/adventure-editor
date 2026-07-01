@@ -414,21 +414,23 @@ public class Presenter implements PresenterActions {
     @Override
     public void onOpenConfigEditor() {
         Data initialData = configMenuManager.getConfigData();
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
-        view.openConfigEditor(initialData, data -> {
+        AtomicReference<EditorSession> sessionRef = new AtomicReference<>();
+        EditorSession session = view.openConfigEditor(initialData, data -> {
             configMenuManager.setConfigData(data);
             view.updateProjectName(configMenuManager.getProjectName());
-            currentData.set(data);
             updateProjectChanges();
         }, data -> {
-            if (!Objects.equals(currentData.get(), data)) {
-                undoManager.pushChange(new DataChangeCommand(List.of(new ConfigChange(currentData.get(), data))));
+            EditorSession currentSession = sessionRef.get();
+            Data beforeData = currentSession.getCurrentData();
+            if (!Objects.equals(beforeData, data)) {
+                undoManager.pushChange(new DataChangeCommand(List.of(new ConfigChange(beforeData, data))));
             }
             configMenuManager.setConfigData(data);
             view.updateProjectName(configMenuManager.getProjectName());
-            currentData.set(data);
+            currentSession.setCurrentData(data);
             updateProjectChanges();
-        }, data -> validateConfig(data, currentData.get()));
+        }, data -> validateConfig(data, sessionRef.get() != null ? sessionRef.get().getCurrentData() : initialData));
+        sessionRef.set(session);
     }
 
     @Override

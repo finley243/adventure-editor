@@ -288,7 +288,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
-    public void openConfigEditor(Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+    public EditorSession openConfigEditor(Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
         if (configFrame != null) {
             configFrame.toFront();
             configFrame.requestFocus();
@@ -296,6 +296,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
             Consumer<EditorFrame> onClose = _ -> configFrame = null;
             configFrame = new EditorFrame(this, templateRegistry.getConfigTemplate(), initialData, null, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
         }
+        return configFrame;
     }
 
     @Override

@@ -123,13 +123,6 @@ public class EditorFrame extends ThemedDialog implements EditorSession {
         return template;
     }
 
-    public String getObjectID() {
-        if (initialData == null) {
-            return null;
-        }
-        return ((DataObject) initialData).getID();
-    }
-
     public void onEditorElementUpdated() {
         Data currentData = parameterField.getData();
         updateErrorLabel(currentData);
@@ -143,14 +136,6 @@ public class EditorFrame extends ThemedDialog implements EditorSession {
         } else {
             super.processWindowEvent(e);
         }
-    }
-
-    private boolean hasUnsavedChanges() {
-        if (initialData == null) {
-            return true;
-        }
-        Data currentData = parameterField.getData();
-        return !initialData.equals(currentData);
     }
 
     private void updateErrorLabel(Data currentData) {
