@@ -31,7 +31,7 @@ public class EditorFrame extends ThemedDialog implements EditorSession {
     private String currentKey;
     private Data currentData;
 
-    public EditorFrame(Window parentWindow, Template template, Data objectData, boolean isTopLevel, ParameterFactory parameterFactory, PresenterActions presenter, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate, Consumer<EditorFrame> onClose) {
+    public EditorFrame(Window parentWindow, Template template, Data objectData, String initialKey, boolean isTopLevel, ParameterFactory parameterFactory, PresenterActions presenter, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate, Consumer<EditorFrame> onClose) {
         //super(template.name());
         super(parentWindow, template.name());
         this.onSave = onSave;
@@ -76,6 +76,8 @@ public class EditorFrame extends ThemedDialog implements EditorSession {
         this.setVisible(true);
 
         Data fullInitialData = parameterField.getData();
+        this.currentKey = initialKey;
+        this.currentData = fullInitialData;
         onInitialize.accept(fullInitialData);
         updateErrorLabel(fullInitialData);
     }
@@ -100,7 +102,6 @@ public class EditorFrame extends ThemedDialog implements EditorSession {
         this.currentData = data;
     }
 
-    @Override
     public void refreshData(String newKey, Data newData) {
         this.currentKey = newKey;
         this.currentData = newData;

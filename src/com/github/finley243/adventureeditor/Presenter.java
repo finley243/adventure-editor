@@ -159,10 +159,10 @@ public class Presenter implements PresenterActions {
         }
         AtomicReference<EditorSession> sessionRef = new AtomicReference<>();
         EditorSession session = view.openEditorFrame(template, defaultID, initialData, data -> {
-            EditorSession currentSession = sessionRef.get();
-            String afterKey = saveObjectData(data, currentSession.getCurrentKey());
-            currentSession.setCurrentKey(afterKey);
-            currentSession.setCurrentData(data);
+            //EditorSession currentSession = sessionRef.get();
+            String afterKey = saveObjectData(data, defaultID);
+            //currentSession.setCurrentKey(afterKey);
+            //currentSession.setCurrentData(data);
             undoManager.pushChange(new DataChangeCommand(List.of(new ObjectCreate(categoryID, afterKey, data))));
             if (onSave != null) onSave.accept(data);
             updateProjectChanges();
@@ -176,7 +176,7 @@ public class Presenter implements PresenterActions {
             currentSession.setCurrentData(data);
             if (onSave != null) onSave.accept(data);
             updateProjectChanges();
-        }, data -> validateObject(data, sessionRef.get().getCurrentKey()));
+        }, data -> validateObject(data, sessionRef.get() != null ? sessionRef.get().getCurrentKey() : defaultID));
         sessionRef.set(session);
     }
 
@@ -191,10 +191,11 @@ public class Presenter implements PresenterActions {
         Data initialData = dataManager.getData(categoryID, objectID);
         AtomicReference<EditorSession> sessionRef = new AtomicReference<>();
         EditorSession session = view.openEditorFrame(template, objectID, initialData, data -> {
-            EditorSession currentSession = sessionRef.get();
-            String afterKey = saveObjectData(data, currentSession.getCurrentKey());
-            currentSession.setCurrentKey(afterKey);
-            currentSession.setCurrentData(data);
+            //EditorSession currentSession = sessionRef.get();
+            //String afterKey = saveObjectData(data, objectID);
+            saveObjectData(data, objectID);
+            //currentSession.setCurrentKey(afterKey);
+            //currentSession.setCurrentData(data);
             if (onSave != null) onSave.accept(data, initialData);
             updateProjectChanges();
         }, data -> {
@@ -207,7 +208,7 @@ public class Presenter implements PresenterActions {
             currentSession.setCurrentData(data);
             if (onSave != null) onSave.accept(data, beforeData);
             updateProjectChanges();
-        }, data -> validateObject(data, sessionRef.get().getCurrentKey()));
+        }, data -> validateObject(data, sessionRef.get() != null ? sessionRef.get().getCurrentKey() : objectID));
         sessionRef.set(session);
     }
 
@@ -441,12 +442,22 @@ public class Presenter implements PresenterActions {
 
     @Override
     public void onUndo() {
-        // TODO - Implement
+        if (!undoManager.canUndo()) return;
+        DataChangeCommand command = undoManager.undo();
+        for (DataChange change : command.dataChanges()) {
+            applyDataChange(change, true);
+        }
+        updateProjectChanges();
     }
 
     @Override
     public void onRedo() {
-        // TODO - Implement
+        if (!undoManager.canRedo()) return;
+        DataChangeCommand command = undoManager.redo();
+        for (DataChange change : command.dataChanges()) {
+            applyDataChange(change, false);
+        }
+        updateProjectChanges();
     }
 
     private void createObjectUndoPointIfDataChanged(String categoryID, String beforeKey, String afterKey, Data before, Data after) {
@@ -471,6 +482,7 @@ public class Presenter implements PresenterActions {
 
     private void updateProjectChanges() {
         view.setHasUnsavedProjectChanges(projectHasUnsavedChanges());
+        view.updateUndoRedoButtons(undoManager.canUndo(), undoManager.canRedo());
     }
 
     private boolean projectHasUnsavedChanges() {
@@ -637,6 +649,119 @@ public class Presenter implements PresenterActions {
     private void renameReferences(String categoryID, String objectID, String newObjectID) {
         configMenuManager.renameReferences(categoryID, objectID, newObjectID);
         dataManager.renameReferences(categoryID, objectID, newObjectID);
+    }
+
+    private void applyDataChange(DataChange change, boolean isUndo) {
+        switch (change) {
+            case ObjectChange oc -> {
+                String fromKey = isUndo ? oc.afterKey() : oc.beforeKey();
+                String toKey = isUndo ? oc.beforeKey() : oc.afterKey();
+                Data toData = isUndo ? oc.before() : oc.after();
+                applyObjectUpdate(oc.categoryID(), fromKey, toKey, toData);
+            }
+            case ObjectCreate oc -> {
+                if (isUndo) removeObject(oc.categoryID(), oc.key());
+                else restoreObject(oc.categoryID(), oc.key(), oc.data());
+            }
+            case ObjectDelete od -> {
+                if (isUndo) restoreObject(od.categoryID(), od.key(), od.data());
+                else removeObject(od.categoryID(), od.key());
+            }
+            case PhraseChange pc -> {
+                String fromKey = isUndo ? pc.afterKey() : pc.beforeKey();
+                String toKey = isUndo ? pc.beforeKey() : pc.afterKey();
+                String toText = isUndo ? pc.beforeText() : pc.afterText();
+                applyPhraseUpdate(fromKey, toKey, toText);
+            }
+            case PhraseCreate pc -> {
+                if (isUndo) removePhraseEntry(pc.key());
+                else restorePhrase(pc.key(), pc.text());
+            }
+            case PhraseDelete pd -> {
+                if (isUndo) restorePhrase(pd.key(), pd.text());
+                else removePhraseEntry(pd.key());
+            }
+            case ScriptChange sc -> {
+                String toBody = isUndo ? sc.before() : sc.after();
+                scriptEditorManager.setScript(sc.scriptName(), toBody);
+                view.updateScripts(scriptEditorManager.getScripts());
+                view.refreshScriptEditor(sc.scriptName(), generateDataForScript(sc.scriptName()));
+            }
+            case ScriptCreate sc -> {
+                if (isUndo) {
+                    view.closeScript(sc.scriptName());
+                    scriptEditorManager.removeScript(sc.scriptName());
+                } else {
+                    scriptEditorManager.setScript(sc.scriptName(), sc.text());
+                }
+                view.updateScripts(scriptEditorManager.getScripts());
+            }
+            case ScriptDelete sd -> {
+                if (isUndo) {
+                    scriptEditorManager.setScript(sd.scriptName(), sd.text());
+                } else {
+                    view.closeScript(sd.scriptName());
+                    scriptEditorManager.removeScript(sd.scriptName());
+                }
+                view.updateScripts(scriptEditorManager.getScripts());
+            }
+            case ConfigChange cc -> {
+                Data toData = isUndo ? cc.before() : cc.after();
+                configMenuManager.setConfigData(toData);
+                view.updateProjectName(configMenuManager.getProjectName());
+                view.refreshConfigEditor(toData);
+            }
+        }
+    }
+
+    private void applyObjectUpdate(String categoryID, String fromKey, String toKey, Data toData) {
+        Template template = ((DataObject) toData).getTemplate();
+        if (!Objects.equals(fromKey, toKey)) {
+            dataManager.removeData(categoryID, fromKey);
+            dataManager.setData(categoryID, toKey, toData);
+            if (template.topLevel()) {
+                view.browserRemoveObject(categoryID, fromKey);
+                view.browserAddObject(categoryID, toKey);
+            }
+        } else {
+            dataManager.setData(categoryID, toKey, toData);
+        }
+        view.refreshObjectEditor(categoryID, fromKey, toKey, toData);
+    }
+
+    private void restoreObject(String categoryID, String key, Data data) {
+        dataManager.setData(categoryID, key, data);
+        if (((DataObject) data).getTemplate().topLevel()) {
+            view.browserAddObject(categoryID, key);
+        }
+    }
+
+    private void removeObject(String categoryID, String key) {
+        view.closeObject(categoryID, key);
+        dataManager.removeData(categoryID, key);
+        if (templateRegistry.getTemplate(categoryID).topLevel()) {
+            view.browserRemoveObject(categoryID, key);
+        }
+    }
+
+    private void applyPhraseUpdate(String fromKey, String toKey, String toText) {
+        if (!Objects.equals(fromKey, toKey)) {
+            phraseEditorManager.removePhrase(fromKey);
+        }
+        phraseEditorManager.setPhrase(toKey, toText);
+        view.updatePhrases(phraseEditorManager.getPhrases());
+        view.refreshPhraseEditor(fromKey, toKey, generateDataForPhrase(toKey));
+    }
+
+    private void restorePhrase(String key, String text) {
+        phraseEditorManager.setPhrase(key, text);
+        view.updatePhrases(phraseEditorManager.getPhrases());
+    }
+
+    private void removePhraseEntry(String key) {
+        view.closePhrase(key);
+        phraseEditorManager.removePhrase(key);
+        view.updatePhrases(phraseEditorManager.getPhrases());
     }
 
 }

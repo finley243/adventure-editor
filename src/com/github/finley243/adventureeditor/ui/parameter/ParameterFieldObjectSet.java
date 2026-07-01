@@ -66,7 +66,7 @@ public class ParameterFieldObjectSet extends ParameterField {
                                 editorFrames.get(index).requestFocus();
                             } else {
                                 UUID entryID = selectedEntry.id();
-                                EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedEntry.data(), false, parameterFactory, presenter, data -> {
+                                EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedEntry.data(), null, false, parameterFactory, presenter, data -> {
                                     ParameterFieldObjectSet.this.updateEntryDataSilently(data, entryID);
                                 }, data -> {
                                     ParameterFieldObjectSet.this.saveObjectData(data, entryID);
@@ -121,7 +121,7 @@ public class ParameterFieldObjectSet extends ParameterField {
             editorFrames.add(addIndex, null);
             onFieldUpdated();
 
-            EditorFrame objectFrame = new EditorFrame(editorFrame, template, initialData, false, parameterFactory, presenter, data -> {
+            EditorFrame objectFrame = new EditorFrame(editorFrame, template, initialData, null, false, parameterFactory, presenter, data -> {
                 this.updateEntryDataSilently(data, entryID);
             }, data -> {
                 this.saveObjectData(data, entryID);
@@ -137,7 +137,7 @@ public class ParameterFieldObjectSet extends ParameterField {
                     editorFrames.get(objectIndex).requestFocus();
                 } else {
                     UUID entryID = selectedEntry.id();
-                    EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedEntry.data(), false, parameterFactory, presenter, data -> {
+                    EditorFrame objectFrame = new EditorFrame(editorFrame, template, selectedEntry.data(), null, false, parameterFactory, presenter, data -> {
                         this.updateEntryDataSilently(data, entryID);
                     }, data -> {
                         this.saveObjectData(data, entryID);

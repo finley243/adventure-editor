@@ -54,4 +54,11 @@ public class ChildFrameHandler<T> {
         }
     }
 
+    public void renameChildFrame(T oldKey, T newKey) {
+        EditorFrame frame = activeEditorFrames.remove(oldKey);
+        if (frame != null) {
+            activeEditorFrames.put(newKey, frame);
+        }
+    }
+
 }

@@ -3,7 +3,6 @@ package com.github.finley243.adventureeditor;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.ui.*;
-import com.github.finley243.adventureeditor.undo.ObjectChange;
 
 import java.io.File;
 import java.util.List;
@@ -76,8 +75,14 @@ public interface ViewActions {
 
     void closeAllEditors();
 
-    void updateObjectData(List<ObjectChange> changes);
-
     void updateUndoRedoButtons(boolean canUndo, boolean canRedo);
+
+    void refreshConfigEditor(Data data);
+
+    void refreshObjectEditor(String categoryID, String fromKey, String toKey, Data data);
+
+    void refreshPhraseEditor(String fromKey, String toKey, Data data);
+
+    void refreshScriptEditor(String scriptName, Data data);
 
 }

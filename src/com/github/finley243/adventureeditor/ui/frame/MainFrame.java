@@ -7,7 +7,6 @@ import com.github.finley243.adventureeditor.template.TemplateRegistry;
 import com.github.finley243.adventureeditor.ui.*;
 import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
-import com.github.finley243.adventureeditor.undo.ObjectChange;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -295,7 +294,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
             configFrame.requestFocus();
         } else {
             Consumer<EditorFrame> onClose = _ -> configFrame = null;
-            configFrame = new EditorFrame(this, templateRegistry.getConfigTemplate(), initialData, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
+            configFrame = new EditorFrame(this, templateRegistry.getConfigTemplate(), initialData, null, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
         }
     }
 
@@ -308,7 +307,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
             return activeFrame;
         } else {
             Consumer<EditorFrame> onClose = _ -> editorManager.removeActiveTopLevelFrame(template.id(), objectID);
-            EditorFrame editorFrame = new EditorFrame(this, template, initialData, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
+            EditorFrame editorFrame = new EditorFrame(this, template, initialData, objectID, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
             editorManager.addActiveTopLevelFrame(template.id(), objectID, editorFrame);
             return editorFrame;
         }
@@ -333,7 +332,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
         boolean isOpen = phraseFrameHandler.requestFocusIfOpen(phraseKey);
         if (!isOpen) {
             Consumer<EditorFrame> onClose = phraseFrameHandler::removeChildFrame;
-            EditorFrame editorFrame = new EditorFrame(phraseEditorFrame, InternalTemplates.PHRASE_TEMPLATE, content, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
+            EditorFrame editorFrame = new EditorFrame(phraseEditorFrame, InternalTemplates.PHRASE_TEMPLATE, content, phraseKey, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
             phraseFrameHandler.add(phraseKey, editorFrame);
             return editorFrame;
         } else {
@@ -367,7 +366,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
         boolean isOpen = scriptFrameHandler.requestFocusIfOpen(name);
         if (!isOpen) {
             Consumer<EditorFrame> onClose = scriptFrameHandler::removeChildFrame;
-            EditorFrame editorFrame = new EditorFrame(scriptEditorFrame, InternalTemplates.SCRIPT_TEMPLATE, content, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
+            EditorFrame editorFrame = new EditorFrame(scriptEditorFrame, InternalTemplates.SCRIPT_TEMPLATE, content, name, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
             editorFrame.setResizable(true);
             editorFrame.setSize(new Dimension(800, 800));
             editorFrame.setLocationRelativeTo(null);
@@ -557,14 +556,46 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
-    public void updateObjectData(List<ObjectChange> changes) {
-        // TODO - Implement
-    }
-
-    @Override
     public void updateUndoRedoButtons(boolean canUndo, boolean canRedo) {
         this.canUndo = canUndo;
         this.canRedo = canRedo;
+    }
+
+    @Override
+    public void refreshConfigEditor(Data data) {
+        if (configFrame != null) {
+            configFrame.refreshData(null, data);
+        }
+    }
+
+    @Override
+    public void refreshObjectEditor(String categoryID, String fromKey, String toKey, Data data) {
+        EditorFrame frame = editorManager.getActiveTopLevelFrame(categoryID, fromKey);
+        if (frame != null) {
+            if (!fromKey.equals(toKey)) {
+                editorManager.renameActiveTopLevelFrame(categoryID, fromKey, toKey);
+            }
+            frame.refreshData(toKey, data);
+        }
+    }
+
+    @Override
+    public void refreshPhraseEditor(String fromKey, String toKey, Data data) {
+        EditorFrame frame = phraseFrameHandler.get(fromKey);
+        if (frame != null) {
+            if (!fromKey.equals(toKey)) {
+                phraseFrameHandler.renameChildFrame(fromKey, toKey);
+            }
+            frame.refreshData(toKey, data);
+        }
+    }
+
+    @Override
+    public void refreshScriptEditor(String scriptName, Data data) {
+        EditorFrame frame = scriptFrameHandler.get(scriptName);
+        if (frame != null) {
+            frame.refreshData(scriptName, data);
+        }
     }
 
     private void attemptOpeningRecentProject(ProjectFile projectFile) {

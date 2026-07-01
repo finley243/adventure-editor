@@ -12,6 +12,4 @@ public interface EditorSession {
 
     void setCurrentData(Data data);
 
-    void refreshData(String newKey, Data newData);
-
 }
