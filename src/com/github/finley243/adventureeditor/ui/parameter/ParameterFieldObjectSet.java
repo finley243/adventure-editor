@@ -119,7 +119,6 @@ public class ParameterFieldObjectSet extends ParameterField {
             }
             ((DefaultListModel<ObjectSetEntry>) objectList.getModel()).add(addIndex, new ObjectSetEntry(entryID, initialData));
             editorFrames.add(addIndex, null);
-            onFieldUpdated();
 
             EditorFrame objectFrame = new EditorFrame(editorFrame, template, initialData, null, false, parameterFactory, presenter, data -> {
                 this.updateEntryDataSilently(data, entryID);
@@ -127,6 +126,7 @@ public class ParameterFieldObjectSet extends ParameterField {
                 this.saveObjectData(data, entryID);
             }, data -> this.validateObject(data, entryID), this::onEditorFrameClose);
             editorFrames.set(addIndex, objectFrame);
+            onFieldUpdated();
         });
         buttonEdit.addActionListener(e -> {
             ObjectSetEntry selectedEntry = objectList.getSelectedValue();
