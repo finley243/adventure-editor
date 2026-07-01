@@ -6,6 +6,7 @@ import com.github.finley243.adventureeditor.ui.frame.MainFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 import com.github.finley243.adventureeditor.ui.theme.SoftDarkTheme;
 import com.github.finley243.adventureeditor.ui.theme.ThemeManager;
+import com.github.finley243.adventureeditor.undo.UndoManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,9 +52,10 @@ public class Main {
         DataManager dataManager = new DataManager();
         ParameterFactory parameterFactory = new ParameterFactory(templateRegistry, dataManager);
         ProjectManager projectManager = new ProjectManager();
+        UndoManager undoManager = new UndoManager();
         MainFrame mainFrame = new MainFrame(parameterFactory, templateRegistry);
         mainFrame.setVisible(true);
-        Presenter presenter = new Presenter(dataManager, projectManager, configMenuManager, phraseEditorManager, scriptEditorManager, templateRegistry, dataLoader, mainFrame);
+        Presenter presenter = new Presenter(dataManager, projectManager, configMenuManager, phraseEditorManager, scriptEditorManager, templateRegistry, dataLoader, undoManager, mainFrame);
         mainFrame.registerPresenter(presenter);
         presenter.start();
     }

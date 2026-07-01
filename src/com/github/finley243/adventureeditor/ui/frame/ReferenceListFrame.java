@@ -1,6 +1,7 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
 import com.github.finley243.adventureeditor.Reference;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.table.PhraseTableModel;
 
 import javax.swing.*;
@@ -55,7 +56,7 @@ public class ReferenceListFrame extends ThemedDialog {
 
         JScrollPane scrollPane = new JScrollPane(referenceTable);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
-        scrollPane.setPreferredSize(new Dimension(300, 300));
+        scrollPane.setPreferredSize(UIConstants.INITIAL_SIZE_REFERENCES);
         this.getContentPane().add(mainPanel);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setResizable(true);

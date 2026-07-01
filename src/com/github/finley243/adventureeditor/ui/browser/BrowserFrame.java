@@ -3,6 +3,7 @@ package com.github.finley243.adventureeditor.ui.browser;
 import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.browser.node.BrowserNode;
 import com.github.finley243.adventureeditor.ui.frame.ThemedDialog;
 
@@ -36,7 +37,7 @@ public class BrowserFrame extends ThemedDialog {
 
         JScrollPane browserScrollPane = new JScrollPane(browserTree);
         browserScrollPane.setViewportView(browserTree);
-        browserScrollPane.setPreferredSize(new Dimension(350, 500));
+        browserScrollPane.setPreferredSize(UIConstants.INITIAL_SIZE_BROWSER);
         browserPanel.add(browserScrollPane, BorderLayout.CENTER);
         this.getContentPane().add(browserPanel);
 
@@ -45,10 +46,10 @@ public class BrowserFrame extends ThemedDialog {
         //this.setLocationRelativeTo(null);
         //Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int windowX = ((JFrame) getParent()).getContentPane().getLocationOnScreen().x;
-        int windowY = ((JFrame) getParent()).getContentPane().getLocationOnScreen().y;
-        int windowWidth = getWidth();
-        int windowHeight = ((JFrame) getParent()).getContentPane().getHeight();
-        this.setSize(windowWidth, windowHeight);
+        int windowY = ((JFrame) getParent()).getContentPane().getLocationOnScreen().y + (Toolkit.getDefaultToolkit().getScreenSize().height / 3);
+        //int windowWidth = getWidth();
+        //int windowHeight = ((JFrame) getParent()).getContentPane().getHeight();
+        //this.setSize(windowWidth, windowHeight);
         this.setLocation(windowX, windowY);
     }
 

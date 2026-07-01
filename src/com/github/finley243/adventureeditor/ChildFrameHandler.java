@@ -7,19 +7,14 @@ import java.util.*;
 public class ChildFrameHandler<T> {
 
     private final Map<T, EditorFrame> activeEditorFrames;
-    private final List<EditorFrame> activeEditorFramesUnsaved;
 
     public ChildFrameHandler() {
         this.activeEditorFrames = new HashMap<>();
-        this.activeEditorFramesUnsaved = new ArrayList<>();
     }
 
     public void add(T key, EditorFrame frame) {
-        if (key != null) {
-            activeEditorFrames.put(key, frame);
-        } else {
-            activeEditorFramesUnsaved.add(frame);
-        }
+        if (key == null) throw new IllegalArgumentException("Key cannot be null");
+        activeEditorFrames.put(key, frame);
     }
 
     public EditorFrame get(T key) {
@@ -27,7 +22,7 @@ public class ChildFrameHandler<T> {
     }
 
     public boolean hasAnyOpenFrame() {
-        return !activeEditorFramesUnsaved.isEmpty() || !activeEditorFrames.isEmpty();
+        return !activeEditorFrames.isEmpty();
     }
 
     public boolean requestFocusIfOpen(T key) {
@@ -42,52 +37,28 @@ public class ChildFrameHandler<T> {
     }
 
     public boolean removeChildFrame(EditorFrame frame) {
-        if (activeEditorFramesUnsaved.contains(frame)) {
-            activeEditorFramesUnsaved.remove(frame);
-            return true;
-        } else {
-            Iterator<Map.Entry<T, EditorFrame>> iterator = activeEditorFrames.entrySet().iterator();
-            while (iterator.hasNext()) {
-                EditorFrame entryValue = iterator.next().getValue();
-                if (entryValue.equals(frame)) {
-                    iterator.remove();
-                    return true;
-                }
+        Iterator<Map.Entry<T, EditorFrame>> iterator = activeEditorFrames.entrySet().iterator();
+        while (iterator.hasNext()) {
+            EditorFrame entryValue = iterator.next().getValue();
+            if (entryValue.equals(frame)) {
+                iterator.remove();
+                return true;
             }
         }
         return false;
     }
 
-    public boolean closeAll() {
-        // These MUST be while-loops to prevent concurrent modification exceptions
-        Iterator<EditorFrame> itr = activeEditorFrames.values().iterator();
-        while (itr.hasNext()) {
-            EditorFrame editorFrame = itr.next();
-            boolean didClose = editorFrame.requestClose(false, false);
-            if (!didClose) return false;
+    public void closeAll() {
+        for (EditorFrame editorFrame : new ArrayList<>(activeEditorFrames.values())) {
+            editorFrame.requestClose();
         }
-        while (!activeEditorFramesUnsaved.isEmpty()) {
-            EditorFrame editorFrame = activeEditorFramesUnsaved.getFirst();
-            boolean didClose = editorFrame.requestClose(false, false);
-            if (!didClose) return false;
-        }
-        return true;
     }
 
-    public boolean forceCloseAll() {
-        // These MUST be while-loops to prevent concurrent modification exceptions
-        Iterator<EditorFrame> itr = activeEditorFrames.values().iterator();
-        while (itr.hasNext()) {
-            EditorFrame editorFrame = itr.next();
-            boolean didClose = editorFrame.requestClose(true, false);
-            if (!didClose) return false;
+    public void renameChildFrame(T oldKey, T newKey) {
+        EditorFrame frame = activeEditorFrames.remove(oldKey);
+        if (frame != null) {
+            activeEditorFrames.put(newKey, frame);
         }
-        while (!activeEditorFramesUnsaved.isEmpty()) {
-            EditorFrame editorFrame = activeEditorFramesUnsaved.getFirst();
-            boolean didClose = editorFrame.requestClose(true, false);
-            if (!didClose) return false;
-        }
-        return true;
     }
 
 }

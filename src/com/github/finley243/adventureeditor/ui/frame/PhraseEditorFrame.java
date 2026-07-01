@@ -10,7 +10,6 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class PhraseEditorFrame extends ThemedDialog {
 
@@ -18,9 +17,9 @@ public class PhraseEditorFrame extends ThemedDialog {
 
     private final PhraseTableModel tableModel;
     private final JTable phraseTable;
-    private final Supplier<Boolean> onClose;
+    private final Runnable onClose;
 
-    public PhraseEditorFrame(Window parentWindow, PresenterActions presenter, Supplier<Boolean> onClose) {
+    public PhraseEditorFrame(Window parentWindow, PresenterActions presenter, Runnable onClose) {
         super(parentWindow, PHRASE_EDITOR_TITLE);
         this.onClose = onClose;
         this.setTitle(PHRASE_EDITOR_TITLE);
@@ -189,10 +188,7 @@ public class PhraseEditorFrame extends ThemedDialog {
     }
 
     private void closeEditor() {
-        boolean didClose = onClose.get();
-        if (didClose) {
-            this.dispose();
-        }
+        onClose.run();
     }
 
     private void openContextMenu(Component component, Point point, String selectedPhraseKey, int viewRowIndex, PresenterActions presenter) {

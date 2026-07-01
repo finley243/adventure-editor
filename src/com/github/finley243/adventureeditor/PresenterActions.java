@@ -1,6 +1,7 @@
 package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.Data;
+import com.github.finley243.adventureeditor.validation.ValidationIssue;
 
 import java.io.File;
 import java.util.function.BiConsumer;
@@ -36,6 +37,10 @@ public interface PresenterActions {
 
     void onOpenReference(String categoryID, String objectID);
 
+    void onOpenProjectErrors();
+
+    void onOpenValidationIssue(ValidationIssue issue);
+
     void onOpenPhraseMenu();
 
     void onOpenPhrase(String phraseKey);
@@ -57,5 +62,9 @@ public interface PresenterActions {
     void onOpenConfigEditor();
 
     boolean onCloseProgram();
+
+    void onUndo();
+
+    void onRedo();
 
 }

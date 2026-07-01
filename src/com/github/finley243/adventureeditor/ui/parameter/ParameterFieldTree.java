@@ -3,6 +3,7 @@ package com.github.finley243.adventureeditor.ui.parameter;
 import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.*;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 import com.github.finley243.adventureeditor.ui.tree.ObjectTree;
 import com.github.finley243.adventureeditor.ui.tree.ObjectTreeNode;
@@ -49,8 +50,8 @@ public class ParameterFieldTree extends ParameterField {
         this.treePanel = new ObjectTree(this);
         JScrollPane treeScrollPane = new JScrollPane(treePanel);
         treeScrollPane.setViewportView(treePanel);
-        treeScrollPane.setPreferredSize(new Dimension(200, 200));
-        treePanel.setPreferredSize(new Dimension(200, 200));
+        treeScrollPane.setPreferredSize(UIConstants.PREFERRED_SIZE_TREE);
+        treePanel.setPreferredSize(UIConstants.PREFERRED_SIZE_TREE);
         getInnerPanel().setLayout(new GridBagLayout());
         GridBagConstraints optionalConstraints = new GridBagConstraints();
         optionalConstraints.gridx = 0;
@@ -132,7 +133,7 @@ public class ParameterFieldTree extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         treePanel.clearNodes();
         clearCards();

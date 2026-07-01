@@ -109,14 +109,10 @@ public class ParameterFieldObject extends ParameterField {
     }
 
     @Override
-    public boolean requestClose(boolean forceClose, boolean forceSave) {
+    public void requestClose() {
         for (ParameterField parameterField : editorElements.values()) {
-            boolean didClose = parameterField.requestClose(forceClose, forceSave);
-            if (!didClose) {
-                return false;
-            }
+            parameterField.requestClose();
         }
-        return true;
     }
 
     @Override
@@ -150,7 +146,7 @@ public class ParameterFieldObject extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data instanceof DataObject dataObject) {
             for (Map.Entry<String, Data> entry : dataObject.getValue().entrySet()) {

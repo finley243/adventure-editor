@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataFloat;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -11,11 +12,14 @@ import java.text.DecimalFormat;
 public class ParameterFieldFloat extends ParameterField {
 
     private final JSpinner spinner;
+    private final Timer debounceTimer;
 
     public ParameterFieldFloat(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
+        this.debounceTimer = new Timer(UIConstants.DEBOUNCE_DELAY_SPINNER, e -> onFieldUpdated());
+        debounceTimer.setRepeats(false);
         JComponent label;
         if (optional) {
             label = getOptionalCheckbox();
@@ -24,8 +28,12 @@ public class ParameterFieldFloat extends ParameterField {
         }
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.000d, null, null, 0.001d);
         this.spinner = new JSpinner(spinnerModel);
-        spinner.setPreferredSize(new Dimension(150, 20));
-        spinner.addChangeListener(e -> onFieldUpdated());
+        spinner.setPreferredSize(UIConstants.PREFERRED_SIZE_SPINNER);
+        spinner.addChangeListener(e -> {
+            if (!isUpdatingData()) {
+                debounceTimer.restart();
+            }
+        });
         JSpinner.NumberEditor editor = (JSpinner.NumberEditor)spinner.getEditor();
         DecimalFormat format = editor.getFormat();
         format.setMinimumFractionDigits(3);
@@ -69,7 +77,7 @@ public class ParameterFieldFloat extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data instanceof DataFloat dataFloat) {
             setValue(dataFloat.getValue());

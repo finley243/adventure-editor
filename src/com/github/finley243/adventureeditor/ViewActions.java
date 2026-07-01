@@ -2,10 +2,8 @@ package com.github.finley243.adventureeditor;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.DeleteConfirmationResult;
-import com.github.finley243.adventureeditor.ui.DeleteObjectConfirmationResult;
-import com.github.finley243.adventureeditor.ui.ErrorData;
-import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
+import com.github.finley243.adventureeditor.ui.*;
+import com.github.finley243.adventureeditor.validation.ValidationIssue;
 
 import java.io.File;
 import java.util.List;
@@ -20,23 +18,25 @@ public interface ViewActions {
 
     void browserRemoveObject(String categoryID, String objectID);
 
+    void reregisterObject(String categoryID, String oldObjectID, String newObjectID);
+
     void browserClear();
 
     void browserLoadObjects(Map<String, Set<String>> objects);
 
-    void openConfigEditor(Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
+    EditorSession openConfigEditor(Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
-    void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
+    EditorSession openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
     void openPhraseMenu(Map<String, String> phrases);
 
-    void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
+    EditorSession openPhraseEditor(String phraseKey, Data content, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
     void updatePhrases(Map<String, String> phrases);
 
     void openScriptMenu(Map<String, String> scripts);
 
-    void openScriptEditor(String name, Data content, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
+    void openScriptEditor(String name, Data content, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate);
 
     String promptScriptName();
 
@@ -44,7 +44,11 @@ public interface ViewActions {
 
     void openReferenceList(Set<Reference> references);
 
+    void showProjectErrors(List<ValidationIssue> issues);
+
     void showError(String message);
+
+    BlockedSaveConfirmationResult confirmBlockedProjectClose();
 
     SaveConfirmationResult confirmProjectSave();
 
@@ -64,18 +68,26 @@ public interface ViewActions {
 
     void updateRecentProjects(List<ProjectFile> recentProjects);
 
-    void forceCloseObject(String categoryID, String objectID);
+    void closeObject(String categoryID, String objectID);
 
     void forceCloseConfig();
 
-    void forceCloseScript(String name);
+    void closeScript(String name);
 
-    void forceClosePhrase(String key);
-
-    void forceCloseAllEditors();
+    void closePhrase(String key);
 
     boolean hasOpenEditors();
 
-    boolean closeAllEditorsWithConfirmation();
+    void closeAllEditors();
+
+    void updateUndoRedoButtons(boolean canUndo, boolean canRedo);
+
+    void refreshConfigEditor(Data data);
+
+    void refreshObjectEditor(String categoryID, String fromKey, String toKey, Data data);
+
+    void refreshPhraseEditor(String fromKey, String toKey, Data data);
+
+    void refreshScriptEditor(String scriptName, Data data);
 
 }

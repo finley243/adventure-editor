@@ -4,7 +4,6 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataString;
 import com.github.finley243.adventureeditor.template.Template;
-import com.github.finley243.adventureeditor.ui.ReferenceUtils;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import java.util.HashMap;

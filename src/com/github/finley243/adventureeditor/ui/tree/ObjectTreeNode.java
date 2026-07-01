@@ -4,6 +4,7 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataComponent;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataTreeBranch;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class ObjectTreeNode extends DefaultMutableTreeNode {
         this.data = newData;
         this.childBranchPoint = findNextTreeBranch(data);
         String name = newData.toString();
-        setUserObject(name);
+        setUserObject((name == null || name.isBlank()) ? UIConstants.UNNAMED_TREE_NODE : name);
     }
 
     public List<ObjectTreeNode> getObjectTreeChildren() {

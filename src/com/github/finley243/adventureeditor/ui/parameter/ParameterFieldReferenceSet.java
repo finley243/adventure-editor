@@ -5,6 +5,7 @@ import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.data.DataReferenceSet;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -39,7 +40,7 @@ public class ParameterFieldReferenceSet extends ParameterField {
         this.buttonAdd = new JButton("New");
         this.buttonEdit = new JButton("Edit");
         this.buttonRemove = new JButton("Remove");
-        scrollPane.setPreferredSize(new Dimension(150, 100));
+        scrollPane.setPreferredSize(UIConstants.PREFERRED_SIZE_LIST);
         referenceList.setModel(new DefaultListModel<>());
         referenceList.setDragEnabled(false);
         referenceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -162,7 +163,9 @@ public class ParameterFieldReferenceSet extends ParameterField {
             ((DefaultListModel<String>) referenceList.getModel()).remove(addIndex);
         }
         ((DefaultListModel<String>) referenceList.getModel()).add(addIndex, objectID);
-        parentFrame.onEditorElementUpdated();
+        if (!isUpdatingData()) {
+            parentFrame.onEditorElementUpdated();
+        }
     }
 
     @Override
@@ -175,7 +178,7 @@ public class ParameterFieldReferenceSet extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data instanceof DataReferenceSet dataReferenceSet) {
             List<String> objectData = dataReferenceSet.getValue();

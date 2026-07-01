@@ -2,6 +2,7 @@ package com.github.finley243.adventureeditor.ui.parameter;
 
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataInteger;
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import javax.swing.*;
@@ -10,11 +11,14 @@ import java.awt.*;
 public class ParameterFieldInteger extends ParameterField {
 
     private final JSpinner spinner;
+    private final Timer debounceTimer;
 
     public ParameterFieldInteger(EditorFrame editorFrame, boolean optional, String name, ParameterField parentField) {
         super(editorFrame, optional, name, parentField);
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         getInnerPanel().setLayout(new GridBagLayout());
+        this.debounceTimer = new Timer(UIConstants.DEBOUNCE_DELAY_SPINNER, e -> onFieldUpdated());
+        debounceTimer.setRepeats(false);
         JComponent label;
         if (optional) {
             label = getOptionalCheckbox();
@@ -23,8 +27,12 @@ public class ParameterFieldInteger extends ParameterField {
         }
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0, null, null, 1);
         this.spinner = new JSpinner(spinnerModel);
-        spinner.setPreferredSize(new Dimension(150, 20));
-        spinner.addChangeListener(e -> onFieldUpdated());
+        spinner.setPreferredSize(UIConstants.PREFERRED_SIZE_SPINNER);
+        spinner.addChangeListener(e -> {
+            if (!isUpdatingData()) {
+                debounceTimer.restart();
+            }
+        });
         GridBagConstraints labelConstraints = new GridBagConstraints();
         GridBagConstraints valueConstraints = new GridBagConstraints();
         labelConstraints.gridx = 0;
@@ -65,7 +73,7 @@ public class ParameterFieldInteger extends ParameterField {
     }
 
     @Override
-    public void setData(Data data) {
+    protected void setDataInternal(Data data) {
         setOptionalEnabled(data != null);
         if (data instanceof DataInteger dataInteger) {
             setValue(dataInteger.getValue());

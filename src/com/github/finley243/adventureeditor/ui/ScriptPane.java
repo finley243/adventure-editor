@@ -142,6 +142,7 @@ public class ScriptPane extends JTextPane {
 
     @Override
     public String getToolTipText(MouseEvent e) {
+        if (activeErrors == null) return null;
         int offset = viewToModel2D(e.getPoint());
         for (CompileError error : activeErrors) {
             if (offset >= error.range().start() && offset < error.range().end()) {

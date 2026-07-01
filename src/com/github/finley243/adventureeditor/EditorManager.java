@@ -3,7 +3,7 @@ package com.github.finley243.adventureeditor;
 import com.github.finley243.adventureeditor.ui.frame.EditorFrame;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 public class EditorManager {
@@ -26,32 +26,14 @@ public class EditorManager {
         }
     }
 
-    public void closeAllActiveEditorFrames() {
-        for (String categoryID : new HashSet<>(topLevelEditorWindows.keySet())) {
-            for (String objectID : new HashSet<>(topLevelEditorWindows.get(categoryID).keySet())) {
-                topLevelEditorWindows.get(categoryID).get(objectID).requestClose(false, false);
-            }
+    public void requestCloseAllEditorFrames() {
+        List<EditorFrame> frames = topLevelEditorWindows.values().stream()
+                .flatMap(m -> m.values().stream())
+                .toList();
+        for (EditorFrame editorFrame : frames) {
+            editorFrame.requestClose();
         }
         topLevelEditorWindows.clear();
-    }
-
-    public boolean requestCloseAllEditorFrames() {
-        for (Map<String, EditorFrame> categoryEditors : topLevelEditorWindows.values()) {
-            for (EditorFrame editorFrame : categoryEditors.values()) {
-                boolean didClose = editorFrame.requestClose(false, false);
-                if (!didClose) return false;
-            }
-        }
-        return true;
-    }
-
-    public void forceCloseAllEditorFrames() {
-        for (Map<String, EditorFrame> categoryEditors : topLevelEditorWindows.values()) {
-            for (EditorFrame editorFrame : categoryEditors.values()) {
-                boolean didClose = editorFrame.requestClose(true, false);
-                if (!didClose) return;
-            }
-        }
     }
 
     public EditorFrame getActiveTopLevelFrame(String categoryID, String objectID) {
@@ -81,6 +63,17 @@ public class EditorManager {
         topLevelEditorWindows.get(categoryID).remove(objectID);
         if (topLevelEditorWindows.get(categoryID).isEmpty()) {
             topLevelEditorWindows.remove(categoryID);
+        }
+    }
+
+    public void renameActiveTopLevelFrame(String categoryID, String oldObjectID, String newObjectID) {
+        if (!topLevelEditorWindows.containsKey(categoryID)) {
+            return;
+        }
+        Map<String, EditorFrame> categoryMap = topLevelEditorWindows.get(categoryID);
+        EditorFrame frame = categoryMap.remove(oldObjectID);
+        if (frame != null) {
+            categoryMap.put(newObjectID, frame);
         }
     }
 
