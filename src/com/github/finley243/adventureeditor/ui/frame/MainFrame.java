@@ -52,6 +52,8 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     private final JMenu fileOpenRecent;
 
     private String projectName;
+    private boolean canUndo;
+    private boolean canRedo;
 
     public MainFrame(ParameterFactory parameterFactory, TemplateRegistry templateRegistry) {
         super(EDITOR_NAME);
@@ -95,6 +97,26 @@ public class MainFrame extends ThemedFrame implements ViewActions {
         fileMenu.addSeparator();
         fileMenu.add(fileSave);
         fileMenu.add(fileSaveAs);
+
+        JMenu editMenu = new JMenu("Edit");
+        menuBar.add(editMenu);
+        JMenuItem editUndo = new JMenuItem("Undo");
+        editUndo.addActionListener(e -> getPresenter().onUndo());
+        JMenuItem editRedo = new JMenuItem("Redo");
+        editRedo.addActionListener(e -> getPresenter().onRedo());
+        editMenu.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                editUndo.setEnabled(canUndo);
+                editRedo.setEnabled(canRedo);
+            }
+            @Override
+            public void menuDeselected(MenuEvent e) {}
+            @Override
+            public void menuCanceled(MenuEvent e) {}
+        });
+        editMenu.add(editUndo);
+        editMenu.add(editRedo);
 
         JMenu toolsMenu = new JMenu("Tools");
         menuBar.add(toolsMenu);
@@ -161,6 +183,18 @@ public class MainFrame extends ThemedFrame implements ViewActions {
                 getPresenter().onOpenConfigEditor();
             }
         };
+        Action undoAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getPresenter().onUndo();
+            }
+        };
+        Action redoAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getPresenter().onRedo();
+            }
+        };
 
         ActionMap actionMap = getRootPane().getActionMap();
         actionMap.put("newProject", newProjectAction);
@@ -168,6 +202,8 @@ public class MainFrame extends ThemedFrame implements ViewActions {
         actionMap.put("saveProject", saveProjectAction);
         actionMap.put("saveProjectAs", saveProjectAsAction);
         actionMap.put("openConfig", openConfigAction);
+        actionMap.put("undo", undoAction);
+        actionMap.put("redo", redoAction);
 
         InputMap inputMapWindow = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "newProject");
@@ -175,6 +211,8 @@ public class MainFrame extends ThemedFrame implements ViewActions {
         inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "saveProject");
         inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "saveProjectAs");
         inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "openConfig");
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), "undo");
+        inputMapWindow.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "redo");
 
         this.pack();
         this.setVisible(true);
@@ -523,7 +561,8 @@ public class MainFrame extends ThemedFrame implements ViewActions {
 
     @Override
     public void updateUndoRedoButtons(boolean canUndo, boolean canRedo) {
-        // TODO - Implement
+        this.canUndo = canUndo;
+        this.canRedo = canRedo;
     }
 
     private void attemptOpeningRecentProject(ProjectFile projectFile) {
