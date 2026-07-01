@@ -410,7 +410,7 @@ public class MainFrame extends ThemedFrame implements ViewActions {
             errorListFrame.toFront();
             errorListFrame.requestFocus();
         } else {
-            errorListFrame = new ErrorListFrame(this, issue -> getPresenter().onOpenValidationIssue(issue), () -> errorListFrame = null);
+            errorListFrame = new ErrorListFrame(this, issue -> getPresenter().onOpenValidationIssue(issue), () -> getPresenter().onOpenProjectErrors(), () -> errorListFrame = null);
         }
         errorListFrame.loadIssues(issues);
     }

@@ -13,6 +13,8 @@ public class UIConstants {
     public static final Dimension PREFERRED_SIZE_TREE = new Dimension(200, 200);
 
     public static final Dimension INITIAL_SIZE_BROWSER = new Dimension(350, 800);
+    public static final Dimension INITIAL_SIZE_REFERENCES = new Dimension(500, 300);
+    public static final Dimension INITIAL_SIZE_ERRORS = new Dimension(500, 300);
 
     public static final int DEBOUNCE_DELAY_TEXT = 600;
     public static final int DEBOUNCE_DELAY_REFERENCE_TYPED = 600;

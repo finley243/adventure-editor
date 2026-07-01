@@ -1,5 +1,6 @@
 package com.github.finley243.adventureeditor.ui.frame;
 
+import com.github.finley243.adventureeditor.ui.UIConstants;
 import com.github.finley243.adventureeditor.validation.*;
 import com.github.finley243.adventureeditor.ui.table.PhraseTableModel;
 
@@ -24,7 +25,7 @@ public class ErrorListFrame extends ThemedDialog {
 
     private List<ValidationIssue> currentIssues;
 
-    public ErrorListFrame(Window parentWindow, Consumer<ValidationIssue> onOpenIssue, Runnable onClose) {
+    public ErrorListFrame(Window parentWindow, Consumer<ValidationIssue> onOpenIssue, Runnable onRefresh, Runnable onClose) {
         super(parentWindow, ERROR_LIST_TITLE);
         this.onOpenIssue = onOpenIssue;
         this.onClose = onClose;
@@ -73,7 +74,10 @@ public class ErrorListFrame extends ThemedDialog {
 
         JScrollPane scrollPane = new JScrollPane(errorTable);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
-        scrollPane.setPreferredSize(new Dimension(500, 300));
+        scrollPane.setPreferredSize(UIConstants.INITIAL_SIZE_ERRORS);
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.addActionListener(e -> onRefresh.run());
+        mainPanel.add(refreshButton, BorderLayout.SOUTH);
         this.getContentPane().add(mainPanel);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setResizable(true);
