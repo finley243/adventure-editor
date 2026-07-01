@@ -4,6 +4,7 @@ import com.github.finley243.adventureeditor.PresenterActions;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.data.DataObject;
 import com.github.finley243.adventureeditor.template.Template;
+import com.github.finley243.adventureeditor.ui.EditorSession;
 import com.github.finley243.adventureeditor.ui.ErrorData;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterField;
@@ -17,7 +18,7 @@ import java.awt.event.WindowEvent;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class EditorFrame extends ThemedDialog {
+public class EditorFrame extends ThemedDialog implements EditorSession {
 
     private final ParameterField parameterField;
     private final JLabel errorLabel;
@@ -26,6 +27,9 @@ public class EditorFrame extends ThemedDialog {
     private final Consumer<Data> onSave;
     private final Function<Data, ErrorData> onValidate;
     private final Consumer<EditorFrame> onClose;
+
+    private String currentKey;
+    private Data currentData;
 
     public EditorFrame(Window parentWindow, Template template, Data objectData, boolean isTopLevel, ParameterFactory parameterFactory, PresenterActions presenter, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate, Consumer<EditorFrame> onClose) {
         //super(template.name());
@@ -74,6 +78,33 @@ public class EditorFrame extends ThemedDialog {
         Data fullInitialData = parameterField.getData();
         onInitialize.accept(fullInitialData);
         updateErrorLabel(fullInitialData);
+    }
+
+    @Override
+    public String getCurrentKey() {
+        return currentKey;
+    }
+
+    @Override
+    public void setCurrentKey(String key) {
+        this.currentKey = key;
+    }
+
+    @Override
+    public Data getCurrentData() {
+        return currentData;
+    }
+
+    @Override
+    public void setCurrentData(Data data) {
+        this.currentData = data;
+    }
+
+    @Override
+    public void refreshData(String newKey, Data newData) {
+        this.currentKey = newKey;
+        this.currentData = newData;
+        parameterField.setData(newData);
     }
 
     public void updateData(Data data) {

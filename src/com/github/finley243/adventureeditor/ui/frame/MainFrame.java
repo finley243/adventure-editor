@@ -4,10 +4,7 @@ import com.github.finley243.adventureeditor.*;
 import com.github.finley243.adventureeditor.data.Data;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
-import com.github.finley243.adventureeditor.ui.DeleteConfirmationResult;
-import com.github.finley243.adventureeditor.ui.DeleteObjectConfirmationResult;
-import com.github.finley243.adventureeditor.ui.ErrorData;
-import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
+import com.github.finley243.adventureeditor.ui.*;
 import com.github.finley243.adventureeditor.ui.browser.BrowserFrame;
 import com.github.finley243.adventureeditor.ui.parameter.ParameterFactory;
 import com.github.finley243.adventureeditor.undo.ObjectChange;
@@ -303,15 +300,17 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
-    public void openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+    public EditorSession openEditorFrame(Template template, String objectID, Data initialData, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
         EditorFrame activeFrame = editorManager.getActiveTopLevelFrame(template.id(), objectID);
         if (activeFrame != null) {
             activeFrame.toFront();
             activeFrame.requestFocus();
+            return activeFrame;
         } else {
             Consumer<EditorFrame> onClose = _ -> editorManager.removeActiveTopLevelFrame(template.id(), objectID);
             EditorFrame editorFrame = new EditorFrame(this, template, initialData, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
             editorManager.addActiveTopLevelFrame(template.id(), objectID, editorFrame);
+            return editorFrame;
         }
     }
 
@@ -330,12 +329,15 @@ public class MainFrame extends ThemedFrame implements ViewActions {
     }
 
     @Override
-    public void openPhraseEditor(String phraseKey, Data content, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
+    public EditorSession openPhraseEditor(String phraseKey, Data content, Consumer<Data> onInitialize, Consumer<Data> onSave, Function<Data, ErrorData> onValidate) {
         boolean isOpen = phraseFrameHandler.requestFocusIfOpen(phraseKey);
         if (!isOpen) {
             Consumer<EditorFrame> onClose = phraseFrameHandler::removeChildFrame;
             EditorFrame editorFrame = new EditorFrame(phraseEditorFrame, InternalTemplates.PHRASE_TEMPLATE, content, true, parameterFactory, getPresenter(), onInitialize, onSave, onValidate, onClose);
             phraseFrameHandler.add(phraseKey, editorFrame);
+            return editorFrame;
+        } else {
+            return phraseFrameHandler.get(phraseKey);
         }
     }
 

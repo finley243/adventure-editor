@@ -6,10 +6,7 @@ import com.github.finley243.adventureeditor.data.DataScript;
 import com.github.finley243.adventureeditor.data.DataString;
 import com.github.finley243.adventureeditor.template.Template;
 import com.github.finley243.adventureeditor.template.TemplateRegistry;
-import com.github.finley243.adventureeditor.ui.DeleteConfirmationResult;
-import com.github.finley243.adventureeditor.ui.DeleteObjectConfirmationResult;
-import com.github.finley243.adventureeditor.ui.ErrorData;
-import com.github.finley243.adventureeditor.ui.SaveConfirmationResult;
+import com.github.finley243.adventureeditor.ui.*;
 import com.github.finley243.adventureeditor.undo.*;
 
 import java.io.File;
@@ -147,28 +144,7 @@ public class Presenter implements PresenterActions {
 
     @Override
     public void onCreateObject(String categoryID) {
-        Template template = templateRegistry.getTemplate(categoryID);
-        String defaultID = generateDefaultID(categoryID, template);
-        Data initialData = new DataObject(template, new HashMap<>());
-        dataManager.setData(categoryID, defaultID, initialData);
-        updateProjectChanges();
-        if (template.topLevel()) {
-            view.browserAddObject(categoryID, defaultID);
-        }
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
-        AtomicReference<String> savedKey = new AtomicReference<>(defaultID);
-        view.openEditorFrame(template, defaultID, initialData, data -> {
-            savedKey.set(saveObjectData(data, savedKey.get()));
-            currentData.set(data);
-            undoManager.pushChange(new DataChangeCommand(List.of(new ObjectCreate(categoryID, savedKey.get(), currentData.get()))));
-            updateProjectChanges();
-        }, data -> {
-            String afterKey = saveObjectData(data, savedKey.get());
-            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), afterKey, currentData.get(), data);
-            savedKey.set(afterKey);
-            currentData.set(data);
-            updateProjectChanges();
-            }, data -> validateObject(data, savedKey.get()));
+        onCreateObject(categoryID, null);
     }
 
     @Override
@@ -177,65 +153,62 @@ public class Presenter implements PresenterActions {
         String defaultID = generateDefaultID(categoryID, template);
         Data initialData = new DataObject(template, new HashMap<>());
         dataManager.setData(categoryID, defaultID, initialData);
+        updateProjectChanges();
         if (template.topLevel()) {
             view.browserAddObject(categoryID, defaultID);
         }
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
-        AtomicReference<String> savedKey = new AtomicReference<>(defaultID);
-        view.openEditorFrame(template, defaultID, initialData, data -> {
-            savedKey.set(saveObjectData(data, savedKey.get()));
-            onSave.accept(data);
-            currentData.set(data);
-            undoManager.pushChange(new DataChangeCommand(List.of(new ObjectCreate(categoryID, savedKey.get(), currentData.get()))));
+        AtomicReference<EditorSession> sessionRef = new AtomicReference<>();
+        EditorSession session = view.openEditorFrame(template, defaultID, initialData, data -> {
+            EditorSession currentSession = sessionRef.get();
+            String afterKey = saveObjectData(data, currentSession.getCurrentKey());
+            currentSession.setCurrentKey(afterKey);
+            currentSession.setCurrentData(data);
+            undoManager.pushChange(new DataChangeCommand(List.of(new ObjectCreate(categoryID, afterKey, data))));
+            if (onSave != null) onSave.accept(data);
             updateProjectChanges();
         }, data -> {
-            String afterKey = saveObjectData(data, savedKey.get());
-            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), afterKey, currentData.get(), data);
-            savedKey.set(afterKey);
-            onSave.accept(data);
-            currentData.set(data);
+            EditorSession currentSession = sessionRef.get();
+            String beforeKey = currentSession.getCurrentKey();
+            Data beforeData = currentSession.getCurrentData();
+            String afterKey = saveObjectData(data, beforeKey);
+            createObjectUndoPointIfDataChanged(categoryID, beforeKey, afterKey, beforeData, data);
+            currentSession.setCurrentKey(afterKey);
+            currentSession.setCurrentData(data);
+            if (onSave != null) onSave.accept(data);
             updateProjectChanges();
-        }, data -> validateObject(data, savedKey.get()));
+        }, data -> validateObject(data, sessionRef.get().getCurrentKey()));
+        sessionRef.set(session);
     }
 
     @Override
     public void onEditObject(String categoryID, String objectID) {
-        Template template = templateRegistry.getTemplate(categoryID);
-        Data initialData = dataManager.getData(categoryID, objectID);
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
-        AtomicReference<String> savedKey = new AtomicReference<>(objectID);
-        view.openEditorFrame(template, objectID, initialData, data -> {
-            savedKey.set(saveObjectData(data, savedKey.get()));
-            currentData.set(data);
-            updateProjectChanges();
-        }, data -> {
-            String afterKey = saveObjectData(data, savedKey.get());
-            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), afterKey, currentData.get(), data);
-            savedKey.set(afterKey);
-            currentData.set(data);
-            updateProjectChanges();
-            }, data -> validateObject(data, savedKey.get()));
+        onEditObject(categoryID, objectID, null);
     }
 
     @Override
     public void onEditObject(String categoryID, String objectID, BiConsumer<Data, Data> onSave) {
         Template template = templateRegistry.getTemplate(categoryID);
         Data initialData = dataManager.getData(categoryID, objectID);
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
-        AtomicReference<String> savedKey = new AtomicReference<>(objectID);
-        view.openEditorFrame(template, objectID, initialData, data -> {
-            savedKey.set(saveObjectData(data, savedKey.get()));
-            onSave.accept(data, currentData.get());
-            currentData.set(data);
+        AtomicReference<EditorSession> sessionRef = new AtomicReference<>();
+        EditorSession session = view.openEditorFrame(template, objectID, initialData, data -> {
+            EditorSession currentSession = sessionRef.get();
+            String afterKey = saveObjectData(data, currentSession.getCurrentKey());
+            currentSession.setCurrentKey(afterKey);
+            currentSession.setCurrentData(data);
+            if (onSave != null) onSave.accept(data, initialData);
             updateProjectChanges();
         }, data -> {
-            String afterKey = saveObjectData(data, savedKey.get());
-            createObjectUndoPointIfDataChanged(categoryID, savedKey.get(), afterKey, currentData.get(), data);
-            savedKey.set(afterKey);
-            onSave.accept(data, currentData.get());
-            currentData.set(data);
+            EditorSession currentSession = sessionRef.get();
+            String beforeKey = currentSession.getCurrentKey();
+            Data beforeData = currentSession.getCurrentData();
+            String afterKey = saveObjectData(data, beforeKey);
+            createObjectUndoPointIfDataChanged(categoryID, beforeKey, afterKey, beforeData, data);
+            currentSession.setCurrentKey(afterKey);
+            currentSession.setCurrentData(data);
+            if (onSave != null) onSave.accept(data, beforeData);
             updateProjectChanges();
-        }, data -> validateObject(data, savedKey.get()));
+        }, data -> validateObject(data, sessionRef.get().getCurrentKey()));
+        sessionRef.set(session);
     }
 
     @Override
@@ -295,21 +268,26 @@ public class Presenter implements PresenterActions {
     @Override
     public void onOpenPhrase(String phraseKey) {
         Data initialData = generateDataForPhrase(phraseKey);
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
-        AtomicReference<String> savedKey = new AtomicReference<>(phraseKey);
-        view.openPhraseEditor(phraseKey, initialData, data -> {
-            savedKey.set(savePhraseData(data, savedKey.get()));
-            currentData.set(data);
+        AtomicReference<EditorSession> sessionRef = new AtomicReference<>();
+        EditorSession session = view.openPhraseEditor(phraseKey, initialData, data -> {
+            EditorSession currentSession = sessionRef.get();
+            String afterKey = savePhraseData(data, currentSession.getCurrentKey());
+            currentSession.setCurrentKey(afterKey);
+            currentSession.setCurrentData(data);
             updateProjectChanges();
         }, data -> {
-            String afterKey = savePhraseData(data, savedKey.get());
-            if (!Objects.equals(currentData.get(), data)) {
-                undoManager.pushChange(new DataChangeCommand(List.of(new PhraseChange(savedKey.get(), afterKey, getPhraseTextFromData(currentData.get()), getPhraseTextFromData(data)))));
+            EditorSession currentSession = sessionRef.get();
+            String beforeKey = currentSession.getCurrentKey();
+            Data beforeData = currentSession.getCurrentData();
+            String afterKey = savePhraseData(data, beforeKey);
+            if (!Objects.equals(beforeData, data)) {
+                undoManager.pushChange(new DataChangeCommand(List.of(new PhraseChange(beforeKey, afterKey, getPhraseTextFromData(beforeData), getPhraseTextFromData(data)))));
             }
-            savedKey.set(afterKey);
-            currentData.set(data);
+            currentSession.setCurrentKey(afterKey);
+            currentSession.setCurrentData(data);
             updateProjectChanges();
-        }, data -> validatePhrase(data, savedKey.get()));
+        }, data -> validatePhrase(data, sessionRef.get().getCurrentKey()));
+        sessionRef.set(session);
     }
 
     @Override
@@ -318,22 +296,28 @@ public class Presenter implements PresenterActions {
         phraseEditorManager.setPhrase(defaultKey, "");
         view.updatePhrases(phraseEditorManager.getPhrases());
         Data initialData = generateDataForPhrase(defaultKey);
-        AtomicReference<Data> currentData = new AtomicReference<>(initialData);
-        AtomicReference<String> savedKey = new AtomicReference<>(defaultKey);
-        view.openPhraseEditor(defaultKey, initialData, data -> {
-            savedKey.set(savePhraseData(data, savedKey.get()));
-            currentData.set(data);
-            undoManager.pushChange(new DataChangeCommand(List.of(new PhraseCreate(savedKey.get(), getPhraseTextFromData(data)))));
+
+        AtomicReference<EditorSession> sessionRef = new AtomicReference<>();
+        EditorSession session = view.openPhraseEditor(defaultKey, initialData, data -> {
+            EditorSession currentSession = sessionRef.get();
+            String afterKey = savePhraseData(data, currentSession.getCurrentKey());
+            currentSession.setCurrentKey(afterKey);
+            currentSession.setCurrentData(data);
+            undoManager.pushChange(new DataChangeCommand(List.of(new PhraseCreate(afterKey, getPhraseTextFromData(data)))));
             updateProjectChanges();
         }, data -> {
-            String afterKey = savePhraseData(data, savedKey.get());
-            if (!Objects.equals(currentData.get(), data)) {
-                undoManager.pushChange(new DataChangeCommand(List.of(new PhraseChange(savedKey.get(), afterKey, getPhraseTextFromData(currentData.get()), getPhraseTextFromData(data)))));
+            EditorSession currentSession = sessionRef.get();
+            String beforeKey = currentSession.getCurrentKey();
+            Data beforeData = currentSession.getCurrentData();
+            String afterKey = savePhraseData(data, beforeKey);
+            if (!Objects.equals(beforeData, data)) {
+                undoManager.pushChange(new DataChangeCommand(List.of(new PhraseChange(beforeKey, afterKey, getPhraseTextFromData(beforeData), getPhraseTextFromData(data)))));
             }
-            savedKey.set(afterKey);
-            currentData.set(data);
+            currentSession.setCurrentKey(afterKey);
+            currentSession.setCurrentData(data);
             updateProjectChanges();
-        }, data -> validatePhrase(data, savedKey.get()));
+        }, data -> validatePhrase(data, sessionRef.get().getCurrentKey()));
+        sessionRef.set(session);
     }
 
     @Override
